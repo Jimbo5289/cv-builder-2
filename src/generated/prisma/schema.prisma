@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CV {
+  id        String      @id
+  title     String
+  content   String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime
+  userId    String
+  atsScore  Int?
+  User      User        @relation(fields: [userId], references: [id])
+  CVSection CVSection[]
+}
+
+model CVSection {
+  id        String   @id
+  title     String
+  content   String
+  order     Int
+  cvId      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  CV        CV       @relation(fields: [cvId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id              String   @id
+  userId          String
+  amount          Float
+  currency        String
+  status          String
+  createdAt       DateTime @default(now())
+  stripePaymentId String
+  User            User     @relation(fields: [userId], references: [id])
+}
+
+model Subscription {
+  id                   String   @id
+  userId               String
+  status               String
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime
+  stripeCustomerId     String
+  stripePriceId        String
+  stripeSubscriptionId String
+  User                 User     @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id                  String         @id
+  email               String         @unique
+  password            String
+  name                String
+  customerId          String?        @unique
+  twoFactorSecret     String?
+  twoFactorEnabled    Boolean        @default(false)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime
+  failedLoginAttempts Int            @default(0)
+  lastLogin           DateTime?
+  lockedUntil         DateTime?
+  resetToken          String?
+  resetTokenExpiry    DateTime?
+  CV                  CV[]
+  Payment             Payment[]
+  Subscription        Subscription[]
+}
