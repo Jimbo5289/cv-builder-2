@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CV {
+  id        String      @id
+  title     String
+  content   String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime
+  userId    String
+  atsScore  Int?
+  User      User        @relation(fields: [userId], references: [id])
+  CVSection CVSection[]
+}
+
+model CVSection {
+  id        String   @id
+  title     String
+  content   String
+  order     Int
+  cvId      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  CV        CV       @relation(fields: [cvId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id              String   @id
+  userId          String
+  amount          Float
+  currency        String
+  status          String
+  createdAt       DateTime @default(now())
+  stripePaymentId String
+  User            User     @relation(fields: [userId], references: [id])
+}
+
+model Subscription {
+  id                   String   @id
+  userId               String
+  status               String
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime
+  stripeCustomerId     String
+  stripePriceId        String
+  stripeSubscriptionId String
+  User                 User     @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id                  String         @id
+  email               String         @unique
+  password            String
+  name                String
+  customerId          String?        @unique
+  twoFactorSecret     String?
+  twoFactorEnabled    Boolean        @default(false)
+  backupCodes         String[]       @default([])
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime
+  failedLoginAttempts Int            @default(0)
+  lastLogin           DateTime?
+  lockedUntil         DateTime?
+  resetToken          String?
+  resetTokenExpiry    DateTime?
+  CV                  CV[]
+  Payment             Payment[]
+  Subscription        Subscription[]
+  RefreshTokens       RefreshToken[]
+  PageViews           PageView[]
+  ErrorLogs           ErrorLog[]
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+model PageView {
+  id        String   @id @default(uuid())
+  url       String
+  userId    String?
+  timestamp DateTime @default(now())
+  userAgent String?
+  referrer  String?
+  User      User?    @relation(fields: [userId], references: [id])
+
+  @@index([url])
+  @@index([timestamp])
+  @@index([userId])
+}
+
+model ErrorLog {
+  id        String   @id @default(uuid())
+  name      String
+  message   String
+  stack     String?
+  code      String?
+  userId    String?
+  timestamp DateTime @default(now())
+  url       String?
+  method    String?
+  User      User?    @relation(fields: [userId], references: [id])
+
+  @@index([timestamp])
+  @@index([userId])
+}
+
+model PerformanceMetric {
+  id        String   @id @default(uuid())
+  type      String
+  duration  Float
+  details   Json?
+  timestamp DateTime @default(now())
+
+  @@index([type])
+  @@index([timestamp])
+}
+
+model MetricsSnapshot {
+  id          String   @id @default(uuid())
+  activeUsers Int
+  pageViews   Json
+  errors      Json
+  performance Json
+  timestamp   DateTime @default(now())
+
+  @@index([timestamp])
+}

@@ -1,0 +1,3 @@
+const response = await fetch('http://localhost:3002/api/auth/register', {
+  // ... existing code ...
+}); 

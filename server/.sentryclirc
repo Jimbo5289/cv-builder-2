@@ -1,0 +1,10 @@
+[auth]
+token=__YOUR_AUTH_TOKEN__
+
+[defaults]
+url=https://sentry.io/
+org=your-org-name
+project=cv-builder-server
+
+[sourcemaps]
+rewrite=true 
