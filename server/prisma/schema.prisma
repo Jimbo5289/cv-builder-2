@@ -12,7 +12,6 @@ model User {
   email               String         @unique
   password            String
   name                String
-  isActive            Boolean        @default(true)
   customerId          String?        @unique
   twoFactorSecret     String?
   twoFactorEnabled    Boolean        @default(false)
@@ -23,26 +22,22 @@ model User {
   lockedUntil         DateTime?
   resetToken          String?
   resetTokenExpiry    DateTime?
+  isActive            Boolean        @default(true)
   cvs                 CV[]
   payments            Payment[]
   subscriptions       Subscription[]
 }
 
 model CV {
-  id          String      @id @default(cuid())
-  title       String
-  content     String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  userId      String
-  atsScore    Int?
-  user        User        @relation(fields: [userId], references: [id])
-  sections    CVSection[]
-  isPublic    Boolean     @default(false)
-  publishedAt DateTime?
-
-  @@unique([userId, title])
-  @@index([userId])
+  id        String      @id @default(cuid())
+  title     String
+  content   String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  userId    String
+  atsScore  Int?
+  user      User        @relation(fields: [userId], references: [id])
+  sections  CVSection[]
 }
 
 model CVSection {
@@ -54,8 +49,6 @@ model CVSection {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   cv        CV       @relation(fields: [cvId], references: [id], onDelete: Cascade)
-
-  @@unique([cvId, title])
 }
 
 model Payment {

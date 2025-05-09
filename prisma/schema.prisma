@@ -16,6 +16,8 @@ model CV {
   updatedAt DateTime
   userId    String
   atsScore  Int?
+  isPublic  Boolean     @default(false)
+  publishedAt DateTime?
   User      User        @relation(fields: [userId], references: [id])
   CVSection CVSection[]
 }

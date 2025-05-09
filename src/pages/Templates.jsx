@@ -1,39 +1,72 @@
 import { Link } from 'react-router-dom';
 
-// Import the PDF files directly
-import professionalPdf from '../assets/cv-templates-pdf/professional_cv.pdf';
-import creativePdf from '../assets/cv-templates-pdf/creative_cv.pdf';
-import executivePdf from '../assets/cv-templates-pdf/executive_cv.pdf';
-import academicPdf from '../assets/cv-templates-pdf/academic_cv.pdf';
+// Remove PDF imports that cause errors
+// import professionalPdf from '../assets/cv-templates-pdf/professional_cv.pdf';
+// import creativePdf from '../assets/cv-templates-pdf/creative_cv.pdf';
+// import executivePdf from '../assets/cv-templates-pdf/executive_cv.pdf';
+// import academicPdf from '../assets/cv-templates-pdf/academic_cv.pdf';
 
 function Templates() {
   const templates = [
     {
       id: 1,
       name: "Professional",
-      description: "Clean and modern design perfect for any industry",
-      // Using the imported PDF files
-      image: professionalPdf,
+      image: "/images/templates/professional.svg",
+      description: "A clean and traditional layout, perfect for corporate roles.",
+      // Instead of PDF, use a function to handle download
+      // pdf: professionalPdf,
+      color: "#4A90E2", // Blue color for professional template
     },
     {
       id: 2,
       name: "Creative",
-      description: "Stand out with a unique and artistic layout",
-      image: creativePdf,
+      image: "/images/templates/creative.svg",
+      description: "A modern design with visual elements for creative industries.",
+      // pdf: creativePdf,
+      color: "#E24A8B", // Pink color for creative template
     },
     {
       id: 3,
       name: "Executive",
-      description: "Sophisticated design for senior positions",
-      image: executivePdf,
+      image: "/images/templates/executive.svg",
+      description: "A sophisticated format for senior leadership positions.",
+      // pdf: executivePdf,
+      color: "#4AE2C4", // Teal color for executive template
     },
     {
       id: 4,
       name: "Academic",
-      description: "Structured layout for academic and research positions",
-      image: academicPdf,
-    }
+      image: "/images/templates/academic.svg",
+      description: "Tailored for academic and research positions.",
+      // pdf: academicPdf,
+      color: "#E2A64A", // Orange color for academic template
+    },
   ];
+
+  // Function to handle template download
+  const handleDownload = (template) => {
+    // This is a placeholder - you can implement PDF generation later
+    alert(`Download functionality for ${template.name} template will be implemented soon!`);
+    
+    // For now, we'll create a colored div to demonstrate the template style
+    const coloredDiv = document.createElement('div');
+    coloredDiv.style.width = '100%';
+    coloredDiv.style.height = '100vh';
+    coloredDiv.style.backgroundColor = template.color;
+    coloredDiv.style.color = 'white';
+    coloredDiv.style.display = 'flex';
+    coloredDiv.style.alignItems = 'center';
+    coloredDiv.style.justifyContent = 'center';
+    coloredDiv.style.fontSize = '24px';
+    coloredDiv.style.fontWeight = 'bold';
+    coloredDiv.style.padding = '20px';
+    coloredDiv.textContent = `${template.name} CV Template - Placeholder`;
+    
+    // Append to body, then use browser print dialog
+    document.body.appendChild(coloredDiv);
+    window.print();
+    document.body.removeChild(coloredDiv);
+  };
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -50,20 +83,11 @@ function Templates() {
             key={template.id}
             className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition"
           >
-            {/* Using object tag for PDF display */}
-            <object
-              data={template.image}
-              type="application/pdf"
+            <img
+              src={template.image}
+              alt={`${template.name} Template`}
               className="w-full h-72 object-cover"
-              aria-label={`${template.name} Template Preview`}
-            >
-              <p className="text-center py-4">
-                Your browser doesn't support PDF display. 
-                <a href={template.image} className="text-blue-500 underline ml-1" target="_blank" rel="noopener noreferrer">
-                  Open PDF
-                </a>
-              </p>
-            </object>
+            />
             <div className="p-6">
               <h3 className="text-xl font-semibold text-[#2c3e50] mb-2">
                 {template.name}
@@ -71,12 +95,20 @@ function Templates() {
               <p className="text-gray-600 mb-4">
                 {template.description}
               </p>
-              <Link
-                to={`/create?template=${template.id}`}
-                className="inline-block bg-[#E78F81] text-white px-6 py-2 rounded-lg hover:bg-[#d36e62] transition"
-              >
-                Use This Template
-              </Link>
+              <div className="template-actions">
+                <button 
+                  className="download-btn"
+                  onClick={() => handleDownload(template)}
+                >
+                  Download
+                </button>
+                <Link
+                  to={`/create?template=${template.id}`}
+                  className="inline-block bg-[#E78F81] text-white px-6 py-2 rounded-lg hover:bg-[#d36e62] transition"
+                >
+                  Use This Template
+                </Link>
+              </div>
             </div>
           </div>
         ))}
