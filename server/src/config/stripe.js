@@ -1,5 +1,6 @@
-import dotenv from 'dotenv';
-import Stripe from 'stripe';
+const dotenv = require('dotenv');
+const Stripe = require('stripe');
+const { logger } = require('./logger');
 
 // Load environment variables
 dotenv.config();
@@ -14,46 +15,58 @@ const validateStripeConfig = () => {
   const missingVars = requiredVars.filter(varName => !process.env[varName]);
   
   if (missingVars.length > 0) {
-    throw new Error(
-      `Missing required Stripe environment variables: ${missingVars.join(', ')}`
-    );
+    logger.warn(`Missing required Stripe environment variables: ${missingVars.join(', ')}`);
+    return false;
   }
+  return true;
 };
 
 // Initialize Stripe configuration
 const initializeStripe = () => {
   try {
-    validateStripeConfig();
+    if (!validateStripeConfig()) {
+      logger.error('Stripe configuration is incomplete. Payment functionality will be limited.');
+      return null;
+    }
     
-    return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2023-10-16',
-      typescript: true,
       appInfo: {
         name: 'CV Builder',
         version: '1.0.0',
       },
       timeout: 20000, // 20 seconds
     });
+    
+    logger.info('Stripe service initialized successfully');
+    return stripe;
   } catch (error) {
-    console.error('Failed to initialize Stripe:', error.message);
-    process.exit(1);
+    logger.error('Failed to initialize Stripe:', error.message);
+    return null;
   }
 };
 
 // Create singleton instance
 const stripe = initializeStripe();
 
-export const verifyWebhookSignature = (rawBody, signature) => {
+const verifyWebhookSignature = (rawBody, signature) => {
   try {
+    if (!stripe) {
+      throw new Error('Stripe is not initialized');
+    }
+    
     return stripe.webhooks.constructEvent(
       rawBody,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (error) {
-    console.error('⚠️ Webhook signature verification failed:', error.message);
+    logger.error('⚠️ Webhook signature verification failed:', error.message);
     throw new Error('Invalid webhook signature');
   }
 };
 
-export default stripe; 
+module.exports = {
+  stripe,
+  verifyWebhookSignature
+}; 

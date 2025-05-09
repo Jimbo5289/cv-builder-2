@@ -9,6 +9,10 @@ const cvRoutes = require('./routes/cv');
 const checkoutRoutes = require('./routes/checkout');
 const webhookRoutes = require('./routes/webhook');
 const contactRoutes = require('./routes/contact');
+const paymentRoutes = require('./routes/payment');
+const subscriptionRoutes = require('./routes/subscription');
+const twoFactorRoutes = require('./routes/twoFactor');
+const { stripe } = require('./config/stripe');
 const net = require('net');
 
 // Validate environment variables
@@ -18,7 +22,7 @@ const app = express();
 
 // Parse JSON bodies (except for webhook routes)
 app.use((req, res, next) => {
-  if (req.path === '/api/webhook/stripe') {
+  if (req.originalUrl === '/api/webhook/stripe') {
     express.raw({ type: 'application/json' })(req, res, next);
   } else {
     express.json()(req, res, next);
@@ -43,18 +47,29 @@ app.use(cors(corsOptions));
 // Security setup (after CORS)
 setupSecurity(app);
 
+// Log services initialization
+if (stripe) {
+  logger.info('Stripe service initialized successfully');
+} else {
+  logger.warn('Stripe service not initialized - payment features will be limited');
+}
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/cv', cvRoutes);
 app.use('/api/checkout', checkoutRoutes);
-app.use('/api/webhook', webhookRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/2fa', twoFactorRoutes);
 app.use('/api/contact', contactRoutes);
-console.log('Contact routes loaded:', Object.keys(contactRoutes));
+
+// Webhook route must come after raw body parser
+app.use('/api/webhook/stripe', webhookRoutes);
 
 // Test endpoint for contact form
 app.post('/api/contact/test', (req, res) => {
-  console.log('Contact test endpoint hit!');
-  console.log('Request body:', req.body);
+  logger.info('Contact test endpoint hit!');
+  logger.debug('Request body:', req.body);
   res.json({
     success: true,
     message: 'Contact test endpoint working',
@@ -63,11 +78,27 @@ app.post('/api/contact/test', (req, res) => {
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
+  // Check database connection by trying a simple query
+  let dbStatus = 'error';
+  try {
+    await database.client.$queryRaw`SELECT 1`;
+    dbStatus = 'ok';
+  } catch (err) {
+    logger.error('Database health check failed:', err);
+  }
+
+  const services = {
+    database: dbStatus,
+    stripe: stripe ? 'ok' : 'not configured',
+    email: process.env.EMAIL_HOST ? 'configured' : 'not configured'
+  };
+
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV,
+    services
   });
 });
 

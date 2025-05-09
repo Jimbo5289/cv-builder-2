@@ -110,6 +110,48 @@ const templates = {
     `
   }),
 
+  paymentSuccess: (user, payment) => ({
+    subject: 'Payment Confirmation - CV Builder',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #4a90e2; color: white; padding: 20px; text-align: center; }
+            .content { padding: 20px; }
+            .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+            .button { display: inline-block; padding: 10px 20px; background: #4a90e2; color: white; text-decoration: none; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Payment Successful</h1>
+            </div>
+            <div class="content">
+              <p>Dear ${user.name || 'valued customer'},</p>
+              <p>Thank you for your payment! Your transaction has been successfully processed.</p>
+              <h2>Payment Details:</h2>
+              <ul>
+                <li>Amount: ${payment.currency.toUpperCase() === 'GBP' ? '£' : payment.currency.toUpperCase()} ${payment.amount.toFixed(2)}</li>
+                <li>Date: ${new Date().toLocaleDateString()}</li>
+              </ul>
+              <p>You can now access your CV Builder features or download your enhanced CV.</p>
+              <p>
+                <a href="${FRONTEND_URL}/dashboard" class="button">Go to Dashboard</a>
+              </p>
+            </div>
+            <div class="footer">
+              <p>This is an automated message, please do not reply directly to this email.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+  }),
+
   subscriptionCancelled: (user) => ({
     subject: 'Subscription Cancelled - CV Builder',
     html: `
@@ -427,6 +469,16 @@ const sendPaymentFailedNotification = async (user, invoice) => {
 };
 
 /**
+ * Send payment success notification email
+ * @param {Object} user - User object
+ * @param {Object} payment - Payment details
+ * @returns {Promise<void>}
+ */
+const sendPaymentSuccessNotification = async (user, payment) => {
+  return sendEmail(user, payment, 'paymentSuccess');
+};
+
+/**
  * Send subscription cancelled notification email
  * @param {Object} user - User object
  * @returns {Promise<void>}
@@ -501,6 +553,7 @@ const sendContactFormEmail = async (senderInfo, message) => {
 module.exports = {
   sendSubscriptionConfirmation,
   sendPaymentFailedNotification,
+  sendPaymentSuccessNotification,
   sendSubscriptionCancelledNotification,
   sendPasswordResetEmail,
   sendContactFormEmail
