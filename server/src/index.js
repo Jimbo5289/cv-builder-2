@@ -14,34 +14,76 @@ const subscriptionRoutes = require('./routes/subscription');
 const twoFactorRoutes = require('./routes/twoFactor');
 const { stripe } = require('./config/stripe');
 const net = require('net');
+const { getSentry } = require('./config/sentry');
+const authMiddleware = require('./middleware/auth');
+const { execSync } = require('child_process');
+
+// Initialize Sentry
+const Sentry = getSentry();
 
 // Validate environment variables
 validateEnv();
 
 const app = express();
 
-// Parse JSON bodies (except for webhook routes)
-app.use((req, res, next) => {
-  if (req.originalUrl === '/api/webhook/stripe') {
-    express.raw({ type: 'application/json' })(req, res, next);
-  } else {
-    express.json()(req, res, next);
-  }
-});
-app.use(express.urlencoded({ extended: true }));
+// Initialize Sentry request handler (must be the first middleware)
+if (Sentry) {
+  app.use(Sentry.Handlers.requestHandler({
+    // Include user information in errors
+    user: ['id', 'email'],
+    // Extract request data
+    request: true,
+  }));
+  
+  // Remove the tracing handler since it requires additional setup
+  // app.use(Sentry.Handlers.tracingHandler());
+}
 
 // Configure CORS
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL 
-    : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176', 'http://localhost:5177'],
+  origin: process.env.CORS_ALLOW_ORIGIN === '*' 
+    ? '*' // Allow all origins if explicitly configured
+    : (process.env.NODE_ENV === 'production' 
+       ? process.env.FRONTEND_URL 
+       : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176', 'http://localhost:5177']),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
   exposedHeaders: ['Content-Type', 'Authorization'],
-  maxAge: 86400 // 24 hours
+  maxAge: 86400, // 24 hours
+  // Add better Safari support
+  optionsSuccessStatus: 200,
+  preflightContinue: false
 };
 
+// Parse application/json but NOT multipart/form-data
+app.use(express.json({ 
+  limit: '10mb',
+  verify: (req, res, buf) => {
+    const contentType = req.headers['content-type'] || '';
+    // Skip raw body parsing for multipart/form-data and webhook endpoints
+    if (contentType.includes('multipart/form-data') || req.url.includes('/webhook')) {
+      req.rawBody = null;
+    } else {
+      req.rawBody = buf.toString();
+    }
+  }
+}));
+
+// Parse application/x-www-form-urlencoded but NOT multipart/form-data
+app.use(express.urlencoded({ 
+  extended: true, 
+  limit: '10mb',
+  verify: (req, res, buf) => {
+    const contentType = req.headers['content-type'] || '';
+    // Skip raw body parsing for multipart/form-data
+    if (!contentType.includes('multipart/form-data')) {
+      req.rawBody = buf.toString();
+    }
+  }
+}));
+
+// Configure CORS
 app.use(cors(corsOptions));
 
 // Security setup (after CORS)
@@ -53,6 +95,14 @@ if (stripe) {
 } else {
   logger.warn('Stripe service not initialized - payment features will be limited');
 }
+
+// Set global middleware options
+app.use((req, res, next) => {
+  // Make environment variables available to middleware
+  req.skipAuthCheck = process.env.SKIP_AUTH_CHECK === 'true';
+  req.mockSubscription = process.env.MOCK_SUBSCRIPTION_DATA === 'true';
+  next();
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -77,30 +127,36 @@ app.post('/api/contact/test', (req, res) => {
   });
 });
 
-// Health check endpoint
-app.get('/health', async (req, res) => {
-  // Check database connection by trying a simple query
-  let dbStatus = 'error';
-  try {
-    await database.client.$queryRaw`SELECT 1`;
-    dbStatus = 'ok';
-  } catch (err) {
-    logger.error('Database health check failed:', err);
-  }
+// Simple health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
 
-  const services = {
-    database: dbStatus,
-    stripe: stripe ? 'ok' : 'not configured',
-    email: process.env.EMAIL_HOST ? 'configured' : 'not configured'
-  };
+// Also add an /api/health endpoint for consistency
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
 
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
+// Status endpoint with auth for testing authentication
+app.get('/status', authMiddleware, (req, res) => {
+  res.json({ 
+    status: 'authenticated',
+    user: req.user,
+    subscriptionStatus: req.user.subscription?.status || 'none',
     environment: process.env.NODE_ENV,
-    services
+    mockSubscriptionData: process.env.MOCK_SUBSCRIPTION_DATA === 'true'
   });
 });
+
+// Sentry error handler (must come before any other error middleware and after all controllers)
+if (Sentry) {
+  app.use(Sentry.Handlers.errorHandler({
+    shouldHandleError(error) {
+      // Only report errors with status code >= 400
+      return error.status >= 400 || !error.status;
+    }
+  }));
+}
 
 // Global error handler
 app.use((err, req, res, next) => {
@@ -130,134 +186,160 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-// Function to check if a port is available
-const isPortAvailable = (port) => {
-  return new Promise((resolve) => {
-    const server = net.createServer();
+// Server startup and port management
+const startServer = async () => {
+  try {
+    // Get the default port from environment or fallback to 3005
+    const defaultPort = parseInt(process.env.PORT || '3005');
     
-    server.once('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        logger.warn(`Port ${port} is already in use`);
-      } else {
-        logger.error(`Error checking port ${port}:`, err);
+    // Check if port is available, and if not, forcefully free it
+    let port = defaultPort;
+    let isPortAvailable = await checkPort(port);
+    
+    // If DISABLE_PORT_FALLBACK=true, force free the port rather than trying alternatives
+    if (!isPortAvailable && process.env.DISABLE_PORT_FALLBACK === 'true') {
+      logger.warn(`Port ${port} is already in use. Forcefully terminating processes...`);
+      
+      try {
+        // Forcefully kill the process holding this port
+        execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null || true`, { stdio: 'inherit' });
+        logger.info(`Terminated process using port ${port}`);
+        
+        // Wait for the port to be released
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Check again if port is available
+        isPortAvailable = await checkPort(port);
+        if (!isPortAvailable) {
+          logger.error(`Failed to free port ${port} after attempting to kill processes`);
+        }
+      } catch (error) {
+        logger.error(`Error freeing port ${port}: ${error.message}`);
       }
-      resolve(false);
+    } 
+    // Else, try to find an alternative port if fallback is allowed
+    else if (!isPortAvailable && process.env.DISABLE_PORT_FALLBACK !== 'true') {
+      logger.warn(`Port ${port} is in use. Attempting to find an available port...`);
+      
+      try {
+        port = await findAvailablePort(defaultPort);
+        logger.info(`Found available port: ${port}`);
+      } catch (error) {
+        logger.error(`Could not find available port: ${error.message}`);
+        throw error;
+      }
+    }
+    
+    // Create HTTP server
+    const server = app.listen(port, () => {
+      logger.info('Server started successfully', {
+        port,
+        url: `http://localhost:${port}`,
+        environment: process.env.NODE_ENV || 'development',
+        frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173'
+      });
+      
+      if (port !== defaultPort) {
+        console.log(`⚠️  Port ${defaultPort} was already in use.`);
+        console.log(`   Server is running on port ${port} instead.`);
+      } else {
+        console.log(`🚀 Server running on port ${port}`);
+      }
+      console.log(`   Access your API at: http://localhost:${port}`);
     });
     
-    server.once('listening', () => {
-      server.close();
-      resolve(true);
+    // Register graceful shutdown handlers
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
+    process.on('uncaughtException', (error) => {
+      logger.error('Uncaught Exception:', { 
+        error: error.message,
+        stack: error.stack,
+        code: error.code,
+        errno: error.errno,
+        syscall: error.syscall,
+        address: error.address,
+        port: error.port
+      });
+      shutdown('uncaughtException');
     });
-    
-    server.listen(port);
+  } catch (error) {
+    logger.error('Startup error', { error: error.message });
+    process.exit(1);
+  }
+};
+
+// Function to check if a specific port is available
+const checkPort = (port) => {
+  return new Promise((resolve) => {
+    const tester = net.createServer()
+      .once('error', () => {
+        // Port is in use
+        resolve(false);
+      })
+      .once('listening', () => {
+        // Port is available, close the server
+        tester.close(() => resolve(true));
+      })
+      .listen(port);
   });
 };
 
-// Function to find an available port
-const findAvailablePort = async (startPort, maxAttempts = 10) => {
-  let port = startPort;
+// Function to find an available port starting from the given port
+const findAvailablePort = async (startPort, maxAttempts = 5) => {
+  let port = startPort + 1; // Start with the next port
   let attempts = 0;
   
-  while (!(await isPortAvailable(port))) {
+  // Try up to maxAttempts ports
+  while (attempts < maxAttempts) {
+    const isAvailable = await checkPort(port);
+    if (isAvailable) {
+      if (port !== startPort) {
+        logger.info(`Original port ${startPort} was busy, using alternative port ${port}`);
+      }
+      return port;
+    }
+    
     port++;
     attempts++;
-    
-    if (attempts >= maxAttempts) {
-      throw new Error(`No available ports found in range ${startPort}-${startPort + maxAttempts}`);
-    }
   }
   
-  if (port !== startPort) {
-    logger.info(`Original port ${startPort} was busy, using alternative port ${port}`);
-  }
-  
-  return port;
+  throw new Error(`Could not find available port after ${maxAttempts} attempts`);
 };
 
-// Start server safely without killing existing processes
-const startServer = async () => {
+// Flag to track if shutdown has been initiated
+let isShuttingDown = false;
+
+// Graceful shutdown function
+const shutdown = async (signal) => {
+  // Prevent multiple shutdown attempts
+  if (isShuttingDown) {
+    logger.info(`Additional shutdown signal received: ${signal} (already shutting down)`);
+    return;
+  }
+  
+  isShuttingDown = true;
+  logger.info(`Initiating graceful shutdown... (Signal: ${signal})`);
+  
   try {
-    const requestedPort = parseInt(process.env.PORT) || 3005;
-    
-    // Check if the requested port is available
-    let port = requestedPort;
-    if (!(await isPortAvailable(requestedPort))) {
-      logger.warn(`Port ${requestedPort} is in use. Attempting to find an available port...`);
-      try {
-        port = await findAvailablePort(requestedPort + 1);
-        logger.info(`Found available port: ${port}`);
-      } catch (error) {
-        logger.error('Failed to find an available port:', error.message);
-        throw new Error(`Cannot start server: ${error.message}`);
-      }
+    // Disconnect from database
+    if (database.client) {
+      await database.client.$disconnect();
+      logger.info('Database disconnected successfully');
     }
     
-    // Initialize database connection before starting server
-    await database.connect();
+    // Add any other cleanup tasks here
     
-    const server = app.listen(port, () => {
-      const serverUrl = `http://localhost:${port}`;
-      logger.info('Server started successfully', {
-        port: port, 
-        url: serverUrl,
-        environment: process.env.NODE_ENV,
-        frontendUrl: process.env.FRONTEND_URL
-      });
-      
-      if (port !== requestedPort) {
-        console.log(`\n⚠️  Port ${requestedPort} was already in use.`);
-        console.log(`   Server is running on port ${port} instead.`);
-        console.log(`   Access your API at: ${serverUrl}\n`);
-      } else {
-        console.log(`\n🚀 Server running on port ${port}`);
-        console.log(`   Access your API at: ${serverUrl}\n`);
-      }
-    });
-
-    // Graceful shutdown
-    const shutdown = async (signal) => {
-      logger.info(`Initiating graceful shutdown... (Signal: ${signal || 'unknown'})`);
-      
-      // Set a timeout to force exit if graceful shutdown takes too long
-      const forceExitTimeout = setTimeout(() => {
-        logger.error('Graceful shutdown timed out after 10s, forcing exit');
-        process.exit(1);
-      }, 10000);
-      
-      server.close(async () => {
-        clearTimeout(forceExitTimeout);
-        await database.disconnect();
-        logger.info('Server shut down successfully');
-        process.exit(0);
-      });
-      
-      // If server doesn't accept new connections within 5s, force close
-      setTimeout(() => {
-        if (server.listening) {
-          logger.warn('Server still listening after 5s, forcing close');
-          server.close();
-        }
-      }, 5000);
-    };
-
-    process.on('SIGTERM', () => shutdown('SIGTERM'));
-    process.on('SIGINT', () => shutdown('SIGINT'));
-
-    // Handle uncaught exceptions
-    process.on('uncaughtException', async (error) => {
-      logger.error('Uncaught Exception:', error);
-      await shutdown('uncaughtException');
-    });
-
-    // Handle unhandled promise rejections
-    process.on('unhandledRejection', async (reason, promise) => {
-      logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
-      await shutdown('unhandledRejection');
-    });
-
+    logger.info('Server shut down successfully');
+    
+    // Exit process with appropriate code
+    if (signal === 'uncaughtException') {
+      process.exit(1);
+    } else {
+      process.exit(0);
+    }
   } catch (error) {
-    logger.error('Failed to start server:', error);
-    console.error('\n❌ Server failed to start:', error.message);
+    logger.error('Error during shutdown:', { error: error.message });
     process.exit(1);
   }
 };

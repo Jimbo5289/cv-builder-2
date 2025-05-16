@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 const AuthContext = createContext(null);
 
 // API URL
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3008';
 
 // Provider component
 function AuthProvider({ children }) {
@@ -184,9 +184,94 @@ function AuthProvider({ children }) {
     toast.success('Logged out successfully');
   }
 
-  function getAuthHeader() {
+  // Get headers for authenticated requests
+  const getAuthHeader = (skipContentType = false) => {
     const token = state.user?.token || localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+    
+    if (!skipContentType) {
+      headers['Content-Type'] = 'application/json';
+    }
+    
+    return headers;
+  };
+
+  // Function to refresh user data including subscription status
+  async function refreshUser() {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        return false;
+      }
+
+      // Try multiple backend ports in case of development environment
+      const fallbackPorts = [3005, 3006, 3007, 3008, 3009];
+      let userData = null;
+      let success = false;
+
+      // First try with the main API URL
+      try {
+        const response = await fetch(`${API_URL}/api/auth/me`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          userData = await response.json();
+          success = true;
+        }
+      } catch (error) {
+        console.warn(`Failed to refresh user data from ${API_URL}:`, error);
+      }
+      
+      // If main API URL fails, try fallback ports in development
+      if (!success && import.meta.env.DEV) {
+        for (const port of fallbackPorts) {
+          const fallbackUrl = `http://localhost:${port}`;
+          if (fallbackUrl === API_URL) continue; // Skip if already tried with this URL
+          
+          try {
+            const response = await fetch(`${fallbackUrl}/api/auth/me`, {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (response.ok) {
+              userData = await response.json();
+              success = true;
+              break;
+            }
+          } catch (error) {
+            console.warn(`Failed to refresh user data from ${fallbackUrl}:`, error);
+          }
+        }
+      }
+
+      if (success && userData) {
+        // Update user data in state and localStorage
+        const updatedUser = {
+          ...userData,
+          token // Keep the token
+        };
+        
+        setState(prev => ({
+          ...prev,
+          user: updatedUser,
+          isAuthenticated: true,
+          error: null
+        }));
+        
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+      return false;
+    }
   }
 
   const value = {
@@ -194,7 +279,8 @@ function AuthProvider({ children }) {
     login,
     register,
     logout,
-    getAuthHeader
+    getAuthHeader,
+    refreshUser
   };
 
   console.log('AuthProvider state:', state);

@@ -1,16 +1,40 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { FiUpload, FiCheck, FiX, FiAlertCircle } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 
 const CVUploader = () => {
   const [file, setFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isAnalysing, setIsAnalysing] = useState(false);
   const [error, setError] = useState('');
   const [results, setResults] = useState(null);
   const { getAuthHeader } = useAuth();
   
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
+  // Primary API URL
+  const [apiUrl, setApiUrl] = useState(import.meta.env.VITE_API_URL || 'http://localhost:3005');
+  
+  // Check all available ports on component mount
+  useEffect(() => {
+    const checkAvailablePorts = async () => {
+      // Try each port from 3005 to 3009
+      for (let port of [3005, 3006, 3007, 3008, 3009]) {
+        try {
+          const url = `http://localhost:${port}/health`;
+          const response = await fetch(url, { method: 'GET' });
+          
+          if (response.ok) {
+            console.log(`Found working server at port ${port}`);
+            setApiUrl(`http://localhost:${port}`);
+            break;
+          }
+        } catch (err) {
+          console.log(`Port ${port} not available`);
+        }
+      }
+    };
+    
+    checkAvailablePorts();
+  }, []);
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
@@ -55,10 +79,10 @@ const CVUploader = () => {
     setFile(file);
   };
 
-  const analyzeCV = async () => {
+  const analyseCV = async () => {
     if (!file) return;
     
-    setIsAnalyzing(true);
+    setIsAnalysing(true);
     setError('');
     setResults(null);
     
@@ -67,42 +91,65 @@ const CVUploader = () => {
       const formData = new FormData();
       formData.append('cv', file);
       
-      // In development mode, use mock data after a delay
-      if (import.meta.env.DEV && !API_URL.includes('localhost')) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        setResults({
-          score: 85,
-          recommendations: [
-            'Add more quantifiable achievements',
-            'Include relevant certifications',
-            'Strengthen technical skills section'
-          ],
-          missingKeywords: ['leadership', 'project management', 'agile']
-        });
-      } else {
-        // Make real API call in production
-        const response = await fetch(`${API_URL}/api/cv/analyze`, {
-          method: 'POST',
-          headers: {
-            ...getAuthHeader(),
-            // Don't set Content-Type with FormData, browser will set it with boundary
-          },
-          body: formData,
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to analyze CV');
+      // Try API calls with multiple fallback ports
+      let success = false;
+      let ports = [apiUrl, ...Array.from({length: 5}, (_, i) => `http://localhost:${3005 + i}`)];
+      
+      // Remove duplicates
+      ports = [...new Set(ports)];
+      
+      for (const url of ports) {
+        try {
+          console.log(`Trying to analyse CV at ${url}/api/cv/analyse`);
+          
+          // In development mode, use mock data after a delay
+          if (import.meta.env.DEV && !url.includes('localhost')) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            setResults({
+              score: 85,
+              recommendations: [
+                'Add more quantifiable achievements',
+                'Include relevant certifications',
+                'Strengthen technical skills section'
+              ],
+              missingKeywords: ['leadership', 'project management', 'agile']
+            });
+            success = true;
+            break;
+          } else {
+            // Make real API call
+            const response = await fetch(`${url}/api/cv/analyse`, {
+              method: 'POST',
+              headers: {
+                ...getAuthHeader(),
+                // Don't set Content-Type with FormData, browser will set it with boundary
+              },
+              body: formData,
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              setResults(data);
+              success = true;
+              break;
+            } else {
+              console.error(`Failed request to ${url}: ${response.status}`);
+            }
+          }
+        } catch (err) {
+          console.error(`Error with ${url}:`, err);
+          // Continue to the next URL
         }
-        
-        const data = await response.json();
-        setResults(data);
+      }
+      
+      if (!success) {
+        throw new Error('Failed to analyse CV on all servers');
       }
     } catch (err) {
       console.error('CV analysis error:', err);
-      setError(err.message || 'Failed to analyze CV. Please try again.');
+      setError(err.message || 'Failed to analyse CV. Please try again.');
     } finally {
-      setIsAnalyzing(false);
+      setIsAnalysing(false);
     }
   };
 
@@ -167,15 +214,15 @@ const CVUploader = () => {
 
       {!results && (
         <button
-          onClick={analyzeCV}
-          disabled={!file || isAnalyzing}
+          onClick={analyseCV}
+          disabled={!file || isAnalysing}
           className={`mt-6 w-full py-3 px-4 rounded-md text-white font-medium ${
-            !file || isAnalyzing
+            !file || isAnalysing
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-blue-600 hover:bg-blue-700'
           }`}
         >
-          {isAnalyzing ? 'Analyzing...' : 'Analyze CV'}
+          {isAnalysing ? 'Analysing...' : 'Analyse CV'}
         </button>
       )}
 

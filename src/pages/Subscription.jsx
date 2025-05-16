@@ -1,45 +1,123 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { loadStripe } from '@stripe/stripe-js';
+import { useLocation, Link } from 'react-router-dom';
 
-const stripe = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+const stripe = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 export default function Subscription() {
-  const { user } = useAuth();
+  const { user, getAuthHeader } = useAuth();
+  const location = useLocation();
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const showUpgradePrompt = location.state?.upgrade;
+  const redirectFrom = location.state?.from?.pathname;
+
+  // API URL - Check multiple possible ports as the server may be running on any of them
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
+  
+  // Array of potential fallback ports if the main one fails
+  const fallbackPorts = [3005, 3006, 3007, 3008, 3009];
+
+  // Mapping of premium features to descriptions
+  const featureDescriptions = {
+    '/analyse': 'AI CV Analysis with Job Description Matching',
+    // Add more premium features here
+  };
+
+  const getPremiumFeatureName = (path) => {
+    return featureDescriptions[path] || 'Premium Features';
+  };
 
   useEffect(() => {
     const fetchSubscription = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+      
+      // Try with the main API URL first
+      let success = await tryFetchSubscription(API_URL);
+      
+      // If main API URL fails, try fallback ports
+      if (!success) {
+        for (const port of fallbackPorts) {
+          const fallbackUrl = `http://localhost:${port}`;
+          if (fallbackUrl !== API_URL) { // Skip if already tried with this URL
+            success = await tryFetchSubscription(fallbackUrl);
+            if (success) break;
+          }
+        }
+      }
+      
+      setLoading(false);
+    };
+    
+    const tryFetchSubscription = async (baseUrl) => {
       try {
-        const response = await fetch('/api/subscription');
-        if (!response.ok) throw new Error('Failed to fetch subscription');
+        console.log(`Trying to fetch subscription at ${baseUrl}/api/subscriptions`);
+        const response = await fetch(`${baseUrl}/api/subscriptions`, {
+          headers: {
+            ...getAuthHeader()
+          }
+        });
+        
+        if (response.status === 404) {
+          // No subscription found is not an error
+          setSubscription(null);
+          return true;
+        }
+        
+        if (!response.ok) {
+          // Log error but continue trying
+          console.error(`Failed to fetch subscription from ${baseUrl}`);
+          return false;
+        } 
+        
         const data = await response.json();
         setSubscription(data);
+        return true;
       } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+        console.error(`Subscription fetch error at ${baseUrl}:`, err);
+        return false;
       }
     };
 
-    if (user) {
-      fetchSubscription();
-    }
-  }, [user]);
+    fetchSubscription();
+  }, [user, API_URL, getAuthHeader]);
 
   const handleCancelSubscription = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/subscription/cancel', {
-        method: 'POST',
-      });
-      if (!response.ok) throw new Error('Failed to cancel subscription');
-      const data = await response.json();
-      setSubscription(data);
-    } catch (err) {
-      setError(err.message);
+      
+      // Try all possible ports
+      let success = false;
+      let ports = [API_URL, ...fallbackPorts.map(port => `http://localhost:${port}`)];
+      
+      for (const url of new Set(ports)) { // Use Set to eliminate duplicates
+        try {
+          const response = await fetch(`${url}/api/subscriptions/cancel`, {
+            method: 'POST',
+            headers: {
+              ...getAuthHeader()
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            setSubscription(data);
+            success = true;
+            break;
+          }
+        } catch (error) {
+          console.error(`Failed to cancel subscription at ${url}:`, error);
+        }
+      }
+      
+      if (!success) {
+        console.error('Failed to cancel subscription on all ports');
+      }
     } finally {
       setLoading(false);
     }
@@ -48,41 +126,87 @@ export default function Subscription() {
   const handleReactivateSubscription = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/subscription/reactivate', {
-        method: 'POST',
-      });
-      if (!response.ok) throw new Error('Failed to reactivate subscription');
-      const data = await response.json();
-      setSubscription(data);
-    } catch (err) {
-      setError(err.message);
+      
+      // Try all possible ports
+      let success = false;
+      let ports = [API_URL, ...fallbackPorts.map(port => `http://localhost:${port}`)];
+      
+      for (const url of new Set(ports)) { // Use Set to eliminate duplicates
+        try {
+          const response = await fetch(`${url}/api/subscriptions/reactivate`, {
+            method: 'POST',
+            headers: {
+              ...getAuthHeader()
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            setSubscription(data);
+            success = true;
+            break;
+          }
+        } catch (error) {
+          console.error(`Failed to reactivate subscription at ${url}:`, error);
+        }
+      }
+      
+      if (!success) {
+        console.error('Failed to reactivate subscription on all ports');
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // Hide loading state
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-8">Subscription Management</h1>
+        {showUpgradePrompt && renderUpgradePrompt()}
+      </div>
+    );
   }
 
-  if (error) {
-    return <div className="flex justify-center items-center min-h-screen text-red-500">{error}</div>;
+  function renderUpgradePrompt() {
+    return (
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+        <div className="flex items-start">
+          <div className="flex-shrink-0">
+            <svg className="h-6 w-6 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <p className="text-sm text-blue-800">
+              <span className="font-medium">Premium Feature Required</span>
+              <br />
+              The feature you attempted to access ({getPremiumFeatureName(redirectFrom)}) requires an active subscription.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-8">Subscription Management</h1>
       
+      {showUpgradePrompt && renderUpgradePrompt()}
+      
       {!subscription ? (
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">No Active Subscription</h2>
           <p className="mb-4">You are currently on the free plan.</p>
-          <a
-            href="/pricing"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          <Link
+            to="/pricing"
+            className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            state={{ premium: showUpgradePrompt, from: redirectFrom, feature: getPremiumFeatureName(redirectFrom) }}
           >
             View Plans
-          </a>
+          </Link>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow p-6">
@@ -90,7 +214,7 @@ export default function Subscription() {
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
               <p className="text-gray-600">Plan</p>
-              <p className="font-semibold">{subscription.planId}</p>
+              <p className="font-semibold">{subscription.planId || 'Premium'}</p>
             </div>
             <div>
               <p className="text-gray-600">Status</p>

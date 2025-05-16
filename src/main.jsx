@@ -2,30 +2,34 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import * as Sentry from '@sentry/react'
+// Remove import that might be causing issues
+// import { BrowserTracing, Replay } from '@sentry/react'
 import './index.css'
 import App from './App'
 
-// Initialize Sentry only in production
+// Initialize Sentry
 const isProd = import.meta.env.PROD;
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
 
+// Simplified Sentry initialization - only initialize if explicitly configured
 if (isProd && sentryDsn) {
-  Sentry.init({
-    dsn: sentryDsn,
-    integrations: [
-      new Sentry.BrowserTracing(),
-      new Sentry.Replay(),
-    ],
-    // Adjust sample rates in production as needed
-    tracesSampleRate: 0.2, // sample 20% of transactions
-    replaysSessionSampleRate: 0.05, // sample 5% of sessions
-    replaysOnErrorSampleRate: 1.0, // capture 100% of sessions with errors
-    environment: import.meta.env.VITE_SENTRY_ENVIRONMENT || 'production',
-  });
-  
-  console.log('Sentry initialized in production mode');
-} else if (isProd) {
-  console.warn('Sentry DSN is missing. Error monitoring is disabled.');
+  try {
+    Sentry.init({
+      dsn: sentryDsn,
+      environment: import.meta.env.VITE_SENTRY_ENVIRONMENT || 'production',
+      tracesSampleRate: 0.2,
+      
+      // Simplified configuration with no additional integrations
+      integrations: [],
+      
+      // Disable PII information
+      sendDefaultPii: false,
+    });
+    
+    console.log('Sentry initialized in production mode');
+  } catch (error) {
+    console.error('Failed to initialize Sentry:', error);
+  }
 } else {
   console.info('Running in development mode. Sentry is disabled.');
 }

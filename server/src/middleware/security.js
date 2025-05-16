@@ -1,31 +1,35 @@
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { logger } = require('../config/logger');
+const { PrismaClient } = require('@prisma/client');
 
-// Create an auth rate limiter to prevent brute force attacks
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // limit each IP to 10 requests per windowMs
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  handler: (req, res) => {
-    logger.warn('Rate limit exceeded:', { 
-      ip: req.ip, 
-      path: req.path 
-    });
-    res.status(429).json({
-      error: 'Too many login attempts. Please try again later.'
-    });
-  }
-});
+const prisma = new PrismaClient();
 
-const setupSecurity = (app) => {
-  // Basic security headers with Helmet
-  app.use(helmet());
+// Import rate limiters from rateLimiter.js
+const { 
+  authLimiter: dbAuthLimiter, 
+  passwordResetLimiter, 
+  registrationLimiter 
+} = require('./rateLimiter');
 
-  // Content Security Policy - configured for development
-  app.use(helmet.contentSecurityPolicy({
-    directives: {
+// Define environment-specific CSP directives
+const getCspDirectives = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", 'https://js.stripe.com'],
+      styleSrc: ["'self'", 'https:'],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'", 'https://api.stripe.com'],
+      fontSrc: ["'self'", 'https:', 'data:'],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'self'", 'https://js.stripe.com'],
+      upgradeInsecureRequests: []
+    };
+  } else {
+    // Development environment - less restrictive
+    return {
       defaultSrc: ["'self'", "http://localhost:*"],
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "http://localhost:*"],
       styleSrc: ["'self'", "'unsafe-inline'", 'https:', "http://localhost:*"],
@@ -35,7 +39,17 @@ const setupSecurity = (app) => {
       objectSrc: ["'none'"],
       mediaSrc: ["'self'", "http://localhost:*"],
       frameSrc: ["'self'", 'https://js.stripe.com', "http://localhost:*"],
-    },
+    };
+  }
+};
+
+const setupSecurity = (app) => {
+  // Basic security headers with Helmet
+  app.use(helmet());
+
+  // Content Security Policy 
+  app.use(helmet.contentSecurityPolicy({
+    directives: getCspDirectives()
   }));
 
   // XSS Protection
@@ -48,14 +62,16 @@ const setupSecurity = (app) => {
   // Disable X-Powered-By header
   app.disable('x-powered-by');
 
-  // Additional security headers
-  app.use((req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    next();
-  });
+  // Set secure cookie flags in production
+  if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1); // Trust first proxy
+    app.use((req, res, next) => {
+      res.cookie('secure', true); // Require HTTPS
+      res.cookie('httpOnly', true); // Prevent client-side JS from reading cookie
+      res.cookie('sameSite', 'strict'); // CSRF protection
+      next();
+    });
+  }
 
   // Basic request logging
   app.use((req, res, next) => {
@@ -75,5 +91,7 @@ const setupSecurity = (app) => {
 
 module.exports = {
   setupSecurity,
-  authLimiter
+  authLimiter: dbAuthLimiter, // Use the more comprehensive auth limiter
+  passwordResetLimiter,
+  registrationLimiter
 }; 
