@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useServer } from '../context/ServerContext';
 
 function Experience() {
   const [searchParams] = useSearchParams();
@@ -10,6 +11,7 @@ function Experience() {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const { apiUrl } = useServer();
 
   const handleInputChange = (index, field, value) => {
     const updatedExperiences = experiences.map((exp, i) => {
@@ -42,8 +44,7 @@ function Experience() {
         throw new Error('Please log in to continue');
       }
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
-      const response = await fetch(`${API_URL}/api/cv/${cvId}/experience`, {
+      const response = await fetch(`${apiUrl}/api/cv/${cvId}/experience`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

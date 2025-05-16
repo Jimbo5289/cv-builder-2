@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { FiUpload, FiCheck, FiX, FiAlertCircle } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
+import { useServer } from '../context/ServerContext';
 
 const CVUploader = () => {
   const [file, setFile] = useState(null);
@@ -9,33 +10,8 @@ const CVUploader = () => {
   const [error, setError] = useState('');
   const [results, setResults] = useState(null);
   const { getAuthHeader } = useAuth();
+  const { apiUrl } = useServer();
   
-  // Primary API URL
-  const [apiUrl, setApiUrl] = useState(import.meta.env.VITE_API_URL || 'http://localhost:3005');
-  
-  // Check all available ports on component mount
-  useEffect(() => {
-    const checkAvailablePorts = async () => {
-      // Try each port from 3005 to 3009
-      for (let port of [3005, 3006, 3007, 3008, 3009]) {
-        try {
-          const url = `http://localhost:${port}/health`;
-          const response = await fetch(url, { method: 'GET' });
-          
-          if (response.ok) {
-            console.log(`Found working server at port ${port}`);
-            setApiUrl(`http://localhost:${port}`);
-            break;
-          }
-        } catch (err) {
-          console.log(`Port ${port} not available`);
-        }
-      }
-    };
-    
-    checkAvailablePorts();
-  }, []);
-
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -91,59 +67,30 @@ const CVUploader = () => {
       const formData = new FormData();
       formData.append('cv', file);
       
-      // Try API calls with multiple fallback ports
-      let success = false;
-      let ports = [apiUrl, ...Array.from({length: 5}, (_, i) => `http://localhost:${3005 + i}`)];
+      // Log file information for debugging
+      console.log(`Analyzing file: ${file.name}, size: ${file.size}, type: ${file.type}`);
       
-      // Remove duplicates
-      ports = [...new Set(ports)];
+      // Get auth headers but remove Content-Type for multipart form data
+      const headers = getAuthHeader();
+      delete headers['Content-Type']; // This is crucial for multipart/form-data to work properly
       
-      for (const url of ports) {
-        try {
-          console.log(`Trying to analyse CV at ${url}/api/cv/analyse`);
-          
-          // In development mode, use mock data after a delay
-          if (import.meta.env.DEV && !url.includes('localhost')) {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setResults({
-              score: 85,
-              recommendations: [
-                'Add more quantifiable achievements',
-                'Include relevant certifications',
-                'Strengthen technical skills section'
-              ],
-              missingKeywords: ['leadership', 'project management', 'agile']
-            });
-            success = true;
-            break;
-          } else {
-            // Make real API call
-            const response = await fetch(`${url}/api/cv/analyse`, {
-              method: 'POST',
-              headers: {
-                ...getAuthHeader(),
-                // Don't set Content-Type with FormData, browser will set it with boundary
-              },
-              body: formData,
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              setResults(data);
-              success = true;
-              break;
-            } else {
-              console.error(`Failed request to ${url}: ${response.status}`);
-            }
-          }
-        } catch (err) {
-          console.error(`Error with ${url}:`, err);
-          // Continue to the next URL
-        }
-      }
+      // Use the single endpoint with no fallbacks
+      console.log(`Sending CV to ${apiUrl}/api/cv/analyse-only`);
       
-      if (!success) {
-        throw new Error('Failed to analyse CV on all servers');
+      const response = await fetch(`${apiUrl}/api/cv/analyse-only`, {
+        method: 'POST',
+        headers: headers,
+        body: formData
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Analysis successful:', data);
+        setResults(data);
+      } else {
+        const errorText = await response.text();
+        console.error(`Analysis failed: ${response.status} ${response.statusText}`, errorText);
+        throw new Error(`Analysis failed: ${response.statusText}`);
       }
     } catch (err) {
       console.error('CV analysis error:', err);

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { loadStripe } from '@stripe/stripe-js';
 import { useLocation, Link } from 'react-router-dom';
+import { useServer } from '../context/ServerContext';
 
 const stripe = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -13,12 +14,7 @@ export default function Subscription() {
   const [error, setError] = useState(null);
   const showUpgradePrompt = location.state?.upgrade;
   const redirectFrom = location.state?.from?.pathname;
-
-  // API URL - Check multiple possible ports as the server may be running on any of them
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
-  
-  // Array of potential fallback ports if the main one fails
-  const fallbackPorts = [3005, 3006, 3007, 3008, 3009];
+  const { apiUrl } = useServer();
 
   // Mapping of premium features to descriptions
   const featureDescriptions = {
@@ -38,18 +34,7 @@ export default function Subscription() {
       }
       
       // Try with the main API URL first
-      let success = await tryFetchSubscription(API_URL);
-      
-      // If main API URL fails, try fallback ports
-      if (!success) {
-        for (const port of fallbackPorts) {
-          const fallbackUrl = `http://localhost:${port}`;
-          if (fallbackUrl !== API_URL) { // Skip if already tried with this URL
-            success = await tryFetchSubscription(fallbackUrl);
-            if (success) break;
-          }
-        }
-      }
+      let success = await tryFetchSubscription(apiUrl);
       
       setLoading(false);
     };
@@ -85,7 +70,7 @@ export default function Subscription() {
     };
 
     fetchSubscription();
-  }, [user, API_URL, getAuthHeader]);
+  }, [user, apiUrl, getAuthHeader]);
 
   const handleCancelSubscription = async () => {
     try {
@@ -93,7 +78,7 @@ export default function Subscription() {
       
       // Try all possible ports
       let success = false;
-      let ports = [API_URL, ...fallbackPorts.map(port => `http://localhost:${port}`)];
+      let ports = [apiUrl];
       
       for (const url of new Set(ports)) { // Use Set to eliminate duplicates
         try {
@@ -129,7 +114,7 @@ export default function Subscription() {
       
       // Try all possible ports
       let success = false;
-      let ports = [API_URL, ...fallbackPorts.map(port => `http://localhost:${port}`)];
+      let ports = [apiUrl];
       
       for (const url of new Set(ports)) { // Use Set to eliminate duplicates
         try {

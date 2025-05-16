@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import PhoneInput from '../components/PhoneInput';
 import SocialNetworkInput from '../components/SocialNetworkInput';
 import toast from 'react-hot-toast';
-import { getApiUrl } from '../config/api';
+import { useServer } from '../context/ServerContext';
 
 function Create() {
   const [searchParams] = useSearchParams();
@@ -22,6 +22,7 @@ function Create() {
       socialNetwork: ''
     }
   });
+  const { apiUrl } = useServer();
 
   useEffect(() => {
     if (user) {
@@ -77,7 +78,7 @@ function Create() {
     setError('');
 
     try {
-      const response = await fetch(getApiUrl('/api/cv/save'), {
+      const response = await fetch(`${apiUrl}/api/cv/save`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -173,6 +174,7 @@ function Create() {
                 onChange={(e) => handleInputChange('personalInfo', 'location', e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#2c3e50] focus:border-transparent"
                 placeholder="City, Country"
+                style={{ height: '42px' }}
               />
             </div>
           </div>

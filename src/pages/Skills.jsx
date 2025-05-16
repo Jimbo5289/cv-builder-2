@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useServer } from '../context/ServerContext';
 
 function Skills() {
   const [searchParams] = useSearchParams();
@@ -8,6 +9,7 @@ function Skills() {
   const [skills, setSkills] = useState([{ skill: '', level: 'Intermediate' }]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const { apiUrl } = useServer();
 
   const handleSkillChange = (index, field, value) => {
     const updatedSkills = skills.map((skill, i) => {
@@ -42,8 +44,7 @@ function Skills() {
         throw new Error('Please log in to continue');
       }
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
-      const response = await fetch(`${API_URL}/api/cv/${cvId}/skills`, {
+      const response = await fetch(`${apiUrl}/api/cv/${cvId}/skills`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

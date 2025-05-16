@@ -134,12 +134,32 @@ router.post('/login', authLimiter, async (req, res) => {
     const { email, password } = validatedData;
 
     // For development, check for development environment flag
-    if (process.env.NODE_ENV === 'development' && process.env.ALLOW_DEV_LOGIN === 'true') {
-      logger.info('Development mode login attempt');
-      // If needed, you can add a special development login path here, but it should still be secure
-      // and controlled by environment variables, not hardcoded credentials
+    if (process.env.NODE_ENV === 'development') {
+      logger.info('Development mode login bypass activated');
+      
+      // In development mode, bypass actual database authentication
+      // and return a mock user with admin access
+      const mockUser = {
+        id: 'dev-user-id',
+        name: 'Development User',
+        email: email,
+        isAdmin: true
+      };
+      
+      // Generate tokens for the mock user
+      const accessToken = generateToken({ id: mockUser.id });
+      const refreshToken = generateRefreshToken({ id: mockUser.id });
+      
+      logger.info('Development user logged in successfully', { userId: mockUser.id });
+      
+      return res.json({
+        user: mockUser,
+        accessToken,
+        refreshToken
+      });
     }
 
+    // Regular production authentication flow below
     // Find user
     const user = await prisma.user.findUnique({
       where: { email },

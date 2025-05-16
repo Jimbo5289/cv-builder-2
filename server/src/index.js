@@ -56,33 +56,6 @@ const corsOptions = {
   preflightContinue: false
 };
 
-// Parse application/json but NOT multipart/form-data
-app.use(express.json({ 
-  limit: '10mb',
-  verify: (req, res, buf) => {
-    const contentType = req.headers['content-type'] || '';
-    // Skip raw body parsing for multipart/form-data and webhook endpoints
-    if (contentType.includes('multipart/form-data') || req.url.includes('/webhook')) {
-      req.rawBody = null;
-    } else {
-      req.rawBody = buf.toString();
-    }
-  }
-}));
-
-// Parse application/x-www-form-urlencoded but NOT multipart/form-data
-app.use(express.urlencoded({ 
-  extended: true, 
-  limit: '10mb',
-  verify: (req, res, buf) => {
-    const contentType = req.headers['content-type'] || '';
-    // Skip raw body parsing for multipart/form-data
-    if (!contentType.includes('multipart/form-data')) {
-      req.rawBody = buf.toString();
-    }
-  }
-}));
-
 // Configure CORS
 app.use(cors(corsOptions));
 
@@ -104,9 +77,37 @@ app.use((req, res, next) => {
   next();
 });
 
+// --- IMPORTANT: Mount file upload routes BEFORE body parsers ---
+app.use('/api/cv', cvRoutes); // Handles file uploads, must come before body parsers
+
+// --- Apply body parsers for JSON and urlencoded after file upload routes ---
+app.use(express.json({ 
+  limit: '10mb',
+  verify: (req, res, buf) => {
+    const contentType = req.headers['content-type'] || '';
+    // Skip raw body parsing for multipart/form-data and webhook endpoints
+    if (contentType.includes('multipart/form-data') || req.url.includes('/webhook')) {
+      req.rawBody = null;
+    } else {
+      req.rawBody = buf.toString();
+    }
+  }
+}));
+
+app.use(express.urlencoded({ 
+  extended: true, 
+  limit: '10mb',
+  verify: (req, res, buf) => {
+    const contentType = req.headers['content-type'] || '';
+    // Skip raw body parsing for multipart/form-data
+    if (!contentType.includes('multipart/form-data')) {
+      req.rawBody = buf.toString();
+    }
+  }
+}));
+
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/cv', cvRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
@@ -127,9 +128,9 @@ app.post('/api/contact/test', (req, res) => {
   });
 });
 
-// Simple health check endpoint
+// Add a /health endpoint for frontend connection checks
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.status(200).json({ status: 'ok', timestamp: Date.now() });
 });
 
 // Also add an /api/health endpoint for consistency
@@ -146,6 +147,15 @@ app.get('/status', authMiddleware, (req, res) => {
     environment: process.env.NODE_ENV,
     mockSubscriptionData: process.env.MOCK_SUBSCRIPTION_DATA === 'true'
   });
+});
+
+// --- Global error handler for multer errors ---
+app.use((err, req, res, next) => {
+  if (err instanceof require('multer').MulterError) {
+    logger.error('Multer error:', { error: err.message });
+    return res.status(400).json({ error: 'File upload error', message: err.message });
+  }
+  next(err);
 });
 
 // Sentry error handler (must come before any other error middleware and after all controllers)

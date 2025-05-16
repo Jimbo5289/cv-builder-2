@@ -3,7 +3,7 @@ import { useServer } from '../context/ServerContext';
 const ServerStatusIndicator = () => {
   const { 
     status, 
-    apiUrl, 
+    serverUrl, 
     retryConnection, 
     isConnected, 
     isChecking, 
@@ -36,7 +36,7 @@ const ServerStatusIndicator = () => {
         <div className="flex items-center text-green-600">
           <div className="w-2 h-2 bg-green-600 rounded-full mr-1.5 animate-pulse"></div>
           <span className="text-xs font-medium">Server connected</span>
-          <span className="text-xs text-gray-500 ml-1.5">({apiUrl?.split('://')[1]})</span>
+          <span className="text-xs text-gray-500 ml-1.5">({serverUrl?.split('://')[1]})</span>
         </div>
       );
     } else if (isChecking) {
@@ -90,10 +90,10 @@ const ServerStatusIndicator = () => {
             {status}
           </span>
         </div>
-        {apiUrl && (
+        {serverUrl && (
           <div className="flex justify-between mb-1">
             <span className="text-gray-500">URL:</span>
-            <span className="font-medium">{apiUrl}</span>
+            <span className="font-medium">{serverUrl}</span>
           </div>
         )}
         <div className="flex justify-between mb-1">
