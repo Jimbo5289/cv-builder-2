@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
-const { generateToken } = require('../utils/jwt');
+const { generateToken, generateRefreshToken } = require('../utils/jwt');
 const router = express.Router();
 const prisma = new PrismaClient();
 const jwt = require('jsonwebtoken');
@@ -193,25 +193,30 @@ router.post('/login', authLimiter, async (req, res) => {
       }
     });
 
-    // Create token
-    const token = jwt.sign(
-      { id: user.id },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-    );
+    // Generate tokens
+    const accessToken = generateToken({ id: user.id });
+    const refreshToken = generateRefreshToken({ id: user.id });
 
-    // Remove sensitive data from response
-    const { password: _, isActive: __, failedLoginAttempts: ___, lockedUntil: ____, ...userWithoutSensitive } = user;
+    // Update last login time
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        lastLogin: new Date()
+      }
+    });
 
-    logger.info('User logged in successfully', { userId: user.id, email });
+    logger.info('User logged in successfully', { userId: user.id });
+    
     res.json({
-      token,
-      user: userWithoutSensitive
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email
+      },
+      accessToken,
+      refreshToken
     });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
-    }
     logger.error('Login error:', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Server error' });
   }
@@ -397,7 +402,8 @@ router.get('/me', auth, async (req, res) => {
       select: {
         id: true,
         email: true,
-        name: true
+        name: true,
+        createdAt: true
       }
     });
 
@@ -413,6 +419,62 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
+// Get user statistics
+router.get('/users/stats', auth, async (req, res) => {
+  try {
+    // For development mode, return mock data when specified
+    if (process.env.NODE_ENV === 'development' && process.env.MOCK_SUBSCRIPTION_DATA === 'true') {
+      logger.info('Using mock statistics data in development mode');
+      return res.json({
+        cvsCreated: Math.floor(Math.random() * 10),
+        analysesRun: Math.floor(Math.random() * 5),
+        lastActive: new Date().toISOString()
+      });
+    }
+
+    const userId = req.user.id;
+    
+    // Get CV count
+    const cvCount = await prisma.cv.count({
+      where: { userId }
+    });
+    
+    // Get analyses count (if you have an analyses table)
+    let analysesCount = 0;
+    try {
+      analysesCount = await prisma.analysis.count({
+        where: { userId }
+      });
+    } catch (err) {
+      // If analyses table doesn't exist, just use 0
+      logger.warn('Analysis table may not exist, using count 0');
+    }
+    
+    // Get last activity time
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        lastLoginAt: true,
+        updatedAt: true 
+      }
+    });
+    
+    // Use the most recent activity timestamp
+    const lastActive = user.lastLoginAt && user.lastLoginAt > user.updatedAt 
+      ? user.lastLoginAt 
+      : user.updatedAt;
+    
+    res.json({
+      cvsCreated: cvCount,
+      analysesRun: analysesCount,
+      lastActive: lastActive
+    });
+  } catch (error) {
+    logger.error('Get user stats error:', { error: error.message, stack: error.stack, userId: req.user.id });
+    res.status(500).json({ error: 'Error fetching user statistics' });
+  }
+});
+
 // Test Sentry error tracking (remove in production)
 router.get('/test-sentry', (req, res) => {
   throw new Error('Test Sentry Error Tracking');
@@ -425,6 +487,48 @@ router.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV
   });
+});
+
+// Refresh token endpoint
+router.post('/refresh-token', async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token is required' });
+    }
+    
+    // Verify the refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    
+    // Check if the user exists
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        isActive: true
+      }
+    });
+    
+    if (!user || !user.isActive) {
+      return res.status(401).json({ error: 'Invalid refresh token' });
+    }
+    
+    // Generate a new access token
+    const accessToken = generateToken({ id: user.id });
+    
+    res.json({ accessToken });
+  } catch (error) {
+    logger.error('Token refresh error:', { error: error.message, stack: error.stack });
+    
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Refresh token has expired, please login again' });
+    }
+    
+    res.status(401).json({ error: 'Invalid refresh token' });
+  }
 });
 
 module.exports = router; 

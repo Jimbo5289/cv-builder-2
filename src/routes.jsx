@@ -2,6 +2,7 @@ import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import SubscriptionProtectedRoute from './components/SubscriptionProtectedRoute';
 
 // Lazy load components
 const Login = React.lazy(() => import('./pages/Login'));
@@ -12,6 +13,8 @@ const Edit = React.lazy(() => import('./pages/Edit'));
 const Preview = React.lazy(() => import('./pages/Preview'));
 const Settings = React.lazy(() => import('./pages/Settings'));
 const Subscription = React.lazy(() => import('./pages/Subscription'));
+const SubscriptionSuccess = React.lazy(() => import('./pages/SubscriptionSuccess'));
+const SubscriptionCancel = React.lazy(() => import('./pages/SubscriptionCancel'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
 const Home = React.lazy(() => import('./pages/Home'));
 const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'));
@@ -23,6 +26,12 @@ const Blog = React.lazy(() => import('./pages/Blog'));
 const Contact = React.lazy(() => import('./pages/Contact'));
 const CvTips = React.lazy(() => import('./pages/CvTips'));
 const FAQ = React.lazy(() => import('./pages/FAQ'));
+const CookiePolicy = React.lazy(() => import('./pages/CookiePolicy'));
+const Analyse = React.lazy(() => import('./pages/Analyse'));
+const CvAnalyse = React.lazy(() => import('./pages/CvAnalyse'));
+const CvAnalyseByRole = React.lazy(() => import('./pages/CvAnalyseByRole'));
+const Profile = React.lazy(() => import('./pages/Profile'));
+const SavedCVs = React.lazy(() => import('./pages/SavedCVs'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -54,8 +63,9 @@ function AppRoutes() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/cv-tips" element={<CvTips />} />
         <Route path="/faq" element={<FAQ />} />
-
-        {/* Protected routes */}
+        <Route path="/cookie-policy" element={<CookiePolicy />} />
+        
+        {/* Protected routes that require authentication */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />
@@ -81,10 +91,47 @@ function AppRoutes() {
             <Settings />
           </ProtectedRoute>
         } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path="/saved-cvs" element={
+          <ProtectedRoute>
+            <Navigate to="/profile" replace />
+          </ProtectedRoute>
+        } />
         <Route path="/subscription" element={
           <ProtectedRoute>
             <Subscription />
           </ProtectedRoute>
+        } />
+        <Route path="/subscription/success" element={
+          <ProtectedRoute>
+            <SubscriptionSuccess />
+          </ProtectedRoute>
+        } />
+        <Route path="/subscription/cancel" element={
+          <ProtectedRoute>
+            <SubscriptionCancel />
+          </ProtectedRoute>
+        } />
+        
+        {/* Premium routes that require an active subscription */}
+        <Route path="/analyse" element={
+          <SubscriptionProtectedRoute>
+            <Analyse />
+          </SubscriptionProtectedRoute>
+        } />
+        <Route path="/cv-analyse" element={
+          <SubscriptionProtectedRoute>
+            <CvAnalyse />
+          </SubscriptionProtectedRoute>
+        } />
+        <Route path="/cv-analyse-by-role" element={
+          <SubscriptionProtectedRoute>
+            <CvAnalyseByRole />
+          </SubscriptionProtectedRoute>
         } />
 
         {/* 404 route */}

@@ -1,10 +1,21 @@
 [auth]
-token=__YOUR_AUTH_TOKEN__
+token=${SENTRY_AUTH_TOKEN}
 
 [defaults]
 url=https://sentry.io/
-org=your-org-name
+org=${SENTRY_ORG}
 project=cv-builder-server
 
+[http]
+keepalive=true
+
+[log]
+level=info
+
 [sourcemaps]
-rewrite=true 
+rewrite=true
+upload_sources=true
+
+[release]
+auto_session_tracking=true
+health_check=true 

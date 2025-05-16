@@ -16,12 +16,12 @@ export const socialNetworks = {
     helper: 'Enter your GitHub username'
   },
   twitter: {
-    name: 'Twitter',
+    name: 'X',
     logo: '/assets/social-networks/twitter.svg',
     baseUrl: 'twitter.com/',
     placeholder: 'username',
     prefix: 'twitter.com/',
-    helper: 'Enter your Twitter handle (without @)'
+    helper: 'Enter your X handle (without @)'
   },
   researchgate: {
     name: 'ResearchGate',

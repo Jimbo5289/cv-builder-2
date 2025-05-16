@@ -77,17 +77,19 @@ function Templates() {
         Select from our professionally designed templates to create your perfect CV. Each template is fully customizable to match your style.
       </p>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {templates.map((template) => (
           <div 
             key={template.id}
-            className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition"
+            className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full"
           >
-            <img
-              src={template.image}
-              alt={`${template.name} Template`}
-              className="w-full h-72 object-cover"
-            />
+            <div className="relative pb-[56.25%]">
+              <img
+                src={template.image}
+                alt={`${template.name} Template`}
+                className="absolute w-full h-full object-cover"
+              />
+            </div>
             <div className="p-6">
               <h3 className="text-xl font-semibold text-[#2c3e50] mb-2">
                 {template.name}
@@ -95,12 +97,16 @@ function Templates() {
               <p className="text-gray-600 mb-4">
                 {template.description}
               </p>
-              <div className="template-actions">
+              <div className="flex flex-wrap gap-3">
                 <button 
-                  className="download-btn"
+                  className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition"
                   onClick={() => handleDownload(template)}
+                  aria-label={`Download ${template.name} template`}
                 >
-                  Download
+                  <span className="sr-only">Download</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
                 </button>
                 <Link
                   to={`/create?template=${template.id}`}

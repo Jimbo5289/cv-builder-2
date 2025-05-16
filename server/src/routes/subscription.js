@@ -2,36 +2,143 @@ const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { PrismaClient } = require('@prisma/client');
-const authMiddleware = require('../middleware/auth');
+const auth = require('../middleware/auth');
+const { logger } = require('../config/logger');
 
 const prisma = new PrismaClient();
 
-// Get subscription status
-router.get('/status', authMiddleware, async (req, res) => {
+// Get current user's subscription
+router.get('/', auth, async (req, res) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      select: {
-        subscriptionStatus: true,
-        subscriptionEndDate: true,
-        stripeCustomerId: true
+    const userId = req.user.id;
+    
+    // Get the most recent active subscription
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        userId,
+        status: { in: ['active', 'trialing'] }
+      },
+      orderBy: {
+        currentPeriodEnd: 'desc'
       }
     });
+    
+    if (!subscription) {
+      return res.status(404).json({ error: 'No active subscription found' });
+    }
+    
+    res.json(subscription);
+  } catch (error) {
+    logger.error('Error fetching subscription:', { error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
+// Check if user has active subscription
+router.get('/status', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // For development purposes, allow bypassing subscription check
+    if (process.env.NODE_ENV !== 'production' && (process.env.MOCK_SUBSCRIPTION_DATA === 'true')) {
+      logger.info('Using mock subscription data in development mode');
+      return res.json({
+        hasActiveSubscription: true,
+        subscriptionData: {
+          id: 'mock-subscription',
+          userId: userId,
+          status: 'active',
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          cancelAtPeriodEnd: false
+        }
+      });
+    }
+    
+    // Count active subscriptions
+    const activeSubscription = await prisma.subscription.findFirst({
+      where: {
+        userId,
+        status: { in: ['active', 'trialing'] },
+        currentPeriodEnd: {
+          gt: new Date() // Subscription period has not ended
+        }
+      }
+    });
+    
+    // Return subscription status
     res.json({
-      status: user.subscriptionStatus,
-      endDate: user.subscriptionEndDate,
-      hasActiveSubscription: user.subscriptionStatus === 'active' && 
-        new Date(user.subscriptionEndDate) > new Date()
+      hasActiveSubscription: !!activeSubscription,
+      subscriptionData: activeSubscription || null
     });
   } catch (error) {
-    console.error('Error getting subscription status:', error);
-    res.status(500).json({ error: 'Failed to get subscription status' });
+    logger.error('Error checking subscription status:', { error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Cancel subscription
+router.post('/cancel', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Find the active subscription
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        userId,
+        status: 'active'
+      }
+    });
+    
+    if (!subscription) {
+      return res.status(404).json({ error: 'No active subscription found' });
+    }
+    
+    // Update subscription to cancel at period end
+    const updatedSubscription = await prisma.subscription.update({
+      where: { id: subscription.id },
+      data: { cancelAtPeriodEnd: true }
+    });
+    
+    res.json(updatedSubscription);
+  } catch (error) {
+    logger.error('Error canceling subscription:', { error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Reactivate subscription
+router.post('/reactivate', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Find the subscription marked for cancellation
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        userId,
+        cancelAtPeriodEnd: true
+      }
+    });
+    
+    if (!subscription) {
+      return res.status(404).json({ error: 'No subscription found for reactivation' });
+    }
+    
+    // Update subscription to not cancel at period end
+    const updatedSubscription = await prisma.subscription.update({
+      where: { id: subscription.id },
+      data: { cancelAtPeriodEnd: false }
+    });
+    
+    res.json(updatedSubscription);
+  } catch (error) {
+    logger.error('Error reactivating subscription:', { error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // Create checkout session
-router.post('/create-checkout-session', authMiddleware, async (req, res) => {
+router.post('/create-checkout-session', auth, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id }
@@ -76,7 +183,7 @@ router.post('/create-checkout-session', authMiddleware, async (req, res) => {
 });
 
 // Create customer portal session
-router.post('/create-portal-session', authMiddleware, async (req, res) => {
+router.post('/create-portal-session', auth, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id }

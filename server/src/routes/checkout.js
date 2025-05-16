@@ -34,8 +34,74 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
       }
     }
     
-    // Get the price from Stripe
-    const price = await stripe.prices.retrieve(finalPriceId);
+    logger.info(`Attempting to create checkout session with price ID: ${finalPriceId}`);
+    
+    // Check for development mode with mock data enabled
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const useMockData = process.env.MOCK_SUBSCRIPTION_DATA === 'true';
+    
+    if (isDevelopment && useMockData) {
+      logger.info('Using mock checkout session in development');
+      
+      try {
+        // Get user id - for development mode, create a mock user if needed
+        const userId = req.user?.id || 'dev-user-id';
+        
+        // Create a mock subscription for the user
+        await prisma.subscription.upsert({
+          where: {
+            id: `mock_subscription_${userId}`
+          },
+          update: {
+            status: 'active',
+            planId: finalPriceId,
+            currentPeriodStart: new Date(),
+            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+            customerId: 'mock_customer_' + userId,
+            subscriptionId: 'mock_subscription_' + Date.now(),
+            stripePriceId: finalPriceId,
+            stripeSubscriptionId: 'mock_subscription_' + Date.now(),
+            stripeCustomerId: 'mock_customer_' + userId
+          },
+          create: {
+            id: `mock_subscription_${userId}`,
+            userId: userId,
+            status: 'active',
+            planId: finalPriceId,
+            currentPeriodStart: new Date(),
+            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+            customerId: 'mock_customer_' + userId,
+            subscriptionId: 'mock_subscription_' + Date.now(),
+            stripePriceId: finalPriceId,
+            stripeSubscriptionId: 'mock_subscription_' + Date.now(),
+            stripeCustomerId: 'mock_customer_' + userId
+          }
+        });
+        
+        // Return a mock successful response
+        return sendSuccess(res, { 
+          url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/subscription/success?mock=true`,
+          sessionId: 'mock_session_' + Date.now() 
+        }, 'Mock checkout session created');
+      } catch (dbError) {
+        logger.error('Database error creating mock subscription:', { error: dbError.message });
+        
+        // In development mode with mock data, just create a fake success response even if DB fails
+        return sendSuccess(res, { 
+          url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/subscription/success?mock=true&bypass=true`,
+          sessionId: 'mock_session_' + Date.now() 
+        }, 'Mock checkout session created (bypass mode)');
+      }
+    }
+    
+    // For production: Get the price from Stripe
+    let price;
+    try {
+      price = await stripe.prices.retrieve(finalPriceId);
+    } catch (stripeError) {
+      logger.error(`Stripe price retrieval failed: ${stripeError.message}`);
+      return sendError(res, `Invalid price ID: ${finalPriceId}`, 400);
+    }
     
     if (!price) {
       return sendError(res, 'Invalid price ID', 400);
@@ -76,7 +142,7 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
     
     return sendError(
       res, 
-      'Failed to create checkout session', 
+      error.message || 'Failed to create checkout session', 
       500
     );
   }

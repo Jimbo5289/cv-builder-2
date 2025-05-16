@@ -7,13 +7,14 @@ const emailService = require('../services/emailService');
 const { logger } = require('../config/logger');
 const cuid = require('cuid');
 
-// Middleware to handle raw body
-router.use(express.raw({ type: 'application/json' }));
+// Note: Raw body parsing is already handled in index.js
+// router.use(express.raw({ type: 'application/json' }));
 
 // Handle Stripe webhook events
 router.post('/', async (req, res) => {
   const sig = req.headers['stripe-signature'];
-  const rawBody = req.body;
+  // Make sure we are using the raw body for verification
+  const rawBody = req.rawBody || req.body;
 
   try {
     if (!stripe) {
@@ -162,16 +163,20 @@ async function handleCheckoutSessionCompleted(session) {
             currentPeriodStart: new Date(),
             currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
             stripeCustomerId: customer || '',
-            stripePriceId: session.price?.id || ''
+            stripePriceId: session.price?.id || '',
+            updatedAt: new Date()
           },
           create: {
+            id: cuid(),
             stripeSubscriptionId: subscription,
             userId: user.id,
             status: 'active',
             currentPeriodStart: new Date(),
             currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
             stripeCustomerId: customer || '',
-            stripePriceId: session.price?.id || ''
+            stripePriceId: session.price?.id || '',
+            createdAt: new Date(),
+            updatedAt: new Date()
           }
         });
         logger.info(`Subscription created/updated for user ${user.id}: ${subscription}`);
@@ -188,6 +193,7 @@ async function handleCheckoutSessionCompleted(session) {
         // Record the payment in the database using correct field names
         const payment = await prisma.payment.create({
           data: {
+            id: cuid(),
             userId: user.id,
             stripePaymentId: session.id,
             amount: amount_total ? amount_total / 100 : 0, // Convert cents to dollars/pounds
@@ -294,6 +300,7 @@ async function handleSubscriptionUpdated(subscription) {
             // Create the subscription
             await prisma.subscription.create({
               data: {
+                id: cuid(),
                 userId: user.id,
                 stripeSubscriptionId: subscription.id,
                 status: subscription.status,
@@ -301,7 +308,9 @@ async function handleSubscriptionUpdated(subscription) {
                 currentPeriodEnd,
                 cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
                 stripeCustomerId: subscription.customer || '',
-                stripePriceId: subscription.plan?.id || ''
+                stripePriceId: subscription.plan?.id || '',
+                createdAt: new Date(),
+                updatedAt: new Date()
               }
             });
             logger.info(`New subscription created for customer ${subscription.customer}: ${subscription.id}`);
@@ -353,18 +362,26 @@ async function handleSubscriptionDeleted(subscription) {
 }
 
 async function handlePaymentFailed(invoice) {
-  const subscription = await prisma.subscription.findUnique({
-    where: { stripeId: invoice.subscription },
-    include: { user: true },
-  });
-
-  if (subscription && subscription.user) {
-    await emailService.sendPaymentFailedNotification({
-      email: subscription.user.email,
-      name: subscription.user.name,
-      amount: invoice.amount_due / 100,
-      currency: invoice.currency,
+  try {
+    const subscription = await prisma.subscription.findFirst({
+      where: { stripeSubscriptionId: invoice.subscription },
+      include: { user: true },
     });
+
+    if (subscription && subscription.user) {
+      await emailService.sendPaymentFailedNotification({
+        email: subscription.user.email,
+        name: subscription.user.name,
+        amount: invoice.amount_due / 100,
+        currency: invoice.currency,
+      });
+      logger.info(`Payment failure notification sent to ${subscription.user.email}`);
+    } else {
+      logger.warn(`No subscription or user found for failed payment: ${invoice.id}`);
+    }
+  } catch (error) {
+    logger.error(`Error handling failed payment: ${error.message}`);
+    // Don't throw to avoid webhook failure
   }
 }
 
@@ -419,8 +436,9 @@ async function handlePaymentSucceeded(invoice) {
 
     try {
       // Create payment record - use only fields that match the schema
-      await prisma.payment.create({
+      const payment = await prisma.payment.create({
         data: {
+          id: cuid(),
           userId: user.id,
           stripePaymentId: paymentId,
           amount: amount || 0,

@@ -1,62 +1,287 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useState, useEffect } from 'react';
 import logo from "../assets/A_cartoon-style_digital_illustration_logo_features.png";
 
-function Header() {
-  console.log('Header component rendering');
-  const auth = useAuth();
-  console.log('Auth context:', auth);
+// Simple ChevronDown component to replace the heroicons import
+const ChevronDownIcon = ({ className }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    className={className} 
+    viewBox="0 0 20 20" 
+    fill="currentColor"
+  >
+    <path 
+      fillRule="evenodd" 
+      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" 
+      clipRule="evenodd" 
+    />
+  </svg>
+);
+
+// Analysis menu items
+const analysisItems = [
+  { name: 'Job-Tailored Analysis', href: '/cv-analyse', description: 'Compare your CV to a specific job description' },
+  { name: 'General CV Analysis', href: '/cv-analyse-by-role', description: 'Analyze your CV for general effectiveness or by role type' },
+];
+
+const Header = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
+  const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
-  console.log('Navigate function:', !!navigate);
+  const location = useLocation();
+
+  // Handle scroll events for sticky header
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Handle clicking outside menu to close it
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (isMenuOpen && !e.target.closest('.mobile-menu-container')) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen]);
 
   const handleLogout = () => {
-    if (auth && auth.logout) {
-      auth.logout();
-      navigate('/');
-    }
+    logout();
+    navigate('/');
+    setIsMenuOpen(false);
   };
 
   return (
-    <header className="bg-white border-b border-gray-100">
+    <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-white py-4'}`}>
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-24">
+        <div className="flex justify-between items-center">
+          {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="CV Builder Logo" className="h-12 w-auto mr-2" />
-            <span className="text-3xl font-bold text-[#2c3e50]">CV Builder</span>
+            <img src={logo} alt="CV Builder Logo" className="h-10 w-auto" />
+            <span className="ml-2 font-bold text-xl">CVBuilder</span>
           </Link>
-          
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/templates" className="text-gray-600 hover:text-gray-900">Templates</Link>
-            <Link to="/examples" className="text-gray-600 hover:text-gray-900">Examples</Link>
-            <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
-            <Link to="/blog" className="text-gray-600 hover:text-gray-900">Blog</Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-6">
+            <NavLink 
+              to="/" 
+              className={({ isActive }) => 
+                isActive ? "text-blue-600 font-medium" : "text-gray-700 hover:text-blue-600 font-medium"
+              }
+            >
+              Home
+            </NavLink>
             
-            {auth?.user ? (
-              <>
-                <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
+            <NavLink 
+              to="/templates" 
+              className={({ isActive }) => 
+                isActive ? "text-blue-600 font-medium" : "text-gray-700 hover:text-blue-600 font-medium"
+              }
+            >
+              Templates
+            </NavLink>
+            
+            {/* Analysis Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                className={`group inline-flex items-center text-base font-medium ${
+                  location.pathname.includes('analyse') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                }`}
+                onClick={() => setIsAnalysisOpen(!isAnalysisOpen)}
+                onMouseEnter={() => setIsAnalysisOpen(true)}
+              >
+                <span>Analysis</span>
+                <ChevronDownIcon
+                  className={`ml-1 h-5 w-5 transition-transform ${isAnalysisOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+
+              {isAnalysisOpen && (
+                <div 
+                  className="absolute left-0 z-10 mt-2 w-64 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                  onMouseLeave={() => setIsAnalysisOpen(false)}
+                >
+                  <div className="py-1">
+                    {analysisItems.map((item) => (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsAnalysisOpen(false)}
+                      >
+                        <div className="font-medium">{item.name}</div>
+                        <p className="text-xs text-gray-500">{item.description}</p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {isAuthenticated && (
+              <NavLink 
+                to="/dashboard" 
+                className={({ isActive }) => 
+                  isActive ? "text-blue-600 font-medium" : "text-gray-700 hover:text-blue-600 font-medium"
+                }
+              >
+                Dashboard
+              </NavLink>
+            )}
+            
+            {/* Auth Links */}
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-4">
+                <NavLink 
+                  to="/profile" 
+                  className={({ isActive }) => 
+                    isActive ? "text-blue-600 font-medium" : "text-gray-700 hover:text-blue-600 font-medium"
+                  }
+                >
+                  Profile
+                </NavLink>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                  className="px-4 py-2 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
                 >
                   Logout
                 </button>
-              </>
+              </div>
             ) : (
-              <>
-                <Link to="/login" className="text-gray-600 hover:text-gray-900">Login</Link>
+              <div className="flex items-center space-x-4">
+                <Link 
+                  to="/login"
+                  className="text-gray-700 hover:text-blue-600 font-medium"
+                >
+                  Login
+                </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
                   Sign Up
                 </Link>
-              </>
+              </div>
             )}
           </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden text-gray-600 focus:outline-none"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {isMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden mobile-menu-container bg-white absolute top-full left-0 right-0 shadow-lg z-20">
+            <div className="px-4 py-3 space-y-2">
+              <Link
+                to="/"
+                className="block py-2 text-gray-700 hover:text-blue-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link
+                to="/templates"
+                className="block py-2 text-gray-700 hover:text-blue-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Templates
+              </Link>
+              
+              {/* Analysis Section */}
+              <div className="border-t border-gray-100 pt-2 mt-2">
+                <p className="text-sm font-semibold text-gray-500 pb-1">Analysis Tools</p>
+                {analysisItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className="block py-2 text-gray-700 hover:text-blue-600"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+              
+              {isAuthenticated && (
+                <Link
+                  to="/dashboard"
+                  className="block py-2 text-gray-700 hover:text-blue-600"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              )}
+              
+              {/* Auth Section */}
+              <div className="border-t border-gray-100 pt-2 mt-2">
+                {isAuthenticated ? (
+                  <>
+                    <Link
+                      to="/profile"
+                      className="block py-2 text-gray-700 hover:text-blue-600"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left py-2 text-red-500 hover:text-red-700"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="block py-2 text-gray-700 hover:text-blue-600"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="block py-2 mt-2 bg-blue-600 text-white text-center rounded-md hover:bg-blue-700 px-4"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Sign Up
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
-}
+};
 
 export default Header;

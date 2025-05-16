@@ -18,7 +18,7 @@ const subscriptionSchema = z.object({
 const requiredEnvVars = ['EMAIL_HOST', 'EMAIL_PORT', 'EMAIL_USER', 'EMAIL_PASSWORD', 'EMAIL_FROM'];
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
 if (missingVars.length > 0) {
-  logger.warn(`Missing email configuration: ${missingVars.join(', ')}. Email functionality may not work.`);
+  logger.warn(`Missing email configuration: ${missingVars.join(', ')}. Email functionality will fall back to mock mode.`);
 }
 
 // Use consistent URL for frontend
@@ -271,13 +271,25 @@ const templates = {
 // Create email transporter
 let transporter = null;
 let isEmailConfigured = false;
+let authenticationFailed = false;
+let lastTransporterInitAttempt = 0;
+const TRANSPORTER_RETRY_INTERVAL = 3600000; // 1 hour in milliseconds
 
 // Initialize and verify email transporter
 const initializeTransporter = () => {
+  // Skip initialization if previous attempt failed authentication and retry interval hasn't passed
+  const now = Date.now();
+  if (authenticationFailed && (now - lastTransporterInitAttempt < TRANSPORTER_RETRY_INTERVAL)) {
+    return Promise.resolve(false);
+  }
+  
+  lastTransporterInitAttempt = now;
+  
+  // Skip if essential config is missing
   if (!process.env.EMAIL_HOST || !process.env.EMAIL_PORT || !process.env.EMAIL_USER) {
-    logger.warn('Email service not fully configured - some environment variables are missing');
+    logger.warn('Email service not fully configured - some environment variables are missing. Using mock email service.');
     isEmailConfigured = false;
-    return false;
+    return Promise.resolve(false);
   }
 
   try {
@@ -286,68 +298,102 @@ const initializeTransporter = () => {
       host: process.env.EMAIL_HOST,
       port: parseInt(process.env.EMAIL_PORT, 10),
       secure: process.env.EMAIL_SECURE === 'true',
+      // Set higher timeout for email server connections
+      connectionTimeout: 10000, // 10 seconds
+      // Handle authentication errors gracefully
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD || '', // Make password optional
+      },
+      // Add debug info if DEBUG_EMAIL is set
+      debug: process.env.DEBUG_EMAIL === 'true',
+      // Don't throw errors on invalid login
+      tls: {
+        rejectUnauthorized: false // Accept self-signed certificates
+      }
     };
 
-    // Configure auth based on authentication type
+    // Configure OAuth2 auth if specified
     if (process.env.EMAIL_AUTH_TYPE === 'OAuth2') {
-      // OAuth2 configuration
-      if (!process.env.EMAIL_CLIENT_ID || !process.env.EMAIL_CLIENT_SECRET || !process.env.EMAIL_REFRESH_TOKEN) {
-        logger.warn('OAuth2 authentication selected but credentials are missing');
+      if (process.env.EMAIL_CLIENT_ID && process.env.EMAIL_CLIENT_SECRET && process.env.EMAIL_REFRESH_TOKEN) {
+        transporterConfig.auth = {
+          type: 'OAuth2',
+          user: process.env.EMAIL_USER,
+          clientId: process.env.EMAIL_CLIENT_ID,
+          clientSecret: process.env.EMAIL_CLIENT_SECRET,
+          refreshToken: process.env.EMAIL_REFRESH_TOKEN,
+        };
+      } else {
+        logger.warn('OAuth2 authentication selected but credentials are incomplete. Falling back to mock email service.');
         isEmailConfigured = false;
-        return false;
+        return Promise.resolve(false);
       }
-
-      transporterConfig.auth = {
-        type: 'OAuth2',
-        user: process.env.EMAIL_USER,
-        clientId: process.env.EMAIL_CLIENT_ID,
-        clientSecret: process.env.EMAIL_CLIENT_SECRET,
-        refreshToken: process.env.EMAIL_REFRESH_TOKEN,
-      };
-    } else {
-      // Standard username/password auth
-      if (!process.env.EMAIL_PASSWORD) {
-        logger.warn('Password authentication selected but EMAIL_PASSWORD is missing');
-        isEmailConfigured = false;
-        return false;
-      }
-
-      transporterConfig.auth = {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-      };
     }
 
     // Create the transporter with the configuration
     transporter = nodemailer.createTransport(transporterConfig);
+
+    // Verify connection and authentication
+    logger.info('Verifying email transporter configuration...');
     
-    // Verify transporter configuration
-    transporter.verify((error, success) => {
-      if (error) {
-        logger.error('Email transporter configuration error:', error);
-        isEmailConfigured = false;
-      } else {
-        logger.info('Email transporter is ready to send messages');
-        isEmailConfigured = true;
-      }
+    // Use a promise to handle the verify callback more gracefully
+    return new Promise((resolve) => {
+      transporter.verify((error, success) => {
+        if (error) {
+          // Check if it's an authentication error
+          if (error.code === 'EAUTH' || 
+              (error.response && error.response.includes('5.7.8')) || 
+              error.message.includes('Invalid login')) {
+            logger.error('Email authentication failed:', { 
+              error: error.message,
+              code: error.code,
+              user: process.env.EMAIL_USER,
+              host: process.env.EMAIL_HOST
+            });
+            authenticationFailed = true;
+          } else {
+            logger.error('Email transporter configuration error:', { 
+              error: error.message,
+              code: error.code || 'UNKNOWN' 
+            });
+          }
+          
+          // For any error, disable the real email service
+          isEmailConfigured = false;
+          transporter = null;
+          resolve(false);
+        } else {
+          // Success
+          logger.info('Email transporter is configured and ready to send messages');
+          isEmailConfigured = true;
+          authenticationFailed = false;
+          resolve(true);
+        }
+      });
     });
-    
-    return true;
   } catch (error) {
     logger.error('Failed to initialize email transporter:', error);
     isEmailConfigured = false;
-    return false;
+    transporter = null;
+    return Promise.resolve(false);
   }
 };
 
-// Initialize transporter
-initializeTransporter();
+// Initialize transporter, but don't block on it
+try {
+  initializeTransporter();
+} catch (err) {
+  logger.error('Async email transporter initialization failed:', err);
+  isEmailConfigured = false;
+  transporter = null;
+}
 
 // Mock email service for development when SMTP is not configured
 const mockEmailService = (message, templateName) => {
-  logger.info('Using mock email service (SMTP not configured)', {
+  logger.info('Using mock email service', {
     to: message.to,
     subject: message.subject,
+    reason: authenticationFailed ? 'Authentication failed' : 'SMTP not configured',
     templateName
   });
   
@@ -413,26 +459,53 @@ const sendEmail = async (user, data, templateName) => {
       html
     };
 
-    // Check if transporter is available
-    if (!isEmailConfigured && !initializeTransporter()) {
-      logger.warn('Email service not configured properly, using mock service');
-      const mockInfo = await mockEmailService(message, templateName);
-      return { success: true, messageId: mockInfo.messageId, mock: true };
+    // If we're in development or email hasn't been configured successfully, use mock
+    if (!isEmailConfigured || process.env.NODE_ENV === 'development') {
+      // Try to initialize transporter again if more than the retry interval has passed
+      const shouldRetryInit = !authenticationFailed || 
+        (Date.now() - lastTransporterInitAttempt >= TRANSPORTER_RETRY_INTERVAL);
+      
+      if (shouldRetryInit) {
+        await initializeTransporter();
+      }
+      
+      // If still not configured, use mock
+      if (!isEmailConfigured) {
+        logger.warn('Email service not configured properly, using mock service instead');
+        const mockInfo = await mockEmailService(message, templateName);
+        return { success: true, messageId: mockInfo.messageId, mock: true };
+      }
     }
 
-    // Send email using real transporter or fall back to mock
-    const info = transporter ? await transporter.sendMail(message) : await mockEmailService(message, templateName);
-    
-    logger.info('Email sent successfully:', { 
-      messageId: info.messageId,
-      template: templateName,
-      recipient: validatedUser.email,
-      mock: !!info.mock
-    });
-    
-    return { success: true, messageId: info.messageId, mock: !!info.mock };
+    try {
+      // Attempt to send email with real transporter
+      const info = await transporter.sendMail(message);
+      
+      logger.info('Email sent successfully:', { 
+        messageId: info.messageId,
+        template: templateName,
+        recipient: validatedUser.email
+      });
+      
+      return { success: true, messageId: info.messageId };
+    } catch (sendError) {
+      // If sending fails, fall back to mock
+      logger.error('Failed to send email with transporter, falling back to mock:', { 
+        error: sendError.message,
+        code: sendError.code || 'UNKNOWN'
+      });
+      
+      // If it's an auth error, mark authentication as failed
+      if (sendError.code === 'EAUTH' || sendError.message.includes('Invalid login')) {
+        authenticationFailed = true;
+        isEmailConfigured = false;
+      }
+      
+      const mockInfo = await mockEmailService(message, templateName);
+      return { success: true, messageId: mockInfo.messageId, mock: true, fallback: true };
+    }
   } catch (error) {
-    logger.error('Failed to send email:', {
+    logger.error('Failed to prepare email:', {
       error: error.message,
       template: templateName,
       recipient: user?.email
