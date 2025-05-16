@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getApiUrl } from '../config/api';
+import { useServer } from '../context/ServerContext';
 import toast from 'react-hot-toast';
 
 export default function Contact() {
@@ -16,6 +16,8 @@ export default function Contact() {
     isError: false,
     errorMessage: ''
   });
+
+  const { apiUrl } = useServer();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,11 +38,11 @@ export default function Contact() {
     
     try {
       // Use the regular API endpoint
-      const apiUrl = getApiUrl('/api/contact');
-      console.log('Submitting form to API:', apiUrl);
+      const apiUrlFull = `${apiUrl}/api/contact`;
+      console.log('Submitting form to API:', apiUrlFull);
       
       // Send data to backend API
-      const response = await fetch(apiUrl, {
+      const response = await fetch(apiUrlFull, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -1,14 +1,13 @@
 import React, { createContext, useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { useServer } from './ServerContext';
 
 // Create the context
 const AuthContext = createContext(null);
 
-// API URL
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3008';
-
 // Provider component
 function AuthProvider({ children }) {
+  const { serverUrl } = useServer();
   const [state, setState] = useState(() => {
     // Initialize state from localStorage
     const token = localStorage.getItem('token');
@@ -48,7 +47,7 @@ function AuthProvider({ children }) {
         }
       }
 
-      const response = await fetch(`${API_URL}/api/auth/me`, {
+      const response = await fetch(`${serverUrl}/api/auth/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -92,7 +91,7 @@ function AuthProvider({ children }) {
     try {
       setState(prev => ({ ...prev, error: null }));
       
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      const response = await fetch(`${serverUrl}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,7 +133,7 @@ function AuthProvider({ children }) {
     try {
       setState(prev => ({ ...prev, error: null }));
       
-      const response = await fetch(`${API_URL}/api/auth/register`, {
+      const response = await fetch(`${serverUrl}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -203,70 +202,36 @@ function AuthProvider({ children }) {
       if (!token) {
         return false;
       }
-
-      // Try multiple backend ports in case of development environment
-      const fallbackPorts = [3005, 3006, 3007, 3008, 3009];
       let userData = null;
       let success = false;
-
-      // First try with the main API URL
       try {
-        const response = await fetch(`${API_URL}/api/auth/me`, {
+        const response = await fetch(`${serverUrl}/api/auth/me`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        
         if (response.ok) {
           userData = await response.json();
           success = true;
         }
       } catch (error) {
-        console.warn(`Failed to refresh user data from ${API_URL}:`, error);
+        console.warn(`Failed to refresh user data from ${serverUrl}:`, error);
       }
-      
-      // If main API URL fails, try fallback ports in development
-      if (!success && import.meta.env.DEV) {
-        for (const port of fallbackPorts) {
-          const fallbackUrl = `http://localhost:${port}`;
-          if (fallbackUrl === API_URL) continue; // Skip if already tried with this URL
-          
-          try {
-            const response = await fetch(`${fallbackUrl}/api/auth/me`, {
-              headers: {
-                'Authorization': `Bearer ${token}`
-              }
-            });
-            
-            if (response.ok) {
-              userData = await response.json();
-              success = true;
-              break;
-            }
-          } catch (error) {
-            console.warn(`Failed to refresh user data from ${fallbackUrl}:`, error);
-          }
-        }
-      }
-
       if (success && userData) {
         // Update user data in state and localStorage
         const updatedUser = {
           ...userData,
           token // Keep the token
         };
-        
         setState(prev => ({
           ...prev,
           user: updatedUser,
           isAuthenticated: true,
           error: null
         }));
-        
         localStorage.setItem('user', JSON.stringify(updatedUser));
         return true;
       }
-      
       return false;
     } catch (error) {
       console.error('Failed to refresh user data:', error);

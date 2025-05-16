@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useServer } from '../context/ServerContext';
 
 function PersonalStatement() {
   const [searchParams] = useSearchParams();
@@ -8,6 +9,7 @@ function PersonalStatement() {
   const [statement, setStatement] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const { apiUrl } = useServer();
 
   const handleSaveAndContinue = async () => {
     setIsLoading(true);
@@ -19,8 +21,7 @@ function PersonalStatement() {
         throw new Error('Please log in to continue');
       }
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
-      const response = await fetch(`${API_URL}/api/cv/${cvId}/personal-statement`, {
+      const response = await fetch(`${apiUrl}/api/cv/${cvId}/personal-statement`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

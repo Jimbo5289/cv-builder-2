@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useServer } from '../context/ServerContext';
 
 const Analyse = () => {
   const [file, setFile] = useState(null);
@@ -17,9 +18,7 @@ const Analyse = () => {
   const { isAuthenticated, user, getAuthHeader } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // Use a fixed API URL from environment variables
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3005';
+  const { apiUrl } = useServer();
   
   // Check if coming from home page
   const comingFromHome = location.state?.fromHome;
@@ -197,9 +196,14 @@ const Analyse = () => {
       
       // Use fixed API URL instead of dynamically checking multiple ports
       console.log(`Submitting CV for analysis to ${apiUrl}/api/cv/analyse`);
+      
+      // Get auth headers but remove Content-Type header which interferes with form data
+      const headers = getAuthHeader();
+      delete headers['Content-Type']; // This is crucial for multipart/form-data to work properly
+      
       const response = await fetch(`${apiUrl}/api/cv/analyse`, {
         method: 'POST',
-        headers: getAuthHeader(),
+        headers: headers,
         body: formData
       });
       

@@ -30,70 +30,6 @@ const CvAnalyseByRole = () => {
     console.log('CvAnalyseByRole: Using API URL:', apiUrl);
   }, [apiUrl]);
 
-  // Check server availability on component mount
-  useEffect(() => {
-    const checkAvailablePorts = async () => {
-      console.log('Checking available ports...');
-      let serverFound = false;
-      
-      // Try each port from 3005 to 3009
-      for (let port of [3005, 3006, 3007, 3008, 3009]) {
-        try {
-          // Try both health endpoints
-          let url = `http://localhost:${port}/api/health`;
-          console.log(`Trying to connect to ${url}...`);
-          
-          try {
-            const response = await fetch(url, { 
-              method: 'GET',
-              // Add timeout to avoid hanging
-              signal: AbortSignal.timeout(1000)
-            });
-            
-            if (response.ok) {
-              console.log(`Found working server at port ${port} (API health endpoint)`);
-              setApiUrl(`http://localhost:${port}`);
-              serverFound = true;
-              break;
-            }
-          } catch (err) {
-            console.log(`Port ${port} API health endpoint not available: ${err.message}`);
-            
-            // Try the regular health endpoint
-            url = `http://localhost:${port}/health`;
-            console.log(`Trying alternative health endpoint: ${url}...`);
-            
-            try {
-              const response = await fetch(url, { 
-                method: 'GET',
-                signal: AbortSignal.timeout(1000)
-              });
-              
-              if (response.ok) {
-                console.log(`Found working server at port ${port} (regular health endpoint)`);
-                setApiUrl(`http://localhost:${port}`);
-                serverFound = true;
-                break;
-              }
-            } catch (innerErr) {
-              console.log(`Port ${port} regular health endpoint not available: ${innerErr.message}`);
-            }
-          }
-        } catch (err) {
-          console.log(`Port ${port} not available or timed out: ${err.message}`);
-          // Continue to the next port
-        }
-      }
-      
-      if (!serverFound) {
-        console.error('No server found on any port! API calls will fail.');
-        setError('Server connection error. Please contact support.');
-      }
-    };
-    
-    checkAvailablePorts();
-  }, []);
-
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -466,27 +402,27 @@ const CvAnalyseByRole = () => {
           </>
         ) : (
           // Results display section
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden p-6">
             <div className="mb-8 text-center">
               <h2 className="text-2xl font-bold text-[#2c3e50] mb-2">Analysis Results</h2>
               
-              <div className="flex justify-center items-center space-x-8 mt-6">
-                <div className="text-center">
-                  <div className="text-gray-600 mb-1">Overall Score</div>
+              <div className="flex flex-col md:flex-row justify-center items-center space-y-6 md:space-y-0 md:space-x-8 mt-6">
+                <div className="text-center bg-gray-50 rounded-lg p-4 w-full md:w-auto">
+                  <div className="text-gray-600 mb-1 font-medium">Overall Score</div>
                   <div className={`text-5xl font-bold ${getScoreColor(analysisResults.score)}`}>
                     {analysisResults.score}%
                   </div>
                 </div>
                 
-                <div className="text-center">
-                  <div className="text-gray-600 mb-1">Format Score</div>
+                <div className="text-center bg-gray-50 rounded-lg p-4 w-full md:w-auto">
+                  <div className="text-gray-600 mb-1 font-medium">Format Score</div>
                   <div className={`text-3xl font-bold ${getScoreColor(analysisResults.formatScore)}`}>
                     {analysisResults.formatScore}%
                   </div>
                 </div>
                 
-                <div className="text-center">
-                  <div className="text-gray-600 mb-1">Content Score</div>
+                <div className="text-center bg-gray-50 rounded-lg p-4 w-full md:w-auto">
+                  <div className="text-gray-600 mb-1 font-medium">Content Score</div>
                   <div className={`text-3xl font-bold ${getScoreColor(analysisResults.contentScore)}`}>
                     {analysisResults.contentScore}%
                   </div>
@@ -495,7 +431,7 @@ const CvAnalyseByRole = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="bg-green-50 rounded-lg p-6 border border-green-100">
+              <div className="bg-green-50 rounded-lg p-6 border border-green-100 h-full">
                 <h3 className="text-xl font-semibold text-green-800 mb-4 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -514,7 +450,7 @@ const CvAnalyseByRole = () => {
                 </ul>
               </div>
               
-              <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-100">
+              <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-100 h-full">
                 <h3 className="text-xl font-semibold text-yellow-800 mb-4 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -534,7 +470,7 @@ const CvAnalyseByRole = () => {
               </div>
             </div>
             
-            <div className="mb-8">
+            <div className="bg-white rounded-lg p-6 border border-gray-200 mb-8">
               <h3 className="text-xl font-semibold text-[#2c3e50] mb-4">Missing Keywords</h3>
               <div className="flex flex-wrap gap-2">
                 {analysisResults.missingKeywords.map((keyword, index) => (
@@ -548,23 +484,25 @@ const CvAnalyseByRole = () => {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 h-full">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">Content Improvements</h3>
                 <p className="text-gray-700">{analysisResults.improvementSuggestions.content}</p>
               </div>
               
-              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 h-full">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">Format Improvements</h3>
                 <p className="text-gray-700">{analysisResults.improvementSuggestions.format}</p>
               </div>
-              
-              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 h-full">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">Structure Improvements</h3>
                 <p className="text-gray-700">{analysisResults.improvementSuggestions.structure}</p>
               </div>
               
-              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 h-full">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">Keyword Improvements</h3>
                 <p className="text-gray-700">{analysisResults.improvementSuggestions.keywords}</p>
               </div>

@@ -20,6 +20,11 @@ export const getDefaultCountry = async () => {
 };
 
 export const isValidPhoneNumber = (number, country) => {
+  // Empty values are considered valid (allows clearing the field)
+  if (!number || number.trim() === '') {
+    return true;
+  }
+  
   const countryData = countries[country];
   if (!countryData) return false;
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { useServer } from '../context/ServerContext';
 
 function SubscriptionProtectedRoute({ children, skipCheck = false }) {
   const { isAuthenticated, user, getAuthHeader } = useAuth();
@@ -10,11 +11,7 @@ function SubscriptionProtectedRoute({ children, skipCheck = false }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // API URL - Check multiple possible ports as the server may be running on any of them
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
-  
-  // Array of potential fallback ports if the main one fails
-  const fallbackPorts = [3005, 3006, 3007, 3008, 3009];
+  const { apiUrl } = useServer();
   
   // Check if we're in development mode with mock subscription enabled
   const mockSubscription = import.meta.env.VITE_MOCK_SUBSCRIPTION_DATA === 'true';
@@ -35,13 +32,13 @@ function SubscriptionProtectedRoute({ children, skipCheck = false }) {
       }
       
       // Try with the main API URL first
-      let success = await tryFetchSubscription(API_URL);
+      let success = await tryFetchSubscription(apiUrl);
       
       // If main API URL fails, try fallback ports
       if (!success) {
         for (const port of fallbackPorts) {
           const fallbackUrl = `http://localhost:${port}`;
-          if (fallbackUrl !== API_URL) { // Skip if already tried with this URL
+          if (fallbackUrl !== apiUrl) { // Skip if already tried with this URL
             success = await tryFetchSubscription(fallbackUrl);
             if (success) break;
           }
@@ -85,7 +82,7 @@ function SubscriptionProtectedRoute({ children, skipCheck = false }) {
     };
     
     checkSubscription();
-  }, [isAuthenticated, user, getAuthHeader, API_URL, skipCheck, mockSubscription]);
+  }, [isAuthenticated, user, getAuthHeader, apiUrl, skipCheck, mockSubscription]);
   
   if (loading) {
     return (

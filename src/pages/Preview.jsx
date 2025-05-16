@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import { getApiUrl } from '../config/api';
+import { useServer } from '../context/ServerContext';
 
 // Initialize pdfMake with fonts
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
@@ -23,6 +23,7 @@ function Preview() {
     education: false,
     references: false
   });
+  const { apiUrl } = useServer();
 
   useEffect(() => {
     const fetchCV = async () => {
@@ -42,7 +43,7 @@ function Preview() {
         console.log('Fetching CV with ID:', cvId);
         console.log('Using token:', token ? 'Token present' : 'No token');
         
-        const response = await fetch(getApiUrl(`/api/cv/${cvId}`), {
+        const response = await fetch(`${apiUrl}/api/cv/${cvId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -137,7 +138,7 @@ function Preview() {
     };
 
     fetchCV();
-  }, [cvId, navigate]);
+  }, [cvId, navigate, apiUrl]);
 
   const updateCompletionStatus = (cvData) => {
     setCompletionStatus({

@@ -162,34 +162,40 @@ const CvAnalyse = () => {
       // Check subscription status
       const hasSubscription = await checkSubscription();
       
-      if (!hasSubscription) {
+      if (!hasSubscription && !import.meta.env.DEV) {
         console.log('User does not have an active subscription');
         setShowSubscriptionModal(true);
         setIsAnalysing(false);
         return;
       }
       
-      console.log('User has active subscription, proceeding with analysis');
+      console.log('Proceeding with analysis');
       
       // Create form data to send the file or text
       const formData = new FormData();
       
       if (activeTab === 'upload' && file) {
+        // Explicitly log file information for debugging
+        console.log(`Appending file to form: ${file.name}, size: ${file.size}, type: ${file.type}`);
         formData.append('cv', file);
       } else if (activeTab === 'paste' && cvText) {
         formData.append('cvText', cvText);
       }
       
-      // Try the API call
-      console.log(`Sending CV analysis request to ${apiUrl}/api/cv/analyse-only`);
+      // Log all form data contents for debugging
+      for (let [key, value] of formData.entries()) {
+        console.log(`Form contains: ${key} => ${value instanceof File ? value.name : value}`);
+      }
       
-      // Get auth headers but don't include Content-Type (browser will set it with boundary)
+      // Get auth headers but remove Content-Type header which interferes with form data
       const headers = getAuthHeader();
-      delete headers['Content-Type'];
+      delete headers['Content-Type']; // This is crucial for multipart/form-data to work properly
+      
+      console.log(`Submitting CV analysis request to ${apiUrl}/api/cv/analyse-only`);
       
       const response = await fetch(`${apiUrl}/api/cv/analyse-only`, {
         method: 'POST',
-        headers,
+        headers: headers,
         body: formData
       });
       
@@ -397,8 +403,8 @@ const CvAnalyse = () => {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-gray-50 p-4 rounded-lg text-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div className="bg-gray-50 p-5 rounded-lg text-center border border-gray-100 shadow-sm">
                 <h3 className="text-gray-500 text-sm font-medium uppercase tracking-wide mb-2">Overall Score</h3>
                 <div className={`text-4xl font-bold ${getScoreColor(analysisResults.score)}`}>
                   {analysisResults.score}%
@@ -407,7 +413,7 @@ const CvAnalyse = () => {
               </div>
               
               {analysisResults.formattingScore && (
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
+                <div className="bg-gray-50 p-5 rounded-lg text-center border border-gray-100 shadow-sm">
                   <h3 className="text-gray-500 text-sm font-medium uppercase tracking-wide mb-2">Format Score</h3>
                   <div className={`text-4xl font-bold ${getScoreColor(analysisResults.formattingScore)}`}>
                     {analysisResults.formattingScore}%
@@ -416,7 +422,7 @@ const CvAnalyse = () => {
               )}
               
               {analysisResults.contentScore && (
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
+                <div className="bg-gray-50 p-5 rounded-lg text-center border border-gray-100 shadow-sm">
                   <h3 className="text-gray-500 text-sm font-medium uppercase tracking-wide mb-2">Content Score</h3>
                   <div className={`text-4xl font-bold ${getScoreColor(analysisResults.contentScore)}`}>
                     {analysisResults.contentScore}%
@@ -425,25 +431,25 @@ const CvAnalyse = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-3">Strengths</h3>
-                <ul className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div className="bg-green-50 p-6 rounded-lg border border-green-100">
+                <h3 className="text-lg font-medium text-green-800 mb-4">Strengths</h3>
+                <ul className="space-y-3">
                   {analysisResults.strengths && analysisResults.strengths.map((strength, index) => (
                     <li key={index} className="flex items-start">
-                      <FiCheck className="mt-1 mr-2 text-green-500 flex-shrink-0" />
+                      <FiCheck className="mt-1 mr-3 text-green-500 flex-shrink-0" />
                       <span>{strength}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-3">Recommendations</h3>
-                <ul className="space-y-2">
+              <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-100">
+                <h3 className="text-lg font-medium text-yellow-800 mb-4">Recommendations</h3>
+                <ul className="space-y-3">
                   {analysisResults.recommendations && analysisResults.recommendations.map((rec, index) => (
                     <li key={index} className="flex items-start">
-                      <FiAlertCircle className="mt-1 mr-2 text-yellow-500 flex-shrink-0" />
+                      <FiAlertCircle className="mt-1 mr-3 text-yellow-500 flex-shrink-0" />
                       <span>{rec}</span>
                     </li>
                   ))}
@@ -451,13 +457,13 @@ const CvAnalyse = () => {
               </div>
             </div>
 
-            <div className="border-t border-gray-200 pt-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">Missing Keywords</h3>
+            <div className="bg-white p-6 rounded-lg border border-gray-200 mb-8">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Missing Keywords</h3>
               <div className="flex flex-wrap gap-2">
                 {analysisResults.missingKeywords && analysisResults.missingKeywords.map((keyword, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800"
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700"
                   >
                     {keyword}
                   </span>
@@ -466,12 +472,12 @@ const CvAnalyse = () => {
             </div>
 
             {analysisResults.suggestedImprovements && (
-              <div className="mt-8 border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-3">Detailed Improvement Suggestions</h3>
+              <div className="mb-8">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Detailed Improvement Suggestions</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {Object.entries(analysisResults.suggestedImprovements).map(([key, value]) => (
-                    <div key={key} className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="font-medium text-gray-900 capitalize mb-1">{key}</h4>
+                    <div key={key} className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                      <h4 className="font-medium text-gray-900 capitalize mb-2">{key}</h4>
                       <p className="text-gray-600">{value}</p>
                     </div>
                   ))}
