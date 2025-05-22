@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function Blog() {
+  // Define a fallback image for cases where the main image fails to load
+  const fallbackImage = "/images/blog/default-blog-image.jpg";
+
   const blogPosts = [
     {
       id: 1,
       title: "10 CV Mistakes That Could Cost You The Job",
       excerpt: "Discover the common CV mistakes that recruiters immediately notice and how to avoid them.",
       date: "May 5, 2025",
-      image: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+      image: "/images/blog/cv-mistakes.jpg",
       category: "CV Writing"
     },
     {
@@ -16,7 +19,7 @@ export default function Blog() {
       title: "How to Explain Employment Gaps on Your CV",
       excerpt: "Employment gaps don't have to be a red flag. Learn how to address them effectively on your CV.",
       date: "April 28, 2025",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+      image: "/images/blog/employment-gaps.jpg",
       category: "Career Advice"
     },
     {
@@ -24,7 +27,7 @@ export default function Blog() {
       title: "Using AI Tools to Enhance Your Job Search",
       excerpt: "Modern AI tools can transform your job search. Learn how to use them effectively to find better opportunities.",
       date: "April 15, 2025",
-      image: "https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+      image: "/images/blog/ai-tools.jpg",
       category: "Technology"
     },
     {
@@ -32,7 +35,7 @@ export default function Blog() {
       title: "Transferable Skills: The Secret to Career Transitions",
       excerpt: "Changing careers? Learn how to identify and highlight transferable skills on your CV.",
       date: "April 2, 2025",
-      image: "https://images.unsplash.com/photo-1507209261841-e517c3ef7fc6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+      image: "/images/blog/transferable-skills.jpg",
       category: "Career Change"
     },
     {
@@ -40,7 +43,7 @@ export default function Blog() {
       title: "Remote Work Skills That Should Be On Your CV",
       excerpt: "With remote work becoming more common, make sure your CV showcases these essential skills.",
       date: "March 20, 2025",
-      image: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+      image: "/images/blog/remote-work.jpg",
       category: "Remote Work"
     },
     {
@@ -48,10 +51,21 @@ export default function Blog() {
       title: "Mastering the Video Interview: Preparation Tips",
       excerpt: "Video interviews require specific preparation. Here's how to make a great impression on camera.",
       date: "March 12, 2025",
-      image: "https://images.unsplash.com/photo-1591115765373-5207764f72e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+      image: "/images/blog/video-interview.jpg",
       category: "Interviews"
     }
   ];
+
+  // State to track which images have failed to load
+  const [failedImages, setFailedImages] = useState({});
+
+  // Handle image load errors
+  const handleImageError = (postId) => {
+    setFailedImages(prev => ({
+      ...prev,
+      [postId]: true
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
@@ -66,12 +80,24 @@ export default function Blog() {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {blogPosts.map(post => (
             <div key={post.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="h-48 overflow-hidden">
-                <img 
-                  src={post.image} 
-                  alt={post.title} 
-                  className="w-full h-full object-cover transition-transform hover:scale-105"
-                />
+              <div className="h-48 overflow-hidden bg-gray-200 dark:bg-gray-700">
+                {!failedImages[post.id] ? (
+                  <img 
+                    src={post.image} 
+                    alt={post.title} 
+                    className="w-full h-full object-cover transition-transform hover:scale-105"
+                    onError={() => handleImageError(post.id)}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center p-4">
+                      <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{post.title}</p>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="p-6">
                 <div className="flex items-center mb-2">
