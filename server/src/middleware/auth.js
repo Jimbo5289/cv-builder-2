@@ -8,103 +8,77 @@ const prisma = new PrismaClient();
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 /**
- * Authentication middleware for validating JWT tokens.
- * In development mode, it can be bypassed with environment variables.
- * Fixed for Safari compatibility.
+ * Authentication middleware
+ * Verifies the JWT token and adds the user object to the request
+ * In development mode with SKIP_AUTH_CHECK=true, it will use a mock user
  */
-const auth = async (req, res, next) => {
-  // Get user agent to detect Safari browser
-  const userAgent = req.headers['user-agent'] || '';
-  const isSafari = userAgent.includes('Safari') && !userAgent.includes('Chrome');
-  
-  // Enhanced development mode bypass for easier testing
-  if (isDevelopment && (process.env.SKIP_AUTH_CHECK === 'true' || 
-                        (isSafari && process.env.ALLOW_SAFARI_CONNECTIONS === 'true') ||
-                        req.query.devMode === 'true')) {
-    logger.warn('Skipping authentication check in development mode');
-    // Create a mock user for the request
-    return useMockUser(req, next);
-  }
-  
+const authMiddleware = async (req, res, next) => {
   try {
+    // Check if we're in development mode with auth check skipped
+    if (process.env.NODE_ENV === 'development' && process.env.SKIP_AUTH_CHECK === 'true') {
+      logger.info('Auth check skipped in development mode');
+      
+      // Create a mock user for development
+      req.user = {
+        id: 'dev-user-id',
+        email: 'dev@example.com',
+        name: 'Development User',
+        subscription: {
+          status: 'active',
+          plan: 'premium'
+        }
+      };
+      
+      // Add flag to indicate auth was skipped
+      req.skipAuthCheck = true;
+      return next();
+    }
+
     // Get token from Authorization header
     const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      logger.warn('Authentication failed: No Authorization header');
-      return res.status(401).json({ error: 'No authorization token provided' });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      logger.warn('Missing or invalid Authorization header');
+      return res.status(401).json({ error: 'Authentication required', message: 'Valid bearer token required' });
     }
-    
-    // Extract token
-    const token = authHeader.startsWith('Bearer ') 
-      ? authHeader.slice(7) 
-      : authHeader;
-    
-    // Special handling for Safari
-    if (isSafari && process.env.ALLOW_SAFARI_CONNECTIONS === 'true') {
-      logger.info('Safari browser detected, using enhanced token validation');
+
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      logger.warn('Empty token provided');
+      return res.status(401).json({ error: 'Authentication required', message: 'Valid token required' });
     }
-    
-    // Verify token
+
     try {
-      const decoded = await verifyToken(token);
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret-key');
       
-      if (!decoded || !decoded.id) {
-        // Handle invalid token payload in development
-        if (isDevelopment && (req.query.devMode === 'true' || isSafari)) {
-          return useMockUser(req, next);
-        }
-        
-        logger.warn('Authentication failed: Invalid token payload');
-        return res.status(401).json({ error: 'Invalid token payload' });
-      }
-      
-      // Find user in database
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.id },
+      // Get user from database
+      const user = await database.client.user.findUnique({
+        where: { id: decoded.userId },
         include: {
-          subscription: {
-            where: {
-              OR: [
-                { status: { in: ['active', 'trialing'] } },
-                { currentPeriodEnd: { gt: new Date() } }
-              ]
-            }
-          }
+          subscription: true
         }
       });
-      
+
       if (!user) {
-        // Handle user not found in development
-        if (isDevelopment && (req.query.devMode === 'true' || isSafari)) {
-          return useMockUser(req, next);
-        }
-        
-        logger.warn('User not found:', { userId: decoded.id });
-        return res.status(401).json({ error: 'User not found' });
+        logger.warn('User not found for token', { userId: decoded.userId });
+        return res.status(401).json({ error: 'Authentication failed', message: 'User not found' });
       }
-      
-      // Attach user to request
+
+      // Add user to request
       req.user = user;
       next();
-    } catch (jwtError) {
-      logger.warn('JWT verification failed:', { error: jwtError.message });
+    } catch (tokenError) {
+      logger.error('Token verification failed', { error: tokenError.message });
       
-      // In development or Safari browser, use mock user
-      if (isDevelopment && (req.query.devMode === 'true' || isSafari)) {
-        return useMockUser(req, next);
+      if (tokenError.name === 'TokenExpiredError') {
+        return res.status(401).json({ error: 'Token expired', message: 'Please login again' });
       }
       
-      return res.status(401).json({ error: 'Invalid authentication token' });
+      return res.status(401).json({ error: 'Invalid token', message: 'Authentication failed' });
     }
   } catch (error) {
-    logger.error('Authentication error:', { error: error.message });
-    
-    // In development or Safari browser, use mock user
-    if (isDevelopment && (req.query.devMode === 'true' || isSafari)) {
-      return useMockUser(req, next);
-    }
-    
-    res.status(500).json({ error: 'Authentication system error' });
+    logger.error('Auth middleware error', { error: error.message, stack: error.stack });
+    return res.status(500).json({ error: 'Server error', message: 'Authentication service unavailable' });
   }
 };
 
@@ -146,8 +120,8 @@ function isSafariBrowser(req) {
 // Additional middleware that includes user data
 const authWithUser = (req, res, next) => {
   req.fetchUser = true;
-  return auth(req, res, next);
+  return authMiddleware(req, res, next);
 };
 
-module.exports = auth;
+module.exports = authMiddleware;
 module.exports.authWithUser = authWithUser; 

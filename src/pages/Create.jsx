@@ -112,14 +112,14 @@ function Create() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="bg-white rounded-lg shadow-lg p-8">
+    <div className="container mx-auto px-4 py-8 max-w-4xl bg-gray-50 dark:bg-gray-900">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[#2c3e50] mb-2">
+          <h1 className="text-3xl font-bold text-[#2c3e50] dark:text-white mb-2">
             Personal Information
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             Let's start with your contact details
           </p>
         </div>
@@ -128,27 +128,27 @@ function Create() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="fullName" className="block text-gray-700 font-medium mb-2">Full Name</label>
+              <label htmlFor="fullName" className="block text-gray-700 dark:text-gray-200 font-medium mb-2">Full Name</label>
               <input
                 type="text"
                 id="fullName"
                 name="fullName"
                 value={formData.personalInfo.fullName}
                 onChange={(e) => handleInputChange('personalInfo', 'fullName', e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#2c3e50] focus:border-transparent"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#2c3e50] dark:focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 placeholder="John Doe"
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email</label>
+              <label htmlFor="email" className="block text-gray-700 dark:text-gray-200 font-medium mb-2">Email</label>
               <input
                 type="email"
                 id="email"
                 name="email"
                 value={formData.personalInfo.email}
                 onChange={(e) => handleInputChange('personalInfo', 'email', e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#2c3e50] focus:border-transparent"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#2c3e50] dark:focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 placeholder="john@example.com"
               />
             </div>
@@ -165,14 +165,14 @@ function Create() {
             </div>
 
             <div>
-              <label htmlFor="location" className="block text-gray-700 font-medium mb-2">Location</label>
+              <label htmlFor="location" className="block text-gray-700 dark:text-gray-200 font-medium mb-2">Location</label>
               <input
                 type="text"
                 id="location"
                 name="location"
                 value={formData.personalInfo.location}
                 onChange={(e) => handleInputChange('personalInfo', 'location', e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#2c3e50] focus:border-transparent"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#2c3e50] dark:focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                 placeholder="City, Country"
                 style={{ height: '42px' }}
               />
@@ -189,7 +189,7 @@ function Create() {
         </div>
 
         {error && (
-          <div className="mt-6 p-4 bg-red-50 text-red-600 rounded-lg">
+          <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg">
             {error}
           </div>
         )}
@@ -198,7 +198,7 @@ function Create() {
           <button
             onClick={handleSaveAndContinue}
             disabled={isLoading}
-            className={`bg-[#2c3e50] text-white px-8 py-3 rounded-lg hover:bg-[#34495e] transition-all duration-200 ${
+            className={`bg-[#2c3e50] text-white px-8 py-3 rounded-lg hover:bg-[#34495e] dark:bg-blue-600 dark:hover:bg-blue-700 transition-all duration-200 ${
               isLoading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >

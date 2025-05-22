@@ -539,39 +539,71 @@ router.post('/save', authMiddleware, async (req, res) => {
 // Create new CV
 router.post('/', authMiddleware, async (req, res) => {
   try {
+    logger.info('CV creation request received', { 
+      user: req.user?.id,
+      body: JSON.stringify(req.body)
+    });
+    
     const { templateId, personalInfo } = req.body;
 
     if (!personalInfo) {
+      logger.warn('Missing personalInfo in CV creation request');
       return res.status(400).json({ error: 'Personal information is required' });
     }
 
-    // Create CV with initial personal information
-    const cv = await database.client.CV.create({
-      data: {
-        userId: req.user.id,
-        templateId,
-        title: `${personalInfo.fullName}'s CV`,
-        content: JSON.stringify({
-          personalInfo,
-          skills: [],
-          experiences: [],
-          education: [],
-          references: []
-        })
-      }
-    });
+    // Check if database is available
+    if (!database.client) {
+      logger.error('Database client not available for CV creation');
+      return res.status(500).json({ error: 'Database service unavailable' });
+    }
 
-    res.status(201).json({
-      id: cv.id,
-      message: 'CV created successfully',
-      cv: {
+    try {
+      // Create CV with initial personal information
+      const cv = await database.client.CV.create({
+        data: {
+          userId: req.user.id,
+          templateId: templateId || 'professional', // Default to professional if not specified
+          title: personalInfo.fullName ? `${personalInfo.fullName}'s CV` : 'Untitled CV',
+          content: JSON.stringify({
+            personalInfo,
+            skills: [],
+            experiences: [],
+            education: [],
+            references: []
+          })
+        }
+      });
+
+      logger.info('CV created successfully', { cvId: cv.id, userId: req.user.id });
+
+      res.status(201).json({
         id: cv.id,
-        templateId: cv.templateId,
-        content: JSON.parse(cv.content)
-      }
-    });
+        message: 'CV created successfully',
+        cv: {
+          id: cv.id,
+          templateId: cv.templateId,
+          content: JSON.parse(cv.content)
+        }
+      });
+    } catch (dbError) {
+      logger.error('Database error during CV creation', { 
+        error: dbError.message, 
+        code: dbError.code,
+        stack: dbError.stack
+      });
+      
+      res.status(500).json({ 
+        error: 'Failed to create CV due to database error',
+        details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+      });
+    }
   } catch (error) {
-    console.error('Error creating CV:', error);
+    logger.error('Unhandled error creating CV:', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id
+    });
+    
     res.status(500).json({ 
       error: 'Failed to create CV',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined

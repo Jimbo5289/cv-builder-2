@@ -4,12 +4,89 @@
 
 @layer base {
   body {
-    @apply bg-white text-gray-900;
+    @apply bg-white text-gray-900 transition-colors duration-200;
+  }
+
+  .dark body {
+    @apply bg-gray-900 text-gray-100;
+  }
+
+  /* Smooth transitions when switching between themes */
+  html {
+    @apply transition-colors duration-200;
+  }
+
+  /* Default focus styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900;
+  }
+
+  /* Form element base styles with dark mode */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm;
+  }
+
+  label {
+    @apply block text-gray-700 dark:text-gray-300 font-medium mb-1;
   }
 }
 
 @layer components {
   .container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Card styles with dark mode support */
+  .card {
+    @apply bg-white dark:bg-gray-800 shadow-md rounded-lg p-6;
+  }
+
+  /* Button styles with dark mode support */
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md 
+           dark:bg-blue-700 dark:hover:bg-blue-800 
+           transition-colors duration-200;
+  }
+
+  /* Common form styling with dark mode */
+  .form-input {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm 
+           focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400
+           bg-white dark:bg-gray-800 text-gray-900 dark:text-white;
+  }
+
+  .form-select {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm 
+           focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400
+           bg-white dark:bg-gray-800 text-gray-900 dark:text-white;
+  }
+
+  .form-checkbox {
+    @apply h-4 w-4 text-blue-600 dark:text-blue-500 border-gray-300 dark:border-gray-700 rounded
+           focus:ring-blue-500 dark:focus:ring-blue-400;
+  }
+
+  .form-radio {
+    @apply h-4 w-4 text-blue-600 dark:text-blue-500 border-gray-300 dark:border-gray-700 rounded-full
+           focus:ring-blue-500 dark:focus:ring-blue-400;
+  }
+
+  /* Modal/dialog styling with dark mode */
+  .modal {
+    @apply bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden;
+  }
+
+  .modal-header {
+    @apply px-6 py-4 border-b border-gray-200 dark:border-gray-700;
+  }
+
+  .modal-body {
+    @apply px-6 py-4;
+  }
+
+  .modal-footer {
+    @apply px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900;
   }
 }
