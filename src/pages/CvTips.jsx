@@ -37,33 +37,33 @@ export default function CvTips() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">CV Writing Tips</h1>
-        <p className="text-xl text-gray-600 mb-12 text-center">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8 text-center">CV Writing Tips</h1>
+        <p className="text-xl text-gray-600 dark:text-gray-300 mb-12 text-center">
           Follow these professional tips to create a standout CV that gets you noticed by employers.
         </p>
         
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
           <div className="grid gap-8 md:grid-cols-2">
             {tips.map((tip, index) => (
-              <div key={index} className="border-l-4 border-blue-500 pl-4 py-1">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">{tip.title}</h3>
-                <p className="text-gray-600">{tip.description}</p>
+              <div key={index} className="border-l-4 border-blue-500 dark:border-blue-600 pl-4 py-1">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">{tip.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300">{tip.description}</p>
               </div>
             ))}
           </div>
         </div>
         
-        <div className="mt-12 bg-blue-50 rounded-lg p-6 border border-blue-100">
-          <h2 className="text-2xl font-bold text-blue-800 mb-4">Need more help with your CV?</h2>
-          <p className="text-blue-700 mb-4">
+        <div className="mt-12 bg-blue-50 dark:bg-blue-900/30 rounded-lg p-6 border border-blue-100 dark:border-blue-800">
+          <h2 className="text-2xl font-bold text-blue-800 dark:text-blue-300 mb-4">Need more help with your CV?</h2>
+          <p className="text-blue-700 dark:text-blue-400 mb-4">
             Our CV builder offers professional templates and expert guidance to help you create
             a CV that stands out to employers.
           </p>
           <a 
             href="/templates"
-            className="inline-block bg-blue-600 text-white font-medium py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-block bg-blue-600 dark:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
           >
             Explore CV Templates
           </a>

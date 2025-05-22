@@ -54,18 +54,18 @@ export default function Blog() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">CV Builder Blog</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">CV Builder Blog</h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Expert advice on CV writing, job hunting, and career development to help you succeed in your professional journey.
           </p>
         </div>
         
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {blogPosts.map(post => (
-            <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+            <div key={post.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
               <div className="h-48 overflow-hidden">
                 <img 
                   src={post.image} 
@@ -75,16 +75,16 @@ export default function Blog() {
               </div>
               <div className="p-6">
                 <div className="flex items-center mb-2">
-                  <span className="text-xs font-semibold bg-blue-100 text-blue-800 rounded-full px-3 py-1">
+                  <span className="text-xs font-semibold bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 rounded-full px-3 py-1">
                     {post.category}
                   </span>
-                  <span className="text-sm text-gray-500 ml-3">{post.date}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 ml-3">{post.date}</span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{post.title}</h3>
-                <p className="text-gray-600 mb-4">{post.excerpt}</p>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{post.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">{post.excerpt}</p>
                 <Link
                   to={`/blog/${post.id}`}
-                  className="text-blue-600 font-medium hover:text-blue-800"
+                  className="text-blue-600 dark:text-blue-400 font-medium hover:text-blue-800 dark:hover:text-blue-300"
                 >
                   Read More →
                 </Link>
@@ -94,17 +94,17 @@ export default function Blog() {
         </div>
 
         <div className="mt-12 text-center">
-          <p className="text-gray-600 mb-2">Want more career advice?</p>
+          <p className="text-gray-600 dark:text-gray-300 mb-2">Want more career advice?</p>
           <div className="flex gap-4 justify-center">
             <Link
               to="/cv-tips"
-              className="text-blue-600 font-medium hover:text-blue-800"
+              className="text-blue-600 dark:text-blue-400 font-medium hover:text-blue-800 dark:hover:text-blue-300"
             >
               CV Writing Tips
             </Link>
             <Link
               to="/templates"
-              className="text-blue-600 font-medium hover:text-blue-800"
+              className="text-blue-600 dark:text-blue-400 font-medium hover:text-blue-800 dark:hover:text-blue-300"
             >
               CV Templates
             </Link>

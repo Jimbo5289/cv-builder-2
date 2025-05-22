@@ -20,28 +20,28 @@ function Hero() {
   ];
 
   return (
-    <div className="relative overflow-hidden bg-white">
+    <div className="relative overflow-hidden bg-white dark:bg-gray-800">
       {/* Background with gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#B7E0FF]/30 to-white/0"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-[#B7E0FF]/30 dark:from-blue-900/20 to-white/0 dark:to-gray-800/0"></div>
 
       {/* Main Hero Content */}
       <div className="container mx-auto px-4 pt-8 md:pt-16 pb-12 md:pb-24">
         <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Left Column - Text Content */}
           <div className="text-center lg:text-left z-10">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#2c3e50] leading-tight mb-4 md:mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#2c3e50] dark:text-white leading-tight mb-4 md:mb-6">
               CV Builder helps you
-              <span className="text-[#E78F81] block">get hired at top companies</span>
+              <span className="text-[#E78F81] dark:text-[#E78F81] block">get hired at top companies</span>
             </h1>
             
-            <p className="text-base md:text-xl text-gray-600 mb-6 md:mb-8 max-w-lg mx-auto lg:mx-0">
+            <p className="text-base md:text-xl text-gray-600 dark:text-gray-300 mb-6 md:mb-8 max-w-lg mx-auto lg:mx-0">
               Create your professional CV in minutes. Choose from expert-designed templates and customize them to match your style.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-8 md:mb-12 justify-center lg:justify-start">
               <Link 
                 to="/create"
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 text-base md:text-lg font-semibold text-white bg-[#E78F81] rounded-full hover:bg-[#d36e62] transition-all duration-200 shadow-md hover:shadow-lg"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 text-base md:text-lg font-semibold text-white bg-[#E78F81] dark:bg-[#d36e62] rounded-full hover:bg-[#d36e62] dark:hover:bg-[#c65c50] transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 Build Your CV
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +50,7 @@ function Hero() {
               </Link>
               <Link 
                 to="/score"
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 text-base md:text-lg font-semibold text-[#2c3e50] bg-[#FFCFB3] rounded-full hover:bg-[#fcb490] transition-all duration-200"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 text-base md:text-lg font-semibold text-[#2c3e50] dark:text-white bg-[#FFCFB3] dark:bg-[#fcb490]/70 rounded-full hover:bg-[#fcb490] dark:hover:bg-[#fcb490]/90 transition-all duration-200"
               >
                 Get Your CV Score
               </Link>
@@ -58,12 +58,12 @@ function Hero() {
 
             {/* Trust Badges */}
             <div className="space-y-3 md:space-y-4 text-center lg:text-left">
-              <p className="text-xs md:text-sm font-medium text-gray-500">TRUSTED BY PROFESSIONALS FROM</p>
+              <p className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400">TRUSTED BY PROFESSIONALS FROM</p>
               <div className="flex flex-wrap justify-center lg:justify-start gap-4 md:gap-6 items-center">
-                <div className="text-gray-400 text-sm md:text-base font-semibold">Google</div>
-                <div className="text-gray-400 text-sm md:text-base font-semibold">Apple</div>
-                <div className="text-gray-400 text-sm md:text-base font-semibold">Microsoft</div>
-                <div className="text-gray-400 text-sm md:text-base font-semibold">Amazon</div>
+                <div className="text-gray-400 dark:text-gray-500 text-sm md:text-base font-semibold">Google</div>
+                <div className="text-gray-400 dark:text-gray-500 text-sm md:text-base font-semibold">Apple</div>
+                <div className="text-gray-400 dark:text-gray-500 text-sm md:text-base font-semibold">Microsoft</div>
+                <div className="text-gray-400 dark:text-gray-500 text-sm md:text-base font-semibold">Amazon</div>
               </div>
             </div>
           </div>
@@ -72,8 +72,8 @@ function Hero() {
           <div className="relative h-[300px] md:h-[400px] lg:h-[500px] mt-8 md:mt-0">
             {isMobile ? (
               // Mobile version - single resume example
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 shadow-2xl rounded-lg overflow-hidden bg-white">
-                <div className="w-64 h-80 sm:w-72 sm:h-96 bg-gray-100 flex items-center justify-center text-gray-400">
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 shadow-2xl rounded-lg overflow-hidden bg-white dark:bg-gray-700">
+                <div className="w-64 h-80 sm:w-72 sm:h-96 bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-400 dark:text-gray-300">
                   Resume Example
                 </div>
               </div>
@@ -82,14 +82,14 @@ function Hero() {
               resumeExamples.map((example, index) => (
                 <div
                   key={example.id}
-                  className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${example.position} transition-all duration-500 hover:scale-105 cursor-pointer shadow-2xl rounded-lg overflow-hidden bg-white`}
+                  className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${example.position} transition-all duration-500 hover:scale-105 cursor-pointer shadow-2xl rounded-lg overflow-hidden bg-white dark:bg-gray-700`}
                   style={{
                     zIndex: resumeExamples.length - index,
                     width: '300px',
                     height: '400px'
                   }}
                 >
-                  <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
+                  <div className="w-full h-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center text-gray-400 dark:text-gray-300">
                     Resume Example {example.id}
                   </div>
                 </div>
@@ -100,28 +100,28 @@ function Hero() {
       </div>
 
       {/* Features Strip */}
-      <div className="bg-white py-8 md:py-12 border-t border-gray-100">
+      <div className="bg-white dark:bg-gray-800 py-8 md:py-12 border-t border-gray-100 dark:border-gray-700">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
             <div className="flex items-center gap-3 md:gap-4">
               <div className="text-2xl md:text-3xl">✨</div>
               <div>
-                <h3 className="font-semibold text-[#2c3e50] text-sm md:text-base">ATS-friendly design</h3>
-                <p className="text-gray-600 text-xs md:text-sm">Optimized for all major ATS systems</p>
+                <h3 className="font-semibold text-[#2c3e50] dark:text-white text-sm md:text-base">ATS-friendly design</h3>
+                <p className="text-gray-600 dark:text-gray-300 text-xs md:text-sm">Optimized for all major ATS systems</p>
               </div>
             </div>
             <div className="flex items-center gap-3 md:gap-4">
               <div className="text-2xl md:text-3xl">🎯</div>
               <div>
-                <h3 className="font-semibold text-[#2c3e50] text-sm md:text-base">Smart CV Checker</h3>
-                <p className="text-gray-600 text-xs md:text-sm">Get instant feedback and tips</p>
+                <h3 className="font-semibold text-[#2c3e50] dark:text-white text-sm md:text-base">Smart CV Checker</h3>
+                <p className="text-gray-600 dark:text-gray-300 text-xs md:text-sm">Get instant feedback and tips</p>
               </div>
             </div>
             <div className="flex items-center gap-3 md:gap-4 sm:col-span-2 md:col-span-1">
               <div className="text-2xl md:text-3xl">⚡</div>
               <div>
-                <h3 className="font-semibold text-[#2c3e50] text-sm md:text-base">Ready in minutes</h3>
-                <p className="text-gray-600 text-xs md:text-sm">Quick and easy to customize</p>
+                <h3 className="font-semibold text-[#2c3e50] dark:text-white text-sm md:text-base">Ready in minutes</h3>
+                <p className="text-gray-600 dark:text-gray-300 text-xs md:text-sm">Quick and easy to customize</p>
               </div>
             </div>
           </div>
