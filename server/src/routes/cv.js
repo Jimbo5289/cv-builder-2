@@ -700,13 +700,6 @@ router.put('/:id/personal-statement', authMiddleware, async (req, res) => {
       where: {
         id: req.params.id,
         userId: req.user.id
-      },
-      include: {
-        sections: {
-          where: {
-            title: 'Personal Statement'
-          }
-        }
       }
     });
 
@@ -714,46 +707,16 @@ router.put('/:id/personal-statement', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'CV not found' });
     }
 
-    // Update or create personal statement section
-    let updatedCv;
-    if (cv.sections.length > 0) {
-      // Update existing section
-      updatedCv = await database.client.CV.update({
-        where: { id: req.params.id },
-        data: {
-          sections: {
-            update: {
-              where: {
-                id: cv.sections[0].id
-              },
-              data: {
-                content: personalStatement
-              }
-            }
-          }
-        },
-        include: {
-          sections: true
-        }
-      });
-    } else {
-      // Create new section
-      updatedCv = await database.client.CV.update({
-        where: { id: req.params.id },
-        data: {
-          sections: {
-            create: {
-              title: 'Personal Statement',
-              content: personalStatement,
-              order: 1
-            }
-          }
-        },
-        include: {
-          sections: true
-        }
-      });
-    }
+    // Use a simpler approach - update the CV content directly
+    const content = JSON.parse(cv.content || '{}');
+    content.personalStatement = personalStatement;
+
+    const updatedCv = await database.client.CV.update({
+      where: { id: req.params.id },
+      data: {
+        content: JSON.stringify(content)
+      }
+    });
 
     res.json(updatedCv);
   } catch (error) {

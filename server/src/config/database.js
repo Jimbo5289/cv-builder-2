@@ -11,7 +11,8 @@ const createMockClient = () => {
   const storage = {
     users: [],
     cvs: [],
-    subscriptions: []
+    subscriptions: [],
+    sections: [] // Add storage for sections
   };
 
   // Add some initial data for testing
@@ -61,8 +62,13 @@ const createMockClient = () => {
         
         // Handle includes if needed
         if (cv && include) {
-          cv.sections = [];
-          cv.user = storage.users.find(u => u.id === cv.userId);
+          if (include.sections) {
+            // Find sections related to this CV
+            cv.sections = storage.sections.filter(s => s.cvId === cv.id);
+          }
+          if (include.user) {
+            cv.user = storage.users.find(u => u.id === cv.userId);
+          }
         }
         
         return cv;
@@ -92,12 +98,61 @@ const createMockClient = () => {
         logger.info('Mock DB: update CV', { where, data });
         const index = storage.cvs.findIndex(cv => cv.id === where.id);
         if (index >= 0) {
+          // Handle sections create/update operations in the data object
+          if (data.sections) {
+            if (data.sections.create) {
+              const sectionData = data.sections.create;
+              const sectionId = 'section-' + Math.random().toString(36).substring(2, 9);
+              const newSection = {
+                id: sectionId,
+                cvId: where.id,
+                ...sectionData,
+                createdAt: new Date(),
+                updatedAt: new Date()
+              };
+              storage.sections.push(newSection);
+              logger.info('Mock DB: Created CV section', { sectionId, cvId: where.id });
+            }
+            
+            if (data.sections.update) {
+              const updateData = data.sections.update;
+              // Handle different update formats
+              if (Array.isArray(updateData)) {
+                updateData.forEach(update => {
+                  const sectionIndex = storage.sections.findIndex(s => s.id === update.where.id);
+                  if (sectionIndex >= 0) {
+                    storage.sections[sectionIndex] = {
+                      ...storage.sections[sectionIndex],
+                      ...update.data,
+                      updatedAt: new Date()
+                    };
+                  }
+                });
+              } else if (updateData.where && updateData.data) {
+                const sectionIndex = storage.sections.findIndex(s => s.id === updateData.where.id);
+                if (sectionIndex >= 0) {
+                  storage.sections[sectionIndex] = {
+                    ...storage.sections[sectionIndex],
+                    ...updateData.data,
+                    updatedAt: new Date()
+                  };
+                }
+              }
+            }
+            
+            delete data.sections; // Remove sections from data to avoid storing it directly
+          }
+          
           storage.cvs[index] = { ...storage.cvs[index], ...data, updatedAt: new Date() };
           
           // Handle includes if needed
           if (include) {
-            storage.cvs[index].sections = [];
-            storage.cvs[index].user = storage.users.find(u => u.id === storage.cvs[index].userId);
+            if (include.sections) {
+              storage.cvs[index].sections = storage.sections.filter(s => s.cvId === storage.cvs[index].id);
+            }
+            if (include.user) {
+              storage.cvs[index].user = storage.users.find(u => u.id === storage.cvs[index].userId);
+            }
           }
           
           return storage.cvs[index];
@@ -124,8 +179,12 @@ const createMockClient = () => {
           
           // Handle includes
           if (include) {
-            storage.cvs[index].sections = [];
-            storage.cvs[index].user = storage.users.find(u => u.id === storage.cvs[index].userId);
+            if (include.sections) {
+              storage.cvs[index].sections = storage.sections.filter(s => s.cvId === storage.cvs[index].id);
+            }
+            if (include.user) {
+              storage.cvs[index].user = storage.users.find(u => u.id === storage.cvs[index].userId);
+            }
           }
           
           return storage.cvs[index];
@@ -143,8 +202,12 @@ const createMockClient = () => {
           
           // Handle includes
           if (include) {
-            newCv.sections = [];
-            newCv.user = storage.users.find(u => u.id === newCv.userId);
+            if (include.sections) {
+              newCv.sections = [];
+            }
+            if (include.user) {
+              newCv.user = storage.users.find(u => u.id === newCv.userId);
+            }
           }
           
           return newCv;
