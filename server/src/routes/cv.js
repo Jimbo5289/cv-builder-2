@@ -619,7 +619,7 @@ router.put('/:id/experience', authMiddleware, async (req, res) => {
       return res.status(400).json({ message: 'Experiences must be an array' });
     }
 
-    const cv = await database.client.cV.findUnique({
+    const cv = await database.client.CV.findUnique({
       where: {
         id: req.params.id,
         userId: req.user.id
@@ -633,7 +633,7 @@ router.put('/:id/experience', authMiddleware, async (req, res) => {
     const content = JSON.parse(cv.content || '{}');
     content.experience = experiences;
 
-    const updatedCV = await database.client.cV.update({
+    const updatedCV = await database.client.CV.update({
       where: {
         id: req.params.id
       },
@@ -657,7 +657,7 @@ router.put('/:id/education', authMiddleware, async (req, res) => {
       return res.status(400).json({ message: 'Education must be an array' });
     }
 
-    const cv = await database.client.cV.findUnique({
+    const cv = await database.client.CV.findUnique({
       where: {
         id: req.params.id,
         userId: req.user.id
@@ -671,7 +671,7 @@ router.put('/:id/education', authMiddleware, async (req, res) => {
     const content = JSON.parse(cv.content || '{}');
     content.education = education;
 
-    const updatedCV = await database.client.cV.update({
+    const updatedCV = await database.client.CV.update({
       where: {
         id: req.params.id
       },
@@ -696,7 +696,7 @@ router.put('/:id/personal-statement', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Personal statement is required' });
     }
 
-    const cv = await database.client.cV.findUnique({
+    const cv = await database.client.CV.findUnique({
       where: {
         id: req.params.id,
         userId: req.user.id
@@ -718,7 +718,7 @@ router.put('/:id/personal-statement', authMiddleware, async (req, res) => {
     let updatedCv;
     if (cv.sections.length > 0) {
       // Update existing section
-      updatedCv = await database.client.cV.update({
+      updatedCv = await database.client.CV.update({
         where: { id: req.params.id },
         data: {
           sections: {
@@ -738,7 +738,7 @@ router.put('/:id/personal-statement', authMiddleware, async (req, res) => {
       });
     } else {
       // Create new section
-      updatedCv = await database.client.cV.update({
+      updatedCv = await database.client.CV.update({
         where: { id: req.params.id },
         data: {
           sections: {
@@ -770,7 +770,7 @@ router.put('/:id/skills', authMiddleware, async (req, res) => {
       return res.status(400).json({ message: 'Skills must be an array' });
     }
 
-    const cv = await database.client.cV.findUnique({
+    const cv = await database.client.CV.findUnique({
       where: {
         id: req.params.id,
         userId: req.user.id
@@ -784,7 +784,7 @@ router.put('/:id/skills', authMiddleware, async (req, res) => {
     const content = JSON.parse(cv.content || '{}');
     content.skills = skills;
 
-    const updatedCV = await database.client.cV.update({
+    const updatedCV = await database.client.CV.update({
       where: {
         id: req.params.id
       },
@@ -808,7 +808,7 @@ router.put('/:id/references', authMiddleware, async (req, res) => {
       return res.status(400).json({ message: 'References must be an array' });
     }
 
-    const cv = await database.client.cV.findUnique({
+    const cv = await database.client.CV.findUnique({
       where: {
         id: req.params.id,
         userId: req.user.id
@@ -822,7 +822,7 @@ router.put('/:id/references', authMiddleware, async (req, res) => {
     const content = JSON.parse(cv.content || '{}');
     content.references = references;
 
-    const updatedCV = await database.client.cV.update({
+    const updatedCV = await database.client.CV.update({
       where: {
         id: req.params.id
       },
