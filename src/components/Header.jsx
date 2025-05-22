@@ -66,13 +66,13 @@ const Header = () => {
   };
 
   return (
-    <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-white py-4'}`}>
+    <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white dark:bg-gray-800 shadow-md py-2' : 'bg-white dark:bg-gray-800 py-4'}`}>
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img src={logo} alt="CV Builder Logo" className="h-10 w-auto" />
-            <span className="ml-2 font-bold text-xl">CVBuilder</span>
+            <span className="ml-2 font-bold text-xl dark:text-white">CVBuilder</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -80,7 +80,7 @@ const Header = () => {
             <NavLink 
               to="/" 
               className={({ isActive }) => 
-                isActive ? "text-blue-600 font-medium" : "text-gray-700 hover:text-blue-600 font-medium"
+                isActive ? "text-blue-600 dark:text-blue-400 font-medium" : "text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
               }
             >
               Home
@@ -89,7 +89,7 @@ const Header = () => {
             <NavLink 
               to="/templates" 
               className={({ isActive }) => 
-                isActive ? "text-blue-600 font-medium" : "text-gray-700 hover:text-blue-600 font-medium"
+                isActive ? "text-blue-600 dark:text-blue-400 font-medium" : "text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
               }
             >
               Templates
@@ -100,7 +100,7 @@ const Header = () => {
               <button
                 type="button"
                 className={`group inline-flex items-center text-base font-medium ${
-                  location.pathname.includes('analyse') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                  location.pathname.includes('analyse') ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400'
                 }`}
                 onClick={() => setIsAnalysisOpen(!isAnalysisOpen)}
                 onMouseEnter={() => setIsAnalysisOpen(true)}
@@ -113,7 +113,7 @@ const Header = () => {
 
               {isAnalysisOpen && (
                 <div 
-                  className="absolute left-0 z-10 mt-2 w-64 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                  className="absolute left-0 z-10 mt-2 w-64 origin-top-left rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 focus:outline-none"
                   onMouseLeave={() => setIsAnalysisOpen(false)}
                 >
                   <div className="py-1">
@@ -121,11 +121,11 @@ const Header = () => {
                       <Link
                         key={item.name}
                         to={item.href}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => setIsAnalysisOpen(false)}
                       >
                         <div className="font-medium">{item.name}</div>
-                        <p className="text-xs text-gray-500">{item.description}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{item.description}</p>
                       </Link>
                     ))}
                   </div>
@@ -137,7 +137,7 @@ const Header = () => {
               <NavLink 
                 to="/dashboard" 
                 className={({ isActive }) => 
-                  isActive ? "text-blue-600 font-medium" : "text-gray-700 hover:text-blue-600 font-medium"
+                  isActive ? "text-blue-600 dark:text-blue-400 font-medium" : "text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
                 }
               >
                 Dashboard
@@ -150,14 +150,14 @@ const Header = () => {
                 <NavLink 
                   to="/profile" 
                   className={({ isActive }) => 
-                    isActive ? "text-blue-600 font-medium" : "text-gray-700 hover:text-blue-600 font-medium"
+                    isActive ? "text-blue-600 dark:text-blue-400 font-medium" : "text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
                   }
                 >
                   Profile
                 </NavLink>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 border border-red-500 text-red-500 rounded-md hover:bg-red-50 transition-colors"
+                  className="px-4 py-2 border border-red-500 text-red-500 dark:border-red-400 dark:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                 >
                   Logout
                 </button>
@@ -166,13 +166,13 @@ const Header = () => {
               <div className="flex items-center space-x-4">
                 <Link 
                   to="/login"
-                  className="text-gray-700 hover:text-blue-600 font-medium"
+                  className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
                 >
                   Sign Up
                 </Link>
@@ -183,7 +183,7 @@ const Header = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-gray-600 focus:outline-none"
+            className="md:hidden text-gray-600 dark:text-gray-200 focus:outline-none"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {isMenuOpen ? (
@@ -197,31 +197,31 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden mobile-menu-container bg-white absolute top-full left-0 right-0 shadow-lg z-20">
+          <div className="md:hidden mobile-menu-container bg-white dark:bg-gray-800 absolute top-full left-0 right-0 shadow-lg z-20">
             <div className="px-4 py-3 space-y-2">
               <Link
                 to="/"
-                className="block py-2 text-gray-700 hover:text-blue-600"
+                className="block py-2 text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 to="/templates"
-                className="block py-2 text-gray-700 hover:text-blue-600"
+                className="block py-2 text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Templates
               </Link>
               
               {/* Analysis Section */}
-              <div className="border-t border-gray-100 pt-2 mt-2">
-                <p className="text-sm font-semibold text-gray-500 pb-1">Analysis Tools</p>
+              <div className="border-t border-gray-100 dark:border-gray-700 pt-2 mt-2">
+                <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 pb-1">Analysis Tools</p>
                 {analysisItems.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
-                    className="block py-2 text-gray-700 hover:text-blue-600"
+                    className="block py-2 text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}
@@ -232,7 +232,7 @@ const Header = () => {
               {isAuthenticated && (
                 <Link
                   to="/dashboard"
-                  className="block py-2 text-gray-700 hover:text-blue-600"
+                  className="block py-2 text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Dashboard
@@ -240,19 +240,19 @@ const Header = () => {
               )}
               
               {/* Auth Section */}
-              <div className="border-t border-gray-100 pt-2 mt-2">
+              <div className="border-t border-gray-100 dark:border-gray-700 pt-2 mt-2">
                 {isAuthenticated ? (
                   <>
                     <Link
                       to="/profile"
-                      className="block py-2 text-gray-700 hover:text-blue-600"
+                      className="block py-2 text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Profile
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left py-2 text-red-500 hover:text-red-700"
+                      className="block w-full text-left py-2 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
                     >
                       Logout
                     </button>
@@ -261,14 +261,14 @@ const Header = () => {
                   <>
                     <Link
                       to="/login"
-                      className="block py-2 text-gray-700 hover:text-blue-600"
+                      className="block py-2 text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Login
                     </Link>
                     <Link
                       to="/register"
-                      className="block py-2 mt-2 bg-blue-600 text-white text-center rounded-md hover:bg-blue-700 px-4"
+                      className="block py-2 mt-2 bg-blue-600 dark:bg-blue-700 text-white text-center rounded-md hover:bg-blue-700 dark:hover:bg-blue-800 px-4"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Sign Up

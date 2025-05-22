@@ -27,10 +27,10 @@ const CvAnalysisNextSteps = ({ score, analysisType }) => {
   // Get priority color
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-700 border-red-300';
-      case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-300';
-      case 'low': return 'bg-green-100 text-green-700 border-green-300';
-      default: return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'high': return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-300 dark:border-red-800/50';
+      case 'medium': return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-800/50';
+      case 'low': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-300 dark:border-green-800/50';
+      default: return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-800/50';
     }
   };
 
@@ -47,8 +47,8 @@ const CvAnalysisNextSteps = ({ score, analysisType }) => {
   const recommendations = getRecommendations();
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 mt-6">
-      <h3 className="text-xl font-bold text-gray-800 mb-4">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mt-6">
+      <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
         Next Steps to Improve Your CV
       </h3>
       
@@ -59,7 +59,7 @@ const CvAnalysisNextSteps = ({ score, analysisType }) => {
               {rec.id}
             </div>
             <div className="flex-1">
-              <p className="text-gray-700">{rec.text}</p>
+              <p className="text-gray-700 dark:text-gray-300">{rec.text}</p>
               <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full mt-1 border ${getPriorityColor(rec.priority)}`}>
                 {getPriorityLabel(rec.priority)}
               </span>
@@ -68,11 +68,11 @@ const CvAnalysisNextSteps = ({ score, analysisType }) => {
         ))}
       </div>
       
-      <div className="mt-6 pt-4 border-t border-gray-200">
+      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row gap-3">
           <Link 
             to="/create" 
-            className="inline-flex items-center justify-center px-4 py-2 bg-[#3498db] text-white rounded-lg hover:bg-[#2980b9] transition-colors"
+            className="inline-flex items-center justify-center px-4 py-2 bg-[#3498db] dark:bg-blue-700 text-white rounded-lg hover:bg-[#2980b9] dark:hover:bg-blue-800 transition-colors"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -82,7 +82,7 @@ const CvAnalysisNextSteps = ({ score, analysisType }) => {
           
           <Link 
             to="/templates" 
-            className="inline-flex items-center justify-center px-4 py-2 bg-white text-[#3498db] border border-[#3498db] rounded-lg hover:bg-blue-50 transition-colors"
+            className="inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-gray-700 text-[#3498db] dark:text-blue-400 border border-[#3498db] dark:border-blue-500 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />

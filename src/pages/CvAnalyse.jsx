@@ -260,13 +260,13 @@ const CvAnalyse = () => {
   }, [analysisResults]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       {/* Header and title section */}
       <div className="container mx-auto px-4 max-w-4xl mb-8">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
+        <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-2">
           CV Analysis
         </h1>
-        <p className="text-center text-gray-600 mb-8">
+        <p className="text-center text-gray-600 dark:text-gray-300 mb-8">
           Get AI-powered feedback on your CV without comparison to a specific job
         </p>
         
@@ -276,25 +276,25 @@ const CvAnalyse = () => {
       
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
             CV Analysis
           </h1>
-          <p className="mt-3 text-xl text-gray-500 sm:mt-4">
+          <p className="mt-3 text-xl text-gray-500 dark:text-gray-400 sm:mt-4">
             Get instant feedback on your CV with our AI-powered analysis
           </p>
         </div>
 
         {/* Tab selection */}
         {!analysisResults && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div className="border-b border-gray-200 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+            <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
               <nav className="flex -mb-px">
                 <button
                   onClick={() => setActiveTab('upload')}
                   className={`${
                     activeTab === 'upload'
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                   } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm sm:text-base mr-8`}
                 >
                   Upload CV
@@ -303,8 +303,8 @@ const CvAnalyse = () => {
                   onClick={() => setActiveTab('paste')}
                   className={`${
                     activeTab === 'paste'
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                   } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm sm:text-base`}
                 >
                   Paste CV Text
@@ -315,17 +315,17 @@ const CvAnalyse = () => {
             {activeTab === 'upload' ? (
               <div
                 className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                  isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                  isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
               >
-                <FiUpload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium mb-2">
+                <FiUpload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+                <h3 className="text-lg font-medium mb-2 text-gray-700 dark:text-gray-200">
                   Drag and drop your CV here
                 </h3>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                   or click to select a file (PDF or DOCX)
                 </p>
                 <input
@@ -337,13 +337,13 @@ const CvAnalyse = () => {
                 />
                 <label
                   htmlFor="cv-upload"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-900 cursor-pointer"
                 >
                   Select File
                 </label>
                 {file && (
-                  <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-600">
-                    <FiCheck className="text-green-500" />
+                  <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <FiCheck className="text-green-500 dark:text-green-400" />
                     {file.name}
                   </div>
                 )}
@@ -357,19 +357,19 @@ const CvAnalyse = () => {
                   id="cv-text"
                   name="cv-text"
                   rows={10}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm"
                   placeholder="Paste the full text of your CV here..."
                   value={cvText}
                   onChange={(e) => setCvText(e.target.value)}
                 ></textarea>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                   Please include all sections: contact details, work experience, education, skills, etc.
                 </p>
               </div>
             )}
 
             {error && (
-              <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md flex items-center gap-2">
+              <div className="mt-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-md flex items-center gap-2">
                 <FiAlertCircle className="flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -380,8 +380,8 @@ const CvAnalyse = () => {
               disabled={isAnalysing || (activeTab === 'upload' && !file) || (activeTab === 'paste' && !cvText.trim())}
               className={`mt-6 w-full py-3 px-4 rounded-md text-white font-medium ${
                 isAnalysing || (activeTab === 'upload' && !file) || (activeTab === 'paste' && !cvText.trim())
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
+                  ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'
               }`}
             >
               {isAnalysing ? 'Analysing...' : 'Analyse CV'}
@@ -391,12 +391,12 @@ const CvAnalyse = () => {
 
         {/* Analysis Results */}
         {analysisResults && (
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Analysis Results</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analysis Results</h2>
               <button
                 onClick={resetAnalysis}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-900"
               >
                 <FiX className="mr-2 -ml-1" />
                 Start Over
@@ -404,8 +404,8 @@ const CvAnalyse = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <div className="bg-gray-50 p-5 rounded-lg text-center border border-gray-100 shadow-sm">
-                <h3 className="text-gray-500 text-sm font-medium uppercase tracking-wide mb-2">Overall Score</h3>
+              <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-lg text-center border border-gray-100 dark:border-gray-600 shadow-sm">
+                <h3 className="text-gray-500 dark:text-gray-300 text-sm font-medium uppercase tracking-wide mb-2">Overall Score</h3>
                 <div className={`text-4xl font-bold ${getScoreColor(analysisResults.score)}`}>
                   {analysisResults.score}%
                 </div>
@@ -413,8 +413,8 @@ const CvAnalyse = () => {
               </div>
               
               {analysisResults.formattingScore && (
-                <div className="bg-gray-50 p-5 rounded-lg text-center border border-gray-100 shadow-sm">
-                  <h3 className="text-gray-500 text-sm font-medium uppercase tracking-wide mb-2">Format Score</h3>
+                <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-lg text-center border border-gray-100 dark:border-gray-600 shadow-sm">
+                  <h3 className="text-gray-500 dark:text-gray-300 text-sm font-medium uppercase tracking-wide mb-2">Format Score</h3>
                   <div className={`text-4xl font-bold ${getScoreColor(analysisResults.formattingScore)}`}>
                     {analysisResults.formattingScore}%
                   </div>
@@ -422,8 +422,8 @@ const CvAnalyse = () => {
               )}
               
               {analysisResults.contentScore && (
-                <div className="bg-gray-50 p-5 rounded-lg text-center border border-gray-100 shadow-sm">
-                  <h3 className="text-gray-500 text-sm font-medium uppercase tracking-wide mb-2">Content Score</h3>
+                <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-lg text-center border border-gray-100 dark:border-gray-600 shadow-sm">
+                  <h3 className="text-gray-500 dark:text-gray-300 text-sm font-medium uppercase tracking-wide mb-2">Content Score</h3>
                   <div className={`text-4xl font-bold ${getScoreColor(analysisResults.contentScore)}`}>
                     {analysisResults.contentScore}%
                   </div>
@@ -432,38 +432,38 @@ const CvAnalyse = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <div className="bg-green-50 p-6 rounded-lg border border-green-100">
-                <h3 className="text-lg font-medium text-green-800 mb-4">Strengths</h3>
+              <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg border border-green-100 dark:border-green-800/30">
+                <h3 className="text-lg font-medium text-green-800 dark:text-green-300 mb-4">Strengths</h3>
                 <ul className="space-y-3">
                   {analysisResults.strengths && analysisResults.strengths.map((strength, index) => (
                     <li key={index} className="flex items-start">
-                      <FiCheck className="mt-1 mr-3 text-green-500 flex-shrink-0" />
-                      <span>{strength}</span>
+                      <FiCheck className="mt-1 mr-3 text-green-500 dark:text-green-400 flex-shrink-0" />
+                      <span className="text-gray-800 dark:text-gray-200">{strength}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-100">
-                <h3 className="text-lg font-medium text-yellow-800 mb-4">Recommendations</h3>
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-6 rounded-lg border border-yellow-100 dark:border-yellow-800/30">
+                <h3 className="text-lg font-medium text-yellow-800 dark:text-yellow-300 mb-4">Recommendations</h3>
                 <ul className="space-y-3">
                   {analysisResults.recommendations && analysisResults.recommendations.map((rec, index) => (
                     <li key={index} className="flex items-start">
-                      <FiAlertCircle className="mt-1 mr-3 text-yellow-500 flex-shrink-0" />
-                      <span>{rec}</span>
+                      <FiAlertCircle className="mt-1 mr-3 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
+                      <span className="text-gray-800 dark:text-gray-200">{rec}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg border border-gray-200 mb-8">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Missing Keywords</h3>
+            <div className="bg-white dark:bg-gray-700 p-6 rounded-lg border border-gray-200 dark:border-gray-600 mb-8">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Missing Keywords</h3>
               <div className="flex flex-wrap gap-2">
                 {analysisResults.missingKeywords && analysisResults.missingKeywords.map((keyword, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700"
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
                   >
                     {keyword}
                   </span>
@@ -473,12 +473,12 @@ const CvAnalyse = () => {
 
             {analysisResults.suggestedImprovements && (
               <div className="mb-8">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Detailed Improvement Suggestions</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Detailed Improvement Suggestions</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {Object.entries(analysisResults.suggestedImprovements).map(([key, value]) => (
-                    <div key={key} className="bg-gray-50 p-5 rounded-lg border border-gray-200">
-                      <h4 className="font-medium text-gray-900 capitalize mb-2">{key}</h4>
-                      <p className="text-gray-600">{value}</p>
+                    <div key={key} className="bg-gray-50 dark:bg-gray-700 p-5 rounded-lg border border-gray-200 dark:border-gray-600">
+                      <h4 className="font-medium text-gray-900 dark:text-white capitalize mb-2">{key}</h4>
+                      <p className="text-gray-600 dark:text-gray-300">{value}</p>
                     </div>
                   ))}
                 </div>
@@ -502,15 +502,15 @@ const CvAnalyse = () => {
               <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
             <span className="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
-            <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
               <div>
-                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
-                  <FiFileText className="h-6 w-6 text-yellow-600" />
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900">
+                  <FiFileText className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
                 </div>
                 <div className="mt-3 text-center sm:mt-5">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">Premium Feature</h3>
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">Premium Feature</h3>
                   <div className="mt-2">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       CV Analysis is a premium feature. Subscribe to unlock this feature and get valuable insights into your CV quality.
                     </p>
                   </div>
@@ -519,17 +519,17 @@ const CvAnalyse = () => {
               <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
                 <button
                   type="button"
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-sm"
+                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 dark:bg-blue-700 text-base font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-900 sm:col-start-2 sm:text-sm"
                   onClick={handleSubscribe}
                 >
-                  Subscribe Now
+                  View Plans
                 </button>
                 <button
                   type="button"
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-900 sm:mt-0 sm:col-start-1 sm:text-sm"
                   onClick={handleCloseModal}
                 >
-                  Close
+                  Cancel
                 </button>
               </div>
             </div>

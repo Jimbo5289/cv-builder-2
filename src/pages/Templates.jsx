@@ -69,11 +69,11 @@ function Templates() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-[#2c3e50] mb-8 text-center">
+    <div className="container mx-auto px-4 py-12 bg-gray-50 dark:bg-gray-900">
+      <h1 className="text-4xl font-bold text-[#2c3e50] dark:text-white mb-8 text-center">
         Choose Your Template
       </h1>
-      <p className="text-xl text-gray-600 mb-12 text-center max-w-3xl mx-auto">
+      <p className="text-xl text-gray-600 dark:text-gray-300 mb-12 text-center max-w-3xl mx-auto">
         Select from our professionally designed templates to create your perfect CV. Each template is fully customizable to match your style.
       </p>
       
@@ -81,7 +81,7 @@ function Templates() {
         {templates.map((template) => (
           <div 
             key={template.id}
-            className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full"
           >
             <div className="relative pb-[56.25%]">
               <img
@@ -91,15 +91,15 @@ function Templates() {
               />
             </div>
             <div className="p-6">
-              <h3 className="text-xl font-semibold text-[#2c3e50] mb-2">
+              <h3 className="text-xl font-semibold text-[#2c3e50] dark:text-white mb-2">
                 {template.name}
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 {template.description}
               </p>
               <div className="flex flex-wrap gap-3">
                 <button 
-                  className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition"
+                  className="bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-6 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
                   onClick={() => handleDownload(template)}
                   aria-label={`Download ${template.name} template`}
                 >
@@ -110,7 +110,7 @@ function Templates() {
                 </button>
                 <Link
                   to={`/create?template=${template.id}`}
-                  className="inline-block bg-[#E78F81] text-white px-6 py-2 rounded-lg hover:bg-[#d36e62] transition"
+                  className="inline-block bg-[#E78F81] dark:bg-[#d36e62] text-white px-6 py-2 rounded-lg hover:bg-[#d36e62] dark:hover:bg-[#c65c50] transition"
                 >
                   Use This Template
                 </Link>

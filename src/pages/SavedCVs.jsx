@@ -95,44 +95,44 @@ export default function SavedCVs() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 dark:border-blue-400"></div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Your Saved CVs</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Your Saved CVs</h1>
         
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+          <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 dark:border-red-400 p-4 mb-6">
             <div className="flex items-center">
-              <FiAlertCircle className="text-red-500 mr-2" />
-              <p className="text-red-700">{error}</p>
+              <FiAlertCircle className="text-red-500 dark:text-red-400 mr-2" />
+              <p className="text-red-700 dark:text-red-300">{error}</p>
             </div>
           </div>
         )}
         
         {savedCVs.length === 0 ? (
-          <div className="bg-white shadow rounded-lg p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">No CVs Found</h2>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">No CVs Found</h2>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
               You haven't created any CVs yet. Get started by creating your first CV.
             </p>
             <Link 
               to="/create"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#E78F81] hover:bg-[#d36e62] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81]"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#E78F81] hover:bg-[#d36e62] dark:bg-[#e07c6e] dark:hover:bg-[#c75d50] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] dark:focus:ring-offset-gray-900"
             >
               Create New CV
             </Link>
           </div>
         ) : (
-          <div className="bg-white shadow rounded-lg p-6 mb-6">
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
             <div className="grid gap-4">
               {/* Table Header */}
-              <div className="hidden md:grid grid-cols-12 gap-4 pb-2 border-b border-gray-200 text-sm font-medium text-gray-500">
+              <div className="hidden md:grid grid-cols-12 gap-4 pb-2 border-b border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400">
                 <div className="col-span-4">CV Title</div>
                 <div className="col-span-2">Created On</div>
                 <div className="col-span-2">Last Updated</div>
@@ -143,26 +143,26 @@ export default function SavedCVs() {
               {savedCVs.map((cv) => (
                 <div 
                   key={cv.id} 
-                  className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  className="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                 >
                   <div className="col-span-4">
-                    <h3 className="text-gray-900 font-medium">{cv.title}</h3>
-                    <p className="text-gray-500 text-sm md:hidden">Created: {formatDate(cv.createdAt)}</p>
-                    <p className="text-gray-500 text-sm md:hidden">Updated: {formatDate(cv.updatedAt)}</p>
+                    <h3 className="text-gray-900 dark:text-white font-medium">{cv.title}</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm md:hidden">Created: {formatDate(cv.createdAt)}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm md:hidden">Updated: {formatDate(cv.updatedAt)}</p>
                   </div>
                   
-                  <div className="hidden md:block col-span-2 text-gray-600">
+                  <div className="hidden md:block col-span-2 text-gray-600 dark:text-gray-300">
                     {formatDate(cv.createdAt)}
                   </div>
                   
-                  <div className="hidden md:block col-span-2 text-gray-600">
+                  <div className="hidden md:block col-span-2 text-gray-600 dark:text-gray-300">
                     {formatDate(cv.updatedAt)}
                   </div>
                   
                   <div className="col-span-4 flex justify-start md:justify-end space-x-3">
                     <button
                       onClick={() => handleDownload(cv.id)}
-                      className="inline-flex items-center p-2 text-sm text-gray-700 hover:text-[#E78F81] transition-colors"
+                      className="inline-flex items-center p-2 text-sm text-gray-700 dark:text-gray-300 hover:text-[#E78F81] dark:hover:text-[#E78F81] transition-colors"
                       title="Download CV"
                     >
                       <FiDownload className="h-5 w-5" />
@@ -171,7 +171,7 @@ export default function SavedCVs() {
                     
                     <button
                       onClick={() => handlePrint(cv.id)}
-                      className="inline-flex items-center p-2 text-sm text-gray-700 hover:text-[#E78F81] transition-colors"
+                      className="inline-flex items-center p-2 text-sm text-gray-700 dark:text-gray-300 hover:text-[#E78F81] dark:hover:text-[#E78F81] transition-colors"
                       title="Print CV"
                     >
                       <FiPrinter className="h-5 w-5" />
@@ -180,7 +180,7 @@ export default function SavedCVs() {
                     
                     <Link
                       to={`/preview/${cv.id}`}
-                      className="inline-flex items-center p-2 text-sm text-gray-700 hover:text-[#E78F81] transition-colors"
+                      className="inline-flex items-center p-2 text-sm text-gray-700 dark:text-gray-300 hover:text-[#E78F81] dark:hover:text-[#E78F81] transition-colors"
                       title="Preview CV"
                     >
                       <FiEye className="h-5 w-5" />
@@ -189,7 +189,7 @@ export default function SavedCVs() {
                     
                     <Link
                       to={`/edit/${cv.id}`}
-                      className="inline-flex items-center p-2 text-sm text-gray-700 hover:text-[#E78F81] transition-colors"
+                      className="inline-flex items-center p-2 text-sm text-gray-700 dark:text-gray-300 hover:text-[#E78F81] dark:hover:text-[#E78F81] transition-colors"
                       title="Edit CV"
                     >
                       <FiEdit className="h-5 w-5" />
@@ -203,7 +203,7 @@ export default function SavedCVs() {
             <div className="mt-6">
               <Link 
                 to="/create"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#E78F81] hover:bg-[#d36e62] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81]"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#E78F81] hover:bg-[#d36e62] dark:bg-[#e07c6e] dark:hover:bg-[#c75d50] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] dark:focus:ring-offset-gray-900"
               >
                 Create New CV
               </Link>
