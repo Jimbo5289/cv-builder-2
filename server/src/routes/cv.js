@@ -252,6 +252,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
         email: ref.email || '',
         phone: ref.phone || ''
       })) : [],
+      referencesOnRequest: Boolean(parsedContent.referencesOnRequest),
       createdAt: cv.createdAt,
       updatedAt: cv.updatedAt
     };
@@ -265,7 +266,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
         skills: transformedCV.skills.length,
         experiences: transformedCV.experiences.length,
         education: transformedCV.education.length,
-        references: transformedCV.references.length
+        references: transformedCV.references.length,
+        referencesOnRequest: transformedCV.referencesOnRequest
       }
     });
 
@@ -660,7 +662,7 @@ router.put('/:id/experience', authMiddleware, async (req, res) => {
     }
 
     const content = JSON.parse(cv.content || '{}');
-    content.experience = experiences;
+    content.experiences = experiences;
 
     const updatedCV = await database.client.CV.update({
       where: {
@@ -795,9 +797,12 @@ router.put('/:id/skills', authMiddleware, async (req, res) => {
 // Update CV references
 router.put('/:id/references', authMiddleware, async (req, res) => {
   try {
-    const { references } = req.body;
-    if (!Array.isArray(references)) {
-      return res.status(400).json({ message: 'References must be an array' });
+    // Check if using "References available on request" option
+    const { references, referencesOnRequest } = req.body;
+    
+    // Validate input - either references array or referencesOnRequest flag should be present
+    if (!referencesOnRequest && (!Array.isArray(references) || references.length === 0)) {
+      return res.status(400).json({ message: 'Either references array or referencesOnRequest flag must be provided' });
     }
 
     const cv = await database.client.CV.findUnique({
@@ -812,7 +817,16 @@ router.put('/:id/references', authMiddleware, async (req, res) => {
     }
 
     const content = JSON.parse(cv.content || '{}');
-    content.references = references;
+    
+    // Handle "References available on request" option
+    if (referencesOnRequest) {
+      content.referencesOnRequest = true;
+      // If using the "on request" option, set references to a special value
+      content.references = [{ onRequest: true }];
+    } else {
+      content.referencesOnRequest = false;
+      content.references = references;
+    }
 
     const updatedCV = await database.client.CV.update({
       where: {

@@ -4,6 +4,7 @@ import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import html2canvas from 'html2canvas';
 import { useServer } from '../context/ServerContext';
+import { QUALIFICATION_LEVELS } from '../data/educationData';
 
 // Initialize pdfMake with fonts
 try {
@@ -11,6 +12,13 @@ try {
 } catch (error) {
   console.error('Error initializing pdfMake:', error);
 }
+
+// Helper function to get qualification label from value
+const getQualificationLabel = (value) => {
+  if (!value) return '';
+  const qualification = QUALIFICATION_LEVELS.find(qual => qual.value === value);
+  return qualification ? qualification.label : value;
+};
 
 function Preview() {
   const { id } = useParams();
@@ -87,7 +95,8 @@ function Preview() {
           skillsCount: Array.isArray(data.skills) ? data.skills.length : 'not an array',
           experiencesCount: Array.isArray(data.experiences) ? data.experiences.length : 'not an array',
           educationCount: Array.isArray(data.education) ? data.education.length : 'not an array',
-          referencesCount: Array.isArray(data.references) ? data.references.length : 'not an array'
+          referencesCount: Array.isArray(data.references) ? data.references.length : 'not an array',
+          referencesOnRequest: Boolean(data.referencesOnRequest)
         });
 
         // Ensure all required sections are present with proper default values
@@ -124,7 +133,8 @@ function Preview() {
             company: ref.company || '',
             email: ref.email || '',
             phone: ref.phone || ''
-          })) : []
+          })) : [],
+          referencesOnRequest: Boolean(data.referencesOnRequest)
         };
 
         console.log('Normalized CV data:', normalizedData);
@@ -152,7 +162,7 @@ function Preview() {
       skills: Array.isArray(cvData.skills) && cvData.skills.length > 0,
       experiences: Array.isArray(cvData.experiences) && cvData.experiences.length > 0,
       education: Array.isArray(cvData.education) && cvData.education.length > 0,
-      references: Array.isArray(cvData.references) && cvData.references.length > 0
+      references: (Array.isArray(cvData.references) && cvData.references.length > 0) || Boolean(cvData.referencesOnRequest)
     });
   };
 
@@ -181,54 +191,67 @@ function Preview() {
       {
         text: cv.personalInfo?.fullName,
         alignment: 'center',
-        fontSize: 14,
+        fontSize: 16,
         bold: true,
         margin: [0, 0, 0, 5]
       },
       {
         text: cv.personalInfo?.location,
         alignment: 'center',
+        fontSize: 11,
         margin: [0, 0, 0, 5]
       },
       {
-        text: `• ${cv.personalInfo?.phone} • ${cv.personalInfo?.email}`,
+        text: `${cv.personalInfo?.phone} • ${cv.personalInfo?.email}`,
         alignment: 'center',
+        fontSize: 11,
         margin: [0, 0, 0, 20]
       }
     );
 
     // Personal Statement
-    if (cv.personalStatement) {
-      sections.push(
-        { 
-          text: 'Personal Statement',
-          style: 'sectionHeader',
-          margin: [0, 0, 0, 10]
-        },
-        { 
-          text: cv.personalStatement,
-          margin: [0, 0, 0, 20]
-        }
-      );
-    }
+    sections.push(
+      { 
+        text: 'Personal Statement',
+        style: 'sectionHeader',
+        margin: [0, 0, 0, 10]
+      },
+      {
+        text: cv.personalStatement,
+        margin: [0, 0, 0, 20]
+      }
+    );
 
     // Skills
-    if (cv.skills?.length > 0) {
+    if (cv.skills && cv.skills.length > 0) {
       sections.push(
         { 
           text: 'Key Skills',
           style: 'sectionHeader',
           margin: [0, 0, 0, 10]
-        },
-        {
-          ul: cv.skills.map(skill => `${skill.skill} - ${skill.level}`),
-          margin: [0, 0, 0, 20]
         }
       );
+      
+      // Create a two-column layout for skills
+      const skillItems = cv.skills.map(skill => `${skill.skill} - ${skill.level}`);
+      
+      sections.push({
+        columns: [
+          {
+            width: '*',
+            ul: skillItems.filter((_, i) => i % 2 === 0)
+          },
+          {
+            width: '*',
+            ul: skillItems.filter((_, i) => i % 2 === 1)
+          }
+        ],
+        margin: [0, 0, 0, 20]
+      });
     }
 
     // Experience
-    if (cv.experiences?.length > 0) {
+    if (cv.experiences && cv.experiences.length > 0) {
       sections.push(
         { 
           text: 'Employment History',
@@ -236,23 +259,28 @@ function Preview() {
           margin: [0, 0, 0, 10]
         }
       );
-
+      
       cv.experiences.forEach(exp => {
         sections.push(
           {
-            text: [
-              { text: exp.position, bold: true },
-              { text: `, ${exp.company}`, bold: true },
-              { text: ` (${exp.startDate} - ${exp.endDate || 'Present'})`, italics: true }
-            ],
-            margin: [0, 10, 0, 5]
+            text: exp.position,
+            style: 'subsectionHeader',
+            margin: [0, 10, 0, 0]
           },
           {
-            text: 'Achievements and responsibilities:',
-            margin: [0, 5, 0, 5]
+            text: exp.company,
+            fontSize: 12,
+            italic: true,
+            margin: [0, 0, 0, 5]
           },
           {
-            ul: exp.description.split('\n').filter(line => line.trim()),
+            text: `${exp.startDate || ''} - ${exp.endDate || 'Present'}`,
+            fontSize: 10,
+            color: '#666666',
+            margin: [0, 0, 0, 5]
+          },
+          {
+            text: exp.description,
             margin: [0, 0, 0, 15]
           }
         );
@@ -260,7 +288,7 @@ function Preview() {
     }
 
     // Education
-    if (cv.education?.length > 0) {
+    if (cv.education && cv.education.length > 0) {
       sections.push(
         { 
           text: 'Education',
@@ -268,38 +296,65 @@ function Preview() {
           margin: [0, 0, 0, 10]
         }
       );
-
+      
       cv.education.forEach(edu => {
         sections.push(
           {
-            text: [
-              { text: edu.institution, bold: true },
-              { text: `\n${edu.degree}` },
-              { text: ` (${edu.startDate} - ${edu.endDate || 'Present'})`, italics: true }
-            ],
-            margin: [0, 5, 0, 5]
+            text: edu.institution,
+            style: 'subsectionHeader',
+            margin: [0, 10, 0, 0]
           },
-          edu.description ? {
-            ul: edu.description.split('\n').filter(line => line.trim()),
+          {
+            text: getQualificationLabel(edu.degree) + (edu.field ? ` - ${edu.field}` : ''),
+            fontSize: 12,
+            italic: true,
+            margin: [0, 0, 0, 5]
+          },
+          {
+            text: `${edu.startDate || ''} - ${edu.endDate || 'Present'}`,
+            fontSize: 10,
+            color: '#666666',
+            margin: [0, 0, 0, 5]
+          },
+          {
+            text: edu.description,
             margin: [0, 0, 0, 15]
-          } : {}
+          }
         );
       });
     }
 
     // References
-    if (cv.references?.length > 0) {
+    sections.push(
+      { 
+        text: 'References',
+        style: 'sectionHeader',
+        margin: [0, 0, 0, 10]
+      }
+    );
+    
+    if (cv.referencesOnRequest) {
       sections.push(
-        { 
-          text: 'References',
-          style: 'sectionHeader',
-          margin: [0, 0, 0, 10]
-        },
         {
-          text: 'References are available on request.',
-          margin: [0, 0, 0, 20]
+          text: 'References available on request.',
+          margin: [0, 0, 0, 20],
+          italics: true
         }
       );
+    } else if (cv.references?.length > 0) {
+      const referenceItems = cv.references.map(ref => {
+        return [
+          `${ref.name} - ${ref.position}`,
+          `${ref.company}`,
+          `Email: ${ref.email}`,
+          `Phone: ${ref.phone}`
+        ].join('\n');
+      });
+      
+      sections.push({
+        ul: referenceItems,
+        margin: [0, 0, 0, 20]
+      });
     }
 
     return {
@@ -310,6 +365,10 @@ function Preview() {
           bold: true,
           margin: [0, 15, 0, 10],
           color: '#000000'
+        },
+        subsectionHeader: {
+          fontSize: 13,
+          bold: true
         }
       },
       defaultStyle: {
@@ -439,7 +498,7 @@ function Preview() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="bg-white rounded-lg shadow-lg p-8">
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 print:hidden">
           <h1 className="text-3xl font-bold text-[#2c3e50] mb-2">
             CV Preview
           </h1>
@@ -449,7 +508,7 @@ function Preview() {
         </div>
 
         {/* Progress Indicator */}
-        <div className="mb-8">
+        <div className="mb-8 print:hidden">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-semibold">CV Completion</h2>
             <span className="text-lg font-bold text-[#2c3e50]">{getCompletionPercentage()}%</span>
@@ -472,9 +531,9 @@ function Preview() {
         </div>
 
         {/* CV Content */}
-        <div ref={cvContentRef} className="space-y-8 print:space-y-6">
-          {/* Personal Information */}
-          <section>
+        <div ref={cvContentRef} id="cv-printable-content" className="space-y-8 print:space-y-6">
+          {/* Personal Information - Display differently in print vs screen */}
+          <section className="print:hidden">
             <h2 className="text-2xl font-bold text-[#2c3e50] mb-4">Personal Information</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -496,16 +555,23 @@ function Preview() {
             </div>
           </section>
 
+          {/* Print-only centered header */}
+          <section className="hidden print:block print:mb-8 print:text-center">
+            <h1 className="text-2xl font-bold">{cv.personalInfo?.fullName}</h1>
+            <p className="mt-1">{cv.personalInfo?.location}</p>
+            <p className="mt-1">{cv.personalInfo?.phone} • {cv.personalInfo?.email}</p>
+          </section>
+
           {/* Personal Statement */}
           <section>
-            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4">Personal Statement</h2>
-            <p className="text-gray-700 whitespace-pre-wrap">{cv.personalStatement}</p>
+            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4 print:text-xl">Personal Statement</h2>
+            <p className="text-gray-700 whitespace-pre-wrap print:text-sm">{cv.personalStatement}</p>
           </section>
 
           {/* Skills */}
           <section>
-            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4">Key Skills</h2>
-            <div className="grid grid-cols-2 gap-4">
+            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4 print:text-xl">Key Skills</h2>
+            <div className="grid grid-cols-2 gap-4 print:text-sm">
               {cv.skills?.map((skill, index) => (
                 <div key={index} className="flex items-center">
                   <span className="font-semibold">{skill.skill}</span>
@@ -517,48 +583,54 @@ function Preview() {
 
           {/* Experience */}
           <section>
-            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4">Employment History</h2>
+            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4 print:text-xl">Employment History</h2>
             {cv.experiences?.map((exp, index) => (
               <div key={index} className="mb-6">
-                <h3 className="text-xl font-semibold">{exp.position}</h3>
+                <h3 className="text-xl font-semibold print:text-lg">{exp.position}</h3>
                 <p className="text-gray-600">{exp.company}</p>
                 <p className="text-gray-500">
                   {exp.startDate} - {exp.endDate || 'Present'}
                 </p>
-                <p className="mt-2 whitespace-pre-wrap">{exp.description}</p>
+                <p className="mt-2 whitespace-pre-wrap print:text-sm">{exp.description}</p>
               </div>
             ))}
           </section>
 
           {/* Education */}
           <section>
-            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4">Education</h2>
+            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4 print:text-xl">Education</h2>
             {cv.education?.map((edu, index) => (
               <div key={index} className="mb-6">
-                <h3 className="text-xl font-semibold">{edu.institution}</h3>
-                <p className="text-gray-600">{edu.degree}</p>
+                <h3 className="text-xl font-semibold print:text-lg">{edu.institution}</h3>
+                <p className="text-gray-600">{getQualificationLabel(edu.degree)} {edu.field ? `- ${edu.field}` : ''}</p>
                 <p className="text-gray-500">
                   {edu.startDate} - {edu.endDate || 'Present'}
                 </p>
-                <p className="mt-2 whitespace-pre-wrap">{edu.description}</p>
+                <p className="mt-2 whitespace-pre-wrap print:text-sm">{edu.description}</p>
               </div>
             ))}
           </section>
 
           {/* References */}
           <section>
-            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4">References</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {cv.references?.map((ref, index) => (
-                <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                  <p className="font-semibold">{ref.name}</p>
-                  <p className="text-gray-600">{ref.position}</p>
-                  <p className="text-gray-600">{ref.company}</p>
-                  <p className="text-gray-500">{ref.email}</p>
-                  <p className="text-gray-500">{ref.phone}</p>
-                </div>
-              ))}
-            </div>
+            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4 print:text-xl">References</h2>
+            {cv.referencesOnRequest ? (
+              <div className="bg-gray-50 p-4 rounded-lg print:bg-transparent print:p-0 print:text-sm">
+                <p className="font-semibold italic">References available on request.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:text-sm">
+                {cv.references?.map((ref, index) => (
+                  <div key={index} className="bg-gray-50 p-4 rounded-lg print:bg-transparent print:p-0">
+                    <p className="font-semibold">{ref.name}</p>
+                    <p className="text-gray-600">{ref.position}</p>
+                    <p className="text-gray-600">{ref.company}</p>
+                    <p className="text-gray-500">{ref.email}</p>
+                    <p className="text-gray-500">{ref.phone}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         </div>
 
@@ -622,7 +694,7 @@ function Preview() {
 
         {/* Error Message */}
         {error && (
-          <div className="mt-4 bg-red-50 text-red-600 p-4 rounded-lg">
+          <div className="mt-4 bg-red-50 text-red-600 p-4 rounded-lg print:hidden">
             {error}
           </div>
         )}
