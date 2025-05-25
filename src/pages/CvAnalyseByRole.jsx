@@ -5,6 +5,8 @@ import { useServer } from '../context/ServerContext';
 import { INDUSTRIES, ROLES_BY_INDUSTRY } from '../data/jobRolesData';
 import CvAnalysisNextSteps from '../components/CvAnalysisNextSteps';
 import AnalysisProgressTracker from '../components/AnalysisProgressTracker';
+import CourseRecommendations from '../components/CourseRecommendations';
+import { findCourseRecommendations } from '../data/courseRecommendations';
 
 const CvAnalyseByRole = () => {
   const [file, setFile] = useState(null);
@@ -21,7 +23,7 @@ const CvAnalyseByRole = () => {
   const [progressStep, setProgressStep] = useState(1);
   
   const { getAuthHeader, isAuthenticated } = useAuth();
-  const { apiUrl, status: serverStatus } = useServer();
+  const { apiUrl, isConnected } = useServer();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -82,7 +84,7 @@ const CvAnalyseByRole = () => {
     
     try {
       // Check if server is connected
-      if (serverStatus !== 'connected' || !apiUrl) {
+      if (!isConnected || !apiUrl) {
         console.error('Server not connected, cannot check subscription');
         setError('Server connection error. Please try again later.');
         return false;
@@ -124,7 +126,7 @@ const CvAnalyseByRole = () => {
     }
 
     // Check if server is connected
-    if (serverStatus !== 'connected' || !apiUrl) {
+    if (!isConnected || !apiUrl) {
       setError('Server connection error. Please check your connection and try again.');
       return;
     }
@@ -525,6 +527,17 @@ const CvAnalyseByRole = () => {
               score={analysisResults.score} 
               analysisType="industry" 
             />
+            
+            {/* Course Recommendations section */}
+            {analysisResults.keySkillGaps && analysisResults.keySkillGaps.length > 0 && (
+              <CourseRecommendations 
+                courses={findCourseRecommendations([
+                  ...analysisResults.keySkillGaps,
+                  ...(selectedIndustry ? [selectedIndustry] : [])
+                ])} 
+                title="Recommended Courses to Close Skills Gaps"
+              />
+            )}
           </div>
         )}
       </div>

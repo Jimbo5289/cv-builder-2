@@ -59,7 +59,8 @@ export function ServerProvider({ children }) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
         
-        const response = await fetch(`${serverUrl}/api/health`, {
+        console.log(`Checking server health at ${serverUrl}/health`);
+        const response = await fetch(`${serverUrl}/health`, {
           method: 'GET',
           signal: controller.signal
         });
@@ -67,12 +68,14 @@ export function ServerProvider({ children }) {
         clearTimeout(timeoutId);
         
         if (response.ok) {
+          console.log('Server health check successful');
           setServerStatus({
             isAvailable: true,
             lastChecked: new Date(),
             error: null
           });
         } else {
+          console.warn(`Server health check failed with status: ${response.status}`);
           setServerStatus({
             isAvailable: false,
             lastChecked: new Date(),
@@ -125,12 +128,41 @@ export function ServerProvider({ children }) {
     }));
   };
 
+  // Retry connection manually
+  const retryConnection = () => {
+    console.log('Manually retrying server connection');
+    setServerStatus(prev => ({
+      ...prev,
+      isAvailable: null,
+      lastChecked: null
+    }));
+  };
+
+  // Calculate simplified status for easier consumption by components
+  const status = serverStatus.isAvailable === null 
+    ? 'checking' 
+    : serverStatus.isAvailable 
+      ? 'connected' 
+      : 'disconnected';
+
+  // Additional simplified flags for connection state
+  const isConnected = status === 'connected';
+  const isChecking = status === 'checking';
+  const isReconnecting = status === 'disconnected' && serverStatus.lastChecked !== null;
+
   return (
     <ServerContext.Provider value={{ 
       serverUrl, 
       apiUrl: serverUrl, // Alias for backward compatibility
       updateServerUrl,
-      serverStatus
+      serverStatus,
+      status, // Simplified status string
+      isConnected,
+      isChecking,
+      isReconnecting,
+      connectionError: serverStatus.error,
+      lastChecked: serverStatus.lastChecked,
+      retryConnection
     }}>
       {children}
     </ServerContext.Provider>
