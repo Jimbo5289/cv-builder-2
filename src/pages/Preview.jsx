@@ -1,16 +1,20 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
+import html2canvas from 'html2canvas';
 import { useServer } from '../context/ServerContext';
 
 // Initialize pdfMake with fonts
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+try {
+  pdfMake.vfs = pdfFonts.pdfMake ? pdfFonts.pdfMake.vfs : pdfFonts.vfs;
+} catch (error) {
+  console.error('Error initializing pdfMake:', error);
+}
 
 function Preview() {
-  const [searchParams] = useSearchParams();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const cvId = searchParams.get('cvId');
   const [cv, setCV] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -23,7 +27,8 @@ function Preview() {
     education: false,
     references: false
   });
-  const { apiUrl } = useServer();
+  const { serverUrl } = useServer();
+  const cvContentRef = useRef(null);
 
   useEffect(() => {
     const fetchCV = async () => {
@@ -36,14 +41,14 @@ function Preview() {
           throw new Error('Please log in to view your CV');
         }
 
-        if (!cvId) {
+        if (!id) {
           throw new Error('No CV ID provided');
         }
 
-        console.log('Fetching CV with ID:', cvId);
+        console.log('Fetching CV with ID:', id);
         console.log('Using token:', token ? 'Token present' : 'No token');
         
-        const response = await fetch(`${apiUrl}/api/cv/${cvId}`, {
+        const response = await fetch(`${serverUrl}/api/cv/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -130,7 +135,7 @@ function Preview() {
         setError(err.message || 'An error occurred while fetching your CV');
         
         if (err.message.includes('log in')) {
-          navigate('/login?redirect=/preview?cvId=' + cvId);
+          navigate(`/login?redirect=/preview/${id}`);
         }
       } finally {
         setIsLoading(false);
@@ -138,7 +143,7 @@ function Preview() {
     };
 
     fetchCV();
-  }, [cvId, navigate, apiUrl]);
+  }, [id, navigate, serverUrl]);
 
   const updateCompletionStatus = (cvData) => {
     setCompletionStatus({
@@ -320,18 +325,59 @@ function Preview() {
       setIsGeneratingPDF(true);
       setError('');
 
-      const docDefinition = generatePdfDefinition();
-      if (!docDefinition) {
-        throw new Error('Failed to generate PDF');
-      }
+      // Try using pdfMake first
+      if (pdfMake && pdfMake.createPdf) {
+        try {
+          const docDefinition = generatePdfDefinition();
+          if (!docDefinition) {
+            throw new Error('Failed to generate PDF definition');
+          }
 
-      // Generate and download PDF
-      await new Promise((resolve, reject) => {
-        pdfMake.createPdf(docDefinition).download('my-cv.pdf', resolve, reject);
-      });
+          console.log('Creating PDF with definition:', docDefinition);
+
+          // Generate and download PDF
+          await new Promise((resolve, reject) => {
+            try {
+              const pdfDocGenerator = pdfMake.createPdf(docDefinition);
+              pdfDocGenerator.download('my-cv.pdf', resolve, reject);
+            } catch (err) {
+              console.error('PDF creation error:', err);
+              reject(err);
+            }
+          });
+          
+          return; // Exit if PDF generation successful
+        } catch (err) {
+          console.error('PDFMake error:', err);
+          // Fall through to screenshot method
+        }
+      }
+      
+      // Fallback to screenshot method if pdfMake fails
+      if (cvContentRef.current) {
+        try {
+          console.log('Using fallback screenshot method');
+          const canvas = await html2canvas(cvContentRef.current, {
+            scale: 2,
+            useCORS: true,
+            logging: false
+          });
+          
+          const imgData = canvas.toDataURL('image/png');
+          const link = document.createElement('a');
+          link.href = imgData;
+          link.download = 'my-cv.png';
+          link.click();
+        } catch (err) {
+          console.error('Screenshot error:', err);
+          throw new Error('Failed to generate image. Please try printing instead.');
+        }
+      } else {
+        throw new Error('CV content not found. Please try printing instead.');
+      }
     } catch (err) {
       console.error('Download error:', err);
-      setError(err.message || 'An error occurred while generating your CV');
+      setError(err.message || 'An error occurred while generating your CV. Please try printing instead.');
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -426,7 +472,7 @@ function Preview() {
         </div>
 
         {/* CV Content */}
-        <div className="space-y-8 print:space-y-6">
+        <div ref={cvContentRef} className="space-y-8 print:space-y-6">
           {/* Personal Information */}
           <section>
             <h2 className="text-2xl font-bold text-[#2c3e50] mb-4">Personal Information</h2>
@@ -517,34 +563,58 @@ function Preview() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-between items-center mt-8 print:hidden">
-          <button
-            onClick={() => navigate(-1)}
-            className="text-gray-600 hover:text-gray-800"
-          >
-            ← Back
-          </button>
-
-          <div className="space-x-4">
+        <div className="flex flex-col mt-12 mb-4 space-y-4 print:hidden">
+          <div className="flex justify-between items-center">
+            <button
+              onClick={() => navigate(-1)}
+              className="text-gray-600 hover:text-gray-800 flex items-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+              </svg>
+              Back
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            <button
+              onClick={() => navigate(`/edit/${id}`)}
+              className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+              </svg>
+              Edit CV
+            </button>
+            
             <button
               onClick={handlePrint}
               disabled={isGeneratingPDF}
-              className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
+              className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 flex items-center justify-center"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clipRule="evenodd" />
+              </svg>
               Print
             </button>
+            
             <button
               onClick={handleDownload}
               disabled={isGeneratingPDF}
-              className="bg-[#2c3e50] text-white px-6 py-2 rounded-lg hover:bg-[#34495e] transition-colors disabled:opacity-50 flex items-center"
+              className="bg-[#2c3e50] text-white px-6 py-3 rounded-lg hover:bg-[#34495e] transition-colors disabled:opacity-50 flex items-center justify-center"
             >
               {isGeneratingPDF ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Generating PDF...
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Generating...
                 </>
               ) : (
-                'Download PDF'
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                  Download PDF
+                </>
               )}
             </button>
           </div>

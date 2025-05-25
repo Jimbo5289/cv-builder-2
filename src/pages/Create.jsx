@@ -1,8 +1,8 @@
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import PhoneInput from '../components/PhoneInput';
 import SocialNetworkInput from '../components/SocialNetworkInput';
+import PhoneInputWithCountry from '../components/PhoneInputWithCountry';
 import toast from 'react-hot-toast';
 import { useServer } from '../context/ServerContext';
 
@@ -10,7 +10,7 @@ function Create() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, getAuthHeader } = useAuth();
-  const templateId = searchParams.get('template');
+  const templateId = searchParams.get('template') || '1'; // Default to template 1 if not specified
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ function Create() {
       socialNetwork: ''
     }
   });
-  const { apiUrl } = useServer();
+  const { serverUrl } = useServer();
 
   useEffect(() => {
     if (user) {
@@ -58,7 +58,7 @@ function Create() {
       toast.error('Email is required');
       return false;
     }
-    if (!phone.trim()) {
+    if (!phone.trim() || phone === '+44 ') {
       toast.error('Phone number is required');
       return false;
     }
@@ -78,24 +78,34 @@ function Create() {
     setError('');
 
     try {
-      const response = await fetch(`${apiUrl}/api/cv/save`, {
+      console.log('Saving CV with templateId:', templateId);
+      
+      // No special phone formatting - just send as is
+      const response = await fetch(`${serverUrl}/api/cv/save`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...getAuthHeader()
         },
         body: JSON.stringify({
-          templateId,
+          templateId: templateId,
           personalInfo: formData.personalInfo
         }),
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.message || 'Failed to save CV');
+        throw new Error(data.message || data.error || 'Failed to save CV');
       }
 
       const data = await response.json();
+      console.log('Save response:', data);
+      
+      // Check if we have a valid CV ID in the response
+      if (!data.cv || !data.cv.id) {
+        throw new Error('Server did not return a valid CV ID');
+      }
+      
       toast.success('Personal information saved successfully');
       navigate(`/create/personal-statement?cvId=${data.cv.id}`);
     } catch (err) {
@@ -156,11 +166,11 @@ function Create() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <PhoneInput
-                value={formData.personalInfo.phone}
-                onChange={(value) => handleInputChange('personalInfo', 'phone', value)}
+              <PhoneInputWithCountry
                 label="Phone Number"
                 required={true}
+                value={formData.personalInfo.phone}
+                onChange={(value) => handleInputChange('personalInfo', 'phone', value)}
               />
             </div>
 

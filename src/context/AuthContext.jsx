@@ -32,154 +32,335 @@ function AuthProvider({ children }) {
         return;
       }
 
-      // For development mode with mock token
-      if (import.meta.env.DEV && token === 'dev-token') {
-        const user = localStorage.getItem('user');
-        if (user) {
+      // Development mode with mock authentication
+      if (import.meta.env.DEV) {
+        // Check for skip auth environment variable
+        if (import.meta.env.VITE_SKIP_AUTH === 'true') {
+          console.log('DEV MODE: Using mock authentication');
+          // Create a mock user if none exists
+          if (!localStorage.getItem('user')) {
+            const mockUser = {
+              id: 'dev-user-id',
+              email: 'test@example.com',
+              name: 'Test User'
+            };
+            localStorage.setItem('user', JSON.stringify(mockUser));
+            localStorage.setItem('token', 'dev-token');
+          }
+          
+          const user = localStorage.getItem('user');
           setState(prev => ({
             ...prev,
-            user: JSON.parse(user),
+            user: user ? JSON.parse(user) : null,
             loading: false,
             isAuthenticated: true,
             error: null
           }));
           return;
         }
+        
+        // For dev mode with custom token
+        if (token === 'dev-token') {
+          const user = localStorage.getItem('user');
+          if (user) {
+            setState(prev => ({
+              ...prev,
+              user: JSON.parse(user),
+              loading: false,
+              isAuthenticated: true,
+              error: null
+            }));
+            return;
+          }
+        }
       }
 
-      const response = await fetch(`${serverUrl}/api/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      // Try to authenticate with server
+      try {
+        const response = await fetch(`${serverUrl}/api/auth/me`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
 
-      if (response.ok) {
-        const userData = await response.json();
-        setState(prev => ({
-          ...prev,
-          user: userData,
+        if (!response.ok) {
+          if (response.status === 401) {
+            // Clear invalid token
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setState(prev => ({ ...prev, loading: false, isAuthenticated: false, user: null }));
+            
+            // For dev mode, create a mock user
+            if (import.meta.env.DEV && import.meta.env.VITE_DEV_MODE === 'true') {
+              console.log('DEV MODE: Creating mock user after failed auth');
+              const mockUser = {
+                id: 'mock-user-id',
+                email: 'dev@example.com', 
+                name: 'Development User'
+              };
+              localStorage.setItem('user', JSON.stringify(mockUser));
+              localStorage.setItem('token', 'dev-token');
+              
+              setState({
+                user: mockUser,
+                loading: false,
+                isAuthenticated: true,
+                error: null
+              });
+            }
+            return;
+          }
+          throw new Error(`Authentication check failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        setState({
+          user: data.user,
           loading: false,
           isAuthenticated: true,
           error: null
-        }));
-      } else {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setState(prev => ({
-          ...prev,
-          user: null,
-          loading: false,
-          isAuthenticated: false,
-          error: 'Session expired'
+        });
+      } catch (error) {
+        console.error('Auth check error:', error);
+        
+        // For dev mode, create a mock user after failed server request
+        if (import.meta.env.DEV && import.meta.env.VITE_DEV_MODE === 'true') {
+          console.log('DEV MODE: Creating mock user after server error');
+          const mockUser = {
+            id: 'mock-user-id',
+            email: 'dev@example.com', 
+            name: 'Development User'
+          };
+          localStorage.setItem('user', JSON.stringify(mockUser));
+          localStorage.setItem('token', 'dev-token');
+          
+          setState({
+            user: mockUser,
+            loading: false,
+            isAuthenticated: true,
+            error: null
+          });
+          return;
+        }
+        
+        // In production mode, show error
+        setState(prev => ({ 
+          ...prev, 
+          loading: false, 
+          error: 'Failed to validate authentication', 
+          isAuthenticated: false 
         }));
       }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      setState(prev => ({
-        ...prev,
-        user: null,
-        loading: false,
-        isAuthenticated: false,
-        error: error.message
+    } catch (err) {
+      console.error('Auth context error:', err);
+      setState(prev => ({ 
+        ...prev, 
+        loading: false, 
+        error: err.message || 'Authentication error', 
+        isAuthenticated: false 
       }));
     }
   }
 
   async function login(email, password) {
     try {
-      setState(prev => ({ ...prev, error: null }));
+      // Dev mode auto-login
+      if (import.meta.env.DEV && import.meta.env.VITE_SKIP_AUTH === 'true') {
+        console.log('DEV MODE: Auto-login with mock credentials');
+        const mockUser = {
+          id: 'dev-user-id',
+          email,
+          name: email.split('@')[0]
+        };
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        localStorage.setItem('token', 'dev-token');
+        
+        setState({
+          user: mockUser,
+          loading: false,
+          isAuthenticated: true,
+          error: null
+        });
+        
+        toast.success('Logged in successfully!');
+        return { success: true };
+      }
       
+      setState(prev => ({ ...prev, loading: true, error: null }));
       const response = await fetch(`${serverUrl}/api/auth/login`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include'
+        body: JSON.stringify({ email, password })
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Login failed');
+        setState(prev => ({ 
+          ...prev, 
+          loading: false, 
+          error: data.message || 'Login failed' 
+        }));
+        toast.error(data.message || 'Login failed');
+        return { success: false, message: data.message };
       }
 
-      const data = await response.json();
-      const userData = {
-        ...data.user,
-        token: data.token
-      };
-
-      setState(prev => ({
-        ...prev,
-        user: userData,
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      setState({
+        user: data.user,
+        loading: false,
         isAuthenticated: true,
         error: null
+      });
+      
+      toast.success('Logged in successfully!');
+      return { success: true };
+    } catch (err) {
+      console.error('Login error:', err);
+      
+      // For development, if server isn't available, allow login with mock data
+      if (import.meta.env.DEV && import.meta.env.VITE_DEV_MODE === 'true') {
+        console.warn('DEV MODE: Server unreachable, using mock login');
+        const mockUser = {
+          id: 'mock-user-id',
+          email,
+          name: email.split('@')[0]
+        };
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        localStorage.setItem('token', 'dev-token');
+        
+        setState({
+          user: mockUser,
+          loading: false,
+          isAuthenticated: true,
+          error: null
+        });
+        
+        toast.success('Logged in successfully (dev mode)!');
+        return { success: true };
+      }
+      
+      setState(prev => ({ 
+        ...prev, 
+        loading: false, 
+        error: err.message || 'Login request failed' 
       }));
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('token', data.token);
-      toast.success('Logged in successfully');
-      return userData;
-    } catch (error) {
-      console.error('Login error:', error);
-      setState(prev => ({ ...prev, error: error.message }));
-      toast.error(error.message || 'Failed to login');
-      throw error;
+      toast.error('Login failed: Network error');
+      return { success: false, message: 'Network error' };
     }
   }
 
-  async function register(email, password, name) {
+  async function register(name, email, password) {
     try {
-      setState(prev => ({ ...prev, error: null }));
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      
+      // Allow mock registration in dev mode
+      if (import.meta.env.DEV && import.meta.env.VITE_DEV_MODE === 'true') {
+        const mockUser = {
+          id: 'mock-user-id',
+          email,
+          name
+        };
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        localStorage.setItem('token', 'dev-token');
+        
+        setState({
+          user: mockUser,
+          loading: false,
+          isAuthenticated: true,
+          error: null
+        });
+        
+        toast.success('Registered successfully (dev mode)!');
+        return { success: true };
+      }
       
       const response = await fetch(`${serverUrl}/api/auth/register`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ email, password, name }),
-        credentials: 'include'
+        body: JSON.stringify({ name, email, password })
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Registration failed');
+        setState(prev => ({ 
+          ...prev, 
+          loading: false, 
+          error: data.message || 'Registration failed' 
+        }));
+        toast.error(data.message || 'Registration failed');
+        return { success: false, message: data.message };
       }
 
-      const data = await response.json();
-      const userData = {
-        ...data.user,
-        token: data.token
-      };
-
-      setState(prev => ({
-        ...prev,
-        user: userData,
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      setState({
+        user: data.user,
+        loading: false,
         isAuthenticated: true,
         error: null
+      });
+      
+      toast.success('Registered successfully!');
+      return { success: true };
+    } catch (err) {
+      console.error('Registration error:', err);
+      
+      // For development, if server isn't available, allow registration with mock data
+      if (import.meta.env.DEV && import.meta.env.VITE_DEV_MODE === 'true') {
+        console.warn('DEV MODE: Server unreachable, using mock registration');
+        const mockUser = {
+          id: 'mock-user-id',
+          email,
+          name
+        };
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        localStorage.setItem('token', 'dev-token');
+        
+        setState({
+          user: mockUser,
+          loading: false,
+          isAuthenticated: true,
+          error: null
+        });
+        
+        toast.success('Registered successfully (dev mode)!');
+        return { success: true };
+      }
+      
+      setState(prev => ({ 
+        ...prev, 
+        loading: false, 
+        error: err.message || 'Registration request failed' 
       }));
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('token', data.token);
-      toast.success('Registered successfully');
-      return userData;
-    } catch (error) {
-      console.error('Registration error:', error);
-      setState(prev => ({ ...prev, error: error.message }));
-      toast.error(error.message || 'Failed to register');
-      throw error;
+      toast.error('Registration failed: Network error');
+      return { success: false, message: 'Network error' };
     }
   }
 
   function logout() {
-    setState(prev => ({
-      ...prev,
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    
+    setState({
       user: null,
+      loading: false,
       isAuthenticated: false,
       error: null
-    }));
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    });
+    
     toast.success('Logged out successfully');
   }
 

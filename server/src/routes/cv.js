@@ -7,6 +7,16 @@ const authMiddleware = require('../middleware/auth');
 const multer = require('multer');
 const fs = require('fs');
 const { logger } = require('../config/logger');
+const { z } = require('zod');
+
+// Personal info validation schema
+const personalInfoSchema = z.object({
+  fullName: z.string().min(1, "Full name is required"),
+  email: z.string().email("Valid email is required"),
+  phone: z.string().min(1, "Phone number is required"),
+  location: z.string().min(1, "Location is required"),
+  socialNetwork: z.string().optional()
+});
 
 // Set up multer for file uploads with memory storage for better handling
 const storage = multer.memoryStorage();
@@ -496,27 +506,44 @@ router.post('/enhance', authMiddleware, async (req, res) => {
 // Save CV data
 router.post('/save', authMiddleware, async (req, res) => {
   try {
-    const { templateId, personalInfo } = req.body;
+    // Add debug logging to see what's being received
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+    console.log('Request headers:', req.headers);
+    
+    // Check if req.body is defined
+    if (!req.body) {
+      console.error('Request body is undefined');
+      return res.status(400).json({ error: 'Request body is missing' });
+    }
+    
+    // Safely destructure with defaults
+    const templateId = req.body.templateId || '1';
+    const personalInfo = req.body.personalInfo || null;
 
+    // Debug logs for request data
+    console.log('Saving CV with templateId:', templateId);
+    console.log('Saving CV with personal info:', JSON.stringify(personalInfo, null, 2));
+    
     if (!personalInfo) {
       return res.status(400).json({ error: 'Personal information is required' });
     }
 
-    // Create or update CV
-    const cv = await database.client.CV.upsert({
-      where: {
-        userId_title: {
-          userId: req.user.id,
-          title: personalInfo.fullName || 'Untitled CV'
-        }
-      },
-      update: {
-        content: JSON.stringify({
-          templateId,
-          personalInfo
-        })
-      },
-      create: {
+    // Skip schema validation temporarily for debugging
+    /*
+    try {
+      personalInfoSchema.parse(personalInfo);
+    } catch (validationError) {
+      console.error('Validation error:', validationError.errors);
+      return res.status(400).json({ 
+        error: 'Invalid personal information', 
+        details: validationError.errors 
+      });
+    }
+    */
+
+    // Create new CV instead of using upsert which isn't supported
+    const cv = await database.client.CV.create({
+      data: {
         userId: req.user.id,
         title: personalInfo.fullName || 'Untitled CV',
         content: JSON.stringify({
@@ -526,6 +553,8 @@ router.post('/save', authMiddleware, async (req, res) => {
       }
     });
 
+    console.log('CV saved successfully:', cv.id);
+    console.log('CV response payload:', JSON.stringify({ cv }, null, 2));
     res.json({ cv });
   } catch (error) {
     console.error('Error saving CV:', error);

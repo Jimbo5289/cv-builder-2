@@ -10,7 +10,7 @@ function PersonalStatement() {
   const [statement, setStatement] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { apiUrl } = useServer();
+  const { serverUrl } = useServer();
 
   // Attempt to fetch any existing statement when component loads
   useEffect(() => {
@@ -20,7 +20,7 @@ function PersonalStatement() {
           const token = localStorage.getItem('token');
           if (!token) return;
 
-          const response = await fetch(`${apiUrl}/api/cv/${cvId}`, {
+          const response = await fetch(`${serverUrl}/api/cv/${cvId}`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -28,8 +28,22 @@ function PersonalStatement() {
 
           if (response.ok) {
             const data = await response.json();
-            if (data.content && data.content.personalStatement) {
+            console.log('Fetched CV data:', data);
+            
+            // Check different possible locations for personalStatement based on API structure
+            if (data.personalStatement) {
+              setStatement(data.personalStatement);
+            } else if (data.content && data.content.personalStatement) {
               setStatement(data.content.personalStatement);
+            } else if (typeof data.content === 'string') {
+              try {
+                const parsedContent = JSON.parse(data.content);
+                if (parsedContent.personalStatement) {
+                  setStatement(parsedContent.personalStatement);
+                }
+              } catch (e) {
+                console.error('Error parsing CV content:', e);
+              }
             }
           }
         } catch (err) {
@@ -39,7 +53,7 @@ function PersonalStatement() {
 
       fetchCV();
     }
-  }, [cvId, apiUrl]);
+  }, [cvId, serverUrl]);
 
   const handleSaveAndContinue = async () => {
     if (!statement.trim()) {
@@ -56,7 +70,7 @@ function PersonalStatement() {
         throw new Error('Please log in to continue');
       }
 
-      const response = await fetch(`${apiUrl}/api/cv/${cvId}/personal-statement`, {
+      const response = await fetch(`${serverUrl}/api/cv/${cvId}/personal-statement`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

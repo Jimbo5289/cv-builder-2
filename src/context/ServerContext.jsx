@@ -1,205 +1,149 @@
-import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 
 // Create context
-const ServerContext = createContext();
+const ServerContext = createContext(null);
 
-// Create provider component
-export const ServerProvider = ({ children }) => {
-  // Initialize with stored server URL or environment variable or default
+// Default server URLs
+const DEFAULT_URLS = {
+  development: 'http://localhost:3005',
+  production: window.location.origin.replace(/:\d+$/, ''),
+  fallback: 'http://localhost:3005' // Fallback for when environment detection fails
+};
+
+// Provider component
+export function ServerProvider({ children }) {
+  // Initialize serverUrl based on environment variables or reasonable defaults
   const [serverUrl, setServerUrl] = useState(() => {
-    // First try to use the URL from localStorage (from previous successful connection)
-    const savedUrl = localStorage.getItem('serverUrl');
-    if (savedUrl) return savedUrl;
+    // First try to get from environment variables
+    const envUrl = import.meta.env.VITE_API_URL;
     
-    // Then try environment variable 
-    if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
-    
-    // Default as last resort
-    return 'http://localhost:3005';
-  });
-  
-  const [isConnected, setIsConnected] = useState(false);
-  const [connectionError, setConnectionError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [retryCount, setRetryCount] = useState(0);
-  
-  // Function to check connection to a specific server URL
-  const checkServerConnection = useCallback(async (url = null) => {
-    // Use provided URL or current serverUrl
-    const checkUrl = url || serverUrl;
-    
-    // Development mode checks - allow bypass of server checks for development
-    const isDev = import.meta.env.DEV;
-    const hasDevToken = localStorage.getItem('token') === 'dev-token';
-    const isDevMode = new URLSearchParams(window.location.search).has('devMode');
-    
-    // Skip server check if in development mode with dev flag
-    if ((isDev && hasDevToken) || isDevMode) {
-      console.log('Development mode detected, skipping server connection check');
-      setIsConnected(true);
-      setIsLoading(false);
-      setRetryCount(0);
-      return true;
+    if (envUrl) {
+      console.log(`Using API URL from environment: ${envUrl}`);
+      return envUrl;
     }
     
-    try {
-      setIsLoading(true);
-      setConnectionError(null);
-      // Add a timestamp to prevent caching
-      const timestamp = Date.now();
-      console.log(`Checking server connection to: ${checkUrl}/health?t=${timestamp}`);
-      
-      // Use a fetch with timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-      
-      const response = await fetch(`${checkUrl}/health?t=${timestamp}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        signal: controller.signal,
-        credentials: 'omit',
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (response.ok) {
-        if (url && url !== serverUrl) {
-          setServerUrl(url);
-          localStorage.setItem('serverUrl', url);
-        }
-        setIsConnected(true);
-        setIsLoading(false);
-        setRetryCount(0);
-        console.log(`Successfully connected to server: ${url || serverUrl}`);
-        return true;
-      } else {
-        console.warn(`Server returned status: ${response.status}`);
-        // Even with error, set connected to true in dev mode to prevent blocking UI
-        if (isDev) {
-          setIsConnected(true);
-          setConnectionError(`Server error (${response.status}), but continuing in dev mode`);
-          setIsLoading(false);
-          return true;
-        }
-        throw new Error(`Server returned status: ${response.status}`);
-      }
-    } catch (error) {
-      console.error(`Connection failed to ${checkUrl}:`, error.message);
-      
-      // In development mode, provide a fallback
-      if (isDev || isDevMode) {
-        console.log('Development mode: Using fallback connectivity');
-        setIsConnected(true);
-        setConnectionError('Using development fallback connection');
-        setIsLoading(false);
-        return true;
-      } else {
-        // In production, still continue with fallback after max retries
-        if (retryCount >= 2) {
-          console.log('Max retries reached, continuing with fallback connectivity');
-          setIsConnected(true);
-          setConnectionError('Using fallback connection after failed retries');
-          setIsLoading(false);
-          return true;
+    // If not available, determine based on current environment
+    const isDev = import.meta.env.DEV || 
+                 window.location.hostname === 'localhost' || 
+                 window.location.hostname === '127.0.0.1';
+    
+    const defaultUrl = isDev ? DEFAULT_URLS.development : DEFAULT_URLS.production;
+    console.log(`Using default ${isDev ? 'development' : 'production'} API URL: ${defaultUrl}`);
+    
+    return defaultUrl;
+  });
+
+  // State for server status
+  const [serverStatus, setServerStatus] = useState({
+    isAvailable: null,
+    lastChecked: null,
+    error: null
+  });
+
+  // Check if server is available
+  useEffect(() => {
+    const checkServerAvailability = async () => {
+      try {
+        // Don't actually check in development mode if using mock mode
+        if (import.meta.env.DEV && import.meta.env.VITE_SKIP_AUTH === 'true') {
+          console.log('DEV MODE: Skipping server availability check');
+          setServerStatus({
+            isAvailable: true,
+            lastChecked: new Date(),
+            error: null
+          });
+          return;
         }
         
-        setIsConnected(false);
-        setConnectionError(error.message);
-        setIsLoading(false);
-        setRetryCount(prev => prev + 1);
-        return false;
-      }
-    }
-  }, [serverUrl, retryCount]);
-  
-  // Check server connection on mount and when serverUrl changes
-  useEffect(() => {
-    let isMounted = true;
-    const initialize = async () => {
-      // Add a short delay to ensure UI renders first
-      await new Promise(resolve => setTimeout(resolve, 500));
-      if (!isMounted) return;
-      
-      try {
-        await checkServerConnection();
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        const response = await fetch(`${serverUrl}/api/health`, {
+          method: 'GET',
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          setServerStatus({
+            isAvailable: true,
+            lastChecked: new Date(),
+            error: null
+          });
+        } else {
+          setServerStatus({
+            isAvailable: false,
+            lastChecked: new Date(),
+            error: `Server responded with status: ${response.status}`
+          });
+        }
       } catch (error) {
-        console.error('Initial server connection check failed:', error);
-        // Always set connected to true after initialization
-        // to prevent app from being blocked
-        if (isMounted) {
-          setIsConnected(true);
-          setIsLoading(false);
+        console.warn(`Server availability check failed: ${error.message}`);
+        
+        // In development mode, we'll simulate the server being available
+        if (import.meta.env.DEV) {
+          console.log('DEV MODE: Simulating server availability despite connection error');
+          setServerStatus({
+            isAvailable: true,
+            lastChecked: new Date(),
+            error: `Connection failed but running in dev mode: ${error.message}`
+          });
+        } else {
+          setServerStatus({
+            isAvailable: false,
+            lastChecked: new Date(),
+            error: error.message
+          });
         }
       }
     };
     
-    initialize();
+    checkServerAvailability();
     
-    // Periodic health check every 30 seconds
-    const healthCheckInterval = setInterval(() => {
-      if (isMounted) {
-        checkServerConnection().catch(error => {
-          console.error('Health check failed:', error);
-        });
-      }
-    }, 30000);
+    // Set up periodic checking (every 5 minutes)
+    const intervalId = setInterval(checkServerAvailability, 5 * 60 * 1000);
     
     return () => {
-      isMounted = false;
-      clearInterval(healthCheckInterval);
+      clearInterval(intervalId);
     };
-  }, [checkServerConnection]);
+  }, [serverUrl]);
   
-  // Utility function to get authentication headers (with token if available)
-  const getAuthHeaders = useCallback(() => {
-    const headers = {
-      'Content-Type': 'application/json',
-    };
+  // API for updating server URL
+  const updateServerUrl = (newUrl) => {
+    if (!newUrl) return;
     
-    const token = Cookies.get('token') || localStorage.getItem('token');
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
+    console.log(`Updating server URL to: ${newUrl}`);
+    setServerUrl(newUrl);
     
-    return headers;
-  }, []);
-  
-  // Manual retry function that can be exposed to components
-  const retryConnection = useCallback(() => {
-    setRetryCount(prev => prev + 1);
-    return checkServerConnection();
-  }, [checkServerConnection]);
-
-  // Context value
-  const value = {
-    serverUrl,
-    apiUrl: serverUrl,
-    isConnected,
-    isLoading,
-    connectionError,
-    getAuthHeaders,
-    checkServerConnection,
-    retryConnection,
-    status: isConnected ? 'connected' : (isLoading ? 'connecting' : 'disconnected')
+    // Check availability with new URL
+    setServerStatus(prev => ({
+      ...prev,
+      isAvailable: null,
+      lastChecked: null
+    }));
   };
 
   return (
-    <ServerContext.Provider value={value}>
+    <ServerContext.Provider value={{ 
+      serverUrl, 
+      apiUrl: serverUrl, // Alias for backward compatibility
+      updateServerUrl,
+      serverStatus
+    }}>
       {children}
     </ServerContext.Provider>
   );
-};
+}
 
-// Custom hook to use the server context
-export const useServer = () => {
+// Custom hook for using the server context
+export function useServer() {
   const context = useContext(ServerContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useServer must be used within a ServerProvider');
   }
   return context;
-};
+}
 
 export default ServerContext; 

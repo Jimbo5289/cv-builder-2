@@ -17,10 +17,29 @@ const createMockClient = () => {
 
   // Add some initial data for testing
   const mockUserId = 'dev-user-id';
-  storage.users.push({
+  const mockUser = {
     id: mockUserId,
-    email: 'dev@example.com',
-    name: 'Development User'
+    email: 'test@example.com',
+    name: 'Development User',
+    password: '$2a$12$k8Y1DB8sMpHu9xzN2OhSGOEE/GiHPKPiCGWIHI0Ti2AQR1f.2YC6.', // password: password123
+    isActive: true,
+    failedLoginAttempts: 0,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+  
+  storage.users.push(mockUser);
+  
+  // Add another test user for login without admin privileges
+  storage.users.push({
+    id: 'test-user-id',
+    email: 'user@example.com',
+    name: 'Test User',
+    password: '$2a$12$k8Y1DB8sMpHu9xzN2OhSGOEE/GiHPKPiCGWIHI0Ti2AQR1f.2YC6.', // password: password123
+    isActive: true,
+    failedLoginAttempts: 0,
+    createdAt: new Date(),
+    updatedAt: new Date()
   });
   
   // Return a mock client with the same interface
@@ -39,9 +58,24 @@ const createMockClient = () => {
           return false;
         });
       },
+      findMany: async ({ where }) => {
+        logger.info('Mock DB: findMany users', where);
+        if (!where) return storage.users;
+        return storage.users.filter(u => {
+          for (const [key, value] of Object.entries(where)) {
+            if (u[key] !== value) return false;
+          }
+          return true;
+        });
+      },
       create: async ({ data }) => {
         logger.info('Mock DB: create user', data);
-        const user = { ...data, createdAt: new Date(), updatedAt: new Date() };
+        const user = { 
+          ...data, 
+          id: data.id || `user-${Math.random().toString(36).substring(2, 9)}`,
+          createdAt: new Date(), 
+          updatedAt: new Date() 
+        };
         storage.users.push(user);
         return user;
       },
@@ -56,22 +90,9 @@ const createMockClient = () => {
       }
     },
     CV: {
-      findUnique: async ({ where, include }) => {
+      findUnique: async ({ where }) => {
         logger.info('Mock DB: findUnique CV', where);
-        const cv = storage.cvs.find(cv => cv.id === where.id && (where.userId ? cv.userId === where.userId : true));
-        
-        // Handle includes if needed
-        if (cv && include) {
-          if (include.sections) {
-            // Find sections related to this CV
-            cv.sections = storage.sections.filter(s => s.cvId === cv.id);
-          }
-          if (include.user) {
-            cv.user = storage.users.find(u => u.id === cv.userId);
-          }
-        }
-        
-        return cv;
+        return storage.cvs.find(cv => cv.id === where.id && (where.userId ? cv.userId === where.userId : true));
       },
       findMany: async ({ where }) => {
         logger.info('Mock DB: findMany CV', where);
@@ -82,136 +103,24 @@ const createMockClient = () => {
       },
       create: async ({ data }) => {
         logger.info('Mock DB: create CV', data);
-        const id = 'cv-' + Math.random().toString(36).substring(2, 9);
         const cv = { 
-          id,
           ...data, 
+          id: data.id || `cv-${Math.random().toString(36).substring(2, 9)}`,
           createdAt: new Date(), 
           updatedAt: new Date(),
           atsScore: Math.floor(Math.random() * 100)
         };
         storage.cvs.push(cv);
-        logger.info('Mock DB: CV created successfully', { id: cv.id });
         return cv;
       },
-      update: async ({ where, data, include }) => {
+      update: async ({ where, data }) => {
         logger.info('Mock DB: update CV', { where, data });
         const index = storage.cvs.findIndex(cv => cv.id === where.id);
         if (index >= 0) {
-          // Handle sections create/update operations in the data object
-          if (data.sections) {
-            if (data.sections.create) {
-              const sectionData = data.sections.create;
-              const sectionId = 'section-' + Math.random().toString(36).substring(2, 9);
-              const newSection = {
-                id: sectionId,
-                cvId: where.id,
-                ...sectionData,
-                createdAt: new Date(),
-                updatedAt: new Date()
-              };
-              storage.sections.push(newSection);
-              logger.info('Mock DB: Created CV section', { sectionId, cvId: where.id });
-            }
-            
-            if (data.sections.update) {
-              const updateData = data.sections.update;
-              // Handle different update formats
-              if (Array.isArray(updateData)) {
-                updateData.forEach(update => {
-                  const sectionIndex = storage.sections.findIndex(s => s.id === update.where.id);
-                  if (sectionIndex >= 0) {
-                    storage.sections[sectionIndex] = {
-                      ...storage.sections[sectionIndex],
-                      ...update.data,
-                      updatedAt: new Date()
-                    };
-                  }
-                });
-              } else if (updateData.where && updateData.data) {
-                const sectionIndex = storage.sections.findIndex(s => s.id === updateData.where.id);
-                if (sectionIndex >= 0) {
-                  storage.sections[sectionIndex] = {
-                    ...storage.sections[sectionIndex],
-                    ...updateData.data,
-                    updatedAt: new Date()
-                  };
-                }
-              }
-            }
-            
-            delete data.sections; // Remove sections from data to avoid storing it directly
-          }
-          
           storage.cvs[index] = { ...storage.cvs[index], ...data, updatedAt: new Date() };
-          
-          // Handle includes if needed
-          if (include) {
-            if (include.sections) {
-              storage.cvs[index].sections = storage.sections.filter(s => s.cvId === storage.cvs[index].id);
-            }
-            if (include.user) {
-              storage.cvs[index].user = storage.users.find(u => u.id === storage.cvs[index].userId);
-            }
-          }
-          
           return storage.cvs[index];
         }
         return null;
-      },
-      upsert: async ({ where, update, create, include }) => {
-        logger.info('Mock DB: upsert CV', { where, update, create });
-        // Try to find the CV first
-        let cv;
-        if (where.id) {
-          cv = storage.cvs.find(c => c.id === where.id);
-        } else if (where.userId_title) {
-          cv = storage.cvs.find(c => 
-            c.userId === where.userId_title.userId && 
-            c.title === where.userId_title.title
-          );
-        }
-        
-        if (cv) {
-          // Update existing CV
-          const index = storage.cvs.findIndex(c => c.id === cv.id);
-          storage.cvs[index] = { ...storage.cvs[index], ...update, updatedAt: new Date() };
-          
-          // Handle includes
-          if (include) {
-            if (include.sections) {
-              storage.cvs[index].sections = storage.sections.filter(s => s.cvId === storage.cvs[index].id);
-            }
-            if (include.user) {
-              storage.cvs[index].user = storage.users.find(u => u.id === storage.cvs[index].userId);
-            }
-          }
-          
-          return storage.cvs[index];
-        } else {
-          // Create new CV
-          const id = 'cv-' + Math.random().toString(36).substring(2, 9);
-          const newCv = { 
-            id, 
-            ...create, 
-            createdAt: new Date(), 
-            updatedAt: new Date(),
-            atsScore: Math.floor(Math.random() * 100)
-          };
-          storage.cvs.push(newCv);
-          
-          // Handle includes
-          if (include) {
-            if (include.sections) {
-              newCv.sections = [];
-            }
-            if (include.user) {
-              newCv.user = storage.users.find(u => u.id === newCv.userId);
-            }
-          }
-          
-          return newCv;
-        }
       },
       delete: async ({ where }) => {
         logger.info('Mock DB: delete CV', where);
@@ -229,13 +138,19 @@ const createMockClient = () => {
         logger.info('Mock DB: findFirst subscription', where);
         return storage.subscriptions.find(s => {
           if (where.id && s.id === where.id) return true;
+          if (where.userId && s.userId === where.userId) return true;
           if (where.stripeSubscriptionId && s.stripeSubscriptionId === where.stripeSubscriptionId) return true;
           return false;
         });
       },
       create: async ({ data }) => {
         logger.info('Mock DB: create subscription', data);
-        const subscription = { ...data, createdAt: new Date(), updatedAt: new Date() };
+        const subscription = { 
+          ...data, 
+          id: data.id || `sub-${Math.random().toString(36).substring(2, 9)}`,
+          createdAt: new Date(), 
+          updatedAt: new Date() 
+        };
         storage.subscriptions.push(subscription);
         return subscription;
       },
@@ -255,7 +170,12 @@ const createMockClient = () => {
           storage.subscriptions[index] = { ...storage.subscriptions[index], ...update, updatedAt: new Date() };
           return storage.subscriptions[index];
         } else {
-          const subscription = { ...create, createdAt: new Date(), updatedAt: new Date() };
+          const subscription = { 
+            ...create, 
+            id: create.id || `sub-${Math.random().toString(36).substring(2, 9)}`,
+            createdAt: new Date(), 
+            updatedAt: new Date() 
+          };
           storage.subscriptions.push(subscription);
           return subscription;
         }
@@ -264,11 +184,80 @@ const createMockClient = () => {
     payment: {
       create: async ({ data }) => {
         logger.info('Mock DB: create payment', data);
-        return { ...data, createdAt: new Date() };
+        return { 
+          ...data, 
+          id: data.id || `pay-${Math.random().toString(36).substring(2, 9)}`,
+          createdAt: new Date() 
+        };
+      }
+    },
+    CVSection: {
+      findMany: async ({ where }) => {
+        logger.info('Mock DB: findMany CVSection', where);
+        return storage.sections.filter(s => {
+          if (where?.cvId && s.cvId !== where.cvId) return false;
+          return true;
+        });
+      },
+      create: async ({ data }) => {
+        logger.info('Mock DB: create CVSection', data);
+        const section = { 
+          ...data, 
+          id: data.id || `section-${Math.random().toString(36).substring(2, 9)}`,
+          createdAt: new Date(), 
+          updatedAt: new Date()
+        };
+        storage.sections.push(section);
+        return section;
+      },
+      createMany: async ({ data }) => {
+        logger.info('Mock DB: createMany CVSection', data);
+        const sections = data.map(item => ({
+          ...item,
+          id: item.id || `section-${Math.random().toString(36).substring(2, 9)}`,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }));
+        storage.sections.push(...sections);
+        return { count: sections.length };
+      },
+      update: async ({ where, data }) => {
+        logger.info('Mock DB: update CVSection', { where, data });
+        const index = storage.sections.findIndex(s => s.id === where.id);
+        if (index >= 0) {
+          storage.sections[index] = { ...storage.sections[index], ...data, updatedAt: new Date() };
+          return storage.sections[index];
+        }
+        return null;
+      },
+      delete: async ({ where }) => {
+        logger.info('Mock DB: delete CVSection', where);
+        const index = storage.sections.findIndex(s => s.id === where.id);
+        if (index >= 0) {
+          const deleted = storage.sections[index];
+          storage.sections.splice(index, 1);
+          return deleted;
+        }
+        return null;
+      },
+      deleteMany: async ({ where }) => {
+        logger.info('Mock DB: deleteMany CVSection', where);
+        const originalLength = storage.sections.length;
+        storage.sections = storage.sections.filter(s => {
+          for (const [key, value] of Object.entries(where)) {
+            if (s[key] !== value) return true;
+          }
+          return false;
+        });
+        return { count: originalLength - storage.sections.length };
       }
     },
     $disconnect: async () => {
       logger.info('Mock DB: disconnecting');
+      return true;
+    },
+    $connect: async () => {
+      logger.info('Mock DB: connecting');
       return true;
     }
   };
@@ -280,9 +269,10 @@ const createMockClient = () => {
  */
 const initDatabase = async () => {
   try {
+    // Use mock database if explicitly set or if DATABASE_URL is missing
     if (process.env.MOCK_DATABASE === 'true') {
+      logger.info('Using mock database as configured by MOCK_DATABASE=true');
       client = createMockClient();
-      logger.info('Initialized mock database client');
       return client;
     }
     
@@ -296,11 +286,11 @@ const initDatabase = async () => {
         return client;
       }
       
-      client = new PrismaClient();
-      logger.info('Initialized Prisma database client');
-      
-      // Test the connection
       try {
+        client = new PrismaClient();
+        logger.info('Initialized Prisma database client');
+        
+        // Test the connection
         await client.$connect();
         logger.info('Database connection established successfully');
       } catch (connectionError) {
@@ -322,12 +312,14 @@ const initDatabase = async () => {
 };
 
 // Initialize the database
-initDatabase().catch((err) => {
-  logger.error('Fatal database initialization error:', err);
-  process.exit(1);
-});
+if (!client) {
+  initDatabase().catch((err) => {
+    logger.error('Fatal database initialization error:', err);
+  });
+}
 
 module.exports = {
   client,
-  initDatabase
+  initDatabase,
+  createMockClient
 };
