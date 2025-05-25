@@ -1,45 +1,56 @@
 # CV Builder
 
-A modern web application for creating, analyzing, and managing CVs.
+A modern web application for creating, editing, downloading, and printing professional CVs with customizable templates.
 
-## How to Start the Application
+## Key Features
 
-### Using the Fixed Port Solution (Recommended)
+- Create detailed CVs with personal info, skills, experiences, education, and references
+- Preview your CV with a professional layout before downloading or printing
+- Edit existing CVs with easy navigation between sections
+- Download your CV as a PDF file
+- Print your CV directly from the browser
+- Responsive design for all devices
 
-We've developed a special startup script that solves the port conflicts and Safari compatibility issues:
+## Project Status
+
+This version of the CV Builder includes fully functional:
+- Complete form flow from personal information to references
+- CV data storage and retrieval
+- CV preview with professional formatting
+- PDF generation and downloading
+- CV editing capabilities
+- Print functionality
+
+## Quick Start
+
+The easiest way to start the application is using our reliable startup script:
 
 ```bash
-# Run the fixed port startup script
-node fixed-port-startup.js
+# Clone the repository
+git clone https://github.com/Jimbo5289/cv-builder-2.git
+cd cv-builder-2
+
+# Install dependencies
+npm install
+cd server && npm install && cd ..
+
+# Start the application with the reliable script
+node start-reliable.js
 ```
 
-This script:
-- Kills any existing processes on required ports
-- Sets up proper environment configuration
-- Ensures backend runs on port 3005
-- Ensures frontend runs on port 5173
-- Properly connects frontend to backend
-- Fixes Safari compatibility issues
+This will:
+1. Kill any conflicting processes on relevant ports
+2. Start the backend server on port 3005
+3. Start the frontend on port 5173
+4. Connect everything correctly
 
-### Manual Startup (Legacy)
+Then open http://localhost:5173 in your browser.
 
-If you prefer to start the services manually:
-
-```bash
-# Start the backend server first
-cd server
-npm run dev
-
-# In a separate terminal, start the frontend
-cd ..
-npm run dev
-```
-
-## Development
+## Manual Setup
 
 ### Prerequisites
 
-- Node.js 16+
+- Node.js 16+ (recommended: latest LTS)
 - npm 8+
 
 ### Installation
@@ -51,75 +62,96 @@ npm install
 # Install backend dependencies
 cd server
 npm install
+cd ..
 ```
 
 ### Environment Setup
 
-Create a `.env` file in the server directory:
+The project includes pre-configured environment files:
+
+- `server/development.env` - Backend configuration
+- Environment variables are automatically set by the startup scripts
+
+### Starting Manually
+
+If you need to start services individually:
+
+```bash
+# Start the backend
+cd server
+PORT=3005 MOCK_SUBSCRIPTION_DATA=true SKIP_AUTH_CHECK=true node src/index.js
+
+# In a separate terminal, start the frontend
+cd cv-builder-2
+npm run dev -- --port 5173
+```
+
+## Troubleshooting
+
+### Port Conflicts
+
+If you encounter port conflicts:
+- Use `node start-reliable.js` which automatically handles port conflicts
+- Manually kill processes: `lsof -ti:3005,5173 | xargs kill -9` (Unix/Mac)
+
+### Safari Compatibility
+
+Safari users may experience connectivity issues. To solve:
+1. Always use the reliable startup script
+2. Make sure backend runs on port 3005
+3. Make sure frontend runs on port 5173
+
+### Server Connection Issues
+
+If the frontend can't connect to the backend:
+1. Check if the backend is running (`curl http://localhost:3005/health`)
+2. Ensure you've started both services
+3. Try restarting with `node start-reliable.js`
+
+## Development
+
+### Project Structure
 
 ```
-NODE_ENV=development
-PORT=3005
-DISABLE_PORT_FALLBACK=true
-SKIP_AUTH_CHECK=true
-MOCK_SUBSCRIPTION_DATA=true
-FRONTEND_URL=http://localhost:5173
-JWT_SECRET=dev-secret-key
-JWT_EXPIRES_IN=86400
+cv-builder/
+├── src/                # Frontend React code
+│   ├── components/     # Reusable React components
+│   ├── context/        # React context providers
+│   ├── pages/          # Page components
+│   └── routes.jsx      # Application routes
+│
+├── server/             # Backend Node.js/Express code
+│   ├── src/            # Server source code
+│   │   ├── config/     # Configuration files
+│   │   ├── routes/     # API routes
+│   │   ├── middleware/ # Express middlewares
+│   │   └── index.js    # Server entry point
+│   └── development.env # Development environment variables
+│
+├── package.json        # Frontend dependencies and scripts
+├── server/package.json # Backend dependencies and scripts
+└── start-reliable.js   # Reliable startup script
 ```
 
-### Troubleshooting Safari Connection Issues
+### Technology Stack
 
-If you're experiencing Safari-specific connection issues:
+- **Frontend**:
+  - React with Vite
+  - React Router for navigation
+  - Context API for state management
+  - Tailwind CSS for styling
+  - PDF.js and html2canvas for PDF generation
 
-1. Use the `fixed-port-startup.js` script (recommended)
-2. Ensure DISABLE_PORT_FALLBACK=true in your server's .env
-3. Make sure the frontend uses the correct API URL (http://localhost:3005)
-
-## Features
-
-- CV creation with modern templates
-- CV analysis powered by AI
-- Subscription management
-- Safari compatibility
-- Responsive design
+- **Backend**:
+  - Node.js with Express
+  - Mock database for development
+  - JWT for authentication
 
 ## License
 
 MIT
 
-## Technology Stack
-
-- Frontend: React with Vite
-- Backend: Node.js with Express
-- Database: PostgreSQL with Prisma ORM
-- Email: Nodemailer with Gmail SMTP
-- Styling: CSS with modern design patterns
-
-## Project Structure
-
-```
-cv-builder/
-├── public/            # Static assets
-├── src/               # Frontend React code
-│   ├── assets/        # Images, fonts, etc.
-│   ├── components/    # Reusable React components
-│   ├── pages/         # Page components
-│   └── ...
-├── server/            # Backend Node.js/Express code
-│   ├── src/           # Server source code
-│   │   ├── config/    # Configuration files
-│   │   ├── controllers/ # Route controllers
-│   │   ├── middleware/ # Express middlewares
-│   │   ├── routes/    # API routes
-│   │   ├── services/  # Business logic
-│   │   └── ...
-│   └── ...
-└── ...
-```
-
 ## Contact
 
-Your Name - [your-email@example.com](mailto:your-email@example.com)
-
-Project Link: [https://github.com/yourusername/cv-builder](https://github.com/yourusername/cv-builder)
+For support or contributions, please contact:
+- GitHub: [https://github.com/Jimbo5289/cv-builder-2](https://github.com/Jimbo5289/cv-builder-2)
