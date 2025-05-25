@@ -5,6 +5,8 @@ import { useServer } from '../context/ServerContext';
 import { FiUpload, FiCheck, FiX, FiAlertCircle, FiFileText } from 'react-icons/fi';
 import CvAnalysisNextSteps from '../components/CvAnalysisNextSteps';
 import AnalysisProgressTracker from '../components/AnalysisProgressTracker';
+import CourseRecommendations from '../components/CourseRecommendations';
+import { findCourseRecommendations } from '../data/courseRecommendations';
 
 const CvAnalyse = () => {
   const [file, setFile] = useState(null);
@@ -17,7 +19,7 @@ const CvAnalyse = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   
   const { isAuthenticated, user, getAuthHeader } = useAuth();
-  const { apiUrl, status: serverStatus } = useServer();
+  const { apiUrl, isConnected } = useServer();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -47,7 +49,7 @@ const CvAnalyse = () => {
       }
       
       // Check if server is connected
-      if (serverStatus !== 'connected' || !apiUrl) {
+      if (!isConnected || !apiUrl) {
         console.error('Server not connected, cannot check subscription');
         setError('Server connection error. Please try again later.');
         return false;
@@ -148,7 +150,7 @@ const CvAnalyse = () => {
     }
 
     // Check if server is connected
-    if (serverStatus !== 'connected' || !apiUrl) {
+    if (!isConnected || !apiUrl) {
       setError('Server connection error. Please check your connection and try again.');
       return;
     }
@@ -250,178 +252,139 @@ const CvAnalyse = () => {
   // If results exist, update useEffect to set final step
   useEffect(() => {
     if (analysisResults) {
-      // Set step to 4 after results are shown for a brief moment
-      const timer = setTimeout(() => {
-        setProgressStep(4);
-      }, 1000);
-      
-      return () => clearTimeout(timer);
+      setProgressStep(3);
     }
   }, [analysisResults]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
-      {/* Header and title section */}
-      <div className="container mx-auto px-4 max-w-4xl mb-8">
-        <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-2">
-          CV Analysis
-        </h1>
-        <p className="text-center text-gray-600 dark:text-gray-300 mb-8">
-          Get AI-powered feedback on your CV without comparison to a specific job
-        </p>
-        
-        {/* Add Progress Tracker */}
-        <AnalysisProgressTracker currentStep={progressStep} isAnalyzing={isAnalysing} />
-      </div>
+    <div className="max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold text-[#2c3e50] dark:text-white mb-2">CV Analysis</h1>
+      <p className="text-gray-600 dark:text-gray-300 mb-6">Upload your CV for a comprehensive analysis</p>
       
-      <div className="container mx-auto px-4 max-w-4xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
-            CV Analysis
-          </h1>
-          <p className="mt-3 text-xl text-gray-500 dark:text-gray-400 sm:mt-4">
-            Get instant feedback on your CV with our AI-powered analysis
-          </p>
-        </div>
-
-        {/* Tab selection */}
+      {/* Progress Tracker */}
+      <AnalysisProgressTracker 
+        steps={['Upload', 'Analysis', 'Results']} 
+        currentStep={progressStep} 
+      />
+      
+      <div className="mb-8">
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 p-4 rounded-md mb-4 flex items-start">
+            <FiAlertCircle className="mt-1 mr-2 flex-shrink-0" />
+            <div>{error}</div>
+          </div>
+        )}
+        
         {!analysisResults && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-            <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
-              <nav className="flex -mb-px">
-                <button
-                  onClick={() => setActiveTab('upload')}
-                  className={`${
-                    activeTab === 'upload'
-                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm sm:text-base mr-8`}
-                >
-                  Upload CV
-                </button>
-                <button
-                  onClick={() => setActiveTab('paste')}
-                  className={`${
-                    activeTab === 'paste'
-                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm sm:text-base`}
-                >
-                  Paste CV Text
-                </button>
-              </nav>
-            </div>
-
-            {activeTab === 'upload' ? (
-              <div
-                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                  isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'
-                }`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
+          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mt-4">
+            <div className="flex border-b dark:border-gray-700 mb-6">
+              <button
+                className={`py-3 mr-8 border-b-2 ${activeTab === 'upload' ? 'text-[#2c3e50] dark:text-white border-[#2c3e50] dark:border-blue-500 font-medium' : 'text-gray-500 border-transparent'}`}
+                onClick={() => setActiveTab('upload')}
               >
-                <FiUpload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
-                <h3 className="text-lg font-medium mb-2 text-gray-700 dark:text-gray-200">
-                  Drag and drop your CV here
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  or click to select a file (PDF or DOCX)
-                </p>
-                <input
-                  type="file"
-                  accept=".pdf,.docx"
-                  onChange={handleFileInput}
-                  className="hidden"
-                  id="cv-upload"
-                />
-                <label
-                  htmlFor="cv-upload"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-900 cursor-pointer"
+                Upload File
+              </button>
+              <button
+                className={`py-3 border-b-2 ${activeTab === 'paste' ? 'text-[#2c3e50] dark:text-white border-[#2c3e50] dark:border-blue-500 font-medium' : 'text-gray-500 border-transparent'}`}
+                onClick={() => setActiveTab('paste')}
+              >
+                Paste Text
+              </button>
+            </div>
+            
+            {activeTab === 'upload' ? (
+              <div>
+                <div 
+                  className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500'}`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() => document.getElementById('file-upload').click()}
                 >
-                  Select File
-                </label>
-                {file && (
-                  <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                    <FiCheck className="text-green-500 dark:text-green-400" />
-                    {file.name}
+                  <input
+                    id="file-upload"
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.docx"
+                    onChange={handleFileInput}
+                  />
+                  <div className="mb-4">
+                    <FiUpload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
                   </div>
-                )}
+                  <p className="text-lg text-gray-700 dark:text-gray-300 font-medium">
+                    {file ? file.name : 'Drag & Drop your CV file here'}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'PDF or DOCX (max 5MB)'}
+                  </p>
+                  {file && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFile(null);
+                      }}
+                      className="mt-4 inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30"
+                    >
+                      <FiX className="mr-1.5" />
+                      Remove
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
               <div>
-                <label htmlFor="cv-text" className="sr-only">
-                  Paste your CV text
+                <label htmlFor="cv-text" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Paste your CV text below
                 </label>
                 <textarea
                   id="cv-text"
-                  name="cv-text"
                   rows={10}
-                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm"
-                  placeholder="Paste the full text of your CV here..."
+                  className="w-full px-3 py-2 text-gray-700 dark:text-gray-200 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2c3e50] dark:focus:ring-blue-500 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                  placeholder="Copy and paste the content of your CV here..."
                   value={cvText}
                   onChange={(e) => setCvText(e.target.value)}
                 ></textarea>
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                  Please include all sections: contact details, work experience, education, skills, etc.
-                </p>
               </div>
             )}
-
-            {error && (
-              <div className="mt-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-md flex items-center gap-2">
-                <FiAlertCircle className="flex-shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <button
-              onClick={analyseCV}
-              disabled={isAnalysing || (activeTab === 'upload' && !file) || (activeTab === 'paste' && !cvText.trim())}
-              className={`mt-6 w-full py-3 px-4 rounded-md text-white font-medium ${
-                isAnalysing || (activeTab === 'upload' && !file) || (activeTab === 'paste' && !cvText.trim())
-                  ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'
-              }`}
-            >
-              {isAnalysing ? 'Analysing...' : 'Analyse CV'}
-            </button>
+            
+            <div className="mt-6 flex justify-end">
+              <button
+                className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-[#2c3e50] hover:bg-[#1e2a37] dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2c3e50] dark:focus:ring-blue-500 dark:focus:ring-offset-gray-900 disabled:opacity-50"
+                onClick={analyseCV}
+                disabled={isAnalysing || (activeTab === 'upload' && !file) || (activeTab === 'paste' && !cvText.trim())}
+              >
+                {isAnalysing ? 'Analysing...' : 'Analyse CV'}
+              </button>
+            </div>
           </div>
         )}
-
-        {/* Analysis Results */}
+        
         {analysisResults && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mt-4">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analysis Results</h2>
               <button
                 onClick={resetAnalysis}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-900"
+                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600"
               >
-                <FiX className="mr-2 -ml-1" />
-                Start Over
+                Analyse Another CV
               </button>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-lg text-center border border-gray-100 dark:border-gray-600 shadow-sm">
-                <h3 className="text-gray-500 dark:text-gray-300 text-sm font-medium uppercase tracking-wide mb-2">Overall Score</h3>
-                <div className={`text-4xl font-bold ${getScoreColor(analysisResults.score)}`}>
-                  {analysisResults.score}%
-                </div>
-                <p className="mt-1 text-sm font-medium">{getScoreLabel(analysisResults.score)}</p>
-              </div>
-              
-              {analysisResults.formattingScore && (
+            
+            <div className="flex flex-col md:flex-row justify-between gap-4 mb-8">
+              {analysisResults.score !== undefined && (
                 <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-lg text-center border border-gray-100 dark:border-gray-600 shadow-sm">
-                  <h3 className="text-gray-500 dark:text-gray-300 text-sm font-medium uppercase tracking-wide mb-2">Format Score</h3>
-                  <div className={`text-4xl font-bold ${getScoreColor(analysisResults.formattingScore)}`}>
-                    {analysisResults.formattingScore}%
+                  <h3 className="text-gray-500 dark:text-gray-300 text-sm font-medium uppercase tracking-wide mb-2">Overall Score</h3>
+                  <div className={`text-4xl font-bold ${getScoreColor(analysisResults.score)}`}>
+                    {analysisResults.score}%
                   </div>
+                  <p className={`text-sm font-medium mt-1 ${getScoreColor(analysisResults.score)}`}>
+                    {getScoreLabel(analysisResults.score)}
+                  </p>
                 </div>
               )}
               
-              {analysisResults.contentScore && (
+              {analysisResults.contentScore !== undefined && (
                 <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-lg text-center border border-gray-100 dark:border-gray-600 shadow-sm">
                   <h3 className="text-gray-500 dark:text-gray-300 text-sm font-medium uppercase tracking-wide mb-2">Content Score</h3>
                   <div className={`text-4xl font-bold ${getScoreColor(analysisResults.contentScore)}`}>
@@ -490,6 +453,14 @@ const CvAnalyse = () => {
               score={analysisResults.score} 
               analysisType="general" 
             />
+            
+            {/* Course Recommendations section */}
+            {analysisResults.missingKeywords && analysisResults.missingKeywords.length > 0 && (
+              <CourseRecommendations 
+                courses={findCourseRecommendations(analysisResults.missingKeywords)} 
+                title="Recommended Courses to Improve Your Skills"
+              />
+            )}
           </div>
         )}
       </div>
@@ -540,4 +511,4 @@ const CvAnalyse = () => {
   );
 };
 
-export default CvAnalyse; 
+export default CvAnalyse;
