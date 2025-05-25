@@ -216,4 +216,49 @@ export const FIELDS_OF_STUDY = [
   'Sustainable Development',
   'Conservation Biology',
   'Climate Science'
+];
+
+// Education qualification levels from secondary to advanced degrees
+export const QUALIFICATION_LEVELS = [
+  // Secondary Education
+  { value: 'gcse', label: 'GCSE' },
+  { value: 'o-level', label: 'O-Level' },
+  { value: 'a-level', label: 'A-Level' },
+  { value: 'btec-level-2', label: 'BTEC Level 2' },
+  { value: 'btec-level-3', label: 'BTEC Level 3' },
+  { value: 'international-baccalaureate', label: 'International Baccalaureate' },
+  { value: 'high-school-diploma', label: 'High School Diploma' },
+
+  // Vocational Qualifications
+  { value: 'nvq-level-1', label: 'NVQ Level 1' },
+  { value: 'nvq-level-2', label: 'NVQ Level 2' },
+  { value: 'nvq-level-3', label: 'NVQ Level 3' },
+  { value: 'nvq-level-4', label: 'NVQ Level 4' },
+  { value: 'nvq-level-5', label: 'NVQ Level 5' },
+  { value: 'city-and-guilds', label: 'City & Guilds' },
+  { value: 'apprenticeship', label: 'Apprenticeship' },
+  { value: 'higher-apprenticeship', label: 'Higher Apprenticeship' },
+  { value: 'vocational-certificate', label: 'Vocational Certificate' },
+
+  // Higher Education
+  { value: 'foundation-degree', label: 'Foundation Degree' },
+  { value: 'higher-national-certificate', label: 'Higher National Certificate (HNC)' },
+  { value: 'higher-national-diploma', label: 'Higher National Diploma (HND)' },
+  { value: 'associate-degree', label: 'Associate Degree' },
+  { value: 'bachelors-degree', label: "Bachelor's Degree (BA/BSc)" },
+  { value: 'graduate-certificate', label: 'Graduate Certificate' },
+  { value: 'graduate-diploma', label: 'Graduate Diploma' },
+  { value: 'postgraduate-certificate', label: 'Postgraduate Certificate' },
+  { value: 'postgraduate-diploma', label: 'Postgraduate Diploma' },
+  { value: 'masters-degree', label: "Master's Degree (MA/MSc/MEng)" },
+  { value: 'mba', label: 'Master of Business Administration (MBA)' },
+  { value: 'doctorate', label: 'Doctorate/PhD' },
+  { value: 'professional-qualification', label: 'Professional Qualification' },
+
+  // Other qualifications
+  { value: 'certificate', label: 'Certificate' },
+  { value: 'diploma', label: 'Diploma' },
+  { value: 'short-course', label: 'Short Course/Workshop' },
+  { value: 'online-certification', label: 'Online Certification' },
+  { value: 'other', label: 'Other' }
 ]; 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useServer } from '../context/ServerContext';
 import toast from 'react-hot-toast';
+import { QUALIFICATION_LEVELS } from '../data/educationData';
 
 // Remove @mui imports and replace with simpler HTML/CSS components
 function Education() {
@@ -199,14 +200,50 @@ function Education() {
                   </div>
 
                   <div>
-                    <label className="block text-gray-700 dark:text-gray-200 font-medium mb-2">Degree</label>
-                    <input
-                      type="text"
+                    <label className="block text-gray-700 dark:text-gray-200 font-medium mb-2">Qualification Level</label>
+                    <select
                       value={edu.degree}
                       onChange={(e) => handleInputChange(index, 'degree', e.target.value)}
                       className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#2c3e50] dark:focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                      placeholder="Degree or qualification"
-                    />
+                    >
+                      <option value="">Select qualification level</option>
+                      
+                      {/* Secondary Education */}
+                      <optgroup label="Secondary Education">
+                        {QUALIFICATION_LEVELS.filter(qual => 
+                          ['gcse', 'o-level', 'a-level', 'btec-level-2', 'btec-level-3', 'international-baccalaureate', 'high-school-diploma'].includes(qual.value)
+                        ).map(qual => (
+                          <option key={qual.value} value={qual.value}>{qual.label}</option>
+                        ))}
+                      </optgroup>
+                      
+                      {/* Vocational Qualifications */}
+                      <optgroup label="Vocational Qualifications">
+                        {QUALIFICATION_LEVELS.filter(qual => 
+                          ['nvq-level-1', 'nvq-level-2', 'nvq-level-3', 'nvq-level-4', 'nvq-level-5', 'city-and-guilds', 'apprenticeship', 'higher-apprenticeship', 'vocational-certificate'].includes(qual.value)
+                        ).map(qual => (
+                          <option key={qual.value} value={qual.value}>{qual.label}</option>
+                        ))}
+                      </optgroup>
+                      
+                      {/* Higher Education */}
+                      <optgroup label="Higher Education">
+                        {QUALIFICATION_LEVELS.filter(qual => 
+                          ['foundation-degree', 'higher-national-certificate', 'higher-national-diploma', 'associate-degree', 'bachelors-degree', 'graduate-certificate', 'graduate-diploma', 'postgraduate-certificate', 'postgraduate-diploma', 'masters-degree', 'mba', 'doctorate', 'professional-qualification'].includes(qual.value)
+                        ).map(qual => (
+                          <option key={qual.value} value={qual.value}>{qual.label}</option>
+                        ))}
+                      </optgroup>
+                      
+                      {/* Other qualifications */}
+                      <optgroup label="Other Qualifications">
+                        {QUALIFICATION_LEVELS.filter(qual => 
+                          ['certificate', 'diploma', 'short-course', 'online-certification', 'other'].includes(qual.value)
+                        ).map(qual => (
+                          <option key={qual.value} value={qual.value}>{qual.label}</option>
+                        ))}
+                      </optgroup>
+                    </select>
                   </div>
                 </div>
 

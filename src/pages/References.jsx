@@ -10,6 +10,7 @@ function References() {
   const [references, setReferences] = useState([
     { name: '', position: '', company: '', email: '', phone: '' }
   ]);
+  const [referencesOnRequest, setReferencesOnRequest] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -35,14 +36,17 @@ function References() {
   };
 
   const handleSaveAndFinish = async () => {
-    // Validate that at least one reference has a name and either email or phone
-    const isValid = references.some(ref => 
-      ref.name.trim() && (ref.email.trim() || ref.phone.trim())
-    );
+    // If "References available on request" is checked, we don't need to validate references
+    if (!referencesOnRequest) {
+      // Validate that at least one reference has a name and either email or phone
+      const isValid = references.some(ref => 
+        ref.name.trim() && (ref.email.trim() || ref.phone.trim())
+      );
 
-    if (!isValid) {
-      setError('Please provide at least one reference with name and contact information');
-      return;
+      if (!isValid) {
+        setError('Please provide at least one reference with name and contact information');
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -54,13 +58,18 @@ function References() {
         throw new Error('Please log in to continue');
       }
 
+      // If "References available on request" is checked, we'll send that instead of the references
+      const payload = referencesOnRequest 
+        ? { referencesOnRequest: true } 
+        : { references };
+
       const response = await fetch(`${serverUrl}/api/cv/${cvId}/references`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ references }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -96,7 +105,7 @@ function References() {
         </div>
 
         <div className="space-y-6">
-          {references.map((reference, index) => (
+          {!referencesOnRequest && references.map((reference, index) => (
             <div key={index} className="bg-gray-50 rounded-lg p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold text-[#2c3e50]">
@@ -181,18 +190,39 @@ function References() {
             </div>
           ))}
 
-          <button
-            onClick={addReference}
-            className="text-[#2c3e50] hover:text-[#34495e]"
-          >
-            + Add Another Reference
-          </button>
+          {!referencesOnRequest && (
+            <button
+              onClick={addReference}
+              className="text-[#2c3e50] hover:text-[#34495e]"
+            >
+              + Add Another Reference
+            </button>
+          )}
 
           {error && (
             <div className="p-4 bg-red-50 text-red-600 rounded-lg">
               {error}
             </div>
           )}
+
+          <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+            <label className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={referencesOnRequest}
+                onChange={() => setReferencesOnRequest(!referencesOnRequest)}
+                className="h-5 w-5 text-[#2c3e50] border-gray-300 rounded focus:ring-[#2c3e50]"
+              />
+              <span className="text-gray-800 font-medium">
+                Display "References available on request" instead of listing references
+              </span>
+            </label>
+            {referencesOnRequest && (
+              <p className="mt-2 text-gray-600 italic pl-8">
+                Your CV will show "References available on request" in the references section
+              </p>
+            )}
+          </div>
 
           <div className="flex justify-between items-center mt-8">
             <button

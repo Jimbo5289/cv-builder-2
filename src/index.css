@@ -90,3 +90,72 @@
     @apply px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900;
   }
 }
+
+/* Add print styles to the end of the file */
+
+@media print {
+  /* Hide all the page elements except CV content */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Show only CV content */
+  #cv-printable-content, 
+  #cv-printable-content * {
+    visibility: visible;
+  }
+  
+  /* Position the CV at the top of the page */
+  #cv-printable-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 25mm 15mm;
+    box-shadow: none;
+  }
+  
+  /* Ensure text is black for better printing */
+  #cv-printable-content h1,
+  #cv-printable-content h2,
+  #cv-printable-content h3,
+  #cv-printable-content p,
+  #cv-printable-content div {
+    color: black !important;
+  }
+  
+  /* Add page breaks between sections if needed */
+  .page-break-after {
+    page-break-after: always;
+  }
+  
+  /* Remove backgrounds and borders */
+  #cv-printable-content .bg-gray-50,
+  #cv-printable-content .rounded-lg,
+  #cv-printable-content .shadow-lg {
+    background: none !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  
+  /* Adjust margins and spacing */
+  #cv-printable-content section {
+    margin-bottom: 15px;
+  }
+  
+  /* Ensure large sections don't get cut off across pages */
+  #cv-printable-content section {
+    page-break-inside: avoid;
+  }
+  
+  /* Remove padding from containers */
+  .container, .p-8 {
+    padding: 0 !important;
+  }
+  
+  /* Set proper font sizes for print */
+  h1 { font-size: 18pt !important; }
+  h2 { font-size: 14pt !important; }
+  h3 { font-size: 12pt !important; }
+  p, div { font-size: 10pt !important; }
+}
