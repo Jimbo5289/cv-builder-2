@@ -9,6 +9,11 @@ const Login = React.lazy(() => import('./pages/Login'));
 const Register = React.lazy(() => import('./pages/Register'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Create = React.lazy(() => import('./pages/Create'));
+const PersonalStatement = React.lazy(() => import('./pages/PersonalStatement'));
+const Skills = React.lazy(() => import('./pages/Skills'));
+const Experience = React.lazy(() => import('./pages/Experience'));
+const Education = React.lazy(() => import('./pages/Education'));
+const References = React.lazy(() => import('./pages/References'));
 const Edit = React.lazy(() => import('./pages/Edit'));
 const Preview = React.lazy(() => import('./pages/Preview'));
 const Settings = React.lazy(() => import('./pages/Settings'));
@@ -74,6 +79,32 @@ function AppRoutes() {
         <Route path="/create" element={
           <ProtectedRoute>
             <Create />
+          </ProtectedRoute>
+        } />
+        {/* CV Creation flow routes */}
+        <Route path="/create/personal-statement" element={
+          <ProtectedRoute>
+            <PersonalStatement />
+          </ProtectedRoute>
+        } />
+        <Route path="/create/skills" element={
+          <ProtectedRoute>
+            <Skills />
+          </ProtectedRoute>
+        } />
+        <Route path="/create/experience" element={
+          <ProtectedRoute>
+            <Experience />
+          </ProtectedRoute>
+        } />
+        <Route path="/create/education" element={
+          <ProtectedRoute>
+            <Education />
+          </ProtectedRoute>
+        } />
+        <Route path="/create/references" element={
+          <ProtectedRoute>
+            <References />
           </ProtectedRoute>
         } />
         <Route path="/edit/:id" element={

@@ -29,13 +29,36 @@ const PhoneInput = ({ value, onChange, label, required = false, error: externalE
       const match = value.match(/^(\+\d+)\s(.*)$/);
       if (match) {
         setCountryCode(match[1]);
-        setPhoneNumber(match[2]);
+        // Clean the phone number to only contain digits
+        setPhoneNumber(match[2].replace(/[^0-9]/g, ''));
       } else if (value && !phoneNumber) {
         // If there's a value but no match, just set the phone number part
-        setPhoneNumber(value);
+        // Clean the phone number to only contain digits
+        setPhoneNumber(value.replace(/[^0-9]/g, ''));
       }
     }
   }, [value]);
+
+  // Get the country code without the plus sign
+  const getCountryCodeWithoutPlus = () => {
+    return countryCode.replace(/^\+/, '');
+  };
+
+  // Find the country object based on the current country code
+  const findCountryByCode = () => {
+    const codeWithoutPlus = getCountryCodeWithoutPlus();
+    // Find the country key that matches this code
+    const countryKey = Object.keys(countries).find(
+      key => countries[key].code === codeWithoutPlus
+    );
+    return countryKey ? countries[countryKey] : countries.GB; // Default to GB if not found
+  };
+
+  // Get the expected number of digits for the current country
+  const getExpectedDigits = () => {
+    const country = findCountryByCode();
+    return country.format.split('').filter(char => char === '#').length;
+  };
 
   // When internal state changes, notify parent
   useEffect(() => {
@@ -48,23 +71,34 @@ const PhoneInput = ({ value, onChange, label, required = false, error: externalE
       onChange('');
     }
     
-    // Validate the phone number
+    // Validate the phone number based on country format
     if (phoneNumber.trim() === '') {
       setIsValid(true); // Empty is valid unless required
     } else {
-      setIsValid(/^[0-9\s()-]{7,}$/.test(phoneNumber));
+      const expectedDigits = getExpectedDigits();
+      setIsValid(phoneNumber.length === expectedDigits);
     }
   }, [countryCode, phoneNumber, onChange]);
 
   const handlePhoneChange = (e) => {
-    // Make sure we're only accepting digits, spaces, hyphens and parentheses
+    // Make sure we're only accepting digits
     const input = e.target.value;
-    const cleanedValue = input.replace(/[^0-9\s()-]/g, '');
-    setPhoneNumber(cleanedValue);
+    const cleanedValue = input.replace(/[^0-9]/g, '');
+    
+    // Limit to expected number of digits
+    const expectedDigits = getExpectedDigits();
+    const limitedValue = cleanedValue.slice(0, expectedDigits);
+    
+    setPhoneNumber(limitedValue);
   };
 
   const handleCountryCodeChange = (e) => {
     setCountryCode(e.target.value);
+    // Reset validation when country changes
+    if (phoneNumber) {
+      const expectedDigits = getExpectedDigits();
+      setIsValid(phoneNumber.length === expectedDigits);
+    }
   };
 
   const getCountryFlag = (code) => {
@@ -78,6 +112,18 @@ const PhoneInput = ({ value, onChange, label, required = false, error: externalE
       '+91': '🇮🇳',
     };
     return codeToFlag[code] || '🌐';
+  };
+
+  // Get placeholder based on current country
+  const getPlaceholder = () => {
+    const country = findCountryByCode();
+    return country.placeholder.replace(/[^0-9]/g, '');
+  };
+
+  // Get expected format for display
+  const getFormatDisplay = () => {
+    const country = findCountryByCode();
+    return country.placeholder;
   };
 
   return (
@@ -106,8 +152,8 @@ const PhoneInput = ({ value, onChange, label, required = false, error: externalE
             }}
           >
             {Object.entries(countries).map(([code, data]) => (
-              <option key={code} value={code} className="text-sm">
-                {getCountryFlag(code)} +{data.code}
+              <option key={code} value={`+${data.code}`} className="text-sm">
+                {getCountryFlag(`+${data.code}`)} +{data.code}
               </option>
             ))}
           </select>
@@ -124,9 +170,9 @@ const PhoneInput = ({ value, onChange, label, required = false, error: externalE
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           className="flex-1 h-full py-0 px-4 focus:outline-none"
-          placeholder="7500 123456"
-          inputMode="tel"
-          pattern="[0-9\s()-]*"
+          placeholder={getPlaceholder()}
+          inputMode="numeric"
+          pattern="[0-9]*"
           aria-label="Phone number"
         />
         
@@ -140,9 +186,11 @@ const PhoneInput = ({ value, onChange, label, required = false, error: externalE
       
       {/* Error message */}
       {!isValid && phoneNumber && (
-        <p className="text-red-500 text-sm mt-1">Please enter a valid phone number</p>
+        <p className="text-red-500 text-sm mt-1">
+          Please enter exactly {getExpectedDigits()} digits for {findCountryByCode().flag} +{getCountryCodeWithoutPlus()}
+        </p>
       )}
-      <p className="text-xs text-gray-500 mt-1">Format: 7500 123456</p>
+      <p className="text-xs text-gray-500 mt-1">Format: {getFormatDisplay()}</p>
     </div>
   );
 };

@@ -77,10 +77,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// --- IMPORTANT: Mount file upload routes BEFORE body parsers ---
-app.use('/api/cv', cvRoutes); // Handles file uploads, must come before body parsers
-
-// --- Apply body parsers for JSON and urlencoded after file upload routes ---
+// --- Apply body parsers for JSON and urlencoded BEFORE mounting routes ---
 app.use(express.json({ 
   limit: '10mb',
   verify: (req, res, buf) => {
@@ -106,7 +103,8 @@ app.use(express.urlencoded({
   }
 }));
 
-// Routes
+// Now mount routes after body parsers are set up
+app.use('/api/cv', cvRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/payments', paymentRoutes);

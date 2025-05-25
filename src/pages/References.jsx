@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useServer } from '../context/ServerContext';
 
 function References() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const cvId = searchParams.get('cvId');
+  const { serverUrl } = useServer();
   const [references, setReferences] = useState([
     { name: '', position: '', company: '', email: '', phone: '' }
   ]);
@@ -52,8 +54,7 @@ function References() {
         throw new Error('Please log in to continue');
       }
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
-      const response = await fetch(`${API_URL}/api/cv/${cvId}/references`, {
+      const response = await fetch(`${serverUrl}/api/cv/${cvId}/references`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +70,7 @@ function References() {
       }
 
       // Navigate to preview
-      navigate(`/preview?cvId=${cvId}`);
+      navigate(`/preview/${cvId}`);
     } catch (err) {
       console.error('Save error:', err);
       setError(err.message || 'An error occurred while saving. Please try again.');
