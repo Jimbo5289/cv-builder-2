@@ -35,6 +35,7 @@ const CookiePolicy = React.lazy(() => import('./pages/CookiePolicy'));
 const Analyse = React.lazy(() => import('./pages/Analyse'));
 const CvAnalyse = React.lazy(() => import('./pages/CvAnalyse'));
 const CvAnalyseByRole = React.lazy(() => import('./pages/CvAnalyseByRole'));
+const LinkedInReview = React.lazy(() => import('./pages/LinkedInReview'));
 const Profile = React.lazy(() => import('./pages/Profile'));
 const SavedCVs = React.lazy(() => import('./pages/SavedCVs'));
 
@@ -162,6 +163,11 @@ function AppRoutes() {
         <Route path="/cv-analyse-by-role" element={
           <SubscriptionProtectedRoute>
             <CvAnalyseByRole />
+          </SubscriptionProtectedRoute>
+        } />
+        <Route path="/linkedin-review" element={
+          <SubscriptionProtectedRoute>
+            <LinkedInReview />
           </SubscriptionProtectedRoute>
         } />
 

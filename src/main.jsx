@@ -7,6 +7,7 @@ import App from './App';
 import ThemeProvider from './context/ThemeContext';
 import { ServerProvider } from './context/ServerContext';
 import AuthProvider from './context/AuthContext';
+import { TemplateProvider } from './context/TemplateContext';
 import { setupErrorHandler } from './utils/errorHandler';
 
 // Debug - log the loading process
@@ -123,9 +124,11 @@ const renderApp = () => {
             <ThemeProvider>
               <ServerProvider>
                 <AuthProvider>
-                  <Sentry.ErrorBoundary fallback={ErrorFallback}>
-                    <App />
-                  </Sentry.ErrorBoundary>
+                  <TemplateProvider>
+                    <Sentry.ErrorBoundary fallback={ErrorFallback}>
+                      <App />
+                    </Sentry.ErrorBoundary>
+                  </TemplateProvider>
                 </AuthProvider>
               </ServerProvider>
             </ThemeProvider>

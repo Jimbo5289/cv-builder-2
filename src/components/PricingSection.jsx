@@ -20,6 +20,21 @@ export default function PricingSection() {
 
   const pricingPlans = [
     {
+      name: 'Free',
+      price: 0,
+      interval: '',
+      features: [
+        'Basic CV builder',
+        'Single CV template',
+        'PDF export',
+        'Save and edit 1 CV',
+        'Access to manual CV writing guides'
+      ],
+      buttonText: 'Get Started',
+      popular: false,
+      priceId: null
+    },
+    {
       name: 'Pay-Per-CV',
       price: 4.99,
       interval: 'one-time',
@@ -64,20 +79,28 @@ export default function PricingSection() {
 
   const addons = [
     {
-      name: 'Custom Branding',
-      price: 49,
-      description: 'Custom branding setup for agencies',
-      buttonText: 'Add to Plan'
+      name: 'AI CV Analysis Package',
+      price: 19.99,
+      interval: 'one-time',
+      description: 'One-time purchase for full AI CV analysis functionality including skills gap detection, course recommendations, and industry-specific feedback',
+      buttonText: 'Add to Cart'
     },
     {
       name: 'AI-Enhanced LinkedIn Review',
       price: 7.99,
+      interval: 'one-time',
       description: 'AI-powered LinkedIn profile optimization',
       buttonText: 'Add to Plan'
     }
   ];
 
   const handleSubscribe = async (plan) => {
+    // For free plan, simply redirect to the CV builder
+    if (plan.price === 0) {
+      navigate('/create');
+      return;
+    }
+    
     if (!user) {
       window.location.href = '/login?redirect=/pricing';
       return;
@@ -200,6 +223,9 @@ export default function PricingSection() {
                 <p className="text-sm text-blue-700">
                   <span className="font-medium">Premium Feature Access</span> - Subscribe to a plan below to unlock {premiumFeature} and all other premium features.
                 </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  <span className="font-medium">Note:</span> AI CV analysis, skills gap detection, industry matching, and course recommendations require a paid subscription or one-time purchase.
+                </p>
                 {fromPath && (
                   <p className="mt-2">
                     <button 
@@ -216,13 +242,13 @@ export default function PricingSection() {
         )}
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-6 max-w-7xl mx-auto">
           {pricingPlans.map((plan, index) => (
             <div
               key={plan.name}
               className={`bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300
                 ${plan.popular ? 'ring-2 ring-[#E78F81] md:transform md:scale-105 z-10' : ''}
-                ${index === 1 && !plan.popular ? 'my-4 md:my-0' : ''}
+                ${plan.price === 0 ? 'border border-gray-200' : ''}
               `}
             >
               {plan.popular && (
@@ -259,10 +285,12 @@ export default function PricingSection() {
                 <button
                   onClick={() => handleSubscribe(plan)}
                   disabled={loading && selectedPlan === plan}
-                  className={`w-full py-2 sm:py-3 px-4 rounded-md text-white text-sm sm:text-base font-medium transition-colors duration-200 ${
-                    plan.popular
-                      ? 'bg-[#E78F81] hover:bg-[#d36e62]'
-                      : 'bg-[#2c3e50] hover:bg-[#1a2530]'
+                  className={`w-full py-2 sm:py-3 px-4 rounded-md text-sm sm:text-base font-medium transition-colors duration-200 ${
+                    plan.price === 0
+                      ? 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300'
+                      : plan.popular
+                        ? 'bg-[#E78F81] hover:bg-[#d36e62] text-white'
+                        : 'bg-[#2c3e50] hover:bg-[#1a2530] text-white'
                   } ${(loading && selectedPlan === plan) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {(loading && selectedPlan === plan) ? 'Processing...' : plan.buttonText}
@@ -284,7 +312,7 @@ export default function PricingSection() {
                 <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2 sm:mb-4">{addon.name}</h3>
                 <div className="mb-3 sm:mb-4 md:mb-6">
                   <span className="text-2xl sm:text-3xl md:text-4xl font-bold">£{addon.price}</span>
-                  <span className="text-gray-500 text-sm sm:text-base"> one-time</span>
+                  <span className="text-gray-500 text-sm sm:text-base"> {addon.interval || 'one-time'}</span>
                 </div>
                 <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 md:mb-8">{addon.description}</p>
                 <button

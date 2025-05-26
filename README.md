@@ -1,6 +1,6 @@
 # CV Builder
 
-A modern web application for creating, editing, downloading, and printing professional CVs with customizable templates.
+A modern web application for creating, editing, downloading, and printing professional CVs with customizable templates, CV analysis, and LinkedIn profile optimization.
 
 ## Key Features
 
@@ -10,6 +10,10 @@ A modern web application for creating, editing, downloading, and printing profes
 - Download your CV as a PDF file
 - Print your CV directly from the browser
 - Responsive design for all devices
+- CV analysis against job descriptions
+- LinkedIn profile review with professional recommendations
+- Course and certification recommendations based on skill gaps
+- Flexible pricing plans including free tier, subscriptions, and one-time purchases
 
 ## Project Status
 
@@ -20,6 +24,10 @@ This version of the CV Builder includes fully functional:
 - PDF generation and downloading
 - CV editing capabilities
 - Print functionality
+- AI-powered CV analysis
+- LinkedIn profile review with actionable recommendations
+- Course recommendations for professional development
+- Comprehensive pricing plans
 
 ## Quick Start
 
@@ -108,6 +116,37 @@ If the frontend can't connect to the backend:
 2. Ensure you've started both services
 3. Try restarting with `node start-reliable.js`
 
+## Features Guide
+
+### CV Builder
+Create professional CVs with customizable sections for personal information, skills, experiences, education, and references. Preview your CV in real-time with professional formatting before downloading or printing.
+
+### CV Analysis
+Upload your CV and receive AI-powered analysis with recommendations for improvement, including:
+- Overall CV score
+- Format and content quality assessment
+- Strengths and improvement recommendations
+- Keyword suggestions for ATS optimization
+
+### LinkedIn Profile Review
+Optimize your LinkedIn profile with:
+- Profile visibility and content quality assessment
+- Section-by-section feedback for headline, about, experience, skills, and education
+- Professional recommendations for improvement
+- Keyword suggestions for enhanced discoverability
+
+### Course Recommendations
+Receive personalized course and certification recommendations based on skill gaps identified in your CV or LinkedIn profile. Recommendations include:
+- Professional certifications from recognized providers
+- Technical and soft skill courses
+- Direct links to course providers
+
+### Pricing Plans
+Flexible pricing options to suit different needs:
+- Free tier for basic CV building
+- Subscription plans for all premium features
+- One-time purchases for specific features
+
 ## Development
 
 ### Project Structure
@@ -118,6 +157,7 @@ cv-builder/
 │   ├── components/     # Reusable React components
 │   ├── context/        # React context providers
 │   ├── pages/          # Page components
+│   ├── data/           # Data files for courses and education options
 │   └── routes.jsx      # Application routes
 │
 ├── server/             # Backend Node.js/Express code
@@ -146,6 +186,7 @@ cv-builder/
   - Node.js with Express
   - Mock database for development
   - JWT for authentication
+  - OpenAI integration for CV and LinkedIn analysis (mock implementation for development)
 
 ## License
 

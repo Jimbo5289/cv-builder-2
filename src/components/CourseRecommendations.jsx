@@ -6,11 +6,20 @@ const CourseRecommendations = ({ courses = [], title = 'Recommended Courses' }) 
     return null;
   }
   
+  // Function to ensure URL has proper format with https
+  const formatUrl = (url) => {
+    if (!url) return '#';
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return `https://${url}`;
+    }
+    return url;
+  };
+  
   return (
     <div className="mt-6 p-4 bg-blue-50 dark:bg-gray-800 rounded-lg">
       <h3 className="text-lg font-medium text-blue-800 dark:text-blue-300 mb-2">{title}</h3>
       <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-        Improve your skills with these recommended courses from trusted providers
+        Enhance your professional qualifications with these industry-recognized certifications and courses
       </p>
       <div className="space-y-3">
         {courses.map((course, index) => (
@@ -30,16 +39,23 @@ const CourseRecommendations = ({ courses = [], title = 'Recommended Courses' }) 
               </div>
             </div>
             <a 
-              href={course.url} 
+              href={formatUrl(course.url)} 
               target="_blank"
               rel="noopener noreferrer" 
               className="inline-flex items-center px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+              onClick={() => {
+                // Log click for analytics
+                console.log(`Course link clicked: ${course.title} by ${course.provider}`);
+              }}
             >
               View Course <FiExternalLink className="ml-1" />
             </a>
           </div>
         ))}
       </div>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mt-4 italic">
+        Note: Links will open in a new tab and take you directly to the course provider's website.
+      </p>
     </div>
   );
 };

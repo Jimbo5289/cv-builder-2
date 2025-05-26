@@ -158,4 +158,44 @@
   h2 { font-size: 14pt !important; }
   h3 { font-size: 12pt !important; }
   p, div { font-size: 10pt !important; }
+
+  @page {
+    margin: 1.5cm;
+    size: A4 portrait;
+  }
+  
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+  
+  /* Ensure text doesn't get cut off */
+  p, li, span, div {
+    orphans: 3;
+    widows: 3;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  /* Prevent elements from being cut across pages */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+  
+  /* Make sure images don't overflow */
+  img, svg {
+    max-width: 100% !important;
+  }
+  
+  /* Ensure proper spacing between sections */
+  section {
+    margin-bottom: 1em;
+  }
+  
+  /* Hide all non-cv content */
+  .print\\:hidden {
+    display: none !important;
+  }
 }

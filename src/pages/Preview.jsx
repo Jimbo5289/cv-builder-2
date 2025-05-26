@@ -5,6 +5,7 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 import html2canvas from 'html2canvas';
 import { useServer } from '../context/ServerContext';
 import { QUALIFICATION_LEVELS } from '../data/educationData';
+import { getTemplateById } from '../templates';
 
 // Initialize pdfMake with fonts
 try {
@@ -96,7 +97,8 @@ function Preview() {
           experiencesCount: Array.isArray(data.experiences) ? data.experiences.length : 'not an array',
           educationCount: Array.isArray(data.education) ? data.education.length : 'not an array',
           referencesCount: Array.isArray(data.references) ? data.references.length : 'not an array',
-          referencesOnRequest: Boolean(data.referencesOnRequest)
+          referencesOnRequest: Boolean(data.referencesOnRequest),
+          templateId: data.templateId || '1' // Default to template 1 if not specified
         });
 
         // Ensure all required sections are present with proper default values
@@ -123,6 +125,7 @@ function Preview() {
           education: Array.isArray(data.education) ? data.education.map(edu => ({
             institution: edu.institution || '',
             degree: edu.degree || '',
+            field: edu.field || '',
             startDate: edu.startDate || '',
             endDate: edu.endDate || '',
             description: edu.description || ''
@@ -134,7 +137,8 @@ function Preview() {
             email: ref.email || '',
             phone: ref.phone || ''
           })) : [],
-          referencesOnRequest: Boolean(data.referencesOnRequest)
+          referencesOnRequest: Boolean(data.referencesOnRequest),
+          templateId: data.templateId || '1' // Default to template 1 if not specified
         };
 
         console.log('Normalized CV data:', normalizedData);
@@ -177,206 +181,9 @@ function Preview() {
   };
 
   const getCompletionPercentage = () => {
+    if (!completionStatus) return 0;
     const completed = Object.values(completionStatus).filter(Boolean).length;
     return Math.round((completed / Object.keys(completionStatus).length) * 100);
-  };
-
-  const generatePdfDefinition = () => {
-    if (!cv) return null;
-
-    const sections = [];
-
-    // Personal Information - Centered at the top
-    sections.push(
-      {
-        text: cv.personalInfo?.fullName,
-        alignment: 'center',
-        fontSize: 16,
-        bold: true,
-        margin: [0, 0, 0, 5]
-      },
-      {
-        text: cv.personalInfo?.location,
-        alignment: 'center',
-        fontSize: 11,
-        margin: [0, 0, 0, 5]
-      },
-      {
-        text: `${cv.personalInfo?.phone} • ${cv.personalInfo?.email}`,
-        alignment: 'center',
-        fontSize: 11,
-        margin: [0, 0, 0, 20]
-      }
-    );
-
-    // Personal Statement
-    sections.push(
-      { 
-        text: 'Personal Statement',
-        style: 'sectionHeader',
-        margin: [0, 0, 0, 10]
-      },
-      {
-        text: cv.personalStatement,
-        margin: [0, 0, 0, 20]
-      }
-    );
-
-    // Skills
-    if (cv.skills && cv.skills.length > 0) {
-      sections.push(
-        { 
-          text: 'Key Skills',
-          style: 'sectionHeader',
-          margin: [0, 0, 0, 10]
-        }
-      );
-      
-      // Create a two-column layout for skills
-      const skillItems = cv.skills.map(skill => `${skill.skill} - ${skill.level}`);
-      
-      sections.push({
-        columns: [
-          {
-            width: '*',
-            ul: skillItems.filter((_, i) => i % 2 === 0)
-          },
-          {
-            width: '*',
-            ul: skillItems.filter((_, i) => i % 2 === 1)
-          }
-        ],
-        margin: [0, 0, 0, 20]
-      });
-    }
-
-    // Experience
-    if (cv.experiences && cv.experiences.length > 0) {
-      sections.push(
-        { 
-          text: 'Employment History',
-          style: 'sectionHeader',
-          margin: [0, 0, 0, 10]
-        }
-      );
-      
-      cv.experiences.forEach(exp => {
-        sections.push(
-          {
-            text: exp.position,
-            style: 'subsectionHeader',
-            margin: [0, 10, 0, 0]
-          },
-          {
-            text: exp.company,
-            fontSize: 12,
-            italic: true,
-            margin: [0, 0, 0, 5]
-          },
-          {
-            text: `${exp.startDate || ''} - ${exp.endDate || 'Present'}`,
-            fontSize: 10,
-            color: '#666666',
-            margin: [0, 0, 0, 5]
-          },
-          {
-            text: exp.description,
-            margin: [0, 0, 0, 15]
-          }
-        );
-      });
-    }
-
-    // Education
-    if (cv.education && cv.education.length > 0) {
-      sections.push(
-        { 
-          text: 'Education',
-          style: 'sectionHeader',
-          margin: [0, 0, 0, 10]
-        }
-      );
-      
-      cv.education.forEach(edu => {
-        sections.push(
-          {
-            text: edu.institution,
-            style: 'subsectionHeader',
-            margin: [0, 10, 0, 0]
-          },
-          {
-            text: getQualificationLabel(edu.degree) + (edu.field ? ` - ${edu.field}` : ''),
-            fontSize: 12,
-            italic: true,
-            margin: [0, 0, 0, 5]
-          },
-          {
-            text: `${edu.startDate || ''} - ${edu.endDate || 'Present'}`,
-            fontSize: 10,
-            color: '#666666',
-            margin: [0, 0, 0, 5]
-          },
-          {
-            text: edu.description,
-            margin: [0, 0, 0, 15]
-          }
-        );
-      });
-    }
-
-    // References
-    sections.push(
-      { 
-        text: 'References',
-        style: 'sectionHeader',
-        margin: [0, 0, 0, 10]
-      }
-    );
-    
-    if (cv.referencesOnRequest) {
-      sections.push(
-        {
-          text: 'References available on request.',
-          margin: [0, 0, 0, 20],
-          italics: true
-        }
-      );
-    } else if (cv.references?.length > 0) {
-      const referenceItems = cv.references.map(ref => {
-        return [
-          `${ref.name} - ${ref.position}`,
-          `${ref.company}`,
-          `Email: ${ref.email}`,
-          `Phone: ${ref.phone}`
-        ].join('\n');
-      });
-      
-      sections.push({
-        ul: referenceItems,
-        margin: [0, 0, 0, 20]
-      });
-    }
-
-    return {
-      content: sections,
-      styles: {
-        sectionHeader: {
-          fontSize: 14,
-          bold: true,
-          margin: [0, 15, 0, 10],
-          color: '#000000'
-        },
-        subsectionHeader: {
-          fontSize: 13,
-          bold: true
-        }
-      },
-      defaultStyle: {
-        fontSize: 11,
-        lineHeight: 1.3
-      },
-      pageMargins: [40, 40, 40, 40]
-    };
   };
 
   const handleDownload = async () => {
@@ -384,38 +191,10 @@ function Preview() {
       setIsGeneratingPDF(true);
       setError('');
 
-      // Try using pdfMake first
-      if (pdfMake && pdfMake.createPdf) {
-        try {
-          const docDefinition = generatePdfDefinition();
-          if (!docDefinition) {
-            throw new Error('Failed to generate PDF definition');
-          }
-
-          console.log('Creating PDF with definition:', docDefinition);
-
-          // Generate and download PDF
-          await new Promise((resolve, reject) => {
-            try {
-              const pdfDocGenerator = pdfMake.createPdf(docDefinition);
-              pdfDocGenerator.download('my-cv.pdf', resolve, reject);
-            } catch (err) {
-              console.error('PDF creation error:', err);
-              reject(err);
-            }
-          });
-          
-          return; // Exit if PDF generation successful
-        } catch (err) {
-          console.error('PDFMake error:', err);
-          // Fall through to screenshot method
-        }
-      }
-      
-      // Fallback to screenshot method if pdfMake fails
+      // Try using html2canvas to capture the template
       if (cvContentRef.current) {
         try {
-          console.log('Using fallback screenshot method');
+          console.log('Using html2canvas to capture template');
           const canvas = await html2canvas(cvContentRef.current, {
             scale: 2,
             useCORS: true,
@@ -423,17 +202,31 @@ function Preview() {
           });
           
           const imgData = canvas.toDataURL('image/png');
-          const link = document.createElement('a');
-          link.href = imgData;
-          link.download = 'my-cv.png';
-          link.click();
+          const pdf = new window.jspdf.jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+          });
+          
+          const imgWidth = 210; // A4 width in mm
+          const imgHeight = canvas.height * imgWidth / canvas.width;
+          
+          pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+          pdf.save('my-cv.pdf');
+          
+          return; // Exit if PDF generation successful
         } catch (err) {
-          console.error('Screenshot error:', err);
-          throw new Error('Failed to generate image. Please try printing instead.');
+          console.error('html2canvas error:', err);
+          // Fall through to link download method
         }
-      } else {
-        throw new Error('CV content not found. Please try printing instead.');
       }
+      
+      // Final fallback method
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(new Blob(['Could not generate PDF. Please try printing instead.'], {type: 'text/plain'}));
+      link.download = 'cv-download-error.txt';
+      link.click();
+      
     } catch (err) {
       console.error('Download error:', err);
       setError(err.message || 'An error occurred while generating your CV. Please try printing instead.');
@@ -494,9 +287,12 @@ function Preview() {
   }
 
   console.log('Rendering CV preview with data:', cv);
-
+  
+  // Get the appropriate template component based on templateId
+  const TemplateComponent = getTemplateById(cv.templateId);
+  
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 max-w-5xl">
       <div className="bg-white rounded-lg shadow-lg p-8">
         <div className="text-center mb-8 print:hidden">
           <h1 className="text-3xl font-bold text-[#2c3e50] mb-2">
@@ -521,7 +317,7 @@ function Preview() {
           </div>
           {/* Section Status */}
           <div className="mt-4 grid grid-cols-2 gap-4">
-            {Object.entries(completionStatus).map(([section, isComplete]) => (
+            {completionStatus && Object.entries(completionStatus).map(([section, isComplete]) => (
               <div key={section} className="flex items-center">
                 <span className={`w-4 h-4 rounded-full mr-2 ${isComplete ? 'bg-green-500' : 'bg-gray-300'}`}></span>
                 <span className="capitalize">{section.replace(/([A-Z])/g, ' $1').trim()}</span>
@@ -530,108 +326,27 @@ function Preview() {
           </div>
         </div>
 
-        {/* CV Content */}
-        <div ref={cvContentRef} id="cv-printable-content" className="space-y-8 print:space-y-6">
-          {/* Personal Information - Display differently in print vs screen */}
-          <section className="print:hidden">
-            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4">Personal Information</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="font-semibold">Name:</p>
-                <p>{cv.personalInfo?.fullName}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Email:</p>
-                <p>{cv.personalInfo?.email}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Phone:</p>
-                <p>{cv.personalInfo?.phone}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Location:</p>
-                <p>{cv.personalInfo?.location}</p>
-              </div>
-            </div>
-          </section>
+        {/* Template Selection */}
+        <div className="mb-8 print:hidden">
+          <h2 className="text-lg font-semibold mb-2">Selected Template</h2>
+          <div className="p-2 border border-gray-300 rounded-md inline-block">
+            <span className="font-medium">
+              {cv.templateId === '1' ? 'Professional' : 
+               cv.templateId === '2' ? 'Creative' : 
+               cv.templateId === '3' ? 'Executive' : 
+               cv.templateId === '4' ? 'Academic' : 'Custom'}
+            </span>
+          </div>
+          <p className="text-sm text-gray-500 mt-1">
+            To change the template, go back to the Templates page.
+          </p>
+        </div>
 
-          {/* Print-only centered header */}
-          <section className="hidden print:block print:mb-8 print:text-center">
-            <h1 className="text-2xl font-bold">{cv.personalInfo?.fullName}</h1>
-            <p className="mt-1">{cv.personalInfo?.location}</p>
-            <p className="mt-1">{cv.personalInfo?.phone} • {cv.personalInfo?.email}</p>
-          </section>
-
-          {/* Personal Statement */}
-          <section>
-            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4 print:text-xl">Personal Statement</h2>
-            <p className="text-gray-700 whitespace-pre-wrap print:text-sm">{cv.personalStatement}</p>
-          </section>
-
-          {/* Skills */}
-          <section>
-            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4 print:text-xl">Key Skills</h2>
-            <div className="grid grid-cols-2 gap-4 print:text-sm">
-              {cv.skills?.map((skill, index) => (
-                <div key={index} className="flex items-center">
-                  <span className="font-semibold">{skill.skill}</span>
-                  <span className="ml-2 text-gray-600">- {skill.level}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Experience */}
-          <section>
-            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4 print:text-xl">Employment History</h2>
-            {cv.experiences?.map((exp, index) => (
-              <div key={index} className="mb-6">
-                <h3 className="text-xl font-semibold print:text-lg">{exp.position}</h3>
-                <p className="text-gray-600">{exp.company}</p>
-                <p className="text-gray-500">
-                  {exp.startDate} - {exp.endDate || 'Present'}
-                </p>
-                <p className="mt-2 whitespace-pre-wrap print:text-sm">{exp.description}</p>
-              </div>
-            ))}
-          </section>
-
-          {/* Education */}
-          <section>
-            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4 print:text-xl">Education</h2>
-            {cv.education?.map((edu, index) => (
-              <div key={index} className="mb-6">
-                <h3 className="text-xl font-semibold print:text-lg">{edu.institution}</h3>
-                <p className="text-gray-600">{getQualificationLabel(edu.degree)} {edu.field ? `- ${edu.field}` : ''}</p>
-                <p className="text-gray-500">
-                  {edu.startDate} - {edu.endDate || 'Present'}
-                </p>
-                <p className="mt-2 whitespace-pre-wrap print:text-sm">{edu.description}</p>
-              </div>
-            ))}
-          </section>
-
-          {/* References */}
-          <section>
-            <h2 className="text-2xl font-bold text-[#2c3e50] mb-4 print:text-xl">References</h2>
-            {cv.referencesOnRequest ? (
-              <div className="bg-gray-50 p-4 rounded-lg print:bg-transparent print:p-0 print:text-sm">
-                <p className="font-semibold italic">References available on request.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:text-sm">
-                {cv.references?.map((ref, index) => (
-                  <div key={index} className="bg-gray-50 p-4 rounded-lg print:bg-transparent print:p-0">
-                    <p className="font-semibold">{ref.name}</p>
-                    <p className="text-gray-600">{ref.position}</p>
-                    <p className="text-gray-600">{ref.company}</p>
-                    <p className="text-gray-500">{ref.email}</p>
-                    <p className="text-gray-500">{ref.phone}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+        {/* CV Content with the selected template */}
+        <div ref={cvContentRef} id="cv-printable-content" className="border border-gray-200 p-6 rounded-lg print:border-0 print:p-0 print:shadow-none bg-white print:w-full print:max-w-none">
+          <div className="max-w-4xl mx-auto print:mx-0 print:max-w-none print:w-full print:p-0">
+            <TemplateComponent cv={cv} />
+          </div>
         </div>
 
         {/* Action Buttons */}

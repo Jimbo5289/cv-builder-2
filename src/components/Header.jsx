@@ -23,6 +23,7 @@ const ChevronDownIcon = ({ className }) => (
 const analysisItems = [
   { name: 'Job-Tailored Analysis', href: '/cv-analyse', description: 'Compare your CV to a specific job description' },
   { name: 'General CV Analysis', href: '/cv-analyse-by-role', description: 'Analyze your CV for general effectiveness or by role type' },
+  { name: 'LinkedIn Profile Review', href: '/linkedin-review', description: 'Optimize your LinkedIn profile to attract recruiters' },
 ];
 
 const Header = () => {

@@ -1,6 +1,7 @@
 import { useAuth } from '../context/AuthContext';
 import CVUploader from '../components/CVUploader';
 import { Link } from 'react-router-dom';
+import { FiFileText, FiSearch, FiLinkedin } from 'react-icons/fi';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -36,6 +37,45 @@ export default function Dashboard() {
                 Create New CV
               </Link>
             </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">AI Analysis Tools</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">
+            Our AI-powered tools help you optimize your professional presence and stand out to recruiters.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link
+              to="/cv-analyse"
+              className="flex items-start p-4 border border-blue-100 dark:border-blue-900 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+            >
+              <FiFileText className="mt-1 mr-3 text-blue-500 flex-shrink-0" size={20} />
+              <div>
+                <h3 className="font-medium text-gray-900 dark:text-white">CV Analysis</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Analyze your CV against job descriptions</p>
+              </div>
+            </Link>
+            <Link
+              to="/cv-analyse-by-role"
+              className="flex items-start p-4 border border-blue-100 dark:border-blue-900 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+            >
+              <FiSearch className="mt-1 mr-3 text-blue-500 flex-shrink-0" size={20} />
+              <div>
+                <h3 className="font-medium text-gray-900 dark:text-white">Role-Based Analysis</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Evaluate your CV for specific roles</p>
+              </div>
+            </Link>
+            <Link
+              to="/linkedin-review"
+              className="flex items-start p-4 border border-blue-100 dark:border-blue-900 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors md:col-span-2"
+            >
+              <FiLinkedin className="mt-1 mr-3 text-blue-500 flex-shrink-0" size={20} />
+              <div>
+                <h3 className="font-medium text-gray-900 dark:text-white">LinkedIn Profile Review</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Optimize your LinkedIn profile to attract recruiters and opportunities</p>
+              </div>
+            </Link>
           </div>
         </div>
 

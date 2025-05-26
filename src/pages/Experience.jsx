@@ -66,6 +66,11 @@ function Experience() {
   const handleInputChange = (index, field, value) => {
     const updatedExperiences = experiences.map((exp, i) => {
       if (i === index) {
+        // For date fields, ensure the date is properly formatted
+        if (field === 'startDate' || field === 'endDate') {
+          // This ensures we store dates in YYYY-MM-DD format
+          return { ...exp, [field]: value }; 
+        }
         return { ...exp, [field]: value };
       }
       return exp;
@@ -200,20 +205,22 @@ function Experience() {
                     <label className="block text-gray-700 dark:text-gray-200 font-medium mb-2">Start Date</label>
                     <input
                       type="date"
-                      value={experience.startDate}
+                      value={experience.startDate || ''}
                       onChange={(e) => handleInputChange(index, 'startDate', e.target.value)}
                       className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#2c3e50] dark:focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Format: YYYY-MM-DD</p>
                   </div>
 
                   <div>
                     <label className="block text-gray-700 dark:text-gray-200 font-medium mb-2">End Date</label>
                     <input
                       type="date"
-                      value={experience.endDate}
+                      value={experience.endDate || ''}
                       onChange={(e) => handleInputChange(index, 'endDate', e.target.value)}
                       className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#2c3e50] dark:focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Leave empty for "Present"</p>
                   </div>
                 </div>
 

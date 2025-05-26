@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import TemplateDetail from '../components/TemplateDetail';
 
 // Remove PDF imports that cause errors
 // import professionalPdf from '../assets/cv-templates-pdf/professional_cv.pdf';
@@ -12,6 +13,7 @@ function Templates() {
       id: 1,
       name: "Professional",
       image: "/images/templates/professional.svg",
+      photo: "/images/templates/photos/professional.jpg",
       description: "A clean and traditional layout, perfect for corporate roles.",
       // Instead of PDF, use a function to handle download
       // pdf: professionalPdf,
@@ -21,6 +23,7 @@ function Templates() {
       id: 2,
       name: "Creative",
       image: "/images/templates/creative.svg",
+      photo: "/images/templates/photos/creative.jpg",
       description: "A modern design with visual elements for creative industries.",
       // pdf: creativePdf,
       color: "#E24A8B", // Pink color for creative template
@@ -29,6 +32,7 @@ function Templates() {
       id: 3,
       name: "Executive",
       image: "/images/templates/executive.svg",
+      photo: "/images/templates/photos/executive.jpg",
       description: "A sophisticated format for senior leadership positions.",
       // pdf: executivePdf,
       color: "#4AE2C4", // Teal color for executive template
@@ -37,6 +41,7 @@ function Templates() {
       id: 4,
       name: "Academic",
       image: "/images/templates/academic.svg",
+      photo: "/images/templates/photos/academic.jpg",
       description: "Tailored for academic and research positions.",
       // pdf: academicPdf,
       color: "#E2A64A", // Orange color for academic template
@@ -84,11 +89,19 @@ function Templates() {
             className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition h-full"
           >
             <div className="relative pb-[56.25%]">
-              <img
-                src={template.image}
-                alt={`${template.name} Template`}
-                className="absolute w-full h-full object-cover"
-              />
+              {template.photo ? (
+                <img
+                  src={template.photo}
+                  alt={`${template.name} Template Example`}
+                  className="absolute w-full h-full object-cover"
+                />
+              ) : (
+                <img
+                  src={template.image}
+                  alt={`${template.name} Template`}
+                  className="absolute w-full h-full object-cover"
+                />
+              )}
             </div>
             <div className="p-6">
               <h3 className="text-xl font-semibold text-[#2c3e50] dark:text-white mb-2">
@@ -114,6 +127,7 @@ function Templates() {
                 >
                   Use This Template
                 </Link>
+                <TemplateDetail template={template} />
               </div>
             </div>
           </div>
