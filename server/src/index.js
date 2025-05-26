@@ -4,6 +4,7 @@ const { validateEnv } = require('./config/env');
 const { logger } = require('./config/logger');
 const database = require('./config/database');
 const { setupSecurity } = require('./middleware/security');
+const { initialize: initializeDatabase } = require('./scripts/db-init');
 const authRoutes = require('./routes/auth');
 const cvRoutes = require('./routes/cv');
 const checkoutRoutes = require('./routes/checkout');
@@ -12,6 +13,8 @@ const contactRoutes = require('./routes/contact');
 const paymentRoutes = require('./routes/payment');
 const subscriptionRoutes = require('./routes/subscription');
 const twoFactorRoutes = require('./routes/twoFactor');
+const templateRoutes = require('./routes/templates');
+const profileRoutes = require('./routes/profile');
 const { stripe } = require('./config/stripe');
 const net = require('net');
 const { getSentry } = require('./config/sentry');
@@ -111,6 +114,8 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/2fa', twoFactorRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/templates', templateRoutes);
+app.use('/api/profile', profileRoutes);
 
 // Webhook route must come after raw body parser
 app.use('/api/webhook/stripe', webhookRoutes);
@@ -198,62 +203,35 @@ app.use((req, res) => {
 const startServer = async () => {
   try {
     // Get the default port from environment or fallback to 3005
-    const defaultPort = parseInt(process.env.PORT || '3005');
+    const port = process.env.PORT || 3005;
     
-    // Check if port is available, and if not, forcefully free it
-    let port = defaultPort;
-    let isPortAvailable = await checkPort(port);
+    // Initialize database connection
+    await database.initDatabase();
+    logger.info('Database connection initialized');
     
-    // If DISABLE_PORT_FALLBACK=true, force free the port rather than trying alternatives
-    if (!isPortAvailable && process.env.DISABLE_PORT_FALLBACK === 'true') {
-      logger.warn(`Port ${port} is already in use. Forcefully terminating processes...`);
-      
-      try {
-        // Forcefully kill the process holding this port
-        execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null || true`, { stdio: 'inherit' });
-        logger.info(`Terminated process using port ${port}`);
-        
-        // Wait for the port to be released
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Check again if port is available
-        isPortAvailable = await checkPort(port);
-        if (!isPortAvailable) {
-          logger.error(`Failed to free port ${port} after attempting to kill processes`);
-        }
-      } catch (error) {
-        logger.error(`Error freeing port ${port}: ${error.message}`);
-      }
-    } 
-    // Else, try to find an alternative port if fallback is allowed
-    else if (!isPortAvailable && process.env.DISABLE_PORT_FALLBACK !== 'true') {
-      logger.warn(`Port ${port} is in use. Attempting to find an available port...`);
-      
-      try {
-        port = await findAvailablePort(defaultPort);
-        logger.info(`Found available port: ${port}`);
-      } catch (error) {
-        logger.error(`Could not find available port: ${error.message}`);
-        throw error;
-      }
-    }
+    // Initialize database with default data
+    await initializeDatabase();
+    logger.info('Database initialized with default data');
+    
+    // Check if the port is available
+    const availablePort = await findAvailablePort(port);
     
     // Create HTTP server
-    const server = app.listen(port, () => {
+    const server = app.listen(availablePort, () => {
       logger.info('Server started successfully', {
         port,
-        url: `http://localhost:${port}`,
+        url: `http://localhost:${availablePort}`,
         environment: process.env.NODE_ENV || 'development',
         frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173'
       });
       
-      if (port !== defaultPort) {
-        console.log(`⚠️  Port ${defaultPort} was already in use.`);
-        console.log(`   Server is running on port ${port} instead.`);
+      if (availablePort !== port) {
+        console.log(`⚠️  Port ${port} was already in use.`);
+        console.log(`   Server is running on port ${availablePort} instead.`);
       } else {
-        console.log(`🚀 Server running on port ${port}`);
+        console.log(`🚀 Server running on port ${availablePort}`);
       }
-      console.log(`   Access your API at: http://localhost:${port}`);
+      console.log(`   Access your API at: http://localhost:${availablePort}`);
     });
     
     // Register graceful shutdown handlers

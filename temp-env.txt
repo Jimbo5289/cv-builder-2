@@ -1,0 +1,28 @@
+# Database Configuration
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/cv_builder
+
+# Server Configuration
+NODE_ENV=development
+PORT=3005
+
+# JWT Auth
+JWT_SECRET=your_jwt_secret_key_here
+JWT_EXPIRY=1d
+JWT_REFRESH_SECRET=your_refresh_secret_key_here
+JWT_REFRESH_EXPIRY=7d
+
+# Admin User
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=admin123
+
+# Development Settings
+SKIP_AUTH_CHECK=true
+MOCK_SUBSCRIPTION_DATA=true
+FRONTEND_URL=http://localhost:5173
+
+# Stripe Settings (Mock for development)
+STRIPE_PUBLISHABLE_KEY=pk_test_mock_key
+STRIPE_SECRET_KEY=sk_test_mock_key
+STRIPE_PRICE_MONTHLY=price_monthly
+STRIPE_PRICE_ANNUAL=price_annual
+CORS_ALLOW_ORIGIN=* 

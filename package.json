@@ -36,6 +36,7 @@
     "fix:setup": "node fix-safari-simpler.js"
   },
   "dependencies": {
+    "@prisma/client": "^6.8.2",
     "@sentry/react": "^9.22.0",
     "@stripe/stripe-js": "^7.3.0",
     "axios": "^1.4.0",
