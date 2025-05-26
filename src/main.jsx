@@ -9,9 +9,17 @@ import { ServerProvider } from './context/ServerContext';
 import AuthProvider from './context/AuthContext';
 import { TemplateProvider } from './context/TemplateContext';
 import { setupErrorHandler } from './utils/errorHandler';
+import { initSentry } from './config/sentry';
 
 // Debug - log the loading process
 console.log('Main.jsx loading - Step 1: Before any initialization');
+
+// Initialize Sentry for error tracking
+try {
+  initSentry();
+} catch (e) {
+  console.error('Failed to initialize Sentry:', e);
+}
 
 // Safari detection
 const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
