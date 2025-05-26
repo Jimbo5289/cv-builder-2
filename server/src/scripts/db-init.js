@@ -6,7 +6,7 @@
  */
 
 const { logger } = require('../config/logger');
-const { prisma } = require('../config/database');
+const database = require('../config/database');
 const { initializeDefaultTemplates } = require('../services/templateService');
 const bcrypt = require('bcryptjs');
 
@@ -17,11 +17,17 @@ async function initialize() {
   try {
     logger.info('Starting database initialization');
     
+    // Make sure database client is available
+    if (!database.client) {
+      logger.error('Database client not initialized');
+      return;
+    }
+    
     // Create default admin user if it doesn't exist
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
     
-    const adminExists = await prisma.user.findUnique({
+    const adminExists = await database.client.user.findUnique({
       where: { email: adminEmail }
     });
     
@@ -31,7 +37,7 @@ async function initialize() {
       // Hash the password
       const hashedPassword = await bcrypt.hash(adminPassword, 12);
       
-      await prisma.user.create({
+      await database.client.user.create({
         data: {
           email: adminEmail,
           password: hashedPassword,

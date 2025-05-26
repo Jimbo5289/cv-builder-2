@@ -33,7 +33,12 @@
     "fix": "node fix-safari.js",
     "fix:all": "node fix-safari.js",
     "fix:simple": "node fix-safari-simpler.js",
-    "fix:setup": "node fix-safari-simpler.js"
+    "fix:setup": "node fix-safari-simpler.js",
+    "memory:check": "node check-memory.js",
+    "memory:clean": "sudo ./server/clear-memory.sh",
+    "memory:monitor": "NODE_OPTIONS=\"--expose-gc\" node server/memory-monitor.js",
+    "start:optimized": "NODE_OPTIONS=\"--max-old-space-size=4096 --expose-gc\" node start-reliable.js",
+    "start:monitored": "node server-monitor.js"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",

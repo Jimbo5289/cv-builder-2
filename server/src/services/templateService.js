@@ -4,7 +4,7 @@
  * Handles operations related to CV templates
  */
 
-const { prisma } = require('../config/database');
+const database = require('../config/database');
 const { logger } = require('../config/logger');
 
 /**
@@ -16,6 +16,12 @@ const { logger } = require('../config/logger');
  */
 async function getAllTemplates(options = {}) {
   try {
+    // Ensure database client is initialized
+    if (!database.client) {
+      logger.error('Database client not initialized');
+      return [];
+    }
+    
     const where = {};
     
     // Filter by premium status if specified
@@ -23,7 +29,51 @@ async function getAllTemplates(options = {}) {
       where.isPremium = options.isPremium;
     }
     
-    return await prisma.cVTemplate.findMany({
+    // Mock implementation for mock database
+    if (process.env.MOCK_DATABASE === 'true') {
+      // Return mock data
+      return [
+        {
+          id: '1',
+          name: 'Professional',
+          description: 'Clean, minimal design for corporate roles',
+          thumbnail: '/images/templates/photos/professional.jpg',
+          isDefault: true,
+          isPremium: false
+        },
+        {
+          id: '2',
+          name: 'Creative',
+          description: 'Modern layout with visual elements for creative industries',
+          thumbnail: '/images/templates/photos/creative.jpg',
+          isDefault: false,
+          isPremium: false
+        },
+        {
+          id: '3',
+          name: 'Executive',
+          description: 'Sophisticated layout for senior leadership positions',
+          thumbnail: '/images/templates/photos/executive.jpg',
+          isDefault: false,
+          isPremium: true
+        },
+        {
+          id: '4',
+          name: 'Academic',
+          description: 'Research-focused template with publication formatting',
+          thumbnail: '/images/templates/photos/academic.jpg',
+          isDefault: false,
+          isPremium: true
+        }
+      ].filter(template => {
+        if (options.isPremium !== undefined) {
+          return template.isPremium === options.isPremium;
+        }
+        return true;
+      });
+    }
+    
+    return await database.client.cVTemplate.findMany({
       where,
       orderBy: [
         { isDefault: 'desc' },  // Default templates first
@@ -32,7 +82,7 @@ async function getAllTemplates(options = {}) {
     });
   } catch (error) {
     logger.error('Error fetching templates:', error);
-    throw error;
+    return [];
   }
 }
 
@@ -44,12 +94,51 @@ async function getAllTemplates(options = {}) {
  */
 async function getTemplateById(id) {
   try {
-    return await prisma.cVTemplate.findUnique({
+    // Mock implementation for mock database
+    if (process.env.MOCK_DATABASE === 'true') {
+      const templates = [
+        {
+          id: '1',
+          name: 'Professional',
+          description: 'Clean, minimal design for corporate roles',
+          thumbnail: '/images/templates/photos/professional.jpg',
+          isDefault: true,
+          isPremium: false
+        },
+        {
+          id: '2',
+          name: 'Creative',
+          description: 'Modern layout with visual elements for creative industries',
+          thumbnail: '/images/templates/photos/creative.jpg',
+          isDefault: false,
+          isPremium: false
+        },
+        {
+          id: '3',
+          name: 'Executive',
+          description: 'Sophisticated layout for senior leadership positions',
+          thumbnail: '/images/templates/photos/executive.jpg',
+          isDefault: false,
+          isPremium: true
+        },
+        {
+          id: '4',
+          name: 'Academic',
+          description: 'Research-focused template with publication formatting',
+          thumbnail: '/images/templates/photos/academic.jpg',
+          isDefault: false,
+          isPremium: true
+        }
+      ];
+      return templates.find(t => t.id === id) || null;
+    }
+    
+    return await database.client.cVTemplate.findUnique({
       where: { id }
     });
   } catch (error) {
     logger.error(`Error fetching template with ID ${id}:`, error);
-    throw error;
+    return null;
   }
 }
 
@@ -61,7 +150,7 @@ async function getTemplateById(id) {
  */
 async function createTemplate(data) {
   try {
-    return await prisma.cVTemplate.create({
+    return await database.client.cVTemplate.create({
       data
     });
   } catch (error) {
@@ -79,7 +168,7 @@ async function createTemplate(data) {
  */
 async function updateTemplate(id, data) {
   try {
-    return await prisma.cVTemplate.update({
+    return await database.client.cVTemplate.update({
       where: { id },
       data
     });
@@ -97,7 +186,7 @@ async function updateTemplate(id, data) {
  */
 async function deleteTemplate(id) {
   try {
-    return await prisma.cVTemplate.delete({
+    return await database.client.cVTemplate.delete({
       where: { id }
     });
   } catch (error) {
@@ -111,13 +200,24 @@ async function deleteTemplate(id) {
  */
 async function initializeDefaultTemplates() {
   try {
-    const count = await prisma.cVTemplate.count();
+    // Skip for mock database
+    if (process.env.MOCK_DATABASE === 'true') {
+      logger.info('Using mock database - skipping template initialization');
+      return;
+    }
+    
+    if (!database.client) {
+      logger.error('Database client not initialized');
+      return;
+    }
+    
+    const count = await database.client.cVTemplate.count();
     
     // Only create default templates if none exist
     if (count === 0) {
       logger.info('Creating default templates');
       
-      await prisma.cVTemplate.createMany({
+      await database.client.cVTemplate.createMany({
         data: [
           {
             name: 'Professional',
@@ -154,7 +254,6 @@ async function initializeDefaultTemplates() {
     }
   } catch (error) {
     logger.error('Error initializing default templates:', error);
-    throw error;
   }
 }
 

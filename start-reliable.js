@@ -5,6 +5,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import net from 'net';
+import http from 'http';
+import fetch from 'node-fetch';
 
 // Get current directory
 const __filename = fileURLToPath(import.meta.url);
@@ -65,11 +67,99 @@ async function findAvailablePort(startPort, endPort) {
   return null;
 }
 
+// Make a health check to see if server is running
+async function checkHealth(port) {
+  return new Promise((resolve) => {
+    const req = new URL(`http://localhost:${port}/health`);
+    const options = {
+      method: 'GET',
+      timeout: 5000
+    };
+    
+    const request = http.request(req, options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        try {
+          const responseData = JSON.parse(data);
+          resolve({
+            status: res.statusCode,
+            data: responseData,
+            error: null
+          });
+        } catch (e) {
+          resolve({
+            status: res.statusCode,
+            data: null,
+            error: 'Invalid JSON response'
+          });
+        }
+      });
+    });
+    
+    request.on('error', (error) => {
+      resolve({
+        status: null,
+        data: null,
+        error: error.message
+      });
+    });
+    
+    request.on('timeout', () => {
+      request.destroy();
+      resolve({
+        status: null,
+        data: null,
+        error: 'Request timed out'
+      });
+    });
+    
+    request.end();
+  });
+}
+
+// Clean up temporary files and cached data
+function cleanupTemporaryFiles() {
+  // Directories to clean
+  const tempDirs = [
+    path.join(__dirname, 'server', 'tmp'),
+    path.join(__dirname, 'server', 'logs'),
+    path.join(__dirname, 'node_modules', '.cache')
+  ];
+
+  console.log(`${colors.yellow}Cleaning up temporary files...${colors.reset}`);
+
+  tempDirs.forEach(dir => {
+    if (fs.existsSync(dir)) {
+      try {
+        // Don't delete the directory itself, just its contents
+        const files = fs.readdirSync(dir);
+        files.forEach(file => {
+          const filePath = path.join(dir, file);
+          if (fs.lstatSync(filePath).isDirectory()) {
+            // Skip directories for safety
+            return;
+          }
+          fs.unlinkSync(filePath);
+        });
+        console.log(`${colors.green}✓ Cleaned ${dir}${colors.reset}`);
+      } catch (err) {
+        console.error(`${colors.red}✗ Failed to clean ${dir}: ${err.message}${colors.reset}`);
+      }
+    }
+  });
+}
+
 // Main function
 async function main() {
   console.log(`${colors.blue}╔═════════════════════════════════════════════╗${colors.reset}`);
   console.log(`${colors.blue}║   CV Builder Safe Startup                  ║${colors.reset}`);
   console.log(`${colors.blue}╚═════════════════════════════════════════════╝${colors.reset}`);
+  
+  // Clean up any temporary files
+  cleanupTemporaryFiles();
   
   // Kill all processes on relevant ports
   const backendPorts = [3005, 3006, 3007, 3008, 3009];
@@ -98,69 +188,101 @@ async function main() {
   console.log(`${colors.green}Using backend port: ${backendPort}${colors.reset}`);
   console.log(`${colors.green}Using frontend port: ${frontendPort}${colors.reset}`);
   
-  try {
-    // Start backend server with explicit port and environment variables
-    console.log(`\n${colors.yellow}Starting backend server...${colors.reset}`);
-    const serverProcess = exec(
-      `cd server && PORT=${backendPort} MOCK_SUBSCRIPTION_DATA=true SKIP_AUTH_CHECK=true node src/index.js`,
-      { 
-        env: {
-          ...process.env,
-          PORT: backendPort.toString(),
-          MOCK_SUBSCRIPTION_DATA: 'true',
-          SKIP_AUTH_CHECK: 'true'
-        }
+  // Start the backend server with increased memory limit and enable memory monitoring
+  console.log(`${colors.yellow}Starting backend server...${colors.reset}`);
+  const serverProcess = exec(
+    `cd server && NODE_OPTIONS="--max-old-space-size=4096 --expose-gc" PORT=${backendPort} MEMORY_MONITOR_INTERVAL=300000 MOCK_SUBSCRIPTION_DATA=true SKIP_AUTH_CHECK=true node --require ./memory-monitor.js src/index.js`,
+    (error, stdout, stderr) => {
+      if (error) {
+        console.error(`${colors.red}Backend server error: ${error.message}${colors.reset}`);
+        return;
       }
-    );
-    
-    // Wait for backend to start
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Check if backend is actually running
-    console.log(`${colors.yellow}Checking if backend started successfully...${colors.reset}`);
-    try {
-      const response = execSync(`curl -s http://localhost:${backendPort}/health`, { encoding: 'utf8' });
-      console.log(`${colors.green}Backend health check: ${response}${colors.reset}`);
-    } catch (error) {
-      console.log(`${colors.yellow}Backend health check failed, but continuing anyway...${colors.reset}`);
+      if (stderr) {
+        console.error(`${colors.red}Backend stderr: ${stderr}${colors.reset}`);
+      }
     }
-    
-    // Start frontend with proper environment variables
-    console.log(`\n${colors.yellow}Starting frontend...${colors.reset}`);
-    const frontendProcess = exec(
-      `VITE_API_URL=http://localhost:${backendPort} VITE_MOCK_SUBSCRIPTION_DATA=true VITE_SKIP_AUTH_CHECK=true npm run dev -- --port ${frontendPort} --host`,
-      {
-        env: {
-          ...process.env,
-          VITE_API_URL: `http://localhost:${backendPort}`,
-          VITE_MOCK_SUBSCRIPTION_DATA: 'true',
-          VITE_SKIP_AUTH_CHECK: 'true'
-        }
+  );
+  
+  // Set up auto-restart for the server process
+  let serverRestarts = 0;
+  const maxServerRestarts = 5;
+  
+  serverProcess.on('exit', (code) => {
+    if (code !== 0 && serverRestarts < maxServerRestarts) {
+      serverRestarts++;
+      console.log(`${colors.yellow}Backend server exited with code ${code}. Restarting (${serverRestarts}/${maxServerRestarts})...${colors.reset}`);
+      
+      // Wait a moment before restarting
+      setTimeout(() => {
+        const restartProcess = exec(
+          `cd server && NODE_OPTIONS="--max-old-space-size=4096 --expose-gc" PORT=${backendPort} MEMORY_MONITOR_INTERVAL=300000 MOCK_SUBSCRIPTION_DATA=true SKIP_AUTH_CHECK=true node --require ./memory-monitor.js src/index.js`
+        );
+        
+        // Redirect output
+        restartProcess.stdout.pipe(process.stdout);
+        restartProcess.stderr.pipe(process.stderr);
+      }, 5000);
+    } else if (serverRestarts >= maxServerRestarts) {
+      console.error(`${colors.red}Backend server failed to restart after ${maxServerRestarts} attempts.${colors.reset}`);
+    }
+  });
+  
+  // Wait for the server to start
+  console.log(`${colors.yellow}Checking if backend started successfully...${colors.reset}`);
+  let serverStarted = false;
+  for (let i = 0; i < 5; i++) {
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const response = await fetch(`http://localhost:${backendPort}/health`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`${colors.green}Backend health check: ${JSON.stringify(data)}${colors.reset}`);
+        serverStarted = true;
+        break;
       }
-    );
-    
-    // Pipe stdout and stderr
-    serverProcess.stdout.pipe(process.stdout);
-    serverProcess.stderr.pipe(process.stderr);
-    frontendProcess.stdout.pipe(process.stdout);
-    frontendProcess.stderr.pipe(process.stderr);
-    
-    console.log(`\n${colors.green}Services started!${colors.reset}`);
-    console.log(`${colors.green}Backend: http://localhost:${backendPort}${colors.reset}`);
-    console.log(`${colors.green}Frontend: http://localhost:${frontendPort}${colors.reset}`);
-    console.log(`${colors.green}Open http://localhost:${frontendPort} in your browser.${colors.reset}`);
-    console.log(`${colors.green}Press Ctrl+C to stop all processes.${colors.reset}`);
-    
-    // Handle process termination
-    process.on('SIGINT', () => {
-      console.log(`\n${colors.yellow}Shutting down all processes...${colors.reset}`);
-      killProcessesOnPorts([...backendPorts, ...frontendPorts]);
-      process.exit(0);
-    });
-  } catch (error) {
-    console.error(`${colors.red}Error starting services: ${error.message}${colors.reset}`);
-    process.exit(1);
+    } catch (error) {
+      // Continue trying
+    }
   }
+  
+  if (!serverStarted) {
+    console.log(`${colors.yellow}Backend health check failed, but continuing anyway...${colors.reset}`);
+  }
+  
+  // Start the frontend
+  console.log(`${colors.yellow}Starting frontend...${colors.reset}`);
+  const frontendProcess = exec(
+    `VITE_API_URL=http://localhost:${backendPort} npm run dev -- --port ${frontendPort} --host`,
+    (error, stdout, stderr) => {
+      if (error) {
+        console.error(`${colors.red}Frontend error: ${error.message}${colors.reset}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`${colors.red}Frontend stderr: ${stderr}${colors.reset}`);
+      }
+    }
+  );
+  
+  // Print success message
+  console.log(`${colors.green}Services started!${colors.reset}`);
+  console.log(`${colors.green}Backend: http://localhost:${backendPort}${colors.reset}`);
+  console.log(`${colors.green}Frontend: http://localhost:${frontendPort}${colors.reset}`);
+  console.log(`${colors.green}Open http://localhost:${frontendPort} in your browser.${colors.reset}`);
+  console.log(`${colors.yellow}Press Ctrl+C to stop all processes.${colors.reset}`);
+  
+  // Handle process exit
+  process.on('SIGINT', () => {
+    console.log(`${colors.yellow}Stopping processes...${colors.reset}`);
+    killProcessesOnPorts([...backendPorts, ...frontendPorts]);
+    process.exit(0);
+  });
+  
+  // Redirect output from child processes to parent
+  serverProcess.stdout.pipe(process.stdout);
+  serverProcess.stderr.pipe(process.stderr);
+  frontendProcess.stdout.pipe(process.stdout);
+  frontendProcess.stderr.pipe(process.stderr);
 }
 
 // Run the main function

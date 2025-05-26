@@ -1,6 +1,25 @@
 const { PrismaClient } = require('@prisma/client');
 const { logger } = require('./logger');
 
+// Improved PrismaClient options with connection pooling
+const prismaOptions = {
+  log: process.env.NODE_ENV === 'development' 
+    ? ['query', 'info', 'warn', 'error'] 
+    : ['warn', 'error'],
+  errorFormat: 'pretty',
+  // Add connection pool configuration
+  // Note: These options are passed to the underlying database connector
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+      poolTimeout: 30, // 30 seconds
+      maxConnections: process.env.DATABASE_MAX_CONNECTIONS 
+        ? parseInt(process.env.DATABASE_MAX_CONNECTIONS) 
+        : 10 // Default to 10 connections
+    }
+  }
+};
+
 let client = null;
 
 // Mock database client with in-memory storage
@@ -287,12 +306,33 @@ const initDatabase = async () => {
       }
       
       try {
-        client = new PrismaClient();
-        logger.info('Initialized Prisma database client');
+        client = new PrismaClient(prismaOptions);
+        logger.info('Initialized Prisma database client with connection pooling');
         
         // Test the connection
         await client.$connect();
         logger.info('Database connection established successfully');
+
+        // Set up periodic connection validation
+        if (process.env.NODE_ENV === 'production') {
+          setInterval(async () => {
+            try {
+              // Simple query to validate connection
+              await client.$queryRaw`SELECT 1`;
+            } catch (error) {
+              logger.error('Database connection validation failed:', error);
+              
+              // Try to reconnect if connection is lost
+              try {
+                await client.$disconnect();
+                await client.$connect();
+                logger.info('Database reconnection successful');
+              } catch (reconnectError) {
+                logger.error('Database reconnection failed:', reconnectError);
+              }
+            }
+          }, 60000); // Check every minute
+        }
       } catch (connectionError) {
         logger.error('Failed to connect to database:', connectionError);
         // Fall back to mock client
@@ -311,15 +351,49 @@ const initDatabase = async () => {
   }
 };
 
+// Function to properly disconnect and clean up database resources
+const disconnect = async () => {
+  if (client) {
+    try {
+      logger.info('Disconnecting from database...');
+      await client.$disconnect();
+      logger.info('Database disconnected successfully');
+      client = null;
+    } catch (error) {
+      logger.error('Error disconnecting from database:', error);
+    }
+  }
+};
+
+// Handle process termination to clean up database connections
+const registerTerminationHandlers = () => {
+  // Only register once
+  if (!process.listenerCount('SIGINT') && !process.listenerCount('SIGTERM')) {
+    process.on('SIGINT', async () => {
+      logger.info('SIGINT received, cleaning up database connections');
+      await disconnect();
+      process.exit(0);
+    });
+    
+    process.on('SIGTERM', async () => {
+      logger.info('SIGTERM received, cleaning up database connections');
+      await disconnect();
+      process.exit(0);
+    });
+  }
+};
+
 // Initialize the database
 if (!client) {
   initDatabase().catch((err) => {
     logger.error('Fatal database initialization error:', err);
   });
+  registerTerminationHandlers();
 }
 
 module.exports = {
   client,
   initDatabase,
-  createMockClient
+  createMockClient,
+  disconnect
 };

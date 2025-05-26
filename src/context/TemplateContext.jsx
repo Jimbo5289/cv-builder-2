@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 // Create context
@@ -60,8 +60,45 @@ const templateDetails = {
   }
 };
 
-export function TemplateProvider({ children }) {
-  const [templateId, setTemplateId] = useState('1');
+export const useTemplate = () => useContext(TemplateContext);
+
+export const TemplateProvider = ({ children }) => {
+  const [templates, setTemplates] = useState([
+    {
+      id: 1,
+      name: "Professional",
+      image: "/images/templates/professional.svg",
+      photo: "/images/templates/photos/professional.jpg",
+      description: "A clean and traditional layout, perfect for corporate roles.",
+      color: "#4A90E2", // Blue color for professional template
+    },
+    {
+      id: 2,
+      name: "Creative",
+      image: "/images/templates/creative.svg",
+      photo: "/images/templates/photos/creative.jpg",
+      description: "A modern design with visual elements for creative industries.",
+      color: "#E24A8B", // Pink color for creative template
+    },
+    {
+      id: 3,
+      name: "Executive",
+      image: "/images/templates/executive.svg",
+      photo: "/images/templates/photos/executive.jpg",
+      description: "A sophisticated format for senior leadership positions.",
+      color: "#4AE2C4", // Teal color for executive template
+    },
+    {
+      id: 4,
+      name: "Academic",
+      image: "/images/templates/academic.svg",
+      photo: "/images/templates/photos/academic.jpg",
+      description: "Tailored for academic and research positions.",
+      color: "#E2A64A", // Orange color for academic template
+    },
+  ]);
+  const [loading, setLoading] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const location = useLocation();
 
   // Update template ID when URL changes
@@ -70,18 +107,36 @@ export function TemplateProvider({ children }) {
     const templateParam = searchParams.get('template');
     
     if (templateParam && templateDetails[templateParam]) {
-      setTemplateId(templateParam);
+      setSelectedTemplate(templateParam);
     }
   }, [location]);
 
+  // For demonstration purposes, simulate fetching templates from an API
+  useEffect(() => {
+    // This could be replaced with an actual API call
+    // setLoading(true);
+    // fetch('/api/templates')
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     setTemplates(data);
+    //     setLoading(false);
+    //   })
+    //   .catch(error => {
+    //     console.error('Error fetching templates:', error);
+    //     setLoading(false);
+    //   });
+  }, []);
+
   // Get current template details
   const getCurrentTemplate = () => {
-    return templateDetails[templateId] || templateDetails['1'];
+    return templateDetails[selectedTemplate] || templateDetails['1'];
   };
 
   const value = {
-    templateId,
-    setTemplateId,
+    templates,
+    loading,
+    selectedTemplate,
+    setSelectedTemplate,
     getCurrentTemplate,
     templateDetails,
   };
@@ -91,15 +146,6 @@ export function TemplateProvider({ children }) {
       {children}
     </TemplateContext.Provider>
   );
-}
-
-// Custom hook to use the template context
-export function useTemplate() {
-  const context = useContext(TemplateContext);
-  if (context === undefined) {
-    throw new Error('useTemplate must be used within a TemplateProvider');
-  }
-  return context;
-}
+};
 
 export default TemplateContext; 
