@@ -455,6 +455,7 @@ const sendEmail = async (user, data, templateName) => {
     const message = {
       from: process.env.EMAIL_FROM || 'support@cvbuilder.com',
       to: validatedUser.email,
+      replyTo: process.env.EMAIL_REPLY_TO || process.env.EMAIL_FROM || 'support@cvbuilder.com',
       subject,
       html
     };

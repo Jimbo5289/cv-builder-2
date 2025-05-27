@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useServer } from '../context/ServerContext';
+import { usePaymentVerification } from '../components/PayPerCvProtectedRoute';
 import { INDUSTRIES, ROLES_BY_INDUSTRY } from '../data/jobRolesData';
 import CvAnalysisNextSteps from '../components/CvAnalysisNextSteps';
 import AnalysisProgressTracker from '../components/AnalysisProgressTracker';
@@ -24,6 +25,7 @@ const CvAnalyseByRole = () => {
   
   const { getAuthHeader, isAuthenticated } = useAuth();
   const { apiUrl, isConnected } = useServer();
+  const { verifyPayment, isVerifying, hasValidPayment } = usePaymentVerification();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -75,38 +77,6 @@ const CvAnalyseByRole = () => {
     setFile(file);
   };
 
-  const checkSubscription = async () => {
-    // In development mode, always return true for testing
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Development mode, bypassing subscription check');
-      return true;
-    }
-    
-    try {
-      // Check if server is connected
-      if (!isConnected || !apiUrl) {
-        console.error('Server not connected, cannot check subscription');
-        setError('Server connection error. Please try again later.');
-        return false;
-      }
-      
-      const response = await fetch(`${apiUrl}/api/subscriptions/status`, {
-        method: 'GET',
-        headers: getAuthHeader()
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        return data.hasActiveSubscription;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error('Error checking subscription:', error);
-      return false;
-    }
-  };
-
   const analyseCV = async () => {
     if (!file) {
       setError('Please upload a CV file first');
@@ -137,12 +107,10 @@ const CvAnalyseByRole = () => {
     setProgressStep(2); // Update progress to Analysis step
     
     try {
-      // Check subscription status - use development bypass if needed
-      const hasSubscription = process.env.NODE_ENV === 'development' || await checkSubscription();
+      // Verify payment instead of checking subscription
+      const paymentVerified = await verifyPayment();
       
-      if (!hasSubscription) {
-        console.log('User does not have an active subscription');
-        setShowSubscriptionModal(true);
+      if (!paymentVerified) {
         setIsAnalysing(false);
         return;
       }
@@ -171,7 +139,6 @@ const CvAnalyseByRole = () => {
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Analysis results:', data);
         setProgressStep(3); // Update to Results step
         setAnalysisResults(data);
       } else {

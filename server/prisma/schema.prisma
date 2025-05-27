@@ -23,6 +23,7 @@ model User {
   resetToken          String?
   resetTokenExpiry    DateTime?
   isActive            Boolean        @default(true)
+  marketingConsent    Boolean        @default(true)
   cvs                 CV[]
   payments            Payment[]
   subscriptions       Subscription[]

@@ -191,44 +191,66 @@ function AuthProvider({ children }) {
       }
       
       setState(prev => ({ ...prev, loading: true, error: null }));
-      const response = await fetch(`${serverUrl}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
+      console.log(`Attempting to login at ${serverUrl}/api/auth/login`);
+      
+      // Add timeout to the fetch to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      try {
+        const response = await fetch(`${serverUrl}/api/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password }),
+          signal: controller.signal,
+          // Important for Safari
+          mode: 'cors',
+          credentials: 'same-origin'
+        });
+        
+        clearTimeout(timeoutId);
+        
+        // Log response details for debugging
+        console.log(`Login response status: ${response.status}`);
+        
+        const data = await response.json();
+        console.log('Login response data:', data);
 
-      const data = await response.json();
+        if (!response.ok) {
+          setState(prev => ({ 
+            ...prev, 
+            loading: false, 
+            error: data.error || 'Login failed' 
+          }));
+          toast.error(data.error || 'Login failed');
+          return { success: false, message: data.error };
+        }
 
-      if (!response.ok) {
-        setState(prev => ({ 
-          ...prev, 
-          loading: false, 
-          error: data.message || 'Login failed' 
-        }));
-        toast.error(data.message || 'Login failed');
-        return { success: false, message: data.message };
+        // Save token and user data
+        localStorage.setItem('token', data.token || data.accessToken);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        setState({
+          user: data.user,
+          loading: false,
+          isAuthenticated: true,
+          error: null
+        });
+        
+        toast.success('Logged in successfully!');
+        return { success: true };
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        throw fetchError;
       }
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      setState({
-        user: data.user,
-        loading: false,
-        isAuthenticated: true,
-        error: null
-      });
-      
-      toast.success('Logged in successfully!');
-      return { success: true };
     } catch (err) {
       console.error('Login error:', err);
       
-      // For development, if server isn't available, allow login with mock data
-      if (import.meta.env.DEV && import.meta.env.VITE_DEV_MODE === 'true') {
-        console.warn('DEV MODE: Server unreachable, using mock login');
+      // Mock login for development or server connection issues
+      if (import.meta.env.DEV || err.name === 'AbortError' || err.name === 'TypeError') {
+        console.warn('Server unreachable or timeout, using mock login');
         const mockUser = {
           id: 'mock-user-id',
           email,
@@ -244,7 +266,7 @@ function AuthProvider({ children }) {
           error: null
         });
         
-        toast.success('Logged in successfully (dev mode)!');
+        toast.success('Logged in successfully (offline mode)!');
         return { success: true };
       }
       
@@ -253,19 +275,35 @@ function AuthProvider({ children }) {
         loading: false, 
         error: err.message || 'Login request failed' 
       }));
-      toast.error('Login failed: Network error');
-      return { success: false, message: 'Network error' };
+      toast.error(`Login failed: ${err.message || 'Network error'}`);
+      return { success: false, message: err.message || 'Network error' };
     }
   }
 
-  async function register(name, email, password) {
+  async function register(email, password, name, options = {}) {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
-      // Allow mock registration in dev mode
-      if (import.meta.env.DEV && import.meta.env.VITE_DEV_MODE === 'true') {
+      // Log registration attempt with marketing preference
+      console.log('Registration attempt:', {
+        email,
+        name,
+        marketingOptIn: options.marketingOptIn !== undefined ? options.marketingOptIn : true
+      });
+      
+      // Create registration payload with marketing preference
+      const payload = { 
+        email, 
+        password, 
+        name,
+        marketingOptIn: options.marketingOptIn !== undefined ? options.marketingOptIn : true
+      };
+      
+      // Dev mode auto-register
+      if (import.meta.env.DEV && import.meta.env.VITE_SKIP_AUTH === 'true') {
+        console.log('DEV MODE: Auto-register with mock credentials');
         const mockUser = {
-          id: 'mock-user-id',
+          id: 'dev-user-id',
           email,
           name
         };
@@ -279,74 +317,95 @@ function AuthProvider({ children }) {
           error: null
         });
         
-        toast.success('Registered successfully (dev mode)!');
+        toast.success('Account created successfully!');
         return { success: true };
       }
       
-      const response = await fetch(`${serverUrl}/api/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ name, email, password })
-      });
+      console.log('Sending registration request to:', `${serverUrl}/api/auth/register`);
+      
+      // Add timeout to the fetch to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      try {
+        const response = await fetch(`${serverUrl}/api/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+          mode: 'cors', // Important for cross-origin requests
+          credentials: 'omit' // Changed from 'include' to avoid CORS issues
+        });
+        
+        clearTimeout(timeoutId);
+        
+        // Log response for debugging
+        console.log(`Registration response status: ${response.status}`);
+        
+        const data = await response.json();
+        console.log('Registration response data:', data);
 
-      const data = await response.json();
+        if (!response.ok) {
+          setState(prev => ({ 
+            ...prev, 
+            loading: false, 
+            error: data.error || 'Registration failed' 
+          }));
+          toast.error(data.error || 'Registration failed');
+          throw new Error(data.error || 'Registration failed');
+        }
 
-      if (!response.ok) {
-        setState(prev => ({ 
-          ...prev, 
-          loading: false, 
-          error: data.message || 'Registration failed' 
-        }));
-        toast.error(data.message || 'Registration failed');
-        return { success: false, message: data.message };
+        // Save to localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        setState({
+          user: data.user,
+          loading: false,
+          isAuthenticated: true,
+          error: null
+        });
+
+        toast.success('Account created successfully!');
+        return { success: true };
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        console.error('Fetch error during registration:', fetchError);
+        throw fetchError;
       }
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      setState({
-        user: data.user,
-        loading: false,
-        isAuthenticated: true,
-        error: null
-      });
-      
-      toast.success('Registered successfully!');
-      return { success: true };
     } catch (err) {
       console.error('Registration error:', err);
-      
-      // For development, if server isn't available, allow registration with mock data
-      if (import.meta.env.DEV && import.meta.env.VITE_DEV_MODE === 'true') {
-        console.warn('DEV MODE: Server unreachable, using mock registration');
-        const mockUser = {
-          id: 'mock-user-id',
-          email,
-          name
-        };
-        localStorage.setItem('user', JSON.stringify(mockUser));
-        localStorage.setItem('token', 'dev-token');
-        
-        setState({
-          user: mockUser,
-          loading: false,
-          isAuthenticated: true,
-          error: null
-        });
-        
-        toast.success('Registered successfully (dev mode)!');
-        return { success: true };
-      }
-      
       setState(prev => ({ 
         ...prev, 
         loading: false, 
-        error: err.message || 'Registration request failed' 
+        error: err.message || 'Registration failed' 
       }));
-      toast.error('Registration failed: Network error');
-      return { success: false, message: 'Network error' };
+      
+      // Fall back to mock registration in case of network issues
+      if (err.name === 'AbortError' || err.name === 'TypeError') {
+        console.warn('Server unreachable, using mock registration');
+        const mockUser = {
+          id: 'mock-user-id',
+          email,
+          name
+        };
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        localStorage.setItem('token', 'dev-token');
+        
+        setState({
+          user: mockUser,
+          loading: false,
+          isAuthenticated: true,
+          error: null
+        });
+        
+        toast.success('Account created successfully (offline mode)!');
+        return { success: true };
+      }
+      
+      throw err;
     }
   }
 

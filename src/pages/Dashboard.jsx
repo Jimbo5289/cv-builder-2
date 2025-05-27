@@ -7,9 +7,9 @@ export default function Dashboard() {
   const { user } = useAuth();
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="container mx-auto px-4 pt-16 pb-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Welcome, {user?.name || 'User'}!</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-4 mb-8">Welcome, {user?.name || 'User'}!</h1>
         
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Upload & Analyze Your CV</h2>

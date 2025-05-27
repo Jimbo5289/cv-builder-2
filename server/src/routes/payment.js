@@ -266,4 +266,80 @@ const generateCVContent = async (cv) => {
   });
 };
 
+// Payment verification for CV analysis or LinkedIn review
+router.get('/verify/:paymentType', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const { paymentType } = req.params;
+    const userId = req.user.id;
+    
+    // Valid payment types
+    const validPaymentTypes = ['cv-analysis', 'cv-analysis-role', 'linkedin-review'];
+    if (!validPaymentTypes.includes(paymentType)) {
+      return sendError(res, 'Invalid payment type', 400);
+    }
+    
+    // Check if user has an active subscription (which covers all analysis)
+    const hasSubscription = await prisma.subscription.findFirst({
+      where: {
+        userId: userId,
+        status: 'active'
+      }
+    });
+    
+    if (hasSubscription) {
+      logger.info('User has active subscription for analysis', { userId, paymentType });
+      return sendSuccess(res, { 
+        hasValidPayment: true, 
+        paymentType,
+        message: 'Subscription active, analysis allowed'
+      });
+    }
+    
+    // Check if user has made a one-time payment for this analysis type
+    const hasOneTimePayment = await prisma.payment.findFirst({
+      where: {
+        userId: userId,
+        status: 'succeeded',
+        metadata: {
+          type: paymentType
+        },
+        createdAt: {
+          // Payment is valid for 7 days
+          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        }
+      }
+    });
+    
+    if (hasOneTimePayment) {
+      logger.info('User has valid one-time payment for analysis', { userId, paymentType });
+      return sendSuccess(res, { 
+        hasValidPayment: true, 
+        paymentType,
+        message: 'One-time payment found, analysis allowed'
+      });
+    }
+    
+    // If in development mode, allow access for testing
+    if (process.env.NODE_ENV === 'development') {
+      logger.info('Development mode bypass for payment verification', { userId, paymentType });
+      return sendSuccess(res, { 
+        hasValidPayment: true, 
+        paymentType,
+        message: 'Development mode - payment bypassed'
+      });
+    }
+    
+    // No valid payment found
+    logger.info('No valid payment found for analysis', { userId, paymentType });
+    return sendSuccess(res, { 
+      hasValidPayment: false, 
+      paymentType,
+      message: 'Payment required for this analysis'
+    });
+  } catch (error) {
+    logger.error('Error verifying payment:', { error: error.message });
+    return sendError(res, 'Error verifying payment status', 500);
+  }
+}));
+
 module.exports = router; 

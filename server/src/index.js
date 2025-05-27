@@ -15,6 +15,7 @@ const subscriptionRoutes = require('./routes/subscription');
 const twoFactorRoutes = require('./routes/twoFactor');
 const templateRoutes = require('./routes/templates');
 const profileRoutes = require('./routes/profile');
+const newsletterRoutes = require('./routes/newsletter');
 const { stripe } = require('./config/stripe');
 const net = require('net');
 const { getSentry } = require('./config/sentry');
@@ -44,23 +45,33 @@ if (Sentry) {
 
 // Configure CORS
 const corsOptions = {
-  origin: process.env.CORS_ALLOW_ORIGIN === '*' 
-    ? '*' // Allow all origins if explicitly configured
-    : (process.env.NODE_ENV === 'production' 
-       ? process.env.FRONTEND_URL 
-       : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176', 'http://localhost:5177']),
+  origin: '*', // Allow all origins temporarily for debugging
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
   exposedHeaders: ['Content-Type', 'Authorization'],
   maxAge: 86400, // 24 hours
-  // Add better Safari support
   optionsSuccessStatus: 200,
   preflightContinue: false
 };
 
 // Configure CORS
 app.use(cors(corsOptions));
+
+// Add additional middleware to ensure CORS headers are set correctly
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT,DELETE,PATCH');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight OPTIONS requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
 
 // Security setup (after CORS)
 setupSecurity(app);
@@ -116,6 +127,7 @@ app.use('/api/2fa', twoFactorRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/newsletter', newsletterRoutes);
 
 // Webhook route must come after raw body parser
 app.use('/api/webhook/stripe', webhookRoutes);
@@ -213,25 +225,33 @@ const startServer = async () => {
     await initializeDatabase();
     logger.info('Database initialized with default data');
     
-    // Check if the port is available
-    const availablePort = await findAvailablePort(port);
+    // Determine which port to use
+    let serverPort = port;
+    
+    // If FORCE_PORT is not set to true, check if the port is available and find an alternative if needed
+    if (process.env.FORCE_PORT !== 'true') {
+      serverPort = await findAvailablePort(port);
+    } else {
+      logger.info('FORCE_PORT is set to true, attempting to use specified port only');
+    }
     
     // Create HTTP server
-    const server = app.listen(availablePort, () => {
+    const server = app.listen(serverPort, () => {
       logger.info('Server started successfully', {
-        port,
-        url: `http://localhost:${availablePort}`,
+        port: serverPort,
+        url: `http://localhost:${serverPort}`,
         environment: process.env.NODE_ENV || 'development',
-        frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173'
+        frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+        forcedPort: process.env.FORCE_PORT === 'true'
       });
       
-      if (availablePort !== port) {
+      if (serverPort !== port && process.env.FORCE_PORT !== 'true') {
         console.log(`⚠️  Port ${port} was already in use.`);
-        console.log(`   Server is running on port ${availablePort} instead.`);
+        console.log(`   Server is running on port ${serverPort} instead.`);
       } else {
-        console.log(`🚀 Server running on port ${availablePort}`);
+        console.log(`🚀 Server running on port ${serverPort}`);
       }
-      console.log(`   Access your API at: http://localhost:${availablePort}`);
+      console.log(`   Access your API at: http://localhost:${serverPort}`);
     });
     
     // Register graceful shutdown handlers
@@ -273,16 +293,20 @@ const checkPort = (port) => {
 
 // Function to find an available port starting from the given port
 const findAvailablePort = async (startPort, maxAttempts = 5) => {
-  let port = startPort + 1; // Start with the next port
+  // First check if the requested port is available
+  if (await checkPort(startPort)) {
+    return startPort;
+  }
+  
+  // If not, try alternative ports
+  let port = startPort + 1;
   let attempts = 0;
   
   // Try up to maxAttempts ports
   while (attempts < maxAttempts) {
     const isAvailable = await checkPort(port);
     if (isAvailable) {
-      if (port !== startPort) {
-        logger.info(`Original port ${startPort} was busy, using alternative port ${port}`);
-      }
+      logger.info(`Original port ${startPort} was busy, using alternative port ${port}`);
       return port;
     }
     

@@ -49,10 +49,8 @@ function App() {
                 toastOptions={{
                   // Responsive styling for toasts
                   style: {
-                    maxWidth: '90vw',
-                    '@media (min-width: 640px)': {
-                      maxWidth: '350px'
-                    }
+                    maxWidth: '350px',
+                    margin: '8px'
                   },
                   // Custom toast styles for dark mode
                   className: '',

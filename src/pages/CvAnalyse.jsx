@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useServer } from '../context/ServerContext';
+import { usePaymentVerification } from '../components/PayPerCvProtectedRoute';
 import { FiUpload, FiCheck, FiX, FiAlertCircle, FiFileText } from 'react-icons/fi';
 import CvAnalysisNextSteps from '../components/CvAnalysisNextSteps';
 import AnalysisProgressTracker from '../components/AnalysisProgressTracker';
@@ -20,6 +21,7 @@ const CvAnalyse = () => {
   
   const { isAuthenticated, user, getAuthHeader } = useAuth();
   const { apiUrl, isConnected } = useServer();
+  const { verifyPayment, isVerifying, hasValidPayment } = usePaymentVerification();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -161,39 +163,28 @@ const CvAnalyse = () => {
     setProgressStep(2); // Update progress to Analysis step
     
     try {
-      // Check subscription status
-      const hasSubscription = await checkSubscription();
+      // Verify payment instead of checking subscription
+      const paymentVerified = await verifyPayment();
       
-      if (!hasSubscription && !import.meta.env.DEV) {
-        console.log('User does not have an active subscription');
-        setShowSubscriptionModal(true);
+      if (!paymentVerified) {
         setIsAnalysing(false);
         return;
       }
       
-      console.log('Proceeding with analysis');
+      console.log('Payment verified, proceeding with analysis');
       
       // Create form data to send the file or text
       const formData = new FormData();
       
       if (activeTab === 'upload' && file) {
-        // Explicitly log file information for debugging
-        console.log(`Appending file to form: ${file.name}, size: ${file.size}, type: ${file.type}`);
         formData.append('cv', file);
       } else if (activeTab === 'paste' && cvText) {
         formData.append('cvText', cvText);
       }
       
-      // Log all form data contents for debugging
-      for (let [key, value] of formData.entries()) {
-        console.log(`Form contains: ${key} => ${value instanceof File ? value.name : value}`);
-      }
-      
       // Get auth headers but remove Content-Type header which interferes with form data
       const headers = getAuthHeader();
       delete headers['Content-Type']; // This is crucial for multipart/form-data to work properly
-      
-      console.log(`Submitting CV analysis request to ${apiUrl}/api/cv/analyse-only`);
       
       const response = await fetch(`${apiUrl}/api/cv/analyse-only`, {
         method: 'POST',
@@ -203,7 +194,6 @@ const CvAnalyse = () => {
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Analysis results:', data);
         setProgressStep(3); // Update progress to Results step
         setAnalysisResults(data);
       } else {

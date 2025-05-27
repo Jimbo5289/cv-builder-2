@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useServer } from '../context/ServerContext';
+import { usePaymentVerification } from '../components/PayPerCvProtectedRoute';
 import { FiCheck, FiX, FiAlertCircle, FiFileText, FiLinkedin } from 'react-icons/fi';
 import CvAnalysisNextSteps from '../components/CvAnalysisNextSteps';
 import AnalysisProgressTracker from '../components/AnalysisProgressTracker';
@@ -11,14 +12,15 @@ import { findCourseRecommendations } from '../data/courseRecommendations';
 const LinkedInReview = () => {
   const [linkedInUrl, setLinkedInUrl] = useState('');
   const [profileText, setProfileText] = useState('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState(null);
-  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState(null);
+  const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('url'); // 'url' or 'paste'
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   
   const { isAuthenticated, user, getAuthHeader } = useAuth();
   const { apiUrl, isConnected } = useServer();
+  const { verifyPayment, isVerifying } = usePaymentVerification();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -94,39 +96,74 @@ const LinkedInReview = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate input
-    if (!linkedInUrl && !profileText) {
-      setError('Please provide either a LinkedIn URL or paste your profile text');
+    if (!linkedInUrl && activeTab === 'url') {
+      setError('Please enter your LinkedIn profile URL');
       return;
     }
-    
-    setIsAnalyzing(true);
-    setError(null);
+
+    if (!profileText && activeTab === 'paste') {
+      setError('Please paste your LinkedIn profile text');
+      return;
+    }
+
+    // Validate LinkedIn URL format
+    if (activeTab === 'url' && !linkedInUrl.includes('linkedin.com/in/')) {
+      setError('Please enter a valid LinkedIn profile URL (e.g., https://www.linkedin.com/in/username)');
+      return;
+    }
+
+    // Check authentication first
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: '/linkedin-review' } });
+      return;
+    }
+
+    // Check if server is connected
+    if (!isConnected || !apiUrl) {
+      setError('Server connection error. Please check your connection and try again.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+    setResults(null);
+    setProgressStep(2); // Analysis in progress
     
     try {
-      const response = await fetch('/api/cv/analyse-linkedin', {
+      // Verify payment before proceeding
+      const paymentVerified = await verifyPayment();
+      
+      if (!paymentVerified) {
+        setIsLoading(false);
+        return;
+      }
+      
+      // Make API request to analyze LinkedIn profile
+      const response = await fetch(`${apiUrl}/api/cv/linkedin-analysis`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...getAuthHeader()
         },
         body: JSON.stringify({
-          profileUrl: linkedInUrl,
-          profileText: profileText
+          profileUrl: activeTab === 'url' ? linkedInUrl : null,
+          profileText: activeTab === 'paste' ? profileText : null,
         }),
       });
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to analyze LinkedIn profile');
+      if (response.ok) {
+        const data = await response.json();
+        setProgressStep(3); // Results ready
+        setResults(data);
+      } else {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        setError(`Analysis failed: ${errorData.message || response.statusText}`);
       }
-      
-      const data = await response.json();
-      setAnalysisResults(data);
     } catch (err) {
       console.error('LinkedIn analysis error:', err);
-      setError(err.message || 'An error occurred during analysis');
+      setError('Failed to analyze LinkedIn profile. Please try again later.');
     } finally {
-      setIsAnalyzing(false);
+      setIsLoading(false);
     }
   };
 
@@ -139,7 +176,7 @@ const LinkedInReview = () => {
   };
 
   const resetAnalysis = () => {
-    setAnalysisResults(null);
+    setResults(null);
     setError('');
     if (activeTab === 'url') {
       setLinkedInUrl('');
@@ -163,10 +200,10 @@ const LinkedInReview = () => {
 
   // If results exist, update useEffect to set final step
   useEffect(() => {
-    if (analysisResults) {
+    if (results) {
       setProgressStep(3);
     }
-  }, [analysisResults]);
+  }, [results]);
 
   // If server is disconnected, show appropriate message
   if (!isConnected) {
@@ -196,7 +233,7 @@ const LinkedInReview = () => {
           LinkedIn Profile Review
         </h1>
         
-        {!analysisResults ? (
+        {!results ? (
           <>
             <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Optimize your LinkedIn profile</h2>
@@ -244,12 +281,12 @@ const LinkedInReview = () => {
                 <div className="flex justify-end">
                   <button
                     type="submit"
-                    disabled={isAnalyzing}
+                    disabled={isLoading}
                     className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                      isAnalyzing ? 'opacity-75 cursor-not-allowed' : ''
+                      isLoading ? 'opacity-75 cursor-not-allowed' : ''
                     }`}
                   >
-                    {isAnalyzing ? 'Analyzing...' : 'Analyze Profile'}
+                    {isLoading ? 'Analyzing...' : 'Analyze Profile'}
                   </button>
                 </div>
               </form>
@@ -286,15 +323,15 @@ const LinkedInReview = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                   <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-1">Overall Score</h3>
-                  <div className="text-3xl font-bold text-blue-900 dark:text-blue-100">{analysisResults.overallScore}%</div>
+                  <div className="text-3xl font-bold text-blue-900 dark:text-blue-100">{results.overallScore}%</div>
                 </div>
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                   <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-1">Profile Visibility</h3>
-                  <div className="text-3xl font-bold text-blue-900 dark:text-blue-100">{analysisResults.profileVisibilityScore}%</div>
+                  <div className="text-3xl font-bold text-blue-900 dark:text-blue-100">{results.profileVisibilityScore}%</div>
                 </div>
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                   <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-1">Content Quality</h3>
-                  <div className="text-3xl font-bold text-blue-900 dark:text-blue-100">{analysisResults.contentQualityScore}%</div>
+                  <div className="text-3xl font-bold text-blue-900 dark:text-blue-100">{results.contentQualityScore}%</div>
                 </div>
               </div>
               
@@ -302,7 +339,7 @@ const LinkedInReview = () => {
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Profile Strengths</h3>
                 <ul className="space-y-2">
-                  {analysisResults.profileStrengths && analysisResults.profileStrengths.map((strength, index) => (
+                  {results.profileStrengths && results.profileStrengths.map((strength, index) => (
                     <li key={index} className="flex items-start">
                       <FiCheck className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
                       <span className="text-gray-700 dark:text-gray-300">{strength}</span>
@@ -315,7 +352,7 @@ const LinkedInReview = () => {
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Recommendations for Improvement</h3>
                 <ul className="space-y-2">
-                  {analysisResults.improvementRecommendations && analysisResults.improvementRecommendations.map((rec, index) => (
+                  {results.improvementRecommendations && results.improvementRecommendations.map((rec, index) => (
                     <li key={index} className="flex items-start">
                       <FiAlertCircle className="h-5 w-5 text-orange-500 mr-2 mt-0.5" />
                       <span className="text-gray-700 dark:text-gray-300">{rec}</span>
@@ -328,7 +365,7 @@ const LinkedInReview = () => {
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Section-by-Section Feedback</h3>
                 <div className="space-y-4">
-                  {analysisResults.sectionFeedback && Object.entries(analysisResults.sectionFeedback).map(([section, feedback]) => (
+                  {results.sectionFeedback && Object.entries(results.sectionFeedback).map(([section, feedback]) => (
                     <div key={section} className="border-l-4 border-blue-500 pl-4 py-1">
                       <h4 className="font-medium text-gray-800 dark:text-gray-200 capitalize mb-1">{section}</h4>
                       <p className="text-gray-600 dark:text-gray-400 text-sm">{feedback}</p>
@@ -339,14 +376,14 @@ const LinkedInReview = () => {
             </div>
             
             {/* Course Recommendations section - prioritizing keySkillGaps over missingKeywords */}
-            {analysisResults.keySkillGaps && analysisResults.keySkillGaps.length > 0 ? (
+            {results.keySkillGaps && results.keySkillGaps.length > 0 ? (
               <CourseRecommendations 
-                courses={findCourseRecommendations(analysisResults.keySkillGaps, 4)} 
+                courses={findCourseRecommendations(results.keySkillGaps, 4)} 
                 title="Recommended Professional Certifications & Courses"
               />
-            ) : analysisResults.missingKeywords && analysisResults.missingKeywords.length > 0 ? (
+            ) : results.missingKeywords && results.missingKeywords.length > 0 ? (
               <CourseRecommendations 
-                courses={findCourseRecommendations(analysisResults.missingKeywords, 4)} 
+                courses={findCourseRecommendations(results.missingKeywords, 4)} 
                 title="Recommended Professional Certifications & Courses"
               />
             ) : null}
@@ -354,7 +391,7 @@ const LinkedInReview = () => {
             {/* Action buttons */}
             <div className="mt-6 flex flex-col sm:flex-row sm:justify-between items-center gap-4">
               <button
-                onClick={() => setAnalysisResults(null)}
+                onClick={() => setResults(null)}
                 className="w-full sm:w-auto px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               >
                 Analyze Another Profile

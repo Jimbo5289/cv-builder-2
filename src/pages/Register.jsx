@@ -7,7 +7,8 @@ export default function Register() {
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    marketingOptIn: true // Default to opted in
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -48,11 +49,15 @@ export default function Register() {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    // Handle checkboxes differently than text inputs
+    const newValue = type === 'checkbox' ? checked : value;
+    
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: newValue
     }));
+    
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -72,7 +77,13 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      await register(formData.email, formData.password, formData.name);
+      // Pass the marketing opt-in preference to register
+      await register(
+        formData.email, 
+        formData.password, 
+        formData.name, 
+        { marketingOptIn: formData.marketingOptIn }
+      );
       navigate('/dashboard');
     } catch (err) {
       setErrors(prev => ({
@@ -193,6 +204,28 @@ export default function Register() {
                 <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
               )}
             </div>
+            
+            {/* Marketing Opt-In Checkbox */}
+            <div className="flex items-start mt-4">
+              <div className="flex items-center h-5">
+                <input
+                  id="marketingOptIn"
+                  name="marketingOptIn"
+                  type="checkbox"
+                  checked={formData.marketingOptIn}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-[#E78F81] focus:ring-[#E78F81] border-gray-300 rounded"
+                />
+              </div>
+              <div className="ml-3 text-sm">
+                <label htmlFor="marketingOptIn" className="font-medium text-gray-700">
+                  Marketing communications
+                </label>
+                <p className="text-gray-500">
+                  I agree to receive tips, news and special offers about CV Builder services via email.
+                </p>
+              </div>
+            </div>
           </div>
 
           <div>
@@ -200,20 +233,10 @@ export default function Register() {
               type="submit"
               disabled={isLoading}
               className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#E78F81] hover:bg-[#d36e62] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] ${
-                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                isLoading ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >
-              {isLoading ? (
-                <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Creating account...
-                </span>
-              ) : (
-                'Create Account'
-              )}
+              {isLoading ? 'Creating account...' : 'Create account'}
             </button>
           </div>
         </form>

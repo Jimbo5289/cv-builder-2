@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import SubscriptionProtectedRoute from './components/SubscriptionProtectedRoute';
+import PayPerCvProtectedRoute from './components/PayPerCvProtectedRoute';
 
 // Lazy load components
 const Login = React.lazy(() => import('./pages/Login'));
@@ -156,19 +157,19 @@ function AppRoutes() {
           </SubscriptionProtectedRoute>
         } />
         <Route path="/cv-analyse" element={
-          <SubscriptionProtectedRoute>
+          <PayPerCvProtectedRoute paymentType="cv-analysis">
             <CvAnalyse />
-          </SubscriptionProtectedRoute>
+          </PayPerCvProtectedRoute>
         } />
         <Route path="/cv-analyse-by-role" element={
-          <SubscriptionProtectedRoute>
+          <PayPerCvProtectedRoute paymentType="cv-analysis-role">
             <CvAnalyseByRole />
-          </SubscriptionProtectedRoute>
+          </PayPerCvProtectedRoute>
         } />
         <Route path="/linkedin-review" element={
-          <SubscriptionProtectedRoute>
+          <PayPerCvProtectedRoute paymentType="linkedin-review">
             <LinkedInReview />
-          </SubscriptionProtectedRoute>
+          </PayPerCvProtectedRoute>
         } />
 
         {/* 404 route */}
