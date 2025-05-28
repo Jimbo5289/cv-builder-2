@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useServer } from '../context/ServerContext';
 import { Link } from 'react-router-dom';
-import { FiUser, FiMail, FiCalendar, FiCreditCard, FiClock, FiEdit, FiBarChart2, FiFileText, FiDownload, FiPrinter, FiEye, FiMonitor } from 'react-icons/fi';
-import ThemeToggle from '../components/ThemeToggle';
+import { FiUser, FiMail, FiCalendar, FiCreditCard, FiClock, FiEdit, FiBarChart2, FiFileText, FiDownload, FiPrinter, FiEye, FiSettings } from 'react-icons/fi';
 import { useTheme } from '../context/ThemeContext';
 
 export default function Profile() {
@@ -187,8 +186,8 @@ export default function Profile() {
                 <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">Personal details and subscription information</p>
               </div>
               <Link to="/settings" className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-800">
-                <FiEdit className="mr-2 -ml-0.5 h-4 w-4" />
-                Edit
+                <FiSettings className="mr-2 -ml-0.5 h-4 w-4" />
+                Settings
               </Link>
             </div>
           </div>
@@ -218,17 +217,6 @@ export default function Profile() {
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Member since</dt>
                 </div>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white ml-7">{formatDate(user?.createdAt) || 'Unknown'}</dd>
-              </div>
-              
-              {/* Theme Toggle */}
-              <div className="sm:col-span-2">
-                <div className="flex items-center">
-                  <FiMonitor className="flex-shrink-0 mr-2 h-5 w-5 text-gray-400 dark:text-gray-500" />
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Display Theme</dt>
-                </div>
-                <dd className="mt-1 ml-7">
-                  <ThemeToggle />
-                </dd>
               </div>
             </dl>
           </div>

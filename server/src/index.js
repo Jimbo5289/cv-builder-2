@@ -129,6 +129,20 @@ app.use('/api/templates', templateRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 
+// Add users routes that map to profile routes for backward compatibility
+app.use('/api/users/stats', (req, res, next) => {
+  // Redirect to profile/stats endpoint
+  req.url = '/stats'; // Remove /api/users from the URL
+  profileRoutes(req, res, next);
+});
+
+// Fix missing /api prefix for cv/user/all endpoint
+app.use('/user/all', (req, res, next) => {
+  // Redirect to proper API endpoint
+  req.url = '/user/all'; // Keep the same path
+  cvRoutes(req, res, next);
+});
+
 // Webhook route must come after raw body parser
 app.use('/api/webhook/stripe', webhookRoutes);
 

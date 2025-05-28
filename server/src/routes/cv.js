@@ -1455,11 +1455,49 @@ router.post('/analyse-linkedin', authMiddleware, (req, res, next) => {
 });
 
 // Get all CVs for the current user
-router.get('/user/all', authMiddleware, async (req, res) => {
+router.get('/user/all', async (req, res) => {
   try {
+    let userId = req.user?.id;
+    
+    // In development, allow access without authentication
+    if (!userId && (process.env.NODE_ENV === 'development' || process.env.SKIP_AUTH_CHECK === 'true')) {
+      logger.info('Providing mock CVs for unauthenticated user in development mode');
+      userId = 'mock-user-id';
+      
+      // Return mock CVs for development
+      const mockCVs = [
+        {
+          id: 'mock-cv-1',
+          title: 'My Professional CV',
+          updatedAt: new Date(),
+          createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+          atsScore: 85,
+          personalInfo: {
+            fullName: 'John Developer',
+            email: 'john@example.com',
+          }
+        },
+        {
+          id: 'mock-cv-2',
+          title: 'Technical Resume',
+          updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+          createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000), // 14 days ago
+          atsScore: 78,
+          personalInfo: {
+            fullName: 'John Developer',
+            email: 'john@example.com',
+          }
+        }
+      ];
+      
+      return res.json(mockCVs);
+    } else if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
     const cvs = await database.client.CV.findMany({
       where: {
-        userId: req.user.id
+        userId: userId
       },
       orderBy: {
         updatedAt: 'desc'

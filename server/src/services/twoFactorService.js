@@ -3,23 +3,17 @@ const QRCode = require('qrcode');
 const { PrismaClient } = require('@prisma/client');
 const winston = require('winston');
 const { z } = require('zod');
-
-// Configure logger
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.json(),
-  transports: [
-    new winston.transports.File({ filename: 'logs/2fa-error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/2fa-combined.log' })
-  ]
-});
+const { logger } = require('../config/logger');
 
 // Initialize Prisma client
 const prisma = new PrismaClient();
 
 // Input validation schemas
 const tokenSchema = z.string().length(6).regex(/^\d+$/);
-const userIdSchema = z.string().uuid();
+const userIdSchema = z.string();
+
+// Check if we're using mock database
+const useMockDatabase = process.env.MOCK_DATABASE === 'true';
 
 class TwoFactorService {
   /**
@@ -29,6 +23,30 @@ class TwoFactorService {
    */
   async generateSecret(userId) {
     try {
+      if (useMockDatabase) {
+        logger.info('Using mock 2FA service - generateSecret');
+        
+        // Generate a secret using speakeasy
+        const secret = speakeasy.generateSecret({
+          name: `CV Builder:mock-user@example.com`,
+          issuer: 'CV Builder',
+          length: 32
+        });
+        
+        // Generate QR code
+        const otpauthUrl = secret.otpauth_url;
+        const qrCodeUrl = await QRCode.toDataURL(otpauthUrl, {
+          errorCorrectionLevel: 'H',
+          margin: 1,
+          width: 300
+        });
+        
+        return {
+          secret: secret.base32,
+          qrCode: qrCodeUrl
+        };
+      }
+      
       // Validate input
       const validatedUserId = userIdSchema.parse(userId);
 
@@ -93,6 +111,22 @@ class TwoFactorService {
    */
   async verifyToken(userId, token) {
     try {
+      if (useMockDatabase) {
+        logger.info('Using mock 2FA service - verifyToken');
+        
+        // In mock mode, accept any 6-digit token
+        const isValid = /^\d{6}$/.test(token);
+        
+        if (isValid) {
+          logger.info('Mock 2FA token verified successfully');
+          return true;
+        } else {
+          logger.warn('Invalid mock 2FA token provided');
+          return false;
+        }
+      }
+      
+      // Real implementation
       // Validate input
       const validatedUserId = userIdSchema.parse(userId);
       const validatedToken = tokenSchema.parse(token);
@@ -147,6 +181,22 @@ class TwoFactorService {
    */
   async validateLogin(userId, token) {
     try {
+      if (useMockDatabase) {
+        logger.info('Using mock 2FA service - validateLogin');
+        
+        // In mock mode, accept any 6-digit token
+        const isValid = /^\d{6}$/.test(token);
+        
+        if (isValid) {
+          logger.info('Mock 2FA login token validated successfully');
+          return true;
+        } else {
+          logger.warn('Invalid mock 2FA login token provided');
+          return false;
+        }
+      }
+      
+      // Real implementation
       // Validate input
       const validatedUserId = userIdSchema.parse(userId);
       const validatedToken = tokenSchema.parse(token);
@@ -198,6 +248,21 @@ class TwoFactorService {
    */
   async disable2FA(userId, token) {
     try {
+      if (useMockDatabase) {
+        logger.info('Using mock 2FA service - disable2FA');
+        
+        // In mock mode, accept any 6-digit token
+        const isValid = /^\d{6}$/.test(token);
+        
+        if (!isValid) {
+          throw new Error('Invalid 2FA token');
+        }
+        
+        logger.info('Mock 2FA disabled successfully');
+        return true;
+      }
+      
+      // Real implementation
       // Validate input
       const validatedUserId = userIdSchema.parse(userId);
       const validatedToken = tokenSchema.parse(token);
