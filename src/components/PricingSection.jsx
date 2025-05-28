@@ -203,16 +203,16 @@ export default function PricingSection() {
   };
 
   return (
-    <div className="bg-gray-50 py-8 sm:py-12 md:py-16">
+    <div className="bg-gray-50 dark:bg-gray-900 py-8 sm:py-12 md:py-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-8 sm:mb-10 md:mb-12">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">Simple, Transparent Pricing</h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600">Choose the plan that's right for you</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4">Simple, Transparent Pricing</h1>
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300">Choose the plan that's right for you</p>
         </div>
 
         {/* Premium Feature Notice */}
         {isPremiumUpgrade && (
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 max-w-3xl mx-auto">
+          <div className="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-8 max-w-3xl mx-auto">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -220,17 +220,17 @@ export default function PricingSection() {
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm text-blue-700">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
                   <span className="font-medium">Premium Feature Access</span> - Subscribe to a plan below to unlock {premiumFeature} and all other premium features.
                 </p>
-                <p className="text-xs text-blue-600 mt-1">
+                <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
                   <span className="font-medium">Note:</span> AI CV analysis, skills gap detection, industry matching, and course recommendations require a paid subscription or one-time purchase.
                 </p>
                 {fromPath && (
                   <p className="mt-2">
                     <button 
                       onClick={() => navigate(fromPath)}
-                      className="text-sm text-blue-600 hover:text-blue-800"
+                      className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
                     >
                       Return to previous page
                     </button>
@@ -246,9 +246,9 @@ export default function PricingSection() {
           {pricingPlans.map((plan, index) => (
             <div
               key={plan.name}
-              className={`bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300
+              className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-all duration-300
                 ${plan.popular ? 'ring-2 ring-[#E78F81] md:transform md:scale-105 z-10' : ''}
-                ${plan.price === 0 ? 'border border-gray-200' : ''}
+                ${plan.price === 0 ? 'border border-gray-200 dark:border-gray-700' : ''}
               `}
             >
               {plan.popular && (
@@ -257,16 +257,16 @@ export default function PricingSection() {
                 </div>
               )}
               <div className="p-4 sm:p-6 md:p-8">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-4">{plan.name}</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4">{plan.name}</h3>
                 <div className="mb-4 sm:mb-6">
-                  <span className="text-2xl sm:text-3xl md:text-4xl font-bold">£{plan.price}</span>
+                  <span className="text-2xl sm:text-3xl md:text-4xl font-bold dark:text-white">£{plan.price}</span>
                   {plan.interval && (
-                    <span className="text-gray-500 text-sm sm:text-base">/{plan.interval}</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-sm sm:text-base">/{plan.interval}</span>
                   )}
                 </div>
                 <ul className="space-y-2 sm:space-y-3 md:space-y-4 mb-6 sm:mb-8">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start text-sm sm:text-base text-gray-600">
+                    <li key={feature} className="flex items-start text-sm sm:text-base text-gray-600 dark:text-gray-300">
                       <svg
                         className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"
                         fill="none"
@@ -287,7 +287,7 @@ export default function PricingSection() {
                   disabled={loading && selectedPlan === plan}
                   className={`w-full py-2 sm:py-3 px-4 rounded-md text-sm sm:text-base font-medium transition-colors duration-200 ${
                     plan.price === 0
-                      ? 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300'
+                      ? 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:border-gray-600'
                       : plan.popular
                         ? 'bg-[#E78F81] hover:bg-[#d36e62] text-white'
                         : 'bg-[#2c3e50] hover:bg-[#1a2530] text-white'
@@ -302,23 +302,23 @@ export default function PricingSection() {
 
         {/* Add-ons Section */}
         <div className="mt-12 sm:mt-14 md:mt-16">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-gray-900 mb-6 sm:mb-8">Optional Add-ons</h2>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-gray-900 dark:text-white mb-6 sm:mb-8">Optional Add-ons</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto">
             {addons.map((addon) => (
               <div
                 key={addon.name}
-                className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8"
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 md:p-8"
               >
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2 sm:mb-4">{addon.name}</h3>
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4">{addon.name}</h3>
                 <div className="mb-3 sm:mb-4 md:mb-6">
-                  <span className="text-2xl sm:text-3xl md:text-4xl font-bold">£{addon.price}</span>
-                  <span className="text-gray-500 text-sm sm:text-base"> {addon.interval || 'one-time'}</span>
+                  <span className="text-2xl sm:text-3xl md:text-4xl font-bold dark:text-white">£{addon.price}</span>
+                  <span className="text-gray-500 dark:text-gray-400 text-sm sm:text-base"> {addon.interval || 'one-time'}</span>
                 </div>
-                <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 md:mb-8">{addon.description}</p>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-4 sm:mb-6 md:mb-8">{addon.description}</p>
                 <button
                   onClick={() => handleSubscribe(addon)}
                   disabled={loading && selectedPlan === addon}
-                  className="w-full py-2 sm:py-3 px-4 bg-[#2c3e50] text-white text-sm sm:text-base rounded-md hover:bg-[#1a2530] transition-colors duration-200"
+                  className="w-full py-2 sm:py-3 px-4 bg-[#2c3e50] text-white text-sm sm:text-base rounded-md hover:bg-[#1a2530] transition-colors duration-200 dark:bg-gray-700 dark:hover:bg-gray-600"
                 >
                   {(loading && selectedPlan === addon) ? 'Processing...' : addon.buttonText}
                 </button>
