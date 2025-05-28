@@ -222,7 +222,7 @@ export default function Profile() {
           </div>
           
           {/* Subscription Information */}
-          <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-5 sm:p-6 bg-gray-50 dark:bg-gray-850">
+          <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-5 sm:p-6 bg-gray-50 dark:bg-gray-900/50">
             <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Subscription Details</h4>
             
             {!subscription ? (
