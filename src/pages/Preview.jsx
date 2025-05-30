@@ -4,7 +4,11 @@ import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import html2canvas from 'html2canvas';
 import { useServer } from '../context/ServerContext';
+import { usePremiumBundle } from '../context/PremiumBundleContext';
+import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 import { QUALIFICATION_LEVELS } from '../data/educationData';
+import SubscriptionModal from '../components/SubscriptionModal';
 
 // Initialize pdfMake with fonts
 try {
@@ -27,6 +31,7 @@ function Preview() {
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [error, setError] = useState('');
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [completionStatus, setCompletionStatus] = useState({
     personalInfo: false,
     personalStatement: false,
@@ -36,6 +41,8 @@ function Preview() {
     references: false
   });
   const { serverUrl } = useServer();
+  const { user } = useAuth();
+  const { bundleActive, bundleUsed, markBundleAsUsed } = usePremiumBundle();
   const cvContentRef = useRef(null);
 
   useEffect(() => {
@@ -381,6 +388,23 @@ function Preview() {
 
   const handleDownload = async () => {
     try {
+      // Check if this is a premium bundle CV that's being downloaded for the first time
+      if (bundleActive && !bundleUsed) {
+        // Show confirmation dialog
+        if (!window.confirm('This will use your one-time Premium CV Bundle. After downloading, you will need to purchase another bundle or subscribe to make further changes. Continue?')) {
+          return;
+        }
+      } else if (!bundleActive && !user?.subscription) {
+        // Show subscription modal for users without premium bundle or subscription
+        setShowSubscriptionModal(true);
+        return;
+      } else if (bundleUsed && !user?.subscription) {
+        // If bundle is already used and no subscription
+        toast.error('Your Premium CV Bundle has already been used. Please purchase another bundle or subscribe for unlimited access.');
+        setShowSubscriptionModal(true);
+        return;
+      }
+
       setIsGeneratingPDF(true);
       setError('');
 
@@ -405,6 +429,11 @@ function Preview() {
             }
           });
           
+          // Mark bundle as used if applicable
+          if (bundleActive && !bundleUsed) {
+            await markBundleAsUsed();
+          }
+          
           return; // Exit if PDF generation successful
         } catch (err) {
           console.error('PDFMake error:', err);
@@ -427,6 +456,11 @@ function Preview() {
           link.href = imgData;
           link.download = 'my-cv.png';
           link.click();
+          
+          // Mark bundle as used if applicable
+          if (bundleActive && !bundleUsed) {
+            await markBundleAsUsed();
+          }
         } catch (err) {
           console.error('Screenshot error:', err);
           throw new Error('Failed to generate image. Please try printing instead.');
@@ -443,7 +477,28 @@ function Preview() {
   };
 
   const handlePrint = () => {
-    window.print();
+    // Check if this is a premium bundle CV that's being printed for the first time
+    if (bundleActive && !bundleUsed) {
+      // Show confirmation dialog
+      if (!window.confirm('This will use your one-time Premium CV Bundle. After printing, you will need to purchase another bundle or subscribe to make further changes. Continue?')) {
+        return;
+      }
+      
+      // Mark as used and then print
+      markBundleAsUsed().then(() => {
+        window.print();
+      });
+    } else if (!bundleActive && !user?.subscription) {
+      // Show subscription modal for users without premium bundle or subscription
+      setShowSubscriptionModal(true);
+    } else if (bundleUsed && !user?.subscription) {
+      // If bundle is already used and no subscription
+      toast.error('Your Premium CV Bundle has already been used. Please purchase another bundle or subscribe for unlimited access.');
+      setShowSubscriptionModal(true);
+    } else {
+      // Regular print for subscribers
+      window.print();
+    }
   };
 
   if (isLoading) {
@@ -497,6 +552,13 @@ function Preview() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
+      {/* Subscription Modal */}
+      <SubscriptionModal 
+        isOpen={showSubscriptionModal} 
+        onClose={() => setShowSubscriptionModal(false)} 
+        bundleUsed={bundleUsed}
+      />
+      
       <div className="bg-white rounded-lg shadow-lg p-8">
         <div className="text-center mb-8 print:hidden">
           <h1 className="text-3xl font-bold text-[#2c3e50] mb-2">

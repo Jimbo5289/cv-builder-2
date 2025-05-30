@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 
 // Create a checkout session
 router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => {
-  const { priceId, planInterval } = req.body;
+  const { priceId, planInterval, planType, planName, accessDuration } = req.body;
   
   if (!priceId && !planInterval) {
     return sendError(res, 'Either Price ID or plan interval (monthly/annual) is required', 400);
@@ -34,49 +34,86 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
       }
     }
     
-    logger.info(`Attempting to create checkout session with price ID: ${finalPriceId}`);
+    logger.info(`Attempting to create checkout session with price ID: ${finalPriceId}, plan type: ${planType || 'subscription'}`);
     
     // Check for development mode with mock data enabled
     const isDevelopment = process.env.NODE_ENV === 'development';
     const useMockData = process.env.MOCK_SUBSCRIPTION_DATA === 'true';
     
     if (isDevelopment && useMockData) {
-      logger.info('Using mock checkout session in development');
+      logger.info(`Using mock checkout session in development for plan: ${planName || planType || 'subscription'}`);
       
       try {
         // Get user id - for development mode, create a mock user if needed
         const userId = req.user?.id || 'dev-user-id';
         
-        // Create a mock subscription for the user
-        await prisma.subscription.upsert({
-          where: {
-            id: `mock_subscription_${userId}`
-          },
-          update: {
-            status: 'active',
-            planId: finalPriceId,
-            currentPeriodStart: new Date(),
-            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-            customerId: 'mock_customer_' + userId,
-            subscriptionId: 'mock_subscription_' + Date.now(),
-            stripePriceId: finalPriceId,
-            stripeSubscriptionId: 'mock_subscription_' + Date.now(),
-            stripeCustomerId: 'mock_customer_' + userId
-          },
-          create: {
-            id: `mock_subscription_${userId}`,
-            userId: userId,
-            status: 'active',
-            planId: finalPriceId,
-            currentPeriodStart: new Date(),
-            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-            customerId: 'mock_customer_' + userId,
-            subscriptionId: 'mock_subscription_' + Date.now(),
-            stripePriceId: finalPriceId,
-            stripeSubscriptionId: 'mock_subscription_' + Date.now(),
-            stripeCustomerId: 'mock_customer_' + userId
-          }
-        });
+        // Handle different plan types
+        if (planType === 'pay-per-cv') {
+          // For Pay-Per-CV, create a one-time purchase record
+          await prisma.purchase.create({
+            data: {
+              userId: userId,
+              productId: finalPriceId,
+              productName: 'Pay-Per-CV',
+              amount: 499, // £4.99 in pence
+              currency: 'GBP',
+              status: 'completed',
+              type: 'one-time',
+              remainingDownloads: 1,
+              purchaseDate: new Date()
+            }
+          });
+        } 
+        else if (planType === '24hour-access') {
+          // For 24-Hour Access, create a temporary access record
+          const expiryDate = new Date();
+          expiryDate.setHours(expiryDate.getHours() + 24);
+          
+          await prisma.temporaryAccess.create({
+            data: {
+              userId: userId,
+              type: '24hour-access',
+              startTime: new Date(),
+              endTime: expiryDate,
+              status: 'active',
+              purchaseId: 'mock_purchase_' + Date.now()
+            }
+          });
+        }
+        else {
+          // For subscriptions, create a subscription record
+          await prisma.subscription.upsert({
+            where: {
+              id: `mock_subscription_${userId}`
+            },
+            update: {
+              status: 'active',
+              planId: finalPriceId,
+              planName: planName || (planInterval === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription'),
+              currentPeriodStart: new Date(),
+              currentPeriodEnd: new Date(Date.now() + (planInterval === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000),
+              customerId: 'mock_customer_' + userId,
+              subscriptionId: 'mock_subscription_' + Date.now(),
+              stripePriceId: finalPriceId,
+              stripeSubscriptionId: 'mock_subscription_' + Date.now(),
+              stripeCustomerId: 'mock_customer_' + userId
+            },
+            create: {
+              id: `mock_subscription_${userId}`,
+              userId: userId,
+              status: 'active',
+              planId: finalPriceId,
+              planName: planName || (planInterval === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription'),
+              currentPeriodStart: new Date(),
+              currentPeriodEnd: new Date(Date.now() + (planInterval === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000),
+              customerId: 'mock_customer_' + userId,
+              subscriptionId: 'mock_subscription_' + Date.now(),
+              stripePriceId: finalPriceId,
+              stripeSubscriptionId: 'mock_subscription_' + Date.now(),
+              stripeCustomerId: 'mock_customer_' + userId
+            }
+          });
+        }
         
         // Return a mock successful response
         return sendSuccess(res, { 
@@ -107,8 +144,12 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
       return sendError(res, 'Invalid price ID', 400);
     }
     
-    // Create a checkout session
-    const session = await stripe.checkout.sessions.create({
+    // Determine checkout mode based on plan type
+    const isSubscription = planType !== 'pay-per-cv' && planType !== '24hour-access';
+    const checkoutMode = isSubscription ? 'subscription' : 'payment';
+    
+    // Create the appropriate checkout session based on plan type
+    const sessionConfig = {
       payment_method_types: ['card'],
       line_items: [
         {
@@ -116,16 +157,21 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
           quantity: 1,
         },
       ],
-      mode: 'subscription',
+      mode: checkoutMode,
       success_url: `${process.env.FRONTEND_URL}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/subscription/cancel`,
       customer_email: req.user.email,
       metadata: {
         userId: req.user.id,
-        planId: finalPriceId
+        planId: finalPriceId,
+        planType: planType || (planInterval ? 'subscription' : 'one-time'),
+        planName: planName || '',
+        accessDuration: accessDuration || ''
       },
       client_reference_id: req.user.id
-    });
+    };
+    
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     logger.info('Checkout session created', {
       userId: req.user.id,

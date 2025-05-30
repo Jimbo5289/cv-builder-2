@@ -1,5 +1,33 @@
 module.exports = {
   plans: {
+    free: {
+      id: 'free_plan',
+      name: 'Free',
+      price: 0,
+      currency: 'gbp',
+      type: 'free',
+      features: [
+        'Basic CV builder',
+        'Standard templates',
+        'PDF export',
+        'No AI analysis'
+      ]
+    },
+    premiumBundle: {
+      id: process.env.STRIPE_PRICE_ENHANCED_CV_DOWNLOAD || 'price_1RTLEoKSDrkHMuUnAmL6Hzmk',
+      name: 'Premium CV Bundle',
+      price: 19.99,
+      currency: 'gbp',
+      type: 'one_time',
+      features: [
+        'One complete CV creation',
+        'All analysis & feedback tools',
+        'Skills gap identification',
+        'Upskill course recommendations',
+        'Premium templates',
+        'One-time download/print'
+      ]
+    },
     payPerCV: {
       id: 'price_pay_per_cv',
       name: 'Pay-Per-CV',
@@ -48,14 +76,6 @@ module.exports = {
     }
   },
   addons: {
-    customBranding: {
-      id: 'price_custom_branding',
-      name: 'Custom Branding',
-      price: 49,
-      currency: 'gbp',
-      type: 'one_time',
-      description: 'Custom branding setup for agencies'
-    },
     linkedinReview: {
       id: 'price_linkedin_review',
       name: 'AI-Enhanced LinkedIn Review',

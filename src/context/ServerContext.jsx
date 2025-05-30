@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 // Create context
 const ServerContext = createContext(null);
 
-// Default server URLs
+// Default server URLs - FIX: Use fixed URL to prevent port scanning issues
 const DEFAULT_URLS = {
   development: 'http://localhost:3005',
   production: window.location.origin.replace(/:\d+$/, ''),
@@ -15,6 +15,11 @@ const DEFAULT_URLS = {
 export function ServerProvider({ children }) {
   // Initialize serverUrl based on environment variables or reasonable defaults
   const [serverUrl, setServerUrl] = useState(() => {
+    // FIX: Use fixed development URL to avoid port scanning issues
+    return 'http://localhost:3005';
+    
+    // Comment out port scanning logic that was causing issues
+    /*
     // First try to get from environment variables
     const envUrl = import.meta.env.VITE_API_URL;
     
@@ -32,6 +37,7 @@ export function ServerProvider({ children }) {
     console.log(`Using default ${isDev ? 'development' : 'production'} API URL: ${defaultUrl}`);
     
     return defaultUrl;
+    */
   });
 
   // State for server status

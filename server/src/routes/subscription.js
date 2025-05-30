@@ -205,4 +205,79 @@ router.post('/create-portal-session', auth, async (req, res) => {
   }
 });
 
+// Premium Bundle Endpoints
+router.get('/premium-bundle-status', auth, async (req, res) => {
+  try {
+    // Check if we're in development mode
+    if (process.env.NODE_ENV === 'development' && process.env.MOCK_SUBSCRIPTION_DATA === 'true') {
+      logger.info('Using mock premium bundle status in development');
+      return res.json({
+        active: true,
+        used: false
+      });
+    }
+
+    // Get the user's premium bundle status from the database
+    const premiumBundle = await prisma.premiumBundle.findFirst({
+      where: {
+        userId: req.user.id,
+        active: true
+      }
+    });
+
+    res.json({
+      active: !!premiumBundle,
+      used: premiumBundle ? premiumBundle.used : false
+    });
+  } catch (error) {
+    logger.error('Error getting premium bundle status:', error);
+    res.status(500).json({ error: 'Failed to get premium bundle status' });
+  }
+});
+
+router.post('/use-premium-bundle', auth, async (req, res) => {
+  try {
+    // Check if we're in development mode
+    if (process.env.NODE_ENV === 'development' && process.env.MOCK_SUBSCRIPTION_DATA === 'true') {
+      logger.info('Using mock premium bundle usage in development');
+      return res.json({
+        success: true,
+        message: 'Premium bundle marked as used'
+      });
+    }
+
+    // Get the user's premium bundle
+    const premiumBundle = await prisma.premiumBundle.findFirst({
+      where: {
+        userId: req.user.id,
+        active: true,
+        used: false
+      }
+    });
+
+    if (!premiumBundle) {
+      return res.status(404).json({ error: 'No active unused premium bundle found' });
+    }
+
+    // Mark the bundle as used
+    await prisma.premiumBundle.update({
+      where: {
+        id: premiumBundle.id
+      },
+      data: {
+        used: true,
+        usedAt: new Date()
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Premium bundle marked as used'
+    });
+  } catch (error) {
+    logger.error('Error marking premium bundle as used:', error);
+    res.status(500).json({ error: 'Failed to mark premium bundle as used' });
+  }
+});
+
 module.exports = router; 
