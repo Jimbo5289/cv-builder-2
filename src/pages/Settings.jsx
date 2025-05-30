@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import TwoFactorSetup from '../components/TwoFactorSetup';
 import ThemeToggle from '../components/ThemeToggle';
@@ -6,7 +6,7 @@ import { FiSun, FiMoon, FiAlertCircle, FiCheck } from 'react-icons/fi';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('security');
-  const { user } = useAuth();
+  const { user, getAuthHeader, updateUserInfo } = useAuth();
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -15,6 +15,15 @@ export default function Settings() {
   const [passwordErrors, setPasswordErrors] = useState({});
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Profile form state
+  const [profileData, setProfileData] = useState({
+    name: user?.name || '',
+    email: user?.email || ''
+  });
+  const [profileErrors, setProfileErrors] = useState({});
+  const [profileSuccess, setProfileSuccess] = useState(false);
+  const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
 
   const tabs = [
     { id: 'security', name: 'Security' },
@@ -22,6 +31,76 @@ export default function Settings() {
     { id: 'appearance', name: 'Appearance' },
     { id: 'notifications', name: 'Notifications' },
   ];
+
+  // Update profile form values when user data changes
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        name: user.name || '',
+        email: user.email || ''
+      });
+    }
+  }, [user]);
+
+  const handleProfileChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear errors when user starts typing again
+    if (profileErrors[name]) {
+      setProfileErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+    
+    // Clear success message when user makes changes
+    if (profileSuccess) {
+      setProfileSuccess(false);
+    }
+  };
+
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmittingProfile(true);
+    setProfileErrors({});
+    
+    const errors = {};
+    
+    // Basic validation
+    if (!profileData.name.trim()) {
+      errors.name = 'Name is required';
+    }
+    
+    if (!profileData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/^\S+@\S+\.\S+$/.test(profileData.email)) {
+      errors.email = 'Invalid email format';
+    }
+    
+    // If there are errors, stop submission
+    if (Object.keys(errors).length > 0) {
+      setProfileErrors(errors);
+      setIsSubmittingProfile(false);
+      return;
+    }
+    
+    try {
+      // Call the updateUserInfo function from AuthContext
+      await updateUserInfo(profileData);
+      
+      setProfileSuccess(true);
+    } catch (error) {
+      setProfileErrors({
+        general: error.message || 'Failed to update profile. Please try again.'
+      });
+    } finally {
+      setIsSubmittingProfile(false);
+    }
+  };
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
@@ -328,7 +407,13 @@ export default function Settings() {
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
                     Profile Information
                   </h3>
-                  <form className="space-y-4">
+                  {profileSuccess && (
+                    <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900 rounded-md flex items-center text-green-700 dark:text-green-400">
+                      <FiCheck className="h-5 w-5 mr-2 flex-shrink-0" />
+                      <p className="text-sm">Your profile has been updated successfully.</p>
+                    </div>
+                  )}
+                  <form className="space-y-4" onSubmit={handleProfileSubmit}>
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Full Name
@@ -337,9 +422,16 @@ export default function Settings() {
                         type="text"
                         id="name"
                         name="name"
-                        defaultValue={user?.name}
-                        className="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:ring-[#E78F81] focus:border-[#E78F81] dark:focus:ring-blue-500 dark:focus:border-blue-500 sm:text-sm"
+                        value={profileData.name}
+                        onChange={handleProfileChange}
+                        className={`mt-1 block w-full border ${profileErrors.name ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:ring-[#E78F81] focus:border-[#E78F81] dark:focus:ring-blue-500 dark:focus:border-blue-500 sm:text-sm h-10`}
                       />
+                      {profileErrors.name && (
+                        <p className="mt-1 text-sm text-red-600 dark:text-red-500 flex items-center">
+                          <FiAlertCircle className="h-4 w-4 mr-1" />
+                          {profileErrors.name}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -349,15 +441,28 @@ export default function Settings() {
                         type="email"
                         id="email"
                         name="email"
-                        defaultValue={user?.email}
-                        className="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:ring-[#E78F81] focus:border-[#E78F81] dark:focus:ring-blue-500 dark:focus:border-blue-500 sm:text-sm"
+                        value={profileData.email}
+                        onChange={handleProfileChange}
+                        className={`mt-1 block w-full border ${profileErrors.email ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:ring-[#E78F81] focus:border-[#E78F81] dark:focus:ring-blue-500 dark:focus:border-blue-500 sm:text-sm h-10`}
                       />
+                      {profileErrors.email && (
+                        <p className="mt-1 text-sm text-red-600 dark:text-red-500 flex items-center">
+                          <FiAlertCircle className="h-4 w-4 mr-1" />
+                          {profileErrors.email}
+                        </p>
+                      )}
                     </div>
+                    {profileErrors.general && (
+                      <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 rounded-md">
+                        <p className="text-sm text-red-600 dark:text-red-500">{profileErrors.general}</p>
+                      </div>
+                    )}
                     <button
                       type="submit"
-                      className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#E78F81] hover:bg-[#d36e62] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-500"
+                      disabled={isSubmittingProfile}
+                      className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#E78F81] hover:bg-[#d36e62] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Update Profile
+                      {isSubmittingProfile ? 'Updating...' : 'Update Profile'}
                     </button>
                   </form>
                 </div>

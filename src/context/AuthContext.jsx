@@ -383,40 +383,90 @@ function AuthProvider({ children }) {
       if (!token) {
         return false;
       }
-      let userData = null;
-      let success = false;
-      try {
-        const response = await fetch(`${serverUrl}/api/auth/me`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (response.ok) {
-          userData = await response.json();
-          success = true;
+
+      const response = await fetch(`${serverUrl}/api/auth/me`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         }
-      } catch (error) {
-        console.warn(`Failed to refresh user data from ${serverUrl}:`, error);
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to refresh user information');
       }
-      if (success && userData) {
-        // Update user data in state and localStorage
+
+      const data = await response.json();
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      setState(prev => ({
+        ...prev,
+        user: data.user
+      }));
+      
+      return true;
+    } catch (error) {
+      console.error('Refresh user error:', error);
+      return false;
+    }
+  }
+
+  async function updateUserInfo(userData) {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      // For development mode, directly update the local user data
+      if (import.meta.env.DEV && (token === 'dev-token' || import.meta.env.VITE_SKIP_AUTH === 'true')) {
+        console.log('DEV MODE: Updating user profile directly');
         const updatedUser = {
-          ...userData,
-          token // Keep the token
+          ...state.user,
+          ...userData
         };
+        
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
         setState(prev => ({
           ...prev,
-          user: updatedUser,
-          isAuthenticated: true,
-          error: null
+          user: updatedUser
         }));
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        return true;
+        
+        toast.success('Profile updated successfully!');
+        return { success: true };
       }
-      return false;
+      
+      // In production, call the API
+      const response = await fetch(`${serverUrl}/api/users/profile`, {
+        method: 'PUT',
+        headers: {
+          ...getAuthHeader(),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update profile');
+      }
+      
+      // Update the user in state and localStorage
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      setState(prev => ({
+        ...prev,
+        user: data.user
+      }));
+      
+      toast.success('Profile updated successfully!');
+      return { success: true };
     } catch (error) {
-      console.error('Failed to refresh user data:', error);
-      return false;
+      console.error('Update profile error:', error);
+      toast.error(error.message || 'Failed to update profile');
+      throw error;
     }
   }
 
@@ -426,7 +476,8 @@ function AuthProvider({ children }) {
     register,
     logout,
     getAuthHeader,
-    refreshUser
+    refreshUser,
+    updateUserInfo
   };
 
   console.log('AuthProvider state:', state);
