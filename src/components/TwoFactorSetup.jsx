@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useServer } from '../context/ServerContext';
 
 export default function TwoFactorSetup() {
   const [step, setStep] = useState('initial'); // initial, setup, verify, success
@@ -8,17 +9,19 @@ export default function TwoFactorSetup() {
   const [token, setToken] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
+  const [copied, setCopied] = useState(false);
+  const { user, getAuthHeader } = useAuth();
+  const { apiUrl } = useServer();
 
   const initiate2FASetup = async () => {
     try {
       setIsLoading(true);
       setError('');
       
-      const response = await fetch('http://localhost:3002/api/2fa/setup', {
+      const response = await fetch(`${apiUrl}/api/2fa/setup`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          ...getAuthHeader(),
           'Content-Type': 'application/json',
         },
       });
@@ -46,10 +49,10 @@ export default function TwoFactorSetup() {
       setIsLoading(true);
       setError('');
 
-      const response = await fetch('http://localhost:3002/api/2fa/verify', {
+      const response = await fetch(`${apiUrl}/api/2fa/verify`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          ...getAuthHeader(),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ token }),
@@ -74,10 +77,10 @@ export default function TwoFactorSetup() {
       setIsLoading(true);
       setError('');
 
-      const response = await fetch('http://localhost:3002/api/2fa/disable', {
+      const response = await fetch(`${apiUrl}/api/2fa/disable`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          ...getAuthHeader(),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ token }),
@@ -95,6 +98,17 @@ export default function TwoFactorSetup() {
       setError(err.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(secret);
+      setCopied(true);
+      // Reset the "Copied!" message after 2 seconds
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
     }
   };
 
@@ -131,7 +145,7 @@ export default function TwoFactorSetup() {
           3. Enter the 6-digit code shown in your app
         </p>
         <div className="mb-6 flex justify-center">
-          <img src={qrCode} alt="2FA QR Code" className="border p-2 rounded-lg" />
+          <img src={qrCode} alt="2FA QR Code" className="border p-2 rounded-lg" style={{ maxWidth: '220px', height: 'auto' }} />
         </div>
         <form onSubmit={verify2FA} className="space-y-4">
           <div>
@@ -158,11 +172,32 @@ export default function TwoFactorSetup() {
         </form>
         {error && <p className="mt-4 text-red-600">{error}</p>}
         <div className="mt-6">
-          <p className="text-sm text-gray-500">
-            Can't scan the QR code? Manually enter this code in your authenticator app:
-            <br />
-            <code className="block mt-2 p-2 bg-gray-100 rounded">{secret}</code>
-          </p>
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-sm text-gray-500">
+              Can't scan the QR code? Manually enter this code in your authenticator app:
+            </p>
+            <button
+              onClick={copyToClipboard}
+              className="ml-2 p-1.5 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 focus:outline-none focus:ring-1 focus:ring-[#E78F81] transition-colors"
+              title="Copy to clipboard"
+            >
+              {copied ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                  <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                </svg>
+              )}
+            </button>
+          </div>
+          <div className="overflow-x-auto relative">
+            <code className="block p-3 bg-gray-100 rounded text-sm break-all overflow-x-auto whitespace-normal">
+              {secret}
+            </code>
+          </div>
         </div>
       </div>
     );

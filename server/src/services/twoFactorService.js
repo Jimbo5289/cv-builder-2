@@ -19,7 +19,24 @@ const prisma = new PrismaClient();
 
 // Input validation schemas
 const tokenSchema = z.string().length(6).regex(/^\d+$/);
-const userIdSchema = z.string().uuid();
+const userIdSchema = z.string().refine(
+  (val) => {
+    // In development mode, allow 'dev-user-id' for testing
+    if (process.env.NODE_ENV === 'development' && val === 'dev-user-id') {
+      return true;
+    }
+    // Otherwise enforce UUID format
+    try {
+      z.string().uuid().parse(val);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  {
+    message: 'Invalid uuid',
+  }
+);
 
 class TwoFactorService {
   /**
@@ -32,6 +49,32 @@ class TwoFactorService {
       // Validate input
       const validatedUserId = userIdSchema.parse(userId);
 
+      // Special handling for dev mode
+      if (process.env.NODE_ENV === 'development' && validatedUserId === 'dev-user-id') {
+        // Create a mock secret for development
+        const secret = speakeasy.generateSecret({
+          name: `CV Builder:dev@example.com`,
+          issuer: 'CV Builder',
+          length: 32
+        });
+
+        // Generate QR code
+        const otpauthUrl = secret.otpauth_url;
+        const qrCodeUrl = await QRCode.toDataURL(otpauthUrl, {
+          errorCorrectionLevel: 'H',
+          margin: 1,
+          width: 300
+        });
+
+        logger.info('2FA secret generated for development user', { userId: validatedUserId });
+
+        return {
+          secret: secret.base32,
+          qrCode: qrCodeUrl
+        };
+      }
+
+      // Regular flow for production users
       // Check if user exists
       const user = await prisma.user.findUnique({
         where: { id: validatedUserId },
@@ -97,6 +140,15 @@ class TwoFactorService {
       const validatedUserId = userIdSchema.parse(userId);
       const validatedToken = tokenSchema.parse(token);
 
+      // Special handling for dev mode
+      if (process.env.NODE_ENV === 'development' && validatedUserId === 'dev-user-id') {
+        // In dev mode, accept any valid 6-digit token for simplicity
+        // This is just for development testing!
+        logger.info('2FA token validated for development user', { userId: validatedUserId });
+        return true;
+      }
+
+      // Regular flow for production users
       // Get user's secret from database
       const user = await prisma.user.findUnique({
         where: { id: validatedUserId },
@@ -151,6 +203,14 @@ class TwoFactorService {
       const validatedUserId = userIdSchema.parse(userId);
       const validatedToken = tokenSchema.parse(token);
 
+      // Special handling for dev mode
+      if (process.env.NODE_ENV === 'development' && validatedUserId === 'dev-user-id') {
+        // In dev mode, accept any valid 6-digit token
+        logger.info('2FA login validated for development user', { userId: validatedUserId });
+        return true;
+      }
+
+      // Regular flow for production users
       const user = await prisma.user.findUnique({
         where: { id: validatedUserId },
         select: { twoFactorSecret: true, twoFactorEnabled: true }
@@ -202,6 +262,14 @@ class TwoFactorService {
       const validatedUserId = userIdSchema.parse(userId);
       const validatedToken = tokenSchema.parse(token);
 
+      // Special handling for dev mode
+      if (process.env.NODE_ENV === 'development' && validatedUserId === 'dev-user-id') {
+        // In dev mode, accept any valid 6-digit token and always succeed
+        logger.info('2FA disabled for development user', { userId: validatedUserId });
+        return true;
+      }
+
+      // Regular flow for production users
       // Verify one last time before disabling
       const isValid = await this.validateLogin(validatedUserId, validatedToken);
       
