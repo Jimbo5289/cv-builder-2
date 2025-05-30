@@ -9,6 +9,7 @@
     "build": "vite build",
     "build:vercel": "node --no-warnings build.js",
     "build:vercel:cjs": "node --no-warnings build-cjs.js",
+    "vercel-build": "npm install --production=false && npm run build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org=${SENTRY_ORG} --project=cv-builder ./dist && sentry-cli sourcemaps upload --org=${SENTRY_ORG} --project=cv-builder ./dist",
