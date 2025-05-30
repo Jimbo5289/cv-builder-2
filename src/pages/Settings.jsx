@@ -202,6 +202,20 @@ export default function Settings() {
                       <p className="text-sm">Your password has been updated successfully.</p>
                     </div>
                   )}
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 mb-6">
+                    <div className="flex items-start mb-4">
+                      <div className="flex-shrink-0 mt-0.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                          <strong>NIST Guidelines:</strong> Modern password security focuses on length over complexity. We recommend using a passphrase of at least 12 characters.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                   <form className="space-y-4" onSubmit={handlePasswordSubmit}>
                     <div>
                       <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -234,6 +248,7 @@ export default function Settings() {
                         onChange={handlePasswordChange}
                         className={`mt-1 block w-full border ${passwordErrors.newPassword ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:ring-[#E78F81] focus:border-[#E78F81] dark:focus:ring-blue-500 dark:focus:border-blue-500 sm:text-sm h-10`}
                       />
+                      
                       {passwordData.newPassword && (
                         <div className="mt-2">
                           <div className="flex items-center justify-between mb-1">
@@ -248,30 +263,36 @@ export default function Settings() {
                               style={{ width: `${(passwordStrength / 5) * 100}%` }}
                             ></div>
                           </div>
-                          <ul className="mt-2 text-xs text-gray-500 dark:text-gray-400 space-y-1">
-                            <li className="flex items-center">
-                              <span className={`inline-block w-3 h-3 mr-2 rounded-full ${/^.{8,}$/.test(passwordData.newPassword) ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
-                              At least 8 characters
-                            </li>
-                            <li className="flex items-center">
-                              <span className={`inline-block w-3 h-3 mr-2 rounded-full ${/[A-Z]/.test(passwordData.newPassword) ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
-                              At least 1 uppercase letter
-                            </li>
-                            <li className="flex items-center">
-                              <span className={`inline-block w-3 h-3 mr-2 rounded-full ${/[a-z]/.test(passwordData.newPassword) ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
-                              At least 1 lowercase letter
-                            </li>
-                            <li className="flex items-center">
+                          
+                          {/* Simplified requirement display based on NIST */}
+                          <div className="mt-2 grid grid-cols-2 gap-2">
+                            <div className="flex items-center">
+                              <span className={`inline-block w-3 h-3 mr-2 rounded-full ${passwordData.newPassword.length >= 12 ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">12+ characters</span>
+                            </div>
+                            <div className="flex items-center">
+                              <span className={`inline-block w-3 h-3 mr-2 rounded-full ${/[A-Z]/.test(passwordData.newPassword) && /[a-z]/.test(passwordData.newPassword) ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">Mixed case</span>
+                            </div>
+                            <div className="flex items-center">
                               <span className={`inline-block w-3 h-3 mr-2 rounded-full ${/[0-9]/.test(passwordData.newPassword) ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
-                              At least 1 number
-                            </li>
-                            <li className="flex items-center">
-                              <span className={`inline-block w-3 h-3 mr-2 rounded-full ${/[^A-Za-z0-9]/.test(passwordData.newPassword) ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
-                              At least 1 special character
-                            </li>
-                          </ul>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">Numbers</span>
+                            </div>
+                            <div className="flex items-center">
+                              <span className={`inline-block w-3 h-3 mr-2 rounded-full ${!/^[a-zA-Z0-9]+$/.test(passwordData.newPassword) ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">Not just alphanumeric</span>
+                            </div>
+                          </div>
+                          
+                          {/* Common password warning - simulated check */}
+                          {passwordData.newPassword.length > 0 && ['password', 'qwerty', '123456', 'admin'].includes(passwordData.newPassword.toLowerCase()) && (
+                            <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900 rounded text-xs text-yellow-700 dark:text-yellow-500">
+                              This password appears in data breaches. Please choose a more unique password.
+                            </div>
+                          )}
                         </div>
                       )}
+                      
                       {passwordErrors.newPassword && (
                         <p className="mt-1 text-sm text-red-600 dark:text-red-500 flex items-center">
                           <FiAlertCircle className="h-4 w-4 mr-1" />
