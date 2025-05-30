@@ -12,6 +12,10 @@ import { setupErrorHandler } from './utils/errorHandler';
 // Debug - log the loading process
 console.log('Main.jsx loading - Step 1: Before any initialization');
 
+// Log React version for debugging
+console.log('React Version:', React.version);
+console.log('React DOM available:', typeof ReactDOM !== 'undefined');
+
 // Safari detection
 const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 console.log('Browser detection - Safari:', isSafari);
@@ -27,6 +31,12 @@ if (isSafari) {
   meta.name = 'viewport';
   meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
   document.getElementsByTagName('head')[0].appendChild(meta);
+}
+
+// Verify React is available before proceeding
+if (typeof React !== 'object' || React === null) {
+  console.error('React is not properly defined in main.jsx');
+  throw new Error('React not found');
 }
 
 // Initialize error handler to prevent unnecessary reloads
@@ -79,6 +89,12 @@ const ErrorFallback = ({ error, resetError }) => {
         >
           Try again
         </button>
+        <button
+          onClick={() => window.location.href = '/fallback-react.html'}
+          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 ml-2"
+        >
+          Go to Fallback Page
+        </button>
       </div>
     </div>
   );
@@ -99,6 +115,7 @@ const LoadingFallback = () => {
 
 // Simplified app render function
 const renderApp = () => {
+  console.log('Step 5: Rendering application');
   const rootElement = document.getElementById('root');
   
   if (!rootElement) {
@@ -107,9 +124,11 @@ const renderApp = () => {
   }
   
   try {
+    console.log('Creating React root');
     const root = createRoot(rootElement);
     
     // First render a loading indicator
+    console.log('Rendering loading indicator');
     root.render(<LoadingFallback />);
     
     // Check for dev mode in URL
@@ -118,18 +137,21 @@ const renderApp = () => {
     // Then render the full app
     setTimeout(() => {
       try {
+        console.log('Rendering full application');
         root.render(
-          <BrowserRouter>
-            <ThemeProvider>
-              <ServerProvider>
-                <AuthProvider>
-                  <Sentry.ErrorBoundary fallback={ErrorFallback}>
-                    <App />
-                  </Sentry.ErrorBoundary>
-                </AuthProvider>
-              </ServerProvider>
-            </ThemeProvider>
-          </BrowserRouter>
+          <React.StrictMode>
+            <BrowserRouter>
+              <ThemeProvider>
+                <ServerProvider>
+                  <AuthProvider>
+                    <Sentry.ErrorBoundary fallback={ErrorFallback}>
+                      <App />
+                    </Sentry.ErrorBoundary>
+                  </AuthProvider>
+                </ServerProvider>
+              </ThemeProvider>
+            </BrowserRouter>
+          </React.StrictMode>
         );
         console.log('App rendered successfully');
       } catch (error) {
@@ -148,18 +170,30 @@ const renderApp = () => {
       <div class="min-h-screen flex items-center justify-center bg-gray-100">
         <div class="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
           <h2 class="text-2xl font-bold text-red-600 mb-4">Fatal Error</h2>
-          <p class="text-gray-600 mb-4">The application could not be loaded.</p>
-          <button 
-            onclick="window.location.reload()" 
-            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Reload Application
-          </button>
+          <p class="text-gray-600 mb-4">The application could not be loaded: ${error.message}</p>
+          <div style="display: flex; gap: 10px;">
+            <button 
+              onclick="window.location.reload()" 
+              class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Reload Application
+            </button>
+            <button 
+              onclick="window.location.href='/fallback-react.html'" 
+              class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            >
+              Fallback Page
+            </button>
+          </div>
         </div>
       </div>
     `;
   }
 };
 
-// Start the app
-renderApp();
+// Only start the app once DOM is fully loaded to ensure root element exists
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderApp);
+} else {
+  renderApp();
+}

@@ -11,7 +11,7 @@
     "build:vercel": "node --no-warnings build.js",
     "build:vercel:cjs": "node --no-warnings build-cjs.js",
     "vercel-build": "npm install --production=false && npm run build:verify",
-    "postbuild": "node verify-build.js",
+    "postbuild": "node verify-build.js && npm run copy-debug-files",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org=${SENTRY_ORG} --project=cv-builder ./dist && sentry-cli sourcemaps upload --org=${SENTRY_ORG} --project=cv-builder ./dist",
@@ -40,7 +40,7 @@
     "fix:simple": "node fix-safari-simpler.js",
     "fix:setup": "node fix-safari-simpler.js",
     "verify-build": "node verify-build.js",
-    "copy-debug-files": "cp public/debug.js public/debug-bundle.js public/test.html public/fallback.html public/fallback-app.jsx public/fallback-react.html dist/"
+    "copy-debug-files": "cp -f public/debug.js public/debug-bundle.js public/test.html public/fallback.html public/fallback-app.jsx public/fallback-react.html public/preload-react.js public/react-rescue.js public/check-react.js dist/ || true"
   },
   "dependencies": {
     "@sentry/react": "^9.22.0",
@@ -48,34 +48,34 @@
     "axios": "^1.4.0",
     "chart.js": "^4.3.0",
     "file-saver": "^2.0.5",
-    "framer-motion": "^12.12.2",
+    "framer-motion": "^10.16.4",
     "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.10.1",
     "js-cookie": "^3.0.5",
     "jspdf": "^3.0.1",
     "pdfmake": "^0.2.20",
-    "react": "^18.2.0",
+    "react": "18.2.0",
     "react-chartjs-2": "^5.2.0",
-    "react-dom": "^18.2.0",
+    "react-dom": "18.2.0",
     "react-hook-form": "^7.43.9",
     "react-hot-toast": "^2.5.2",
-    "react-icons": "^5.5.0",
-    "react-native": "^0.72.6",
-    "react-pdf": "^9.2.1",
+    "react-icons": "^5.0.1",
+    "react-native": "0.72.6",
+    "react-pdf": "^7.5.1",
     "react-router-dom": "^6.11.1",
     "react-select": "^5.7.3",
-    "react-spring": "^10.0.1",
-    "react-to-pdf": "^2.0.0",
-    "react-to-print": "^3.1.0",
+    "react-spring": "^9.7.3",
+    "react-to-pdf": "^1.0.1",
+    "react-to-print": "^2.14.13",
     "save-html-as-image": "^1.7.1"
   },
   "devDependencies": {
     "@tailwindcss/aspect-ratio": "^0.4.2",
-    "@tailwindcss/forms": "^0.5.10",
-    "@tailwindcss/typography": "^0.5.16",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
     "@types/react": "^18.2.61",
     "@types/react-dom": "^18.0.11",
-    "@vitejs/plugin-react": "^4.0.0-beta.0",
+    "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.14",
     "chalk": "^4.1.2",
     "eslint": "^8.38.0",
@@ -85,5 +85,14 @@
     "postcss": "^8.4.23",
     "tailwindcss": "^3.3.2",
     "vite": "^6.3.5"
+  },
+  "resolutions": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "overrides": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-spring": "9.7.3"
   }
 }

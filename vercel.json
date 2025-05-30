@@ -40,6 +40,9 @@
     { "src": "/test.html", "dest": "/test.html" },
     { "src": "/debug.js", "dest": "/debug.js" },
     { "src": "/debug-bundle.js", "dest": "/debug-bundle.js" },
+    { "src": "/check-react.js", "dest": "/check-react.js" },
+    { "src": "/react-rescue.js", "dest": "/react-rescue.js" },
+    { "src": "/preload-react.js", "dest": "/preload-react.js" },
     { "src": "/fallback-app.jsx", "dest": "/fallback-app.jsx" },
     { "src": "/fallback-react.html", "dest": "/fallback-react.html" },
     { "src": "/(.*)", "dest": "/index.html" }
