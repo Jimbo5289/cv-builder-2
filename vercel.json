@@ -7,6 +7,12 @@
     }
   ],
   "routes": [
-    { "src": "/[^.]+", "dest": "/", "status": 200 }
-  ]
+    { "handle": "filesystem" },
+    { "src": "/api/(.*)", "dest": "https://your-backend-api-url.com/api/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "env": {
+    "VITE_DEV_MODE": "false",
+    "VITE_SKIP_AUTH": "false"
+  }
 } 
