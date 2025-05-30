@@ -7,6 +7,8 @@
     <meta name="description" content="CV Builder - Create professional CVs that help you stand out in the job market and get hired at top companies." />
     <meta name="theme-color" content="#2c3e50" />
     <title>CV Builder - Create Professional CVs in Minutes</title>
+    <!-- Diagnostic script loads before everything else -->
+    <script src="/debug-bundle.js"></script>
     <!-- Set environment variables directly -->
     <script>
       // Inject environment variables
@@ -14,13 +16,29 @@
       window.ENV_VITE_SKIP_AUTH = "true";
       window.ENV_VITE_API_URL = "https://mock-api.example.com";  // This can be updated to your actual API later
 
+      // Global variable to track script loading attempts
+      window.scriptLoadAttempts = {
+        main: 0,
+        react: 0,
+        vendor: 0
+      };
+
       // Basic error handling
       window.addEventListener('error', function(e) {
         console.error('Global error caught:', e.message, e.filename, e.lineno);
         const rootEl = document.getElementById('root');
         if (rootEl) {
-          rootEl.innerHTML = '<div style="padding: 20px; text-align: center;"><h2>Something went wrong</h2><p>Please check the console for details: ' + e.message + '</p><button onclick="window.location.reload()">Reload</button></div>';
+          rootEl.innerHTML = '<div style="padding: 20px; text-align: center;"><h2>Something went wrong</h2><p>Please check the console for details: ' + e.message + '</p><button onclick="window.location.reload()">Reload</button><button onclick="window.location.href=\'/fallback.html\'">Go to Fallback Page</button></div>';
         }
+        
+        // Log the error details to the console in a structured way
+        console.error('Error details:', {
+          message: e.message,
+          filename: e.filename,
+          lineNumber: e.lineno,
+          columnNumber: e.colno,
+          stack: e.error?.stack
+        });
       });
 
       // Override fetch to mock API requests if needed
@@ -42,6 +60,36 @@
             throw err;
           });
       };
+
+      // Attempt to load React as a backup if the main script fails
+      function loadReactBackup() {
+        console.log('Attempting to load React backup scripts');
+        if (window.scriptLoadAttempts.react >= 2) {
+          console.error('Max React load attempts reached');
+          return;
+        }
+        
+        window.scriptLoadAttempts.react++;
+        
+        const loadScript = (src, onload, onerror) => {
+          const script = document.createElement('script');
+          script.src = src;
+          script.onload = onload;
+          script.onerror = onerror;
+          document.head.appendChild(script);
+        };
+        
+        // Load React and ReactDOM from CDN as a fallback
+        loadScript('https://unpkg.com/react@18/umd/react.production.min.js', 
+          () => console.log('React loaded successfully from CDN'),
+          () => console.error('Failed to load React from CDN')
+        );
+        
+        loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
+          () => console.log('ReactDOM loaded successfully from CDN'),
+          () => console.error('Failed to load ReactDOM from CDN')
+        );
+      }
     </script>
   </head>
   <body>
@@ -51,15 +99,59 @@
         <div style="text-align: center; padding: 2rem; background-color: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
           <div style="border: 4px solid #eee; border-top: 4px solid #3498db; border-radius: 50%; width: 50px; height: 50px; margin: 0 auto 20px; animation: spin 1s linear infinite;"></div>
           <p>Loading CV Builder...</p>
+          <div id="load-status" style="color: #666; font-size: 0.8rem; margin-top: 10px;">Initializing application...</div>
         </div>
       </div>
     </div>
+    
+    <!-- Debug button (creates itself in the DOM) -->
+    <script>
+      // Create a manual debugging button
+      const debugButton = document.createElement('button');
+      debugButton.innerText = 'Debug React';
+      debugButton.style.position = 'fixed';
+      debugButton.style.bottom = '50px';
+      debugButton.style.right = '10px';
+      debugButton.style.zIndex = '9999';
+      debugButton.style.padding = '8px 12px';
+      debugButton.style.backgroundColor = '#e74c3c';
+      debugButton.style.color = 'white';
+      debugButton.style.border = 'none';
+      debugButton.style.borderRadius = '4px';
+      debugButton.onclick = function() {
+        // Try to load React manually
+        loadReactBackup();
+        
+        // Check React status
+        const reactStatus = {
+          reactLoaded: typeof React !== 'undefined',
+          reactDomLoaded: typeof ReactDOM !== 'undefined',
+          reactVersion: typeof React !== 'undefined' ? React.version : 'not loaded',
+          rootElement: !!document.getElementById('root'),
+          mainScriptAttempts: window.scriptLoadAttempts.main,
+          reactAttempts: window.scriptLoadAttempts.react
+        };
+        
+        alert('React Debug Info: ' + JSON.stringify(reactStatus, null, 2));
+      };
+      document.body.appendChild(debugButton);
+      
+      // Update loading status
+      const loadStatus = document.getElementById('load-status');
+      if (loadStatus) {
+        let dots = 0;
+        setInterval(() => {
+          dots = (dots + 1) % 4;
+          loadStatus.textContent = 'Initializing application' + '.'.repeat(dots);
+        }, 500);
+      }
+    </script>
     
     <!-- Debug script for troubleshooting -->
     <script src="/debug.js"></script>
     
     <!-- Main application -->
-    <script type="module" src="/src/main.jsx"></script>
+    <script type="module" src="/src/main.jsx" onerror="console.error('Failed to load main script'); loadReactBackup(); window.scriptLoadAttempts.main++"></script>
     
     <style>
       @keyframes spin {

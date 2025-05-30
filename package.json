@@ -7,9 +7,11 @@
     "dev": "vite",
     "vite": "vite",
     "build": "vite build",
+    "build:verify": "vite build && node verify-build.js",
     "build:vercel": "node --no-warnings build.js",
     "build:vercel:cjs": "node --no-warnings build-cjs.js",
-    "vercel-build": "npm install --production=false && npm run build",
+    "vercel-build": "npm install --production=false && npm run build:verify",
+    "postbuild": "node verify-build.js",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org=${SENTRY_ORG} --project=cv-builder ./dist && sentry-cli sourcemaps upload --org=${SENTRY_ORG} --project=cv-builder ./dist",
@@ -36,7 +38,9 @@
     "fix": "node fix-safari.js",
     "fix:all": "node fix-safari.js",
     "fix:simple": "node fix-safari-simpler.js",
-    "fix:setup": "node fix-safari-simpler.js"
+    "fix:setup": "node fix-safari-simpler.js",
+    "verify-build": "node verify-build.js",
+    "copy-debug-files": "cp public/debug.js public/debug-bundle.js public/test.html public/fallback.html public/fallback-app.jsx public/fallback-react.html dist/"
   },
   "dependencies": {
     "@sentry/react": "^9.22.0",
@@ -73,6 +77,7 @@
     "@types/react-dom": "^18.0.11",
     "@vitejs/plugin-react": "^4.0.0-beta.0",
     "autoprefixer": "^10.4.14",
+    "chalk": "^4.1.2",
     "eslint": "^8.38.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",

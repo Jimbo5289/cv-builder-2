@@ -1,5 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "vite",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],
@@ -10,12 +14,34 @@
         { "key": "Access-Control-Allow-Credentials", "value": "true" },
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
-        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization" }
+        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization" },
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     }
   ],
   "env": {
     "VITE_DEV_MODE": "false",
-    "VITE_SKIP_AUTH": "true"
-  }
+    "VITE_SKIP_AUTH": "true",
+    "VITE_API_URL": "https://mock-api.example.com"
+  },
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/favicon.ico", "dest": "/favicon.ico" },
+    { "src": "/robots.txt", "dest": "/robots.txt" },
+    { "src": "/fallback.html", "dest": "/fallback.html" },
+    { "src": "/test.html", "dest": "/test.html" },
+    { "src": "/debug.js", "dest": "/debug.js" },
+    { "src": "/debug-bundle.js", "dest": "/debug-bundle.js" },
+    { "src": "/fallback-app.jsx", "dest": "/fallback-app.jsx" },
+    { "src": "/fallback-react.html", "dest": "/fallback-react.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
 } 
