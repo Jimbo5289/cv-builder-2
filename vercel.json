@@ -32,7 +32,7 @@
   },
   "routes": [
     { "handle": "filesystem" },
-    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/assets/(.*)", "dest": "/assets/$1", "headers": { "cache-control": "public, max-age=31536000, immutable" } },
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/favicon.ico", "dest": "/favicon.ico" },
     { "src": "/robots.txt", "dest": "/robots.txt" },
@@ -43,5 +43,12 @@
     { "src": "/fallback-app.jsx", "dest": "/fallback-app.jsx" },
     { "src": "/fallback-react.html", "dest": "/fallback-react.html" },
     { "src": "/(.*)", "dest": "/index.html" }
-  ]
+  ],
+  "build": {
+    "env": {
+      "VITE_DEV_MODE": "false",
+      "VITE_SKIP_AUTH": "true",
+      "VITE_API_URL": "https://mock-api.example.com"
+    }
+  }
 } 

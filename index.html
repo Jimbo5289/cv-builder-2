@@ -7,6 +7,17 @@
     <meta name="description" content="CV Builder - Create professional CVs that help you stand out in the job market and get hired at top companies." />
     <meta name="theme-color" content="#2c3e50" />
     <title>CV Builder - Create Professional CVs in Minutes</title>
+    
+    <!-- Preload React script - ensures React is available before any other JavaScript runs -->
+    <script src="/preload-react.js"></script>
+    
+    <!-- React Rescue Script - ensures React is available even if the bundle fails -->
+    <script src="/react-rescue.js"></script>
+    
+    <!-- Fallback React from CDN (will only be used if bundled React fails) -->
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    
     <!-- Diagnostic script loads before everything else -->
     <script src="/debug-bundle.js"></script>
     <!-- Set environment variables directly -->
@@ -90,6 +101,16 @@
           () => console.error('Failed to load ReactDOM from CDN')
         );
       }
+
+      // Handle cases where React might not be defined
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
+            console.error('React or ReactDOM not defined after page load, attempting to load from CDN');
+            loadReactBackup();
+          }
+        }, 1000);
+      });
     </script>
   </head>
   <body>

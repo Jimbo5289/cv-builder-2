@@ -10,7 +10,17 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
-      react(),
+      react({
+        // React plugin options for better error handling
+        fastRefresh: true,
+        jsxRuntime: 'automatic',
+        babel: {
+          presets: [],
+          plugins: [],
+          babelrc: false,
+          configFile: false,
+        }
+      }),
     ],
     server: {
       port: 5173,
@@ -30,15 +40,27 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
+        'react': path.resolve(__dirname, './node_modules/react'),
+        'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
       },
     },
     build: {
       outDir: 'dist',
       sourcemap: true,
       chunkSizeWarningLimit: 1000,
+      // Ensure React is part of the initial bundle
+      assetsInlineLimit: 0,
       rollupOptions: {
+        input: {
+          main: path.resolve(__dirname, 'index.html'),
+          test: path.resolve(__dirname, 'public/test.html'),
+          fallback: path.resolve(__dirname, 'public/fallback.html'),
+          fallbackReact: path.resolve(__dirname, 'public/fallback-react.html'),
+        },
         output: {
+          // Ensure React is given a reliable chunk name
           manualChunks: (id) => {
+            // React and ReactDOM go in their own chunk that loads first
             if (id.includes('node_modules/react') || 
                 id.includes('node_modules/react-dom') ||
                 id.includes('node_modules/scheduler')) {
@@ -94,9 +116,24 @@ export default defineConfig(({ mode }) => {
             if (id.includes('node_modules')) {
               return 'vendor';
             }
-          }
+          },
+          // Make sure chunks are properly loaded in the right order
+          entryFileNames: 'assets/[name]-[hash].js',
+          chunkFileNames: 'assets/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash].[ext]'
         }
       }
+    },
+    optimizeDeps: {
+      include: ['react', 'react-dom'],
+      force: true
+    },
+    define: {
+      // Define these values at build time
+      'process.env.NODE_ENV': JSON.stringify(mode),
+      'process.env.VITE_DEV_MODE': JSON.stringify(env.VITE_DEV_MODE || 'false'),
+      'process.env.VITE_SKIP_AUTH': JSON.stringify(env.VITE_SKIP_AUTH || 'false'),
+      'process.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || '')
     }
   }
 })
