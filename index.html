@@ -7,12 +7,41 @@
     <meta name="description" content="CV Builder - Create professional CVs that help you stand out in the job market and get hired at top companies." />
     <meta name="theme-color" content="#2c3e50" />
     <title>CV Builder - Create Professional CVs in Minutes</title>
+    <!-- Set environment variables directly -->
     <script>
+      // Inject environment variables
+      window.ENV_VITE_DEV_MODE = "true";
+      window.ENV_VITE_SKIP_AUTH = "true";
+      window.ENV_VITE_API_URL = "https://mock-api.example.com";  // This can be updated to your actual API later
+
       // Basic error handling
       window.addEventListener('error', function(e) {
         console.error('Global error caught:', e.message, e.filename, e.lineno);
-        document.getElementById('root').innerHTML = '<div style="padding: 20px; text-align: center;"><h2>Something went wrong</h2><p>Please check the console for details.</p><button onclick="window.location.reload()">Reload</button></div>';
+        const rootEl = document.getElementById('root');
+        if (rootEl) {
+          rootEl.innerHTML = '<div style="padding: 20px; text-align: center;"><h2>Something went wrong</h2><p>Please check the console for details: ' + e.message + '</p><button onclick="window.location.reload()">Reload</button></div>';
+        }
       });
+
+      // Override fetch to mock API requests if needed
+      const originalFetch = window.fetch;
+      window.fetch = function(url, options) {
+        console.log('Fetch request:', url, options);
+        if (url.startsWith('/api/')) {
+          console.log('API request detected - would normally go to backend');
+          if (url === '/api/health') {
+            return Promise.resolve({
+              status: 200,
+              json: () => Promise.resolve({ status: 'ok', mocked: true })
+            });
+          }
+        }
+        return originalFetch(url, options)
+          .catch(err => {
+            console.error('Fetch error for URL:', url, err);
+            throw err;
+          });
+      };
     </script>
   </head>
   <body>
