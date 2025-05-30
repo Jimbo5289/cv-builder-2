@@ -35,13 +35,67 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       sourcemap: true,
+      chunkSizeWarningLimit: 1000,
       rollupOptions: {
         output: {
-          manualChunks: {
-            react: ['react', 'react-dom'],
-            router: ['react-router-dom'],
-          },
-        },
+          manualChunks: (id) => {
+            if (id.includes('node_modules/react') || 
+                id.includes('node_modules/react-dom') ||
+                id.includes('node_modules/scheduler')) {
+              return 'react-vendor';
+            }
+            
+            if (id.includes('node_modules/react-router') ||
+                id.includes('node_modules/react-router-dom') ||
+                id.includes('node_modules/history') ||
+                id.includes('node_modules/@remix-run')) {
+              return 'router';
+            }
+            
+            if (id.includes('node_modules/@headlessui') ||
+                id.includes('node_modules/@heroicons') ||
+                id.includes('node_modules/tailwindcss')) {
+              return 'ui-libs';
+            }
+            
+            if (id.includes('node_modules/html2canvas') ||
+                id.includes('node_modules/jspdf') ||
+                id.includes('node_modules/pdfjs')) {
+              return 'pdf-libs';
+            }
+            
+            if (id.includes('node_modules/chart.js') ||
+                id.includes('node_modules/react-chartjs')) {
+              return 'chart-libs';
+            }
+            
+            if (id.includes('node_modules/formik') ||
+                id.includes('node_modules/yup') ||
+                id.includes('node_modules/react-hook-form')) {
+              return 'form-libs';
+            }
+            
+            if (id.includes('node_modules/lodash') ||
+                id.includes('node_modules/date-fns') ||
+                id.includes('node_modules/uuid')) {
+              return 'utils';
+            }
+            
+            if (id.includes('node_modules/@stripe') ||
+                id.includes('node_modules/stripe')) {
+              return 'stripe';
+            }
+            
+            if (id.includes('/src/pages/Preview.jsx') ||
+                id.includes('/src/components/CVPreview')) {
+              return 'preview';
+            }
+            
+            if (id.includes('node_modules')) {
+              return 'vendor';
+            }
+          }
+        }
       }
     }
   }
