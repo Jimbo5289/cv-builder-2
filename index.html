@@ -8,6 +8,12 @@
     <meta name="theme-color" content="#2c3e50" />
     <title>CV Builder - Create Professional CVs in Minutes</title>
     
+    <!-- Direct module system fix for i1.Component error -->
+    <script src="/direct-fix.js"></script>
+    
+    <!-- Lazy component fix for React.lazy issues -->
+    <script src="/lazy-component-fix.js"></script>
+    
     <!-- Component resolver script - addresses Component reference issues in production builds -->
     <script src="/component-resolver.js"></script>
     
@@ -31,6 +37,13 @@
     <script src="/debug-bundle.js"></script>
     <!-- Set environment variables directly -->
     <script>
+      // Immediate i1.Component fix 
+      window.i1 = window.i1 || {};
+      if (typeof React !== 'undefined') {
+        window.i1.Component = React.Component;
+        window.Component = React.Component;
+      }
+
       // Inject environment variables
       window.ENV_VITE_DEV_MODE = "true";
       window.ENV_VITE_SKIP_AUTH = "true";

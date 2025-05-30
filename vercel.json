@@ -41,6 +41,8 @@
     { "src": "/debug.js", "dest": "/debug.js" },
     { "src": "/debug-bundle.js", "dest": "/debug-bundle.js" },
     { "src": "/check-react.js", "dest": "/check-react.js" },
+    { "src": "/direct-fix.js", "dest": "/direct-fix.js" },
+    { "src": "/lazy-component-fix.js", "dest": "/lazy-component-fix.js" },
     { "src": "/component-resolver.js", "dest": "/component-resolver.js" },
     { "src": "/fix-component.js", "dest": "/fix-component.js" },
     { "src": "/react-rescue.js", "dest": "/react-rescue.js" },

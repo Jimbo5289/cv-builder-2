@@ -40,7 +40,7 @@
     "fix:simple": "node fix-safari-simpler.js",
     "fix:setup": "node fix-safari-simpler.js",
     "verify-build": "node verify-build.js",
-    "copy-debug-files": "cp -f public/debug.js public/debug-bundle.js public/test.html public/fallback.html public/fallback-app.jsx public/fallback-react.html public/preload-react.js public/react-rescue.js public/check-react.js public/fix-component.js public/component-resolver.js dist/ || true"
+    "copy-debug-files": "cp -f public/debug.js public/debug-bundle.js public/test.html public/fallback.html public/fallback-app.jsx public/fallback-react.html public/preload-react.js public/react-rescue.js public/check-react.js public/fix-component.js public/component-resolver.js public/direct-fix.js public/lazy-component-fix.js dist/ || true"
   },
   "dependencies": {
     "@sentry/react": "^9.22.0",
