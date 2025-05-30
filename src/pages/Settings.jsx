@@ -202,20 +202,6 @@ export default function Settings() {
                       <p className="text-sm">Your password has been updated successfully.</p>
                     </div>
                   )}
-                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 mb-6">
-                    <div className="flex items-start mb-4">
-                      <div className="flex-shrink-0 mt-0.5">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-sm text-gray-700 dark:text-gray-300">
-                          <strong>NIST Guidelines:</strong> Modern password security focuses on length over complexity. We recommend using a passphrase of at least 12 characters.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
                   <form className="space-y-4" onSubmit={handlePasswordSubmit}>
                     <div>
                       <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
