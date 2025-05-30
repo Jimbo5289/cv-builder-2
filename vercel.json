@@ -41,6 +41,7 @@
     { "src": "/debug.js", "dest": "/debug.js" },
     { "src": "/debug-bundle.js", "dest": "/debug-bundle.js" },
     { "src": "/check-react.js", "dest": "/check-react.js" },
+    { "src": "/fix-component.js", "dest": "/fix-component.js" },
     { "src": "/react-rescue.js", "dest": "/react-rescue.js" },
     { "src": "/preload-react.js", "dest": "/preload-react.js" },
     { "src": "/fallback-app.jsx", "dest": "/fallback-app.jsx" },

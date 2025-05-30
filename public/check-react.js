@@ -16,9 +16,18 @@
       const element = window.React.createElement('div', null, 'Test Element');
       console.log('Test element created successfully');
       
-      // Try to render it
+      // Try to render it - handle both React 18 and older versions
       console.log('Attempting to render with ReactDOM');
-      window.ReactDOM.render(element, testDiv);
+      if (window.ReactDOM.createRoot) {
+        // React 18+
+        const root = window.ReactDOM.createRoot(testDiv);
+        root.render(element);
+      } else if (window.ReactDOM.render) {
+        // React 17 and earlier
+        window.ReactDOM.render(element, testDiv);
+      } else {
+        throw new Error('No ReactDOM render method available');
+      }
       console.log('React test successful');
       
       // Clean up
@@ -57,6 +66,10 @@
     
     reactDomScript.onload = function() {
       console.log('ReactDOM loaded from CDN');
+      // Create a global Component reference to avoid i1.Component error
+      if (window.React && !window.Component) {
+        window.Component = window.React.Component;
+      }
       window.setTimeout(function() {
         const testResult = createTestComponent();
         console.log('React test result:', testResult);
@@ -81,6 +94,11 @@
   } else {
     console.log('React already defined:', window.React.version);
     
+    // Create a global Component reference to avoid i1.Component error
+    if (window.React && !window.Component) {
+      window.Component = window.React.Component;
+    }
+    
     // Test if React is working properly
     window.setTimeout(function() {
       const testResult = createTestComponent();
@@ -95,14 +113,17 @@
         e.message.includes('React') || 
         e.message.includes('react') || 
         e.message.includes('Component') ||
-        e.message.includes('jsx')
+        e.message.includes('jsx') ||
+        e.message.includes('i1.Component') || // Specific error we're seeing
+        e.message.includes('undefined is not an object')
     )) {
       console.error('Caught React-related error:', e);
       
       // Try to load React from CDN if it appears to be a missing React error
       if (e.message.includes('undefined is not an object') || 
           e.message.includes('undefined is not a function') ||
-          e.message.includes('Component')) {
+          e.message.includes('Component') ||
+          e.message.includes('i1.Component')) {
         
         console.warn('Attempting to reload React after error');
         
@@ -114,6 +135,9 @@
         const reactDomScript = document.createElement('script');
         reactDomScript.src = 'https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js';
         reactDomScript.crossOrigin = 'anonymous';
+        
+        // Create a global Component reference to avoid i1.Component error
+        window.Component = window.React ? window.React.Component : null;
         
         // Add them to the document
         document.head.appendChild(reactScript);
