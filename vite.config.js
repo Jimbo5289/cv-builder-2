@@ -43,6 +43,10 @@ export default defineConfig(({ mode }) => {
         'react': path.resolve(__dirname, './node_modules/react'),
         'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
       },
+      // Ensure .jsx files are properly resolved
+      extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+      // Preserve valid package exports
+      preserveSymlinks: false,
     },
     build: {
       outDir: 'dist',
@@ -50,6 +54,29 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 1000,
       // Ensure React is part of the initial bundle
       assetsInlineLimit: 0,
+      // Prevent mangling of component names in production
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: false,
+          drop_debugger: true,
+        },
+        mangle: {
+          // Don't mangle component names to avoid runtime issues
+          keep_classnames: true,
+          keep_fnames: true,
+        },
+        format: {
+          // Preserve comments for better debugging
+          comments: false,
+        },
+      },
+      commonjsOptions: {
+        // Improve handling of CommonJS modules
+        transformMixedEsModules: true,
+        // Keep original names to avoid reference issues
+        strictRequires: true,
+      },
       rollupOptions: {
         input: {
           main: path.resolve(__dirname, 'index.html'),
@@ -120,13 +147,26 @@ export default defineConfig(({ mode }) => {
           // Make sure chunks are properly loaded in the right order
           entryFileNames: 'assets/[name]-[hash].js',
           chunkFileNames: 'assets/[name]-[hash].js',
-          assetFileNames: 'assets/[name]-[hash].[ext]'
+          assetFileNames: 'assets/[name]-[hash].[ext]',
+          // Ensure exports are properly preserved
+          preserveModules: false,
+          format: 'es',
+          // Avoid hashing for better stability and readability
+          experimentalMinChunkSize: 10000,
         }
       }
     },
     optimizeDeps: {
       include: ['react', 'react-dom'],
-      force: true
+      force: true,
+      // Ensure ESM modules are properly processed
+      esbuildOptions: {
+        keepNames: true, // Preserve class and function names
+        target: 'es2020',
+        supported: {
+          'dynamic-import': true
+        },
+      }
     },
     define: {
       // Define these values at build time
