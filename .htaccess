@@ -1,0 +1,13 @@
+RewriteEngine On
+RewriteBase /
+
+# Serve static frontend files directly
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Proxy API requests to Node.js server
+RewriteRule ^api/(.*)$ http://localhost:3005/api/$1 [P,L]
+
+# For all other requests, serve the React app
+RewriteRule . /index.html [L] 

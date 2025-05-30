@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String         @id @default(cuid())
+  email               String         @unique
+  password            String
+  name                String
+  customerId          String?        @unique
+  twoFactorSecret     String?
+  twoFactorEnabled    Boolean        @default(false)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  failedLoginAttempts Int            @default(0)
+  lastLogin           DateTime?
+  lockedUntil         DateTime?
+  resetToken          String?
+  resetTokenExpiry    DateTime?
+  isActive            Boolean        @default(true)
+  cvs                 CV[]
+  payments            Payment[]
+  subscriptions       Subscription[]
+}
+
+model CV {
+  id        String      @id @default(cuid())
+  title     String
+  content   String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  userId    String
+  atsScore  Int?
+  user      User        @relation(fields: [userId], references: [id])
+  sections  CVSection[]
+}
+
+model CVSection {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  order     Int
+  cvId      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cv        CV       @relation(fields: [cvId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  userId          String
+  amount          Float
+  currency        String
+  status          String
+  createdAt       DateTime @default(now())
+  stripePaymentId String
+  user            User     @relation(fields: [userId], references: [id])
+}
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  userId               String
+  status               String
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  stripeCustomerId     String
+  stripePriceId        String
+  stripeSubscriptionId String
+  user                 User     @relation(fields: [userId], references: [id])
+}
