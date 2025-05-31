@@ -21,8 +21,9 @@ const ChevronDownIcon = ({ className }) => (
 
 // Analysis menu items
 const analysisItems = [
-  { name: 'Job-Tailored Analysis', href: '/cv-analyse', description: 'Compare your CV to a specific job description' },
-  { name: 'General CV Analysis', href: '/cv-analyse-by-role', description: 'Analyze your CV for general effectiveness or by role type' },
+  { name: 'CV Analysis Tool', href: '/cv-analyse', description: 'Get general feedback on your CV' },
+  { name: 'Industry Focused Analysis', href: '/cv-analyse-by-role', description: 'Analyze your CV for industry-specific roles' },
+  { name: 'Analyse with Job', href: '/analyse', description: 'Match your CV to specific job openings' },
 ];
 
 const Header = () => {

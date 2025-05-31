@@ -7,6 +7,7 @@ import CvAnalysisNextSteps from '../components/CvAnalysisNextSteps';
 import AnalysisProgressTracker from '../components/AnalysisProgressTracker';
 import CourseRecommendations from '../components/CourseRecommendations';
 import { findCourseRecommendations } from '../data/courseRecommendations';
+import SubscriptionModal from '../components/SubscriptionModal';
 
 const CvAnalyseByRole = () => {
   const [file, setFile] = useState(null);
@@ -208,7 +209,7 @@ const CvAnalyseByRole = () => {
       {/* Title section */}
       <div className="container mx-auto px-4 max-w-4xl mb-8">
         <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-2">
-          Industry-Focused CV Analysis
+          Role Related CV Analysis
         </h1>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-8">
           Get CV feedback tailored to your specific industry and role
@@ -219,42 +220,13 @@ const CvAnalyseByRole = () => {
       </div>
       
       <div className="max-w-4xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold text-[#2c3e50] dark:text-white mb-6">CV Analysis Tool</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-          Upload your CV for an AI analysis of its effectiveness. Get personalized feedback to improve your CV's impact for any job application.
-        </p>
-
         {/* Subscription Modal */}
         {showSubscriptionModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md w-full shadow-xl">
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 dark:bg-yellow-900 rounded-full mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-yellow-500 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H10m10-7l-3 4m0 0l-3-4m3 4V9m-7 6a6 6 0 110-12 6 6 0 010 12z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Premium Feature</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-6">
-                  CV analysis is a premium feature. Upgrade now to unlock this feature and many more!
-                </p>
-                <div className="flex space-x-4">
-                  <button
-                    onClick={() => navigate('/subscription')}
-                    className="flex-1 bg-[#3498db] hover:bg-[#2980b9] dark:bg-blue-600 dark:hover:bg-blue-700 text-white py-2 px-4 rounded transition"
-                  >
-                    Upgrade
-                  </button>
-                  <button
-                    onClick={() => setShowSubscriptionModal(false)}
-                    className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <SubscriptionModal
+            isOpen={showSubscriptionModal}
+            onClose={() => setShowSubscriptionModal(false)}
+            bundleUsed={false}
+          />
         )}
 
         {!analysisResults ? (
@@ -545,4 +517,4 @@ const CvAnalyseByRole = () => {
   );
 };
 
-export default CvAnalyseByRole; 
+export default CvAnalyseByRole;

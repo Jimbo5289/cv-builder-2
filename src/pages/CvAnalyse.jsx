@@ -16,19 +16,18 @@ const CvAnalyse = () => {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('upload'); // 'upload' or 'paste'
   const [cvText, setCvText] = useState('');
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  
+
   const { isAuthenticated, user, getAuthHeader } = useAuth();
   const { apiUrl, isConnected } = useServer();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Add progress step state
   const [progressStep, setProgressStep] = useState(1);
-  
+
   // Check if coming from home page
   const comingFromHome = location.state?.fromHome;
-  
+
   useEffect(() => {
     // Check if user is coming from home page and prompt about premium feature
     if (comingFromHome) {
@@ -44,47 +43,39 @@ const CvAnalyse = () => {
       // Skip check if not authenticated
       if (!isAuthenticated) {
         console.log('User not authenticated, showing subscription prompt');
-        setShowSubscriptionModal(true);
         return false;
       }
-      
+
       // Check if server is connected
       if (!isConnected || !apiUrl) {
         console.error('Server not connected, cannot check subscription');
         setError('Server connection error. Please try again later.');
         return false;
       }
-      
+
       // Get auth headers
       const headers = getAuthHeader();
       if (!headers.Authorization) {
         console.log('No auth token available, showing subscription prompt');
-        setShowSubscriptionModal(true);
         return false;
       }
-      
+
       console.log(`Checking subscription at ${apiUrl}/api/subscriptions/status`);
       const response = await fetch(`${apiUrl}/api/subscriptions/status`, {
         headers
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log('Subscription check result:', data);
-        
-        if (!data.hasActiveSubscription) {
-          setShowSubscriptionModal(true);
-        }
-        
+
         return data.hasActiveSubscription;
       } else {
         console.error('Subscription check failed:', response.status);
-        setShowSubscriptionModal(true);
         return false;
       }
     } catch (error) {
       console.error('Failed to check subscription status:', error);
-      setShowSubscriptionModal(true);
       return false;
     }
   };
@@ -166,7 +157,6 @@ const CvAnalyse = () => {
       
       if (!hasSubscription && !import.meta.env.DEV) {
         console.log('User does not have an active subscription');
-        setShowSubscriptionModal(true);
         setIsAnalysing(false);
         return;
       }
@@ -218,14 +208,6 @@ const CvAnalyse = () => {
     }
   };
 
-  const handleCloseModal = () => {
-    setShowSubscriptionModal(false);
-  };
-
-  const handleSubscribe = () => {
-    navigate('/pricing', { state: { premium: true, feature: 'CV analysis' } });
-  };
-
   const resetAnalysis = () => {
     setAnalysisResults(null);
     setError('');
@@ -257,256 +239,219 @@ const CvAnalyse = () => {
   }, [analysisResults]);
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-[#2c3e50] dark:text-white mb-2">CV Analysis</h1>
-      <p className="text-gray-600 dark:text-gray-300 mb-6">Upload your CV for a comprehensive analysis</p>
-      
-      {/* Progress Tracker */}
-      <AnalysisProgressTracker 
-        steps={['Upload', 'Analysis', 'Results']} 
-        currentStep={progressStep} 
-      />
-      
-      <div className="mb-8">
-        {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 p-4 rounded-md mb-4 flex items-start">
-            <FiAlertCircle className="mt-1 mr-2 flex-shrink-0" />
-            <div>{error}</div>
-          </div>
-        )}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+      {/* Title section */}
+      <div className="container mx-auto px-4 max-w-4xl mb-8">
+        <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-2">
+          CV Analysis
+        </h1>
+        <p className="text-center text-gray-600 dark:text-gray-300 mb-8">
+          Upload your CV for a comprehensive analysis of its effectiveness. Get personalized feedback to improve your CV's impact for any job application.
+        </p>
         
-        {!analysisResults && (
-          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mt-4">
-            <div className="flex border-b dark:border-gray-700 mb-6">
-              <button
-                className={`py-3 mr-8 border-b-2 ${activeTab === 'upload' ? 'text-[#2c3e50] dark:text-white border-[#2c3e50] dark:border-blue-500 font-medium' : 'text-gray-500 border-transparent'}`}
-                onClick={() => setActiveTab('upload')}
-              >
-                Upload File
-              </button>
-              <button
-                className={`py-3 border-b-2 ${activeTab === 'paste' ? 'text-[#2c3e50] dark:text-white border-[#2c3e50] dark:border-blue-500 font-medium' : 'text-gray-500 border-transparent'}`}
-                onClick={() => setActiveTab('paste')}
-              >
-                Paste Text
-              </button>
+        {/* Add Progress Tracker */}
+        <AnalysisProgressTracker currentStep={progressStep} isAnalyzing={isAnalysing} />
+      </div>
+      
+      <div className="max-w-4xl mx-auto px-4 py-10">
+        <div className="mb-8">
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 p-4 rounded-md mb-4 flex items-start">
+              <FiAlertCircle className="mt-1 mr-2 flex-shrink-0" />
+              <div>{error}</div>
             </div>
-            
-            {activeTab === 'upload' ? (
-              <div>
-                <div 
-                  className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500'}`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={() => document.getElementById('file-upload').click()}
+          )}
+          
+          {!analysisResults && (
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mt-4">
+              <div className="flex border-b dark:border-gray-700 mb-6">
+                <button
+                  className={`py-3 mr-8 border-b-2 ${activeTab === 'upload' ? 'text-[#2c3e50] dark:text-white border-[#2c3e50] dark:border-blue-500 font-medium' : 'text-gray-500 border-transparent'}`}
+                  onClick={() => setActiveTab('upload')}
                 >
-                  <input
-                    id="file-upload"
-                    type="file"
-                    className="hidden"
-                    accept=".pdf,.docx"
-                    onChange={handleFileInput}
-                  />
-                  <div className="mb-4">
-                    <FiUpload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                  Upload File
+                </button>
+                <button
+                  className={`py-3 border-b-2 ${activeTab === 'paste' ? 'text-[#2c3e50] dark:text-white border-[#2c3e50] dark:border-blue-500 font-medium' : 'text-gray-500 border-transparent'}`}
+                  onClick={() => setActiveTab('paste')}
+                >
+                  Paste Text
+                </button>
+              </div>
+              
+              {activeTab === 'upload' ? (
+                <div>
+                  <div 
+                    className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500'}`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => document.getElementById('file-upload').click()}
+                  >
+                    <input
+                      id="file-upload"
+                      type="file"
+                      className="hidden"
+                      accept=".pdf,.docx"
+                      onChange={handleFileInput}
+                    />
+                    <div className="mb-4">
+                      <FiUpload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                    </div>
+                    <p className="text-lg text-gray-700 dark:text-gray-300 font-medium">
+                      {file ? file.name : 'Drag & Drop your CV file here'}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'PDF or DOCX (max 5MB)'}
+                    </p>
+                    {file && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFile(null);
+                        }}
+                        className="mt-4 inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30"
+                      >
+                        <FiX className="mr-1.5" />
+                        Remove
+                      </button>
+                    )}
                   </div>
-                  <p className="text-lg text-gray-700 dark:text-gray-300 font-medium">
-                    {file ? file.name : 'Drag & Drop your CV file here'}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'PDF or DOCX (max 5MB)'}
-                  </p>
-                  {file && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setFile(null);
-                      }}
-                      className="mt-4 inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30"
-                    >
-                      <FiX className="mr-1.5" />
-                      Remove
-                    </button>
-                  )}
                 </div>
-              </div>
-            ) : (
-              <div>
-                <label htmlFor="cv-text" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Paste your CV text below
-                </label>
-                <textarea
-                  id="cv-text"
-                  rows={10}
-                  className="w-full px-3 py-2 text-gray-700 dark:text-gray-200 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2c3e50] dark:focus:ring-blue-500 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
-                  placeholder="Copy and paste the content of your CV here..."
-                  value={cvText}
-                  onChange={(e) => setCvText(e.target.value)}
-                ></textarea>
-              </div>
-            )}
-            
-            <div className="mt-6 flex justify-end">
-              <button
-                className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-[#2c3e50] hover:bg-[#1e2a37] dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2c3e50] dark:focus:ring-blue-500 dark:focus:ring-offset-gray-900 disabled:opacity-50"
-                onClick={analyseCV}
-                disabled={isAnalysing || (activeTab === 'upload' && !file) || (activeTab === 'paste' && !cvText.trim())}
-              >
-                {isAnalysing ? 'Analysing...' : 'Analyse CV'}
-              </button>
-            </div>
-          </div>
-        )}
-        
-        {analysisResults && (
-          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mt-4">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analysis Results</h2>
-              <button
-                onClick={resetAnalysis}
-                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600"
-              >
-                Analyse Another CV
-              </button>
-            </div>
-            
-            <div className="flex flex-col md:flex-row justify-between gap-4 mb-8">
-              {analysisResults.score !== undefined && (
-                <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-lg text-center border border-gray-100 dark:border-gray-600 shadow-sm">
-                  <h3 className="text-gray-500 dark:text-gray-300 text-sm font-medium uppercase tracking-wide mb-2">Overall Score</h3>
-                  <div className={`text-4xl font-bold ${getScoreColor(analysisResults.score)}`}>
-                    {analysisResults.score}%
-                  </div>
-                  <p className={`text-sm font-medium mt-1 ${getScoreColor(analysisResults.score)}`}>
-                    {getScoreLabel(analysisResults.score)}
-                  </p>
+              ) : (
+                <div>
+                  <label htmlFor="cv-text" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Paste your CV text below
+                  </label>
+                  <textarea
+                    id="cv-text"
+                    rows={10}
+                    className="w-full px-3 py-2 text-gray-700 dark:text-gray-200 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2c3e50] dark:focus:ring-blue-500 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                    placeholder="Copy and paste the content of your CV here..."
+                    value={cvText}
+                    onChange={(e) => setCvText(e.target.value)}
+                  ></textarea>
                 </div>
               )}
               
-              {analysisResults.contentScore !== undefined && (
-                <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-lg text-center border border-gray-100 dark:border-gray-600 shadow-sm">
-                  <h3 className="text-gray-500 dark:text-gray-300 text-sm font-medium uppercase tracking-wide mb-2">Content Score</h3>
-                  <div className={`text-4xl font-bold ${getScoreColor(analysisResults.contentScore)}`}>
-                    {analysisResults.contentScore}%
+              <div className="mt-6 flex justify-end">
+                <button
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-[#2c3e50] hover:bg-[#1e2a37] dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2c3e50] dark:focus:ring-blue-500 dark:focus:ring-offset-gray-900 disabled:opacity-50"
+                  onClick={analyseCV}
+                  disabled={isAnalysing || (activeTab === 'upload' && !file) || (activeTab === 'paste' && !cvText.trim())}
+                >
+                  {isAnalysing ? 'Analysing...' : 'Analyse CV'}
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {analysisResults && (
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mt-4">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analysis Results</h2>
+                <button
+                  onClick={resetAnalysis}
+                  className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600"
+                >
+                  Analyse Another CV
+                </button>
+              </div>
+              
+              <div className="flex flex-col md:flex-row justify-between gap-4 mb-8">
+                {analysisResults.score !== undefined && (
+                  <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-lg text-center border border-gray-100 dark:border-gray-600 shadow-sm">
+                    <h3 className="text-gray-500 dark:text-gray-300 text-sm font-medium uppercase tracking-wide mb-2">Overall Score</h3>
+                    <div className={`text-4xl font-bold ${getScoreColor(analysisResults.score)}`}>
+                      {analysisResults.score}%
+                    </div>
+                    <p className={`text-sm font-medium mt-1 ${getScoreColor(analysisResults.score)}`}>
+                      {getScoreLabel(analysisResults.score)}
+                    </p>
+                  </div>
+                )}
+                
+                {analysisResults.contentScore !== undefined && (
+                  <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-lg text-center border border-gray-100 dark:border-gray-600 shadow-sm">
+                    <h3 className="text-gray-500 dark:text-gray-300 text-sm font-medium uppercase tracking-wide mb-2">Content Score</h3>
+                    <div className={`text-4xl font-bold ${getScoreColor(analysisResults.contentScore)}`}>
+                      {analysisResults.contentScore}%
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg border border-green-100 dark:border-green-800/30">
+                  <h3 className="text-lg font-medium text-green-800 dark:text-green-300 mb-4">Strengths</h3>
+                  <ul className="space-y-3">
+                    {analysisResults.strengths && analysisResults.strengths.map((strength, index) => (
+                      <li key={index} className="flex items-start">
+                        <FiCheck className="mt-1 mr-3 text-green-500 dark:text-green-400 flex-shrink-0" />
+                        <span className="text-gray-800 dark:text-gray-200">{strength}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-6 rounded-lg border border-yellow-100 dark:border-yellow-800/30">
+                  <h3 className="text-lg font-medium text-yellow-800 dark:text-yellow-300 mb-4">Recommendations</h3>
+                  <ul className="space-y-3">
+                    {analysisResults.recommendations && analysisResults.recommendations.map((rec, index) => (
+                      <li key={index} className="flex items-start">
+                        <FiAlertCircle className="mt-1 mr-3 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
+                        <span className="text-gray-800 dark:text-gray-200">{rec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-700 p-6 rounded-lg border border-gray-200 dark:border-gray-600 mb-8">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Missing Keywords</h3>
+                <div className="flex flex-wrap gap-2">
+                  {analysisResults.missingKeywords && analysisResults.missingKeywords.map((keyword, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                    >
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {analysisResults.suggestedImprovements && (
+                <div className="mb-8">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Detailed Improvement Suggestions</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(analysisResults.suggestedImprovements).map(([key, value]) => (
+                      <div key={key} className="bg-gray-50 dark:bg-gray-700 p-5 rounded-lg border border-gray-200 dark:border-gray-600">
+                        <h4 className="font-medium text-gray-900 dark:text-white capitalize mb-2">{key}</h4>
+                        <p className="text-gray-600 dark:text-gray-300">{value}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg border border-green-100 dark:border-green-800/30">
-                <h3 className="text-lg font-medium text-green-800 dark:text-green-300 mb-4">Strengths</h3>
-                <ul className="space-y-3">
-                  {analysisResults.strengths && analysisResults.strengths.map((strength, index) => (
-                    <li key={index} className="flex items-start">
-                      <FiCheck className="mt-1 mr-3 text-green-500 dark:text-green-400 flex-shrink-0" />
-                      <span className="text-gray-800 dark:text-gray-200">{strength}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-6 rounded-lg border border-yellow-100 dark:border-yellow-800/30">
-                <h3 className="text-lg font-medium text-yellow-800 dark:text-yellow-300 mb-4">Recommendations</h3>
-                <ul className="space-y-3">
-                  {analysisResults.recommendations && analysisResults.recommendations.map((rec, index) => (
-                    <li key={index} className="flex items-start">
-                      <FiAlertCircle className="mt-1 mr-3 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
-                      <span className="text-gray-800 dark:text-gray-200">{rec}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-700 p-6 rounded-lg border border-gray-200 dark:border-gray-600 mb-8">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Missing Keywords</h3>
-              <div className="flex flex-wrap gap-2">
-                {analysisResults.missingKeywords && analysisResults.missingKeywords.map((keyword, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
-                  >
-                    {keyword}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {analysisResults.suggestedImprovements && (
-              <div className="mb-8">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Detailed Improvement Suggestions</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(analysisResults.suggestedImprovements).map(([key, value]) => (
-                    <div key={key} className="bg-gray-50 dark:bg-gray-700 p-5 rounded-lg border border-gray-200 dark:border-gray-600">
-                      <h4 className="font-medium text-gray-900 dark:text-white capitalize mb-2">{key}</h4>
-                      <p className="text-gray-600 dark:text-gray-300">{value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Add Next Steps component */}
-            <CvAnalysisNextSteps 
-              score={analysisResults.score} 
-              analysisType="general" 
-            />
-            
-            {/* Course Recommendations section */}
-            {analysisResults.missingKeywords && analysisResults.missingKeywords.length > 0 && (
-              <CourseRecommendations 
-                courses={findCourseRecommendations(analysisResults.missingKeywords)} 
-                title="Recommended Courses to Improve Your Skills"
+              {/* Add Next Steps component */}
+              <CvAnalysisNextSteps 
+                score={analysisResults.score} 
+                analysisType="general" 
               />
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Subscription Modal */}
-      {showSubscriptionModal && (
-        <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+              
+              {/* Course Recommendations section */}
+              {analysisResults.missingKeywords && analysisResults.missingKeywords.length > 0 && (
+                <CourseRecommendations 
+                  courses={findCourseRecommendations(analysisResults.missingKeywords)} 
+                  title="Recommended Courses to Improve Your Skills"
+                />
+              )}
             </div>
-            <span className="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
-            <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-              <div>
-                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900">
-                  <FiFileText className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
-                </div>
-                <div className="mt-3 text-center sm:mt-5">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">Premium Feature</h3>
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      CV Analysis is a premium feature. Subscribe to unlock this feature and get valuable insights into your CV quality.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
-                <button
-                  type="button"
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 dark:bg-blue-700 text-base font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-900 sm:col-start-2 sm:text-sm"
-                  onClick={handleSubscribe}
-                >
-                  View Plans
-                </button>
-                <button
-                  type="button"
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-900 sm:mt-0 sm:col-start-1 sm:text-sm"
-                  onClick={handleCloseModal}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
