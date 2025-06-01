@@ -11,7 +11,7 @@
     "build:vercel": "node --no-warnings build.js",
     "build:vercel:cjs": "node --no-warnings build-cjs.js",
     "vercel-build": "npm install --production=false && npm run build:verify",
-    "postbuild": "node verify-build.js && npm run copy-debug-files",
+    "postbuild": "node verify-build.cjs && npm run copy-debug-files",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org=${SENTRY_ORG} --project=cv-builder ./dist && sentry-cli sourcemaps upload --org=${SENTRY_ORG} --project=cv-builder ./dist",

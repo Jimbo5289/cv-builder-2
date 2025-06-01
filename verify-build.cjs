@@ -3,13 +3,13 @@
 // This script verifies that all necessary files are present in the build output
 // Run this after 'npm run build' and before deploying to Vercel
 
-import fs from 'fs';
-import path from 'path';
-import chalk from 'chalk';
+const fs = require('fs');
+const path = require('path');
+const chalk = require('chalk');
 
 // Configuration
-const BUILD_DIR = path.join(decodeURIComponent(path.dirname(new URL(import.meta.url).pathname)), 'dist');
-const PUBLIC_DIR = path.join(decodeURIComponent(path.dirname(new URL(import.meta.url).pathname)), 'public');
+const BUILD_DIR = path.join(decodeURIComponent(path.dirname(__filename)), 'dist');
+const PUBLIC_DIR = path.join(decodeURIComponent(path.dirname(__filename)), 'public');
 const REQUIRED_FILES = [
   'index.html',
   'favicon.png',
