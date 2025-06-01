@@ -55,3 +55,4 @@ pids
 # Stripe webhook local development
 stripe.exe
 .stripe/
+.vercel

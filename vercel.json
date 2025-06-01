@@ -24,38 +24,5 @@
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     }
-  ],
-  "env": {
-    "VITE_DEV_MODE": "false",
-    "VITE_SKIP_AUTH": "true",
-    "VITE_API_URL": "https://mock-api.example.com"
-  },
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/assets/(.*)", "dest": "/assets/$1", "headers": { "cache-control": "public, max-age=31536000, immutable" } },
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/favicon.ico", "dest": "/favicon.ico" },
-    { "src": "/robots.txt", "dest": "/robots.txt" },
-    { "src": "/fallback.html", "dest": "/fallback.html" },
-    { "src": "/test.html", "dest": "/test.html" },
-    { "src": "/debug.js", "dest": "/debug.js" },
-    { "src": "/debug-bundle.js", "dest": "/debug-bundle.js" },
-    { "src": "/check-react.js", "dest": "/check-react.js" },
-    { "src": "/direct-fix.js", "dest": "/direct-fix.js" },
-    { "src": "/lazy-component-fix.js", "dest": "/lazy-component-fix.js" },
-    { "src": "/component-resolver.js", "dest": "/component-resolver.js" },
-    { "src": "/fix-component.js", "dest": "/fix-component.js" },
-    { "src": "/react-rescue.js", "dest": "/react-rescue.js" },
-    { "src": "/preload-react.js", "dest": "/preload-react.js" },
-    { "src": "/fallback-app.jsx", "dest": "/fallback-app.jsx" },
-    { "src": "/fallback-react.html", "dest": "/fallback-react.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ],
-  "build": {
-    "env": {
-      "VITE_DEV_MODE": "false",
-      "VITE_SKIP_AUTH": "true",
-      "VITE_API_URL": "https://mock-api.example.com"
-    }
-  }
-} 
+  ]
+}

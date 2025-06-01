@@ -222,7 +222,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Standalone CV Analysis Feature */}
+          {/* Analyse CV Only Feature */}
           <div className="mt-8 mb-16 bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 sm:p-8 shadow-sm">
             <div className="flex flex-col md:flex-row items-start">
               <div className="md:w-1/2 flex justify-center order-2 md:order-1">
@@ -241,13 +241,10 @@ export default function Home() {
               <div className="md:w-1/2 mb-6 md:mb-0 md:pl-6 order-1 md:order-2">
                 <div className="mb-4">
                   <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <h3 className="text-2xl font-bold text-[#2c3e50]">CV Quality Analysis</h3>
-                    <span className="inline-block bg-yellow-400 text-[#2c3e50] px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
-                      PREMIUM FEATURE
-                    </span>
+                    <h3 className="text-2xl font-bold text-[#2c3e50]">Analyse CV Only</h3>
                   </div>
                   <p className="text-gray-700 mb-6">
-                    Get instant feedback on your CV without a specific job in mind. Our AI analyzes your CV's format, content, and keywords to ensure it's optimized for ATS systems and meets industry standards.
+                    Get general feedback on your CV without a specific job in mind. Our AI analyzes your CV's format, content, and keywords to ensure it's optimized for ATS systems and meets industry standards.
                   </p>
                   <div className="flex flex-wrap gap-3 mb-4">
                     <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
@@ -271,6 +268,114 @@ export default function Home() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                   </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Industry Focused CV Analysis Feature */}
+          <div className="mt-16 mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 sm:p-8 shadow-sm">
+            <div className="flex flex-col md:flex-row items-start">
+              <div className="md:w-1/2 mb-6 md:mb-0 md:pr-6">
+                <div className="mb-4">
+                  <div className="flex flex-wrap items-center gap-3 mb-3">
+                    <h3 className="text-2xl font-bold text-[#2c3e50]">Industry Focused CV Analysis</h3>
+                    <span className="inline-block bg-yellow-400 text-[#2c3e50] px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
+                      PREMIUM FEATURE
+                    </span>
+                  </div>
+                  <p className="text-gray-700 mb-6">
+                    Our advanced AI analyses your CV against specific job descriptions to provide tailored recommendations. Stand out from other applicants by perfectly matching your CV to each job you apply for.
+                  </p>
+                  <div className="flex flex-wrap gap-3 mb-4">
+                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
+                      Job-Specific Keywords
+                    </div>
+                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
+                      Skills Gap Analysis
+                    </div>
+                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
+                      ATS Compatibility Score
+                    </div>
+                  </div>
+                  <Link
+                    to="/analyse" 
+                    className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800"
+                    aria-label="Try CV analysis with job matching"
+                    state={{ fromHome: true }}
+                  >
+                    Try it now
+                    <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+              <div className="md:w-1/2 flex justify-center">
+                <div className="relative">
+                  <svg className="w-64 h-64 text-blue-100" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H216v96H40ZM40,200V168H216v32Z"></path>
+                    <path d="M184,180a8,8,0,0,1-8,8H80a8,8,0,0,1,0-16h96A8,8,0,0,1,184,180Zm32-84a12,12,0,1,1-12-12A12,12,0,0,1,216,96Zm-32,0a12,12,0,1,1-12-12A12,12,0,0,1,184,96Zm-32,0a12,12,0,1,1-12-12A12,12,0,0,1,152,96Z"></path>
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <svg className="w-24 h-24 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Analyse with JDPS Feature */}
+          <div className="mt-8 mb-16 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-6 sm:p-8 shadow-sm">
+            <div className="flex flex-col md:flex-row items-start">
+              <div className="md:w-1/2 mb-6 md:mb-0 md:pr-6">
+                <div className="mb-4">
+                  <div className="flex flex-wrap items-center gap-3 mb-3">
+                    <h3 className="text-2xl font-bold text-[#2c3e50]">Analyse with JDPS</h3>
+                    <span className="inline-block bg-yellow-400 text-[#2c3e50] px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
+                      PREMIUM FEATURE
+                    </span>
+                  </div>
+                  <p className="text-gray-700 mb-6">
+                    Ensure your CV is fully optimized for Applicant Tracking Systems (ATS). Our AI evaluates your CV's structure, formatting, and keyword usage to maximize compatibility with ATS software.
+                  </p>
+                  <div className="flex flex-wrap gap-3 mb-4">
+                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
+                      ATS Optimization
+                    </div>
+                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
+                      Keyword Analysis
+                    </div>
+                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
+                      Formatting Checks
+                    </div>
+                  </div>
+                  <Link
+                    to="/ats-analyse"
+                    className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800"
+                    aria-label="Try ATS compatibility analysis"
+                    state={{ fromHome: true }}
+                  >
+                    Try it now
+                    <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+              <div className="md:w-1/2 flex justify-center">
+                <div className="relative">
+                  <svg className="w-64 h-64 text-purple-100" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H216v96H40ZM40,200V168H216v32Z"></path>
+                    <path d="M184,180a8,8,0,0,1-8,8H80a8,8,0,0,1,0-16h96A8,8,0,0,1,184,180Zm32-84a12,12,0,1,1-12-12A12,12,0,0,1,216,96Zm-32,0a12,12,0,1,1-12-12A12,12,0,0,1,184,96Zm-32,0a12,12,0,1,1-12-12A12,12,0,0,1,152,96Z"></path>
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <svg className="w-24 h-24 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
