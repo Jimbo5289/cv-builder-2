@@ -7,7 +7,7 @@
     "dev": "vite",
     "vite": "vite",
     "build": "vite build",
-    "build:verify": "vite build && node verify-build.js",
+    "build:verify": "vite build && node verify-build.cjs",
     "build:vercel": "node --no-warnings build.js",
     "build:vercel:cjs": "node --no-warnings build-cjs.js",
     "vercel-build": "npm install --production=false && npm run build:verify",
@@ -39,7 +39,7 @@
     "fix:all": "node fix-safari.js",
     "fix:simple": "node fix-safari-simpler.js",
     "fix:setup": "node fix-safari-simpler.js",
-    "verify-build": "node verify-build.js",
+    "verify-build": "node verify-build.cjs",
     "copy-debug-files": "cp -f public/debug.js public/debug-bundle.js public/test.html public/fallback.html public/fallback-app.jsx public/fallback-react.html public/preload-react.js public/react-rescue.js public/check-react.js public/fix-component.js public/component-resolver.js public/direct-fix.js public/lazy-component-fix.js dist/ || true"
   },
   "dependencies": {
