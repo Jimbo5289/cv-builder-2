@@ -3,12 +3,13 @@
 // This script verifies that all necessary files are present in the build output
 // Run this after 'npm run build' and before deploying to Vercel
 
-const fs = require('fs');
-const path = require('path');
-const chalk = require('chalk') || { green: (s) => s, red: (s) => s, yellow: (s) => s, blue: (s) => s };
+import fs from 'fs';
+import path from 'path';
+import chalk from 'chalk';
 
 // Configuration
-const BUILD_DIR = path.join(__dirname, 'dist');
+const BUILD_DIR = path.join(decodeURIComponent(path.dirname(new URL(import.meta.url).pathname)), 'dist');
+const PUBLIC_DIR = path.join(decodeURIComponent(path.dirname(new URL(import.meta.url).pathname)), 'public');
 const REQUIRED_FILES = [
   'index.html',
   'favicon.png',
@@ -116,7 +117,6 @@ if (fs.existsSync(indexPath)) {
 }
 
 // Copy any missing files from public
-const PUBLIC_DIR = path.join(__dirname, 'public');
 if (fs.existsSync(PUBLIC_DIR)) {
   console.log(chalk.blue('Checking for files to copy from public directory...'));
   for (const file of missingFiles) {
@@ -142,4 +142,4 @@ if (missingFiles.length > 0 || missingDirs.length > 0 || !mainJsFound) {
 } else {
   console.log(chalk.green('✅ Build verification passed. All required files are present.'));
   process.exit(0);
-} 
+}
