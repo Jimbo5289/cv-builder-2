@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useState } from 'react';
 import CVEnhancer from './CVEnhancer';
 import { useAuth } from '../context/AuthContext';

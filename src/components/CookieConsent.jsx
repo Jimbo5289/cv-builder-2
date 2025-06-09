@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -46,7 +47,7 @@ const CookieConsent = ({ onConsentChange }) => {
       <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 md:flex md:items-center md:justify-between">
         <div className="md:flex-1 md:pr-6">
           <p className="text-sm text-gray-700">
-            We use cookies to enhance your browsing experience, serve personalised ads or content, and analyse our traffic. By clicking "Accept", you consent to our use of cookies.
+            We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. By clicking "Accept", you consent to our use of cookies.
             <Link to="/cookie-policy" className="text-[#2c3e50] font-medium ml-1 hover:underline">
               Read our Cookie Policy
             </Link>

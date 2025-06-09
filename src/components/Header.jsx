@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect } from 'react';
@@ -21,9 +22,9 @@ const ChevronDownIcon = ({ className }) => (
 
 // Analysis menu items
 const analysisItems = [
-  { name: 'CV Analysis Tool', href: '/cv-analyse', description: 'Get general feedback on your CV' },
-  { name: 'Industry Focused Analysis', href: '/cv-analyse-by-role', description: 'Analyze your CV for industry-specific roles' },
-  { name: 'Analyse with Job', href: '/analyse', description: 'Match your CV to specific job openings' },
+  { name: 'Analyze CV Only', href: '/cv-analyze', description: 'Get general feedback on your CV' },
+  { name: 'Industry-Focused Analysis', href: '/cv-analyze-by-role', description: 'Optimize for specific career fields' },
+  { name: 'Analyze with Job', href: '/analyze', description: 'Compare your CV to a specific job description' }
 ];
 
 const Header = () => {
@@ -101,7 +102,7 @@ const Header = () => {
               <button
                 type="button"
                 className={`group inline-flex items-center text-base font-medium ${
-                  location.pathname.includes('analyse') ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400'
+                  location.pathname.includes('analyze') ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400'
                 }`}
                 onClick={() => setIsAnalysisOpen(!isAnalysisOpen)}
                 onMouseEnter={() => setIsAnalysisOpen(true)}

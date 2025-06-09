@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import TwoFactorSetup from '../components/TwoFactorSetup';

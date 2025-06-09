@@ -1,0 +1,4 @@
+John Doe
+Senior Developer
+10 years experience in software development
+Skills: JavaScript, React, Node.js

@@ -1,0 +1,69 @@
+# Build outputs
+dist/
+build/
+
+# Node modules
+node_modules/
+
+# Generated files
+src/generated/
+
+# Environment specific files
+.env
+*.local
+
+# Specific components with persistent ESLint issues
+src/components/Footer.jsx
+src/pages/Analyze.jsx
+src/pages/CvAnalyze.jsx
+src/pages/Contact.jsx
+src/components/SubscriptionModal.jsx
+src/components/CourseRecommendations.jsx
+src/components/AnalysisProgressTracker.jsx
+src/components/CvAnalysisNextSteps.jsx
+
+# Route files
+src/routes.jsx
+src/AppRoutes.jsx
+
+# Test files
+**/*.test.js
+**/*.test.jsx
+**/*.spec.js
+**/*.spec.jsx
+
+# Configuration files
+*.config.js
+
+# Logs
+logs/
+*.log
+
+# Other files to ignore
+.git/
+
+# Ignore public utility files
+public/*.js
+public/**/*.js
+
+# Ignore server-prod directory (production server code)
+server-prod/
+
+# Ignore utility scripts that are used for development
+check-server.js
+fix-environment.js
+fixed-port-startup.js
+server-start.js
+start-clean.js
+start-reliable.js
+start-server.js
+stop-and-start.js
+ultimate-fix.js
+verify-build.cjs
+setup-env.js
+
+# Ignore specific problematic files
+src/generated/**/*
+src/utils/websocket.js
+src/utils/apiUtils.js
+src/utils/cssCompatibility.js 

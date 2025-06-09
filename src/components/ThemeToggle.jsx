@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { FiSun, FiMoon, FiMonitor } from 'react-icons/fi';

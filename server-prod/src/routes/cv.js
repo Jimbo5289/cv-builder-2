@@ -997,7 +997,7 @@ router.get('/pricing', async (req, res) => {
 });
 
 // New route: Analyze CV without job description (simplified version)
-router.post('/analyse-only', authMiddleware, (req, res, next) => {
+router.post('/analyze-only', authMiddleware, (req, res, next) => {
   // Check subscription status if not in development
   if (process.env.NODE_ENV !== 'development' || process.env.MOCK_SUBSCRIPTION_DATA !== 'true') {
     if (!req.user.subscription || req.user.subscription.status !== 'active') {
@@ -1084,7 +1084,7 @@ router.post('/analyse-only', authMiddleware, (req, res, next) => {
 });
 
 // Analyze CV against job description
-router.post('/analyse', authMiddleware, (req, res, next) => {
+router.post('/analyze', authMiddleware, (req, res, next) => {
   // Check subscription status - allow bypass in development mode
   if (process.env.NODE_ENV === 'development' && process.env.MOCK_SUBSCRIPTION_DATA === 'true') {
     logger.info('Using mock subscription data in development mode - bypassing subscription check');
@@ -1182,7 +1182,7 @@ router.post('/analyse', authMiddleware, (req, res, next) => {
 });
 
 // Analyze CV without job description, but optionally with role context
-router.post('/analyse-by-role', authMiddleware, (req, res, next) => {
+router.post('/analyze-by-role', authMiddleware, (req, res, next) => {
   // Check subscription status if not in development
   if (process.env.NODE_ENV !== 'development' || process.env.MOCK_SUBSCRIPTION_DATA !== 'true') {
     if (!req.user.subscription || req.user.subscription.status !== 'active') {
@@ -1404,4 +1404,27 @@ async function extractTextFromFile(file) {
   }
 }
 
+// Backward compatibility routes for British English spelling
+// Redirect /analyse-only to /analyze-only
+router.post('/analyse-only', (req, res, next) => {
+  logger.info('Redirecting deprecated /analyse-only endpoint to /analyze-only');
+  req.url = '/analyze-only';
+  next();
+});
+
+// Redirect /analyse to /analyze
+router.post('/analyse', (req, res, next) => {
+  logger.info('Redirecting deprecated /analyse endpoint to /analyze');
+  req.url = '/analyze';
+  next();
+});
+
+// Redirect /analyse-by-role to /analyze-by-role
+router.post('/analyse-by-role', (req, res, next) => {
+  logger.info('Redirecting deprecated /analyse-by-role endpoint to /analyze-by-role');
+  req.url = '/analyze-by-role';
+  next();
+});
+
+// Export the router
 module.exports = router; 

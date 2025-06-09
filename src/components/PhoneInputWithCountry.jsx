@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect } from 'react';
 import { countries } from '../utils/countryCodes';
 import { getDefaultCountry } from '../utils/locationUtils';

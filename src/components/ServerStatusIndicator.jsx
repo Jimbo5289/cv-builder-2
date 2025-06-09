@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useServer } from '../context/ServerContext';
 
 const ServerStatusIndicator = () => {

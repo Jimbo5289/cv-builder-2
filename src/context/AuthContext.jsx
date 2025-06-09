@@ -1,30 +1,66 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useServer } from './ServerContext';
 
 // Create the context
-const AuthContext = createContext(null);
+const AuthContext = createContext({
+  user: null,
+  loading: true,
+  isAuthenticated: false,
+  error: null,
+  login: () => {},
+  register: () => {},
+  logout: () => {},
+  refreshUser: () => {},
+  updateUserInfo: () => {},
+  getAuthHeader: () => ({})
+});
+
+// Safe JSON parse function
+const safeJsonParse = (str, defaultValue = null) => {
+  if (!str) return defaultValue;
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    console.error('JSON parse error:', e);
+    return defaultValue;
+  }
+};
 
 // Provider component
 function AuthProvider({ children }) {
   const { serverUrl } = useServer();
   const [state, setState] = useState(() => {
-    // Initialize state from localStorage
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
-    return {
-      user: user ? JSON.parse(user) : null,
-      loading: true,
-      isAuthenticated: !!token,
-      error: null
-    };
+    try {
+      // Initialize state from localStorage with proper error handling
+      const token = localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+      const user = safeJsonParse(userStr);
+      
+      if (userStr && !user) {
+        // If we had a string but couldn't parse it, clear it
+        console.warn('Removing invalid user data from localStorage');
+        localStorage.removeItem('user');
+      }
+      
+      return {
+        user,
+        loading: true,
+        isAuthenticated: !!token,
+        error: null
+      };
+    } catch (e) {
+      console.error('Error initializing auth state:', e);
+      return {
+        user: null,
+        loading: true,
+        isAuthenticated: false,
+        error: null
+      };
+    }
   });
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  async function checkAuth() {
+  const checkUserAuth = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -38,34 +74,105 @@ function AuthProvider({ children }) {
         if (import.meta.env.VITE_SKIP_AUTH === 'true') {
           console.log('DEV MODE: Using mock authentication');
           // Create a mock user if none exists
-          if (!localStorage.getItem('user')) {
+          const userStr = localStorage.getItem('user');
+          const user = safeJsonParse(userStr);
+          
+          if (!user) {
             const mockUser = {
               id: 'dev-user-id',
               email: 'test@example.com',
-              name: 'Test User'
+              name: 'Test User',
+              role: 'admin',
+              isPremium: true,
+              premiumTier: 'professional',
+              subscription: {
+                status: 'active',
+                plan: 'professional',
+                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+                features: ['cv-analysis', 'job-matching', 'ai-enhancement', 'unlimited-cvs', 'export-formats']
+              },
+              preferences: {
+                theme: 'light',
+                notifications: true,
+                analytics: true
+              },
+              usage: {
+                cvCount: 5,
+                analyzeCount: 10,
+                downloadCount: 15
+              },
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
             };
             localStorage.setItem('user', JSON.stringify(mockUser));
             localStorage.setItem('token', 'dev-token');
+            
+            setState(prev => ({
+              ...prev,
+              user: mockUser,
+              loading: false,
+              isAuthenticated: true,
+              error: null
+            }));
+          } else {
+            setState(prev => ({
+              ...prev,
+              user,
+              loading: false,
+              isAuthenticated: true,
+              error: null
+            }));
           }
-          
-          const user = localStorage.getItem('user');
-          setState(prev => ({
-            ...prev,
-            user: user ? JSON.parse(user) : null,
-            loading: false,
-            isAuthenticated: true,
-            error: null
-          }));
           return;
         }
         
         // For dev mode with custom token
         if (token === 'dev-token') {
-          const user = localStorage.getItem('user');
+          const userStr = localStorage.getItem('user');
+          const user = safeJsonParse(userStr);
+          
           if (user) {
             setState(prev => ({
               ...prev,
-              user: JSON.parse(user),
+              user,
+              loading: false,
+              isAuthenticated: true,
+              error: null
+            }));
+            return;
+          } else {
+            // Create a new mock user
+            const mockUser = {
+              id: 'dev-user-id',
+              email: 'dev@example.com',
+              name: 'Development User',
+              role: 'admin',
+              isPremium: true,
+              premiumTier: 'professional',
+              subscription: {
+                status: 'active',
+                plan: 'professional',
+                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+                features: ['cv-analysis', 'job-matching', 'ai-enhancement', 'unlimited-cvs', 'export-formats']
+              },
+              preferences: {
+                theme: 'light',
+                notifications: true,
+                analytics: true
+              },
+              usage: {
+                cvCount: 5,
+                analyzeCount: 10,
+                downloadCount: 15
+              },
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            localStorage.setItem('user', JSON.stringify(mockUser));
+            
+            setState(prev => ({
+              ...prev,
+              user: mockUser,
               loading: false,
               isAuthenticated: true,
               error: null
@@ -98,7 +205,28 @@ function AuthProvider({ children }) {
               const mockUser = {
                 id: 'mock-user-id',
                 email: 'dev@example.com', 
-                name: 'Development User'
+                name: 'Development User',
+                role: 'admin',
+                isPremium: true,
+                premiumTier: 'professional',
+                subscription: {
+                  status: 'active',
+                  plan: 'professional',
+                  expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+                  features: ['cv-analysis', 'job-matching', 'ai-enhancement', 'unlimited-cvs', 'export-formats']
+                },
+                preferences: {
+                  theme: 'light',
+                  notifications: true,
+                  analytics: true
+                },
+                usage: {
+                  cvCount: 5,
+                  analyzeCount: 10,
+                  downloadCount: 15
+                },
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
               };
               localStorage.setItem('user', JSON.stringify(mockUser));
               localStorage.setItem('token', 'dev-token');
@@ -116,24 +244,49 @@ function AuthProvider({ children }) {
         }
 
         const data = await response.json();
-        localStorage.setItem('user', JSON.stringify(data.user));
-        
-        setState({
-          user: data.user,
-          loading: false,
-          isAuthenticated: true,
-          error: null
-        });
+        if (data && data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          
+          setState({
+            user: data.user,
+            loading: false,
+            isAuthenticated: true,
+            error: null
+          });
+        } else {
+          throw new Error('Invalid user data received');
+        }
       } catch (error) {
-        console.error('Auth check error:', error);
+        console.error('Authentication check error:', error);
         
-        // For dev mode, create a mock user after failed server request
-        if (import.meta.env.DEV && import.meta.env.VITE_DEV_MODE === 'true') {
-          console.log('DEV MODE: Creating mock user after server error');
+        if (import.meta.env.DEV) {
+          console.log('DEV MODE: Creating mock user after auth check error');
+          // In development, we can create a mock user
           const mockUser = {
             id: 'mock-user-id',
-            email: 'dev@example.com', 
-            name: 'Development User'
+            email: 'dev@example.com',
+            name: 'Development User',
+            role: 'admin',
+            isPremium: true,
+            premiumTier: 'professional',
+            subscription: {
+              status: 'active',
+              plan: 'professional',
+              expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+              features: ['cv-analysis', 'job-matching', 'ai-enhancement', 'unlimited-cvs', 'export-formats']
+            },
+            preferences: {
+              theme: 'light',
+              notifications: true,
+              analytics: true
+            },
+            usage: {
+              cvCount: 5,
+              analyzeCount: 10,
+              downloadCount: 15
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
           };
           localStorage.setItem('user', JSON.stringify(mockUser));
           localStorage.setItem('token', 'dev-token');
@@ -144,27 +297,32 @@ function AuthProvider({ children }) {
             isAuthenticated: true,
             error: null
           });
-          return;
+        } else {
+          setState(prev => ({
+            ...prev,
+            loading: false,
+            isAuthenticated: false,
+            error: error.message || 'Authentication failed'
+          }));
         }
-        
-        // In production mode, show error
-        setState(prev => ({ 
-          ...prev, 
-          loading: false, 
-          error: 'Failed to validate authentication', 
-          isAuthenticated: false 
-        }));
       }
-    } catch (err) {
-      console.error('Auth context error:', err);
-      setState(prev => ({ 
-        ...prev, 
-        loading: false, 
-        error: err.message || 'Authentication error', 
-        isAuthenticated: false 
+    } catch (error) {
+      console.error('Error in checkUserAuth:', error);
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        isAuthenticated: false,
+        error: error.message
       }));
     }
-  }
+  }, [serverUrl]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      await checkUserAuth();
+    };
+    checkAuth();
+  }, [serverUrl, checkUserAuth]);
 
   async function login(email, password) {
     try {
@@ -173,9 +331,31 @@ function AuthProvider({ children }) {
         console.log('DEV MODE: Auto-login with mock credentials');
         const mockUser = {
           id: 'dev-user-id',
-          email,
-          name: email.split('@')[0]
+          email: email || 'dev@example.com',
+          name: 'Development User',
+          role: 'admin',
+          isPremium: true,
+          premiumTier: 'professional',
+          subscription: {
+            status: 'active',
+            plan: 'professional',
+            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+            features: ['cv-analysis', 'job-matching', 'ai-enhancement', 'unlimited-cvs', 'export-formats']
+          },
+          preferences: {
+            theme: 'light',
+            notifications: true,
+            analytics: true
+          },
+          usage: {
+            cvCount: 5,
+            analyzeCount: 10,
+            downloadCount: 15
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         };
+        
         localStorage.setItem('user', JSON.stringify(mockUser));
         localStorage.setItem('token', 'dev-token');
         
@@ -186,32 +366,68 @@ function AuthProvider({ children }) {
           error: null
         });
         
-        toast.success('Logged in successfully!');
         return { success: true };
       }
       
+      // Special dev mode handling for 2FA test account
+      if (import.meta.env.DEV && email === '2fa-test@example.com' && password === 'Test@123') {
+        console.log('DEV MODE: 2FA test account login');
+        
+        // Check if 2FA is enabled in local storage
+        if (localStorage.getItem('mock_2fa_enabled') === 'true') {
+          console.log('DEV MODE: 2FA verification required');
+          return {
+            success: false,
+            requiresTwoFactor: true,
+            userId: 'mock-2fa-user-id'
+          };
+        } else {
+          // If 2FA not enabled, auto-login
+          const mockUser = {
+            id: 'mock-2fa-user-id',
+            email: email,
+            name: '2FA Test User'
+          };
+          
+          localStorage.setItem('user', JSON.stringify(mockUser));
+          localStorage.setItem('token', 'dev-token');
+          
+          setState({
+            user: mockUser,
+            loading: false,
+            isAuthenticated: true,
+            error: null
+          });
+          
+          return { success: true };
+        }
+      }
+      
       setState(prev => ({ ...prev, loading: true, error: null }));
+      
       const response = await fetch(`${serverUrl}/api/auth/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-
+      
       const data = await response.json();
-
+      
       if (!response.ok) {
-        setState(prev => ({ 
-          ...prev, 
-          loading: false, 
-          error: data.message || 'Login failed' 
-        }));
-        toast.error(data.message || 'Login failed');
-        return { success: false, message: data.message };
+        throw new Error(data.error || 'Login failed');
       }
-
-      localStorage.setItem('token', data.token);
+      
+      // Check if 2FA is required
+      if (data.requiresTwoFactor) {
+        return {
+          success: false,
+          requiresTwoFactor: true,
+          userId: data.userId
+        };
+      }
+      
+      // Regular successful login
+      localStorage.setItem('token', data.accessToken);
       localStorage.setItem('user', JSON.stringify(data.user));
       
       setState({
@@ -221,40 +437,104 @@ function AuthProvider({ children }) {
         error: null
       });
       
-      toast.success('Logged in successfully!');
+      toast.success('Login successful');
       return { success: true };
-    } catch (err) {
-      console.error('Login error:', err);
+    } catch (error) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       
-      // For development, if server isn't available, allow login with mock data
-      if (import.meta.env.DEV && import.meta.env.VITE_DEV_MODE === 'true') {
-        console.warn('DEV MODE: Server unreachable, using mock login');
-        const mockUser = {
-          id: 'mock-user-id',
-          email,
-          name: email.split('@')[0]
-        };
-        localStorage.setItem('user', JSON.stringify(mockUser));
-        localStorage.setItem('token', 'dev-token');
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        isAuthenticated: false,
+        error: error.message
+      }));
+      
+      toast.error(error.message || 'Login failed');
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Validate 2FA token during login
+  async function validate2FA(userId, token) {
+    try {
+      // Dev mode handling for 2FA test account
+      if (import.meta.env.DEV && userId === 'mock-2fa-user-id') {
+        console.log('DEV MODE: Validating 2FA token');
         
-        setState({
-          user: mockUser,
-          loading: false,
-          isAuthenticated: true,
-          error: null
-        });
-        
-        toast.success('Logged in successfully (dev mode)!');
-        return { success: true };
+        // In dev mode, any 6-digit code is valid
+        if (token.length === 6) {
+          const mockUser = {
+            id: 'mock-2fa-user-id',
+            email: '2fa-test@example.com',
+            name: '2FA Test User'
+          };
+          
+          localStorage.setItem('user', JSON.stringify(mockUser));
+          localStorage.setItem('token', 'dev-token');
+          
+          setState({
+            user: mockUser,
+            loading: false,
+            isAuthenticated: true,
+            error: null
+          });
+          
+          toast.success('Login successful');
+          return { success: true };
+        } else {
+          throw new Error('Invalid verification code');
+        }
       }
       
-      setState(prev => ({ 
-        ...prev, 
-        loading: false, 
-        error: err.message || 'Login request failed' 
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      
+      const response = await fetch(`${serverUrl}/api/2fa/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, token })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Invalid verification code');
+      }
+      
+      // Fetch user data again after successful 2FA validation
+      const userResponse = await fetch(`${serverUrl}/api/auth/user/${userId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      const userData = await userResponse.json();
+      
+      if (!userResponse.ok) {
+        throw new Error(userData.error || 'Failed to fetch user data');
+      }
+      
+      localStorage.setItem('token', userData.accessToken);
+      localStorage.setItem('user', JSON.stringify(userData.user));
+      
+      setState({
+        user: userData.user,
+        loading: false,
+        isAuthenticated: true,
+        error: null
+      });
+      
+      toast.success('Login successful');
+      return { success: true };
+    } catch (error) {
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        isAuthenticated: false,
+        error: error.message
       }));
-      toast.error('Login failed: Network error');
-      return { success: false, message: 'Network error' };
+      
+      toast.error(error.message || 'Authentication failed');
+      return { success: false, error: error.message };
     }
   }
 
@@ -366,14 +646,41 @@ function AuthProvider({ children }) {
 
   // Get headers for authenticated requests
   const getAuthHeader = (skipContentType = false) => {
-    const token = state.user?.token || localStorage.getItem('token');
-    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-    
-    if (!skipContentType) {
-      headers['Content-Type'] = 'application/json';
+    try {
+      const token = localStorage.getItem('token');
+      let headers = {};
+      
+      // For development mode, always provide a dev token
+      if (import.meta.env.DEV) {
+        console.log('DEV MODE: Using development token for API request');
+        
+        // Check if we have a valid token already
+        if (token && token !== 'undefined' && token !== 'null') {
+          headers['Authorization'] = `Bearer ${token}`;
+        } else {
+          // Create a new dev token if none exists
+          const devToken = 'dev-token-' + Math.random().toString(36).substring(2, 15);
+          console.log('DEV MODE: Created new development token');
+          localStorage.setItem('token', devToken);
+          headers['Authorization'] = `Bearer ${devToken}`;
+        }
+      } 
+      // Production token handling
+      else if (token && token !== 'undefined' && token !== 'null') {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      // Add Content-Type header unless skipped
+      if (!skipContentType) {
+        headers['Content-Type'] = 'application/json';
+      }
+      
+      return headers;
+    } catch (e) {
+      console.error('Error in getAuthHeader:', e);
+      // Provide sensible defaults even in error case
+      return skipContentType ? {} : { 'Content-Type': 'application/json' };
     }
-    
-    return headers;
   };
 
   // Function to refresh user data including subscription status
@@ -397,7 +704,12 @@ function AuthProvider({ children }) {
       }
 
       const data = await response.json();
-      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      try {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      } catch (e) {
+        console.error('Failed to save user to localStorage:', e);
+      }
       
       setState(prev => ({
         ...prev,
@@ -470,41 +782,33 @@ function AuthProvider({ children }) {
     }
   }
 
-  const value = {
-    ...state,
-    login,
-    register,
-    logout,
-    getAuthHeader,
-    refreshUser,
-    updateUserInfo
-  };
-
-  console.log('AuthProvider state:', state);
-
-  if (state.loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
+  // Expose the context values
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{
+      user: state.user,
+      loading: state.loading,
+      isAuthenticated: state.isAuthenticated,
+      error: state.error,
+      login,
+      validate2FA,
+      register,
+      logout,
+      refreshUser,
+      updateUserInfo,
+      getAuthHeader
+    }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-// Custom hook for using auth context
+// Custom hook to use the auth context
 function useAuth() {
-  const context = React.useContext(AuthContext);
-  if (!context) {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }
 
-export { AuthContext, useAuth };
-export default AuthProvider; 
+export { AuthProvider as default, useAuth }; 

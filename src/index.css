@@ -1,31 +1,37 @@
+/**
+ * Main stylesheet for CV Builder application
+ * Uses Tailwind CSS with custom components and utilities
+ */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * Base styles applied to HTML elements
+ */
 @layer base {
-  body {
-    @apply bg-white text-gray-900 transition-colors duration-200;
-  }
-
-  .dark body {
-    @apply bg-gray-900 text-gray-100;
-  }
-
-  /* Smooth transitions when switching between themes */
+  /* Core theme styles with smooth transitions */
   html {
     @apply transition-colors duration-200;
   }
+  
+  body {
+    @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200;
+  }
 
-  /* Default focus styles */
+  /* Default focus styles for accessibility */
   *:focus-visible {
     @apply outline-none ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900;
   }
 
-  /* Form element base styles with dark mode */
+  /* Form element base styles with dark mode support */
   input:not([type="checkbox"]):not([type="radio"]),
   select,
   textarea {
-    @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm;
+    @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 
+           border border-gray-300 dark:border-gray-700 
+           rounded-md shadow-sm;
   }
 
   label {
@@ -33,47 +39,60 @@
   }
 }
 
+/**
+ * Reusable component styles
+ */
 @layer components {
+  /* Layout container */
   .container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  /* Card styles with dark mode support */
+  /* Card with dark mode support */
   .card {
     @apply bg-white dark:bg-gray-800 shadow-md rounded-lg p-6;
   }
 
-  /* Button styles with dark mode support */
+  /* Button variants */
   .btn-primary {
     @apply bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md 
            dark:bg-blue-700 dark:hover:bg-blue-800 
            transition-colors duration-200;
   }
+  
+  .btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md 
+           dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200
+           transition-colors duration-200;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md 
+           dark:bg-red-700 dark:hover:bg-red-800 
+           transition-colors duration-200;
+  }
 
-  /* Common form styling with dark mode */
-  .form-input {
+  /* Form controls with consistent styling */
+  .form-input, .form-select, .form-textarea {
     @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm 
            focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400
            bg-white dark:bg-gray-800 text-gray-900 dark:text-white;
   }
 
-  .form-select {
-    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm 
-           focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400
-           bg-white dark:bg-gray-800 text-gray-900 dark:text-white;
+  .form-checkbox, .form-radio {
+    @apply text-blue-600 dark:text-blue-500 border-gray-300 dark:border-gray-700
+           focus:ring-blue-500 dark:focus:ring-blue-400;
   }
-
+  
   .form-checkbox {
-    @apply h-4 w-4 text-blue-600 dark:text-blue-500 border-gray-300 dark:border-gray-700 rounded
-           focus:ring-blue-500 dark:focus:ring-blue-400;
+    @apply h-4 w-4 rounded;
   }
-
+  
   .form-radio {
-    @apply h-4 w-4 text-blue-600 dark:text-blue-500 border-gray-300 dark:border-gray-700 rounded-full
-           focus:ring-blue-500 dark:focus:ring-blue-400;
+    @apply h-4 w-4 rounded-full;
   }
 
-  /* Modal/dialog styling with dark mode */
+  /* Modal/dialog components */
   .modal {
     @apply bg-white dark:bg-gray-800 shadow-xl rounded-lg overflow-hidden;
   }
@@ -91,10 +110,11 @@
   }
 }
 
-/* Add print styles to the end of the file */
-
+/**
+ * Print styles for CV output
+ */
 @media print {
-  /* Hide all the page elements except CV content */
+  /* Hide all page elements except CV content */
   body * {
     visibility: hidden;
   }
@@ -105,7 +125,7 @@
     visibility: visible;
   }
   
-  /* Position the CV at the top of the page */
+  /* Position CV at the top of the page */
   #cv-printable-content {
     position: absolute;
     left: 0;
@@ -124,12 +144,17 @@
     color: black !important;
   }
   
-  /* Add page breaks between sections if needed */
+  /* Optimize page breaks */
   .page-break-after {
     page-break-after: always;
   }
   
-  /* Remove backgrounds and borders */
+  #cv-printable-content section {
+    page-break-inside: avoid;
+    margin-bottom: 15px;
+  }
+  
+  /* Remove decorative elements for print */
   #cv-printable-content .bg-gray-50,
   #cv-printable-content .rounded-lg,
   #cv-printable-content .shadow-lg {
@@ -138,22 +163,12 @@
     border: none !important;
   }
   
-  /* Adjust margins and spacing */
-  #cv-printable-content section {
-    margin-bottom: 15px;
-  }
-  
-  /* Ensure large sections don't get cut off across pages */
-  #cv-printable-content section {
-    page-break-inside: avoid;
-  }
-  
   /* Remove padding from containers */
   .container, .p-8 {
     padding: 0 !important;
   }
   
-  /* Set proper font sizes for print */
+  /* Set consistent font sizes for print */
   h1 { font-size: 18pt !important; }
   h2 { font-size: 14pt !important; }
   h3 { font-size: 12pt !important; }

@@ -136,6 +136,64 @@ export const COURSE_RECOMMENDATIONS = {
     }
   ],
   
+  // Safety, compliance and regulations
+  'safety': [
+    { 
+      title: 'Workplace Health and Safety',
+      provider: 'Alison',
+      url: 'https://alison.com/course/workplace-health-and-safety', 
+      level: 'Beginner'
+    },
+    { 
+      title: 'Health and Safety in the Workplace',
+      provider: 'Alison',
+      url: 'https://alison.com/course/health-and-safety-in-the-workplace-revised', 
+      level: 'Intermediate'
+    }
+  ],
+  'building safety': [
+    { 
+      title: 'Building Safety and Compliance',
+      provider: 'RICS Training',
+      url: 'https://www.rics.org/courses-events/search-results/?topic=BuildingSafety', 
+      level: 'Advanced'
+    },
+    { 
+      title: 'Building Regulations and Safety',
+      provider: 'CIOB Academy',
+      url: 'https://ciobacademy.org/product/building-regulations-in-practice/', 
+      level: 'Intermediate'
+    }
+  ],
+  'compliance': [
+    { 
+      title: 'Regulatory Compliance: An Introduction',
+      provider: 'Alison',
+      url: 'https://alison.com/course/understanding-regulatory-compliance', 
+      level: 'Beginner'
+    },
+    { 
+      title: 'Business Compliance and Regulations',
+      provider: 'Alison',
+      url: 'https://alison.com/course/business-law-compliance-and-regulations', 
+      level: 'Intermediate'
+    }
+  ],
+  'regulations': [
+    { 
+      title: 'Understanding Building Regulations',
+      provider: 'CIOB Academy',
+      url: 'https://ciobacademy.org/product/building-regulations-in-practice/', 
+      level: 'Intermediate'
+    },
+    { 
+      title: 'Building Regulations Compliance',
+      provider: 'RICS Training',
+      url: 'https://www.rics.org/courses-events/search-results/?topic=BuildingControl', 
+      level: 'Advanced'
+    }
+  ],
+  
   // Certifications and qualifications
   'iosh': [
     { 
@@ -198,11 +256,10 @@ export const findCourseRecommendations = (keywords = [], count = 3) => {
   // Convert keywords to lowercase for case-insensitive matching
   const normalizedKeywords = keywords.map(kw => kw.toLowerCase());
   
-  // Check each keyword against our recommendations
+  // First, try exact matches for keywords
   normalizedKeywords.forEach(keyword => {
-    // Find exact matches first
     for (const [key, courses] of Object.entries(COURSE_RECOMMENDATIONS)) {
-      if (keyword.includes(key) || key.includes(keyword)) {
+      if (key.toLowerCase() === keyword) {
         // Add courses that aren't already in results
         courses.forEach(course => {
           if (!results.find(r => r.url === course.url)) {
@@ -213,7 +270,65 @@ export const findCourseRecommendations = (keywords = [], count = 3) => {
     }
   });
   
-  // If we don't have enough results, add some general recommendations
+  // If we don't have enough results, look for partial matches
+  if (results.length < count) {
+    normalizedKeywords.forEach(keyword => {
+      for (const [key, courses] of Object.entries(COURSE_RECOMMENDATIONS)) {
+        // Skip keys we've already matched exactly
+        if (key.toLowerCase() === keyword) continue;
+        
+        // Check for partial matches
+        if (keyword.includes(key.toLowerCase()) || key.toLowerCase().includes(keyword)) {
+          // Add courses that aren't already in results
+          courses.forEach(course => {
+            if (!results.find(r => r.url === course.url)) {
+              results.push(course);
+            }
+          });
+        }
+      }
+    });
+  }
+  
+  // Handle special cases for related skills
+  if (results.length < count) {
+    // Related skill mapping
+    const relatedSkills = {
+      'management': ['leadership', 'project management'],
+      'lead': ['leadership'],
+      'manager': ['leadership', 'management'],
+      'analysis': ['data analysis'],
+      'analytics': ['data analysis'],
+      'coding': ['programming'],
+      'software': ['programming'],
+      'regulations': ['compliance'],
+      'regulatory': ['compliance'],
+      'safety': ['iosh', 'health and safety'],
+      'building': ['building safety', 'regulations'],
+      'health': ['healthcare', 'safety'],
+      'teach': ['education']
+    };
+    
+    normalizedKeywords.forEach(keyword => {
+      for (const [relatedKey, relatedValues] of Object.entries(relatedSkills)) {
+        if (keyword.includes(relatedKey)) {
+          // Look up each related skill
+          relatedValues.forEach(relatedSkill => {
+            const coursesForSkill = COURSE_RECOMMENDATIONS[relatedSkill];
+            if (coursesForSkill) {
+              coursesForSkill.forEach(course => {
+                if (!results.find(r => r.url === course.url)) {
+                  results.push(course);
+                }
+              });
+            }
+          });
+        }
+      }
+    });
+  }
+  
+  // If we still don't have enough results, add some general recommendations
   if (results.length < count) {
     const generalCourses = COURSE_RECOMMENDATIONS.general.filter(
       course => !results.find(r => r.url === course.url)

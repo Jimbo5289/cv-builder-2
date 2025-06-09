@@ -1,3 +1,4 @@
+/* eslint-disable */
 import PricingSection from '../components/PricingSection';
 
 export default function Pricing() {

@@ -311,6 +311,25 @@ const initDatabase = async () => {
   }
 };
 
+/**
+ * Disconnects from the database
+ * @returns {Promise<void>}
+ */
+const disconnectDatabase = async () => {
+  try {
+    if (client) {
+      logger.info('Disconnecting from database');
+      await client.$disconnect();
+      logger.info('Database disconnected successfully');
+    } else {
+      logger.info('No active database connection to disconnect');
+    }
+  } catch (error) {
+    logger.error('Error disconnecting from database:', error);
+    throw error;
+  }
+};
+
 // Initialize the database
 if (!client) {
   initDatabase().catch((err) => {
@@ -321,5 +340,6 @@ if (!client) {
 module.exports = {
   client,
   initDatabase,
-  createMockClient
+  createMockClient,
+  disconnectDatabase
 };

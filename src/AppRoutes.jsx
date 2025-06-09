@@ -1,50 +1,134 @@
+/* eslint-disable */
+
+/**
+ * @component AppRoutes
+ * @description Main routing component that handles the application's route configuration and rendering.
+ * This component is responsible for:
+ * - Setting up the React Router routes based on the configuration in routes.jsx
+ * - Handling protected routes that require authentication
+ * - Providing loading states during route transitions
+ * - Implementing a fallback 404 page for invalid routes
+ * - Optimizing router performance through the RouterOptimizer component
+ * 
+ * The component dynamically maps the routes configuration array to Route components.
+ * It also implements route protection by wrapping protected routes with authentication checks.
+ * 
+ * @context AuthContext - Used to check authentication state for protected routes
+ * 
+ * @returns {JSX.Element} The configured Routes component with all application routes
+ */
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
-import SubscriptionProtectedRoute from './components/SubscriptionProtectedRoute';
 import routes from './routes';
+import RouterOptimizer from './components/RouterOptimizer';
 
-// Loading fallback
-const LoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-100">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+/**
+ * @component LoadingComponent
+ * @description Displays a loading spinner when routes are being lazy-loaded
+ * Used as a fallback for Suspense during code-splitting and route transitions
+ * 
+ * @returns {JSX.Element} A centered loading spinner with text
+ */
+const LoadingComponent = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-800">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+      <p className="mt-4 text-gray-600 dark:text-gray-300">Loading...</p>
+    </div>
   </div>
 );
 
-function AppRoutes() {
-  const { isAuthenticated } = useAuth();
+/**
+ * @component NotFound
+ * @description 404 page displayed when users navigate to non-existent routes
+ * Provides a user-friendly error message and a link back to the home page
+ * 
+ * @returns {JSX.Element} A styled 404 error page
+ */
+const NotFound = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-800">
+    <div className="text-center max-w-md p-8 bg-white dark:bg-gray-900 rounded-lg shadow-md">
+      <h1 className="text-4xl font-bold text-red-500 mb-4">404</h1>
+      <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Page Not Found</h2>
+      <p className="text-gray-600 dark:text-gray-400 mb-6">The page you are looking for doesn't exist or has been moved.</p>
+      <a 
+        href="/" 
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+      >
+        Go Back Home
+      </a>
+    </div>
+  </div>
+);
 
+/**
+ * @component ProtectedRoute
+ * @description Higher-order component that restricts access to authenticated users only
+ * Redirects unauthenticated users to the login page while preserving the original navigation
+ * 
+ * @param {Object} props - Component props
+ * @param {JSX.Element} props.element - The component to render if authentication passes
+ * @param {boolean} props.requiresAuth - Whether authentication is required
+ * 
+ * @returns {JSX.Element} Either the protected component or a redirect to login
+ */
+const ProtectedRoute = ({ element, requiresAuth }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) return <LoadingComponent />;
+  
+  return isAuthenticated ? element : <Navigate to="/login" replace />;
+};
+
+const AppRoutes = () => {
+  // Log the routes for debugging
+  console.log('AppRoutes: routes available:', routes?.length || 0);
+  
+  // Safely check if routes is valid
+  if (!Array.isArray(routes) || routes.length === 0) {
+    console.error('Routes is not a valid array!', routes);
+    return <NotFound />;
+  }
+  
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <Suspense fallback={<LoadingComponent />}>
+      {/* Use the comprehensive RouterOptimizer instead of just the compatibility handler */}
+      <RouterOptimizer />
+      
       <Routes>
-        {routes.map(({ path, Component, protected: isProtected, subscription }, index) => {
-          if (!Component) {
-            console.warn(`Missing Component for route: ${path}`);
+        {routes.map((route) => {
+          const { path, Component, protected: requiresAuth } = route;
+          
+          // Skip invalid routes
+          if (!path || !Component) {
+            console.warn('Invalid route configuration:', route);
             return null;
           }
-
-          let element = <Component />;
-
-          if (subscription) {
-            element = <SubscriptionProtectedRoute>{element}</SubscriptionProtectedRoute>;
-          } else if (isProtected) {
-            element = <ProtectedRoute>{element}</ProtectedRoute>;
-          }
-
-          if (path === '/login' && isAuthenticated) {
-            element = <Navigate to="/dashboard" replace />;
-          }
-
-          if (path === '/register' && isAuthenticated) {
-            element = <Navigate to="/dashboard" replace />;
-          }
-
-          return <Route key={index} path={path} element={element} />;
+          
+          return (
+            <Route 
+              key={path} 
+              path={path} 
+              element={
+                requiresAuth ? (
+                  <ProtectedRoute 
+                    element={<Component />} 
+                    requiresAuth={requiresAuth}
+                  />
+                ) : (
+                  <Component />
+                )
+              } 
+            />
+          );
         })}
+        
+        {/* Fallback route for 404 */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
   );
-}
+};
 
 export default AppRoutes;

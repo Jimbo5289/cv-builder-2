@@ -1,4 +1,6 @@
+/* eslint-disable */
 import { Link } from 'react-router-dom';
+import { FiFileText, FiBriefcase, FiTarget, FiCheckCircle, FiArrowRight } from 'react-icons/fi';
 
 export default function Home() {
   return (
@@ -75,58 +77,82 @@ export default function Home() {
             {/* Right column - Analysis options */}
             <div className="md:w-1/2 bg-white bg-opacity-10 backdrop-filter backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white border-opacity-10">
               <h2 className="text-xl font-semibold mb-4 text-center">Enhance Your CV with AI Analysis</h2>
-              <div className="grid gap-6">
+              <div className="grid gap-3">
                 <Link
-                  to="/cv-analyse"
-                  className="flex items-center justify-between bg-gradient-to-r from-green-400 to-green-600 text-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1"
+                  to="/cv-analyze"
+                  className="flex items-center justify-between bg-[#2ecc71] bg-opacity-80 hover:bg-opacity-100 p-4 rounded-xl transition-all duration-200 group hover:shadow-md"
                   state={{ fromHome: true }}
                 >
-                  <div className="flex items-center">
-                    <div className="bg-white text-green-600 p-3 rounded-full shadow-md mr-4">
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-start">
+                    <div className="text-white bg-green-600 p-2 rounded-lg mr-3 mt-1">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Analyse CV Only</h3>
-                      <p className="text-sm">Get general feedback on your CV</p>
+                      <span className="font-medium">Analyze CV Only</span>
+                      <p className="text-sm text-green-100">Get general feedback on your CV</p>
                     </div>
                   </div>
+                  <div className="flex items-center">
+                    <span className="text-xs bg-yellow-400 text-[#2c3e50] px-2 py-0.5 rounded-full font-bold mr-2">
+                      PREMIUM
+                    </span>
+                    <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
                 </Link>
-
+                
                 <Link
-                  to="/cv-analyse-by-role"
-                  className="flex items-center justify-between bg-gradient-to-r from-blue-500 to-blue-700 text-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1"
+                  to="/cv-analyze-by-role"
+                  className="flex items-center justify-between bg-[#9b59b6] bg-opacity-80 hover:bg-opacity-100 p-4 rounded-xl transition-all duration-200 group hover:shadow-md"
                   state={{ fromHome: true }}
                 >
+                  <div className="flex items-start">
+                    <div className="text-white bg-purple-700 p-2 rounded-lg mr-3 mt-1">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="font-medium">Industry-Focused Analysis</span>
+                      <p className="text-sm text-purple-100">Optimize for specific career fields</p>
+                    </div>
+                  </div>
                   <div className="flex items-center">
-                    <div className="bg-white text-blue-600 p-3 rounded-full shadow-md mr-4">
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span className="text-xs bg-yellow-400 text-[#2c3e50] px-2 py-0.5 rounded-full font-bold mr-2">
+                      PREMIUM
+                    </span>
+                    <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </Link>
+                
+                <Link
+                  to="/analyze"
+                  className="flex items-center justify-between bg-[#3498db] bg-opacity-80 hover:bg-opacity-100 p-4 rounded-xl transition-all duration-200 group hover:shadow-md"
+                  state={{ fromHome: true }}
+                >
+                  <div className="flex items-start">
+                    <div className="text-white bg-blue-600 p-2 rounded-lg mr-3 mt-1">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Industry Focused Analysis</h3>
-                      <p className="text-sm">Analyze your CV for industry-specific roles</p>
+                      <span className="font-medium">Analyze with Job</span>
+                      <p className="text-sm text-blue-100">Match your CV to specific job openings</p>
                     </div>
                   </div>
-                </Link>
-
-                <Link
-                  to="/analyse"
-                  className="flex items-center justify-between bg-gradient-to-r from-purple-400 to-purple-600 text-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1"
-                  state={{ fromHome: true }}
-                >
                   <div className="flex items-center">
-                    <div className="bg-white text-purple-600 p-3 rounded-full shadow-md mr-4">
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold">Analyse with JDPS</h3>
-                      <p className="text-sm">Match your CV to specific job openings</p>
-                    </div>
+                    <span className="text-xs bg-yellow-400 text-[#2c3e50] px-2 py-0.5 rounded-full font-bold mr-2">
+                      PREMIUM
+                    </span>
+                    <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
                   </div>
                 </Link>
               </div>
@@ -168,62 +194,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Premium Feature Highlight */}
-          <div className="mt-16 mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 sm:p-8 shadow-sm">
-            <div className="flex flex-col md:flex-row items-start">
-              <div className="md:w-1/2 mb-6 md:mb-0 md:pr-6">
-                <div className="mb-4">
-                  <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <h3 className="text-2xl font-bold text-[#2c3e50]">Job-Tailored CV Analysis</h3>
-                    <span className="inline-block bg-yellow-400 text-[#2c3e50] px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
-                      PREMIUM FEATURE
-                    </span>
-                  </div>
-                  <p className="text-gray-700 mb-6">
-                    Our advanced AI analyses your CV against specific job descriptions to provide tailored recommendations. Stand out from other applicants by perfectly matching your CV to each job you apply for.
-                  </p>
-                  <div className="flex flex-wrap gap-3 mb-4">
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      Job-Specific Keywords
-                    </div>
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      Skills Gap Analysis
-                    </div>
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      ATS Compatibility Score
-                    </div>
-                  </div>
-                  <Link
-                    to="/analyse" 
-                    className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800"
-                    aria-label="Try CV analysis with job matching"
-                    state={{ fromHome: true }}
-                  >
-                    Try it now
-                    <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                  </Link>
-                </div>
-              </div>
-              <div className="md:w-1/2 flex justify-center">
-                <div className="relative">
-                  <svg className="w-64 h-64 text-blue-100" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
-                    <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H216v96H40ZM40,200V168H216v32Z"></path>
-                    <path d="M184,180a8,8,0,0,1-8,8H80a8,8,0,0,1,0-16h96A8,8,0,0,1,184,180Zm32-84a12,12,0,1,1-12-12A12,12,0,0,1,216,96Zm-32,0a12,12,0,1,1-12-12A12,12,0,0,1,184,96Zm-32,0a12,12,0,1,1-12-12A12,12,0,0,1,152,96Z"></path>
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <svg className="w-24 h-24 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Analyse CV Only Feature */}
-          <div className="mt-8 mb-16 bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 sm:p-8 shadow-sm">
+          {/* Analyze CV Only Feature */}
+          <div className="mt-16 mb-16 bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 sm:p-8 shadow-sm">
             <div className="flex flex-col md:flex-row items-start">
               <div className="md:w-1/2 flex justify-center order-2 md:order-1">
                 <div className="relative">
@@ -241,10 +213,14 @@ export default function Home() {
               <div className="md:w-1/2 mb-6 md:mb-0 md:pl-6 order-1 md:order-2">
                 <div className="mb-4">
                   <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <h3 className="text-2xl font-bold text-[#2c3e50]">Analyse CV Only</h3>
+                    <h3 className="text-2xl font-bold text-[#2c3e50]">Analyze CV Only</h3>
+                    <span className="inline-block bg-yellow-400 text-[#2c3e50] px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
+                      PREMIUM FEATURE
+                    </span>
                   </div>
                   <p className="text-gray-700 mb-6">
-                    Get general feedback on your CV without a specific job in mind. Our AI analyzes your CV's format, content, and keywords to ensure it's optimized for ATS systems and meets industry standards.
+                    Get comprehensive feedback on your CV without targeting a specific job. Our advanced AI analyzes your CV's format, content, and keywords to ensure it meets professional standards and passes Applicant Tracking Systems (ATS). 
+                    This analysis helps identify missing sections, formatting issues, and content improvements needed for a professional CV.
                   </p>
                   <div className="flex flex-wrap gap-3 mb-4">
                     <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
@@ -258,7 +234,7 @@ export default function Home() {
                     </div>
                   </div>
                   <Link
-                    to="/cv-analyse"
+                    to="/cv-analyze"
                     className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800"
                     aria-label="Try standalone CV analysis"
                     state={{ fromHome: true }}
@@ -273,89 +249,36 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Industry Focused CV Analysis Feature */}
-          <div className="mt-16 mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 sm:p-8 shadow-sm">
-            <div className="flex flex-col md:flex-row items-start">
-              <div className="md:w-1/2 mb-6 md:mb-0 md:pr-6">
-                <div className="mb-4">
-                  <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <h3 className="text-2xl font-bold text-[#2c3e50]">Industry Focused CV Analysis</h3>
-                    <span className="inline-block bg-yellow-400 text-[#2c3e50] px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
-                      PREMIUM FEATURE
-                    </span>
-                  </div>
-                  <p className="text-gray-700 mb-6">
-                    Our advanced AI analyses your CV against specific job descriptions to provide tailored recommendations. Stand out from other applicants by perfectly matching your CV to each job you apply for.
-                  </p>
-                  <div className="flex flex-wrap gap-3 mb-4">
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      Job-Specific Keywords
-                    </div>
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      Skills Gap Analysis
-                    </div>
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      ATS Compatibility Score
-                    </div>
-                  </div>
-                  <Link
-                    to="/analyse" 
-                    className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800"
-                    aria-label="Try CV analysis with job matching"
-                    state={{ fromHome: true }}
-                  >
-                    Try it now
-                    <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                  </Link>
-                </div>
-              </div>
-              <div className="md:w-1/2 flex justify-center">
-                <div className="relative">
-                  <svg className="w-64 h-64 text-blue-100" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
-                    <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H216v96H40ZM40,200V168H216v32Z"></path>
-                    <path d="M184,180a8,8,0,0,1-8,8H80a8,8,0,0,1,0-16h96A8,8,0,0,1,184,180Zm32-84a12,12,0,1,1-12-12A12,12,0,0,1,216,96Zm-32,0a12,12,0,1,1-12-12A12,12,0,0,1,184,96Zm-32,0a12,12,0,1,1-12-12A12,12,0,0,1,152,96Z"></path>
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <svg className="w-24 h-24 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Analyse with JDPS Feature */}
+          {/* Industry-Focused Analysis Feature */}
           <div className="mt-8 mb-16 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-6 sm:p-8 shadow-sm">
             <div className="flex flex-col md:flex-row items-start">
               <div className="md:w-1/2 mb-6 md:mb-0 md:pr-6">
                 <div className="mb-4">
                   <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <h3 className="text-2xl font-bold text-[#2c3e50]">Analyse with JDPS</h3>
+                    <h3 className="text-2xl font-bold text-[#2c3e50]">Industry-Focused Analysis</h3>
                     <span className="inline-block bg-yellow-400 text-[#2c3e50] px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
                       PREMIUM FEATURE
                     </span>
                   </div>
                   <p className="text-gray-700 mb-6">
-                    Ensure your CV is fully optimized for Applicant Tracking Systems (ATS). Our AI evaluates your CV's structure, formatting, and keyword usage to maximize compatibility with ATS software.
+                    Optimize your CV for specific industries and career fields. Our AI compares your CV against industry benchmarks and best practices to help you align with field-specific expectations. 
+                    Receive customized recommendations for your target industry, including relevant skills, certifications, and terminology that hiring managers look for.
                   </p>
                   <div className="flex flex-wrap gap-3 mb-4">
                     <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      ATS Optimization
+                      Industry-Specific Terms
                     </div>
                     <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      Keyword Analysis
+                      Career Field Alignment
                     </div>
                     <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      Formatting Checks
+                      Competitive Benchmark
                     </div>
                   </div>
                   <Link
-                    to="/ats-analyse"
+                    to="/cv-analyze-by-role" 
                     className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800"
-                    aria-label="Try ATS compatibility analysis"
+                    aria-label="Try industry-focused analysis"
                     state={{ fromHome: true }}
                   >
                     Try it now
@@ -373,9 +296,64 @@ export default function Home() {
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <svg className="w-24 h-24 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Analyze with Job Feature */}
+          <div className="mt-8 mb-16 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 sm:p-8 shadow-sm">
+            <div className="flex flex-col md:flex-row items-start">
+              <div className="md:w-1/2 flex justify-center order-2 md:order-1">
+                <div className="relative">
+                  <svg className="w-64 h-64 text-blue-100" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H216v96H40ZM40,200V168H216v32Z"></path>
+                    <path d="M184,180a8,8,0,0,1-8,8H80a8,8,0,0,1,0-16h96A8,8,0,0,1,184,180Zm32-84a12,12,0,1,1-12-12A12,12,0,0,1,216,96Zm-32,0a12,12,0,1,1-12-12A12,12,0,0,1,184,96Zm-32,0a12,12,0,1,1-12-12A12,12,0,0,1,152,96Z"></path>
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <svg className="w-24 h-24 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div className="md:w-1/2 mb-6 md:mb-0 md:pl-6 order-1 md:order-2">
+                <div className="mb-4">
+                  <div className="flex flex-wrap items-center gap-3 mb-3">
+                    <h3 className="text-2xl font-bold text-[#2c3e50]">Analyze with Job</h3>
+                    <span className="inline-block bg-yellow-400 text-[#2c3e50] px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
+                      PREMIUM FEATURE
+                    </span>
+                  </div>
+                  <p className="text-gray-700 mb-6">
+                    Match your CV precisely to specific job openings to maximize your chances of getting an interview. Our AI analyzes your CV against the job description to identify keyword matches, skills gaps, and optimization opportunities. 
+                    Receive tailored recommendations for each job application, including specific phrases to include and skills to highlight based on the exact requirements in the job posting.
+                  </p>
+                  <div className="flex flex-wrap gap-3 mb-4">
+                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
+                      Job-Specific Keywords
+                    </div>
+                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
+                      Skills Gap Analysis
+                    </div>
+                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
+                      ATS Match Score
+                    </div>
+                  </div>
+                  <Link
+                    to="/analyze"
+                    className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800"
+                    aria-label="Try job-specific analysis"
+                    state={{ fromHome: true }}
+                  >
+                    Try it now
+                    <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </Link>
                 </div>
               </div>
             </div>

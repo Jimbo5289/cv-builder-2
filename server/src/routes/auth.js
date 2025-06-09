@@ -170,7 +170,9 @@ router.post('/login', authLimiter, async (req, res) => {
         password: true,
         isActive: true,
         failedLoginAttempts: true,
-        lockedUntil: true
+        lockedUntil: true,
+        twoFactorEnabled: true,
+        twoFactorSecret: true
       }
     });
 
@@ -213,7 +215,16 @@ router.post('/login', authLimiter, async (req, res) => {
       }
     });
 
-    // Generate tokens
+    // Check if 2FA is enabled
+    if (user.twoFactorEnabled) {
+      logger.info('User has 2FA enabled, requiring verification code', { userId: user.id });
+      return res.json({
+        requiresTwoFactor: true,
+        userId: user.id
+      });
+    }
+
+    // Generate tokens for non-2FA users
     const accessToken = generateToken({ id: user.id });
     const refreshToken = generateRefreshToken({ id: user.id });
 
@@ -548,6 +559,51 @@ router.post('/refresh-token', async (req, res) => {
     }
     
     res.status(401).json({ error: 'Invalid refresh token' });
+  }
+});
+
+// Get user data by ID (for 2FA verification)
+router.get('/user/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true
+      }
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Generate tokens
+    const accessToken = generateToken({ id: user.id });
+    const refreshToken = generateRefreshToken({ id: user.id });
+    
+    // Update last login time
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        lastLogin: new Date()
+      }
+    });
+    
+    logger.info('User data retrieved after 2FA verification', { userId: user.id });
+    
+    res.json({
+      user,
+      accessToken,
+      refreshToken
+    });
+  } catch (error) {
+    logger.error('Get user error:', { error: error.message, stack: error.stack });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

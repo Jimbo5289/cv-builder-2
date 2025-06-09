@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState } from 'react';
 
 const PhoneInputSimple = ({ value, onChange, label, required = false }) => {

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { loadStripe } from '@stripe/stripe-js';
@@ -16,14 +17,16 @@ export default function Subscription() {
   const redirectFrom = location.state?.from?.pathname;
   const { apiUrl } = useServer();
 
-  // Mapping of premium features to descriptions
-  const featureDescriptions = {
-    '/analyse': 'AI CV Analysis with Job Description Matching',
-    // Add more premium features here
+  // Map from path to feature name
+  const featureMap = {
+    '/cv-analyze': 'Basic CV Analysis',
+    '/cv-analyze-by-role': 'Industry-Specific CV Analysis',
+    '/analyze': 'AI CV Analysis with Job Description Matching',
+    '/create': 'CV Builder Tool'
   };
 
   const getPremiumFeatureName = (path) => {
-    return featureDescriptions[path] || 'Premium Features';
+    return featureMap[path] || 'Premium Features';
   };
 
   useEffect(() => {

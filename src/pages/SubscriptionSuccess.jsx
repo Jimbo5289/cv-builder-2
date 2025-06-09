@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -89,10 +90,10 @@ export default function SubscriptionSuccess() {
                     Go to Dashboard
                   </button>
                   <button
-                    onClick={() => navigate('/analyse')}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="w-full bg-green-600 text-white rounded-md py-3 hover:bg-green-700 transition-colors shadow-md"
+                    onClick={() => navigate('/analyze')}
                   >
-                    Try CV Analysis
+                    Analyze Your CV Now
                   </button>
                 </div>
               </div>

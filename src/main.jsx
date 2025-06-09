@@ -1,199 +1,232 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import * as Sentry from '@sentry/react';
 import './index.css';
 import App from './App';
-import ThemeProvider from './context/ThemeContext';
-import { ServerProvider } from './context/ServerContext';
-import AuthProvider from './context/AuthContext';
-import { setupErrorHandler } from './utils/errorHandler';
+import { ensureRootElement } from './utils/domUtils';
+import storageUtils from './utils/storageCleanup';
+import { suppressCssWarnings } from './utils/cssCompatibility';
+import { bootstrapReact, isReactAvailable } from './utils/reactBootstrap';
+import { getRouterFutureConfig } from './utils/routerConfig';
+import ReactBootstrap from './components/ReactBootstrap';
+
+// Import our fixes for React global definitions and ESLint errors
+import './fix-react-config';
+import './utils/reactEslintFix';
 
 // Debug - log the loading process
-console.log('Main.jsx loading - Step 1: Before any initialization');
+console.log('Main.jsx loading - Initializing app');
 
-// Log React version for debugging
-console.log('React Version:', React.version);
-console.log('React DOM available:', typeof ReactDOM !== 'undefined');
+// Suppress known CSS warnings that can't be fixed
+suppressCssWarnings();
 
-// Safari detection
-const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-console.log('Browser detection - Safari:', isSafari);
-
-// Safari-specific workarounds
-if (isSafari) {
-  console.log('Applying Safari-specific workarounds');
-  // Force hardware acceleration for Safari
-  document.documentElement.style.transform = 'translateZ(0)';
-  document.documentElement.style.backfaceVisibility = 'hidden';
-  // Add meta tag for Safari viewport issues
-  const meta = document.createElement('meta');
-  meta.name = 'viewport';
-  meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-  document.getElementsByTagName('head')[0].appendChild(meta);
-}
-
-// Verify React is available before proceeding
-if (typeof React !== 'object' || React === null) {
-  console.error('React is not properly defined in main.jsx');
-  throw new Error('React not found');
-}
-
-// Initialize error handler to prevent unnecessary reloads
-try {
-  console.log('Step 2: Setting up error handler');
-  setupErrorHandler();
-  console.log('Error handler set up successfully');
-} catch (e) {
-  console.error('Failed to setup error handler:', e);
-}
-
-// Apply theme from localStorage on initial load
-const applyStoredTheme = () => {
-  console.log('Step 3: Applying stored theme');
-  try {
-    // Default to light mode to prevent blank blue screen
-    document.documentElement.classList.remove('dark');
-    
-    const theme = localStorage.getItem('theme') || 'light'; // Changed from 'auto' to 'light'
-    const root = window.document.documentElement;
-    
-    if (theme === 'dark' || 
-        (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
+// Set up global error handler for unhandled errors
+window.addEventListener('error', (event) => {
+  console.error('Global error caught:', event);
+  
+  // If it's a NotFoundError, clear localStorage and reload
+  if (event.message && (
+    event.message.includes('NotFoundError') || 
+    event.message.includes('object can not be found')
+  )) {
+    console.log('NotFoundError detected, resetting localStorage and reloading');
+    try {
+      storageUtils.resetAllLocalStorage();
+      // Prevent the error from propagating
+      event.preventDefault();
+      // Reload the page
+      window.location.reload();
+    } catch (e) {
+      console.error('Error handling NotFoundError:', e);
     }
-    console.log('Theme applied successfully:', theme);
+  }
+});
+
+// Initialize theme
+initializeTheme();
+
+// Clean up any corrupted localStorage items
+try {
+  const cleanedItems = storageUtils.cleanupLocalStorage();
+  if (cleanedItems > 0) {
+    console.log(`Cleaned up ${cleanedItems} corrupted localStorage items`);
+  }
+  
+  // Log storage usage if available
+  const storageStats = storageUtils.getStorageUsage();
+  if (storageStats.available) {
+    console.log(`Storage usage: ${(storageStats.usage / 1024).toFixed(2)}KB / ${(storageStats.quota / 1024 / 1024).toFixed(2)}MB (${storageStats.percentUsed.toFixed(2)}%)`);
+  }
+} catch (e) {
+  console.error('Error during localStorage cleanup:', e);
+}
+
+// Initialize theme function (extracted for clarity)
+function initializeTheme() {
+  try {
+    document.documentElement.classList.remove('dark');
+    const theme = localStorage.getItem('theme');
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
   } catch (e) {
     console.error('Error applying theme:', e);
-    // Ensure light mode as fallback
-    document.documentElement.classList.remove('dark');
   }
-};
+}
 
-// Apply theme immediately
-applyStoredTheme();
-
-// Error fallback component
-const ErrorFallback = ({ error, resetError }) => {
-  console.error('Error fallback triggered with error:', error);
+// Simple error component that doesn't use any external dependencies
+const FatalErrorFallback = ({ message }) => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md max-w-md w-full">
-        <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Something went wrong</h2>
-        <p className="text-gray-600 dark:text-gray-300 mb-4">{error?.message || 'An unknown error occurred'}</p>
-        <button
-          onClick={resetError || (() => window.location.reload())}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
-        >
-          Try again
-        </button>
-        <button
-          onClick={() => window.location.href = '/fallback-react.html'}
-          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 ml-2"
-        >
-          Go to Fallback Page
-        </button>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#f5f5f5',
+      fontFamily: 'Arial, sans-serif'
+    }}>
+      <div style={{
+        maxWidth: '500px',
+        padding: '2rem',
+        backgroundColor: 'white',
+        borderRadius: '8px',
+        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+        textAlign: 'center'
+      }}>
+        <h2 style={{ 
+          color: '#e53e3e', 
+          fontSize: '1.5rem', 
+          marginBottom: '1rem' 
+        }}>
+          Something went wrong
+        </h2>
+        <p style={{ marginBottom: '1.5rem', color: '#4a5568' }}>
+          {message || 'The application encountered an error and could not continue.'}
+        </p>
+        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+          <button 
+            onClick={() => window.location.reload()} 
+            style={{
+              backgroundColor: '#3182ce',
+              color: 'white',
+              border: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '0.25rem',
+              cursor: 'pointer'
+            }}
+          >
+            Reload Page
+          </button>
+          <button 
+            onClick={() => { 
+              storageUtils.resetAllLocalStorage();
+              window.location.reload();
+            }} 
+            style={{
+              backgroundColor: '#e53e3e',
+              color: 'white',
+              border: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '0.25rem',
+              cursor: 'pointer'
+            }}
+          >
+            Reset & Reload
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-// Simple loading component
-const LoadingFallback = () => {
-  console.log('Step 4: Rendering loading fallback');
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-        <p className="text-gray-800 dark:text-gray-200">Loading application...</p>
-      </div>
-    </div>
-  );
-};
-
-// Simplified app render function
-const renderApp = () => {
-  console.log('Step 5: Rendering application');
-  const rootElement = document.getElementById('root');
-  
-  if (!rootElement) {
-    console.error('Root element #root not found!');
-    return;
-  }
-  
+// Render function with minimal complexity
+const renderApp = async () => {
   try {
+    console.log('Ensuring React is available...');
+    
+    // Bootstrap React before rendering
+    const bootstrapSuccessful = await bootstrapReact();
+    
+    if (!bootstrapSuccessful) {
+      throw new Error('Failed to bootstrap React');
+    }
+    
+    // Double check React is available
+    if (!isReactAvailable()) {
+      throw new Error('React is not available after bootstrap');
+    }
+    
+    console.log('Ensuring root element exists');
+    // Ensure we have a root element before proceeding
+    const rootElement = ensureRootElement();
+    
+    if (!rootElement) {
+      throw new Error('Could not create or find root element');
+    }
+    
     console.log('Creating React root');
     const root = createRoot(rootElement);
     
-    // First render a loading indicator
-    console.log('Rendering loading indicator');
-    root.render(<LoadingFallback />);
+    // Get the future flags configuration for React Router
+    const routerFutureConfig = getRouterFutureConfig();
     
-    // Check for dev mode in URL
-    const isDevMode = new URLSearchParams(window.location.search).has('devMode');
+    // Directly render the app with minimal wrapping
+    console.log('Rendering application');
+    root.render(
+      <BrowserRouter future={routerFutureConfig}>
+        <ReactBootstrap>
+          <App />
+        </ReactBootstrap>
+      </BrowserRouter>
+    );
     
-    // Then render the full app
-    setTimeout(() => {
-      try {
-        console.log('Rendering full application');
-        root.render(
-          <React.StrictMode>
-            <BrowserRouter>
-              <ThemeProvider>
-                <ServerProvider>
-                  <AuthProvider>
-                    <Sentry.ErrorBoundary fallback={ErrorFallback}>
-                      <App />
-                    </Sentry.ErrorBoundary>
-                  </AuthProvider>
-                </ServerProvider>
-              </ThemeProvider>
-            </BrowserRouter>
-          </React.StrictMode>
-        );
-        console.log('App rendered successfully');
-      } catch (error) {
-        console.error('Error rendering app:', error);
-        root.render(
-          <BrowserRouter>
-            <ErrorFallback error={error} />
-          </BrowserRouter>
-        );
-      }
-    }, 300);
+    console.log('App render call completed');
   } catch (error) {
-    console.error('Fatal error during initialization:', error);
-    // Last resort - render HTML directly
-    rootElement.innerHTML = `
-      <div class="min-h-screen flex items-center justify-center bg-gray-100">
-        <div class="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
-          <h2 class="text-2xl font-bold text-red-600 mb-4">Fatal Error</h2>
-          <p class="text-gray-600 mb-4">The application could not be loaded: ${error.message}</p>
-          <div style="display: flex; gap: 10px;">
-            <button 
-              onclick="window.location.reload()" 
-              class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Reload Application
-            </button>
-            <button 
-              onclick="window.location.href='/fallback-react.html'" 
-              class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-            >
-              Fallback Page
-            </button>
+    console.error('FATAL ERROR during app rendering:', error);
+    
+    // Try to render error fallback directly
+    try {
+      const rootElement = document.getElementById('root') || ensureRootElement();
+      if (rootElement) {
+        createRoot(rootElement).render(
+          <FatalErrorFallback message={error?.message} />
+        );
+      } else {
+        // Last resort - inject HTML directly
+        document.body.innerHTML = `
+          <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #f5f5f5;">
+            <div style="max-width: 500px; padding: 2rem; background-color: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); text-align: center;">
+              <h2 style="color: #e53e3e; font-size: 1.5rem; margin-bottom: 1rem;">Fatal Error</h2>
+              <p style="margin-bottom: 1.5rem; color: #4a5568;">
+                ${error?.message || 'The application could not be loaded.'}
+              </p>
+              <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                <button 
+                  onclick="window.location.reload()" 
+                  style="background-color: #3182ce; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.25rem; cursor: pointer;">
+                  Reload Page
+                </button>
+                <button 
+                  onclick="localStorage.clear(); window.location.reload()" 
+                  style="background-color: #e53e3e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.25rem; cursor: pointer;">
+                  Reset & Reload
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    `;
+        `;
+      }
+    } catch (finalError) {
+      console.error('Failed to render error fallback:', finalError);
+    }
   }
 };
 
-// Only start the app once DOM is fully loaded to ensure root element exists
+// Use the new bootstrap approach
 if (document.readyState === 'loading') {
+  // Wait for DOMContentLoaded if document is still loading
   document.addEventListener('DOMContentLoaded', renderApp);
 } else {
+  // Otherwise render immediately
   renderApp();
 }

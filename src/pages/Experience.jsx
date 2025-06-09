@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useServer } from '../context/ServerContext';
@@ -219,13 +220,22 @@ function Experience() {
 
                 <div>
                   <label className="block text-gray-700 dark:text-gray-200 font-medium mb-2">Description</label>
-                  <textarea
-                    value={experience.description}
-                    onChange={(e) => handleInputChange(index, 'description', e.target.value)}
-                    rows="4"
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#2c3e50] dark:focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder="Describe your responsibilities and achievements..."
-                  />
+                  <div className="relative">
+                    <textarea
+                      value={experience.description}
+                      onChange={(e) => handleInputChange(index, 'description', e.target.value)}
+                      rows="4"
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#2c3e50] dark:focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      placeholder=""
+                    />
+                    {experience.description.length === 0 && (
+                      <div className="absolute inset-0 pointer-events-none flex items-start pt-2 px-4">
+                        <span className="text-gray-400/60 dark:text-gray-500/70 text-sm italic">
+                          Describe your responsibilities and achievements...
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

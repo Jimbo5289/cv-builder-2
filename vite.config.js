@@ -36,6 +36,14 @@ export default defineConfig(({ mode }) => {
           secure: false,
         },
       },
+      // Add specific Safari support
+      hmr: {
+        protocol: 'ws',
+        host: 'localhost',
+        clientPort: 5173,
+      },
+      // Fallback to serve index.html for any non-file requests
+      middlewareMode: false,
     },
     resolve: {
       alias: {
@@ -48,6 +56,8 @@ export default defineConfig(({ mode }) => {
       // Preserve valid package exports
       preserveSymlinks: false,
     },
+    // Add history API fallback manually
+    appType: 'spa',
     build: {
       outDir: 'dist',
       sourcemap: true,

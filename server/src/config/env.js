@@ -1,25 +1,30 @@
 const path = require('path');
 const dotenv = require('dotenv');
 const fs = require('fs');
-const { logger } = require('./logger');
+// Using console first to avoid circular dependencies
+const console_logger = {
+  info: (...args) => console.log('[info] :', ...args),
+  warn: (...args) => console.log('[warn] :', ...args),
+  error: (...args) => console.log('[error] :', ...args)
+};
 
 // Get the absolute path to the .env file
 const envPath = path.resolve(__dirname, '../../.env');
-logger.info('Looking for .env file at:', envPath);
+console_logger.info('Looking for .env file at:', envPath);
 
 // First check if the file exists
 if (!fs.existsSync(envPath)) {
-    logger.error(`ENV file not found at: ${envPath}`);
-    logger.warn('Continuing with environment defaults and mock services');
+    console_logger.error(`ENV file not found at: ${envPath}`);
+    console_logger.warn('Continuing with environment defaults and mock services');
 } else {
     // Load the .env file
     const result = dotenv.config({ path: envPath });
     
     if (result.error) {
-        logger.error('Error loading .env file:', result.error.message);
-        logger.warn('Continuing with environment defaults and mock services');
+        console_logger.error('Error loading .env file:', result.error.message);
+        console_logger.warn('Continuing with environment defaults and mock services');
     } else {
-        logger.info('Environment file loaded successfully');
+        console_logger.info('Environment file loaded successfully');
     }
 }
 
@@ -47,6 +52,15 @@ const envConfig = {
 };
 
 function validateEnv() {
+    // Now we can safely import the real logger if needed
+    let logger;
+    try {
+        const loggerModule = require('../utils/logger');
+        logger = loggerModule;
+    } catch (err) {
+        logger = console_logger;
+    }
+    
     const missingVars = [];
     const warnings = [];
 

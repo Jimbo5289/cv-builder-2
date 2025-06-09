@@ -13,16 +13,46 @@ const paymentRoutes = require('./routes/payment');
 const subscriptionRoutes = require('./routes/subscription');
 const twoFactorRoutes = require('./routes/twoFactor');
 const { stripe } = require('./config/stripe');
-const net = require('net');
 const { getSentry } = require('./config/sentry');
 const authMiddleware = require('./middleware/auth');
-const { execSync } = require('child_process');
+
+// Try to import fix-database, but don't fail if it's not available
+let ensureDevUser;
+try {
+  // First try the simplified version
+  const fixDatabase = require('./config/fix-database.simple');
+  ensureDevUser = fixDatabase.ensureDevUser;
+  logger.info('Loaded simplified fix-database module');
+} catch (err1) {
+  try {
+    // Then try the regular version
+    const fixDatabase = require('./config/fix-database');
+    ensureDevUser = fixDatabase.ensureDevUser;
+    logger.info('Loaded standard fix-database module');
+  } catch (err2) {
+    // If both fail, create a placeholder function
+    logger.warn('Could not load fix-database module, using placeholder');
+    ensureDevUser = async () => {
+      logger.info('Using placeholder for ensureDevUser function');
+      return { id: process.env.DEV_USER_ID || 'dev-user-id' };
+    };
+  }
+}
 
 // Initialize Sentry
 const Sentry = getSentry();
 
 // Validate environment variables
 validateEnv();
+
+// Initialize development database if needed
+if (process.env.NODE_ENV === 'development' && process.env.SKIP_AUTH_CHECK === 'true') {
+  logger.info('Development mode detected with SKIP_AUTH_CHECK. Initializing development database...');
+  // Will run asynchronously - we'll await the connection in the startServer function
+  ensureDevUser().catch(err => {
+    logger.error('Error initializing development database:', err);
+  });
+}
 
 const app = express();
 
@@ -41,11 +71,7 @@ if (Sentry) {
 
 // Configure CORS
 const corsOptions = {
-  origin: process.env.CORS_ALLOW_ORIGIN === '*' 
-    ? '*' // Allow all origins if explicitly configured
-    : (process.env.NODE_ENV === 'production' 
-       ? process.env.FRONTEND_URL 
-       : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176', 'http://localhost:5177']),
+  origin: '*', // Allow all origins for development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
@@ -167,7 +193,7 @@ if (Sentry) {
 }
 
 // Global error handler
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   logger.error('Unhandled error:', {
     error: err.message,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
@@ -197,49 +223,14 @@ app.use((req, res) => {
 // Server startup and port management
 const startServer = async () => {
   try {
-    // Get the default port from environment or fallback to 3005
-    const defaultPort = parseInt(process.env.PORT || '3005');
+    // Get the port from environment - this will be set by our port manager
+    const port = parseInt(process.env.PORT || '3005');
     
-    // Check if port is available, and if not, forcefully free it
-    let port = defaultPort;
-    let isPortAvailable = await checkPort(port);
-    
-    // If DISABLE_PORT_FALLBACK=true, force free the port rather than trying alternatives
-    if (!isPortAvailable && process.env.DISABLE_PORT_FALLBACK === 'true') {
-      logger.warn(`Port ${port} is already in use. Forcefully terminating processes...`);
-      
-      try {
-        // Forcefully kill the process holding this port
-        execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null || true`, { stdio: 'inherit' });
-        logger.info(`Terminated process using port ${port}`);
-        
-        // Wait for the port to be released
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Check again if port is available
-        isPortAvailable = await checkPort(port);
-        if (!isPortAvailable) {
-          logger.error(`Failed to free port ${port} after attempting to kill processes`);
-        }
-      } catch (error) {
-        logger.error(`Error freeing port ${port}: ${error.message}`);
-      }
-    } 
-    // Else, try to find an alternative port if fallback is allowed
-    else if (!isPortAvailable && process.env.DISABLE_PORT_FALLBACK !== 'true') {
-      logger.warn(`Port ${port} is in use. Attempting to find an available port...`);
-      
-      try {
-        port = await findAvailablePort(defaultPort);
-        logger.info(`Found available port: ${port}`);
-      } catch (error) {
-        logger.error(`Could not find available port: ${error.message}`);
-        throw error;
-      }
-    }
+    // Initialize database connection
+    await database.initDatabase();
     
     // Create HTTP server
-    const server = app.listen(port, () => {
+    app.listen(port, () => {
       logger.info('Server started successfully', {
         port,
         url: `http://localhost:${port}`,
@@ -247,12 +238,7 @@ const startServer = async () => {
         frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173'
       });
       
-      if (port !== defaultPort) {
-        console.log(`⚠️  Port ${defaultPort} was already in use.`);
-        console.log(`   Server is running on port ${port} instead.`);
-      } else {
         console.log(`🚀 Server running on port ${port}`);
-      }
       console.log(`   Access your API at: http://localhost:${port}`);
     });
     
@@ -272,86 +258,31 @@ const startServer = async () => {
       shutdown('uncaughtException');
     });
   } catch (error) {
-    logger.error('Startup error', { error: error.message });
+    logger.error('Failed to start server:', error);
     process.exit(1);
   }
 };
 
-// Function to check if a specific port is available
-const checkPort = (port) => {
-  return new Promise((resolve) => {
-    const tester = net.createServer()
-      .once('error', () => {
-        // Port is in use
-        resolve(false);
-      })
-      .once('listening', () => {
-        // Port is available, close the server
-        tester.close(() => resolve(true));
-      })
-      .listen(port);
-  });
-};
-
-// Function to find an available port starting from the given port
-const findAvailablePort = async (startPort, maxAttempts = 5) => {
-  let port = startPort + 1; // Start with the next port
-  let attempts = 0;
-  
-  // Try up to maxAttempts ports
-  while (attempts < maxAttempts) {
-    const isAvailable = await checkPort(port);
-    if (isAvailable) {
-      if (port !== startPort) {
-        logger.info(`Original port ${startPort} was busy, using alternative port ${port}`);
-      }
-      return port;
-    }
-    
-    port++;
-    attempts++;
-  }
-  
-  throw new Error(`Could not find available port after ${maxAttempts} attempts`);
-};
-
-// Flag to track if shutdown has been initiated
-let isShuttingDown = false;
-
-// Graceful shutdown function
+// Modify the shutdown function to only focus on clean termination
 const shutdown = async (signal) => {
-  // Prevent multiple shutdown attempts
-  if (isShuttingDown) {
-    logger.info(`Additional shutdown signal received: ${signal} (already shutting down)`);
-    return;
-  }
-  
-  isShuttingDown = true;
   logger.info(`Initiating graceful shutdown... (Signal: ${signal})`);
   
   try {
-    // Disconnect from database
-    if (database.client) {
-      await database.client.$disconnect();
+    // Disconnect from the database
+    await database.disconnectDatabase();
       logger.info('Database disconnected successfully');
-    }
     
-    // Add any other cleanup tasks here
+    // Close any other resources here if needed
     
     logger.info('Server shut down successfully');
-    
-    // Exit process with appropriate code
-    if (signal === 'uncaughtException') {
-      process.exit(1);
-    } else {
       process.exit(0);
-    }
   } catch (error) {
-    logger.error('Error during shutdown:', { error: error.message });
+    logger.error('Error during shutdown:', error);
     process.exit(1);
   }
 };
 
+// Initialize and start the server
 startServer();
 
 module.exports = app; 
