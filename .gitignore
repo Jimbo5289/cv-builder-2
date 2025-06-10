@@ -56,3 +56,5 @@ pids
 stripe.exe
 .stripe/
 .vercel
+.env.production
+server/.env.production
