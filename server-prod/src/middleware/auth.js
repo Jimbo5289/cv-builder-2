@@ -23,10 +23,12 @@ const authMiddleware = async (req, res, next) => {
         id: 'dev-user-id',
         email: 'dev@example.com',
         name: 'Development User',
-        subscription: {
+        subscriptions: [{
           status: 'active',
-          plan: 'premium'
-        }
+          plan: 'premium',
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        }]
       };
       
       // Add flag to indicate auth was skipped
@@ -55,7 +57,7 @@ const authMiddleware = async (req, res, next) => {
       const user = await database.client.user.findUnique({
         where: { id: decoded.userId },
         include: {
-          subscription: true
+          subscriptions: true
         }
       });
 
@@ -97,7 +99,7 @@ function useMockUser(req, next) {
   
   // Add mock subscription data if needed
   if (process.env.MOCK_SUBSCRIPTION_DATA === 'true') {
-    req.user.subscription = [{
+    req.user.subscriptions = [{
       id: 'mock-subscription-id',
       status: 'active',
       currentPeriodStart: new Date(),

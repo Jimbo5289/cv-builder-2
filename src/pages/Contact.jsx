@@ -227,18 +227,9 @@ export default function Contact() {
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-8 text-center">Get in Touch</h2>
             
             {/* Email contact information */}
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="bg-blue-100 dark:bg-blue-900/50 w-12 h-12 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4 flex flex-col justify-center">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Email</h3>
-                <p className="text-gray-600 dark:text-gray-300">support@cvbuilder.com</p>
-              </div>
+            <div className="flex items-center mb-4">
+              <svg className="w-5 h-5 text-gray-600 dark:text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+              <p className="text-gray-600 dark:text-gray-300">support@mycvbuilder.co.uk</p>
             </div>
           </div>
           

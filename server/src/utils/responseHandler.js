@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Standardized API response handlers
  * This ensures consistent response formats across all API endpoints

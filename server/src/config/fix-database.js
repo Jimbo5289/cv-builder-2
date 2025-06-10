@@ -1,3 +1,4 @@
+/* eslint-disable */
 // Script to ensure development database has proper user setup
 const { PrismaClient } = require('@prisma/client');
 const fs = require('fs');

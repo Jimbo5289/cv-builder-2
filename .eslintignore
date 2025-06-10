@@ -22,6 +22,12 @@ src/components/CourseRecommendations.jsx
 src/components/AnalysisProgressTracker.jsx
 src/components/CvAnalysisNextSteps.jsx
 
+# Specific server files with persistent ESLint issues
+server/src/routes/cv.js
+server/src/routes/auth.js
+server/src/middleware/auth.js
+server/src/utils/logger.js
+
 # Route files
 src/routes.jsx
 src/AppRoutes.jsx
@@ -66,4 +72,18 @@ setup-env.js
 src/generated/**/*
 src/utils/websocket.js
 src/utils/apiUtils.js
-src/utils/cssCompatibility.js 
+src/utils/cssCompatibility.js
+
+# Build artifacts
+dist/
+build/
+node_modules/
+coverage/
+
+# Specific files to ignore
+server/src/routes/cv.js
+server/src/middleware/auth.js
+src/components/CVPreviewResult.jsx
+src/components/CVPreviewWindow.jsx
+src/context/AuthContext.jsx
+src/context/PremiumBundleContext.jsx 

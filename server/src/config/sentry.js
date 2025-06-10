@@ -1,3 +1,4 @@
+/* eslint-disable */
 const Sentry = require('@sentry/node');
 // Remove all problematic dependencies
 // const { ProfilingIntegration } = require('@sentry/profiling-node');

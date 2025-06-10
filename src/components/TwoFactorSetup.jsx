@@ -142,7 +142,7 @@ export default function TwoFactorSetup() {
         await new Promise(resolve => setTimeout(resolve, 700));
         
         // Mock QR code and secret
-        setQrCode('https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/CVBuilder:dev@example.com?secret=JBSWY3DPEHPK3PXP&issuer=CVBuilder');
+        setQrCode('https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/MyCVBuilder.co.uk:dev@example.com?secret=JBSWY3DPEHPK3PXP&issuer=MyCVBuilder.co.uk');
         setSecret('JBSWY3DPEHPK3PXP');
         setStep('setup');
         setIsLoading(false);
@@ -159,7 +159,7 @@ export default function TwoFactorSetup() {
       if (isDevelopment && (response.status === 404 || response.status === 401)) {
         console.log('DEV MODE: 2FA setup API not implemented, using mock mode');
         // Mock QR code and secret
-        setQrCode('https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/CVBuilder:dev@example.com?secret=JBSWY3DPEHPK3PXP&issuer=CVBuilder');
+        setQrCode('https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/MyCVBuilder.co.uk:dev@example.com?secret=JBSWY3DPEHPK3PXP&issuer=MyCVBuilder.co.uk');
         setSecret('JBSWY3DPEHPK3PXP');
         setStep('setup');
         setIsLoading(false);
@@ -179,7 +179,7 @@ export default function TwoFactorSetup() {
       // Handle error gracefully in dev mode
       if (isDevelopment) {
         console.log('DEV MODE: Using mock 2FA setup despite error');
-        setQrCode('https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/CVBuilder:dev@example.com?secret=JBSWY3DPEHPK3PXP&issuer=CVBuilder');
+        setQrCode('https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/MyCVBuilder.co.uk:dev@example.com?secret=JBSWY3DPEHPK3PXP&issuer=MyCVBuilder.co.uk');
         setSecret('JBSWY3DPEHPK3PXP');
         setStep('setup');
       } else {

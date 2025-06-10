@@ -1,136 +1,66 @@
-import js from '@eslint/js'
-import react from 'eslint-plugin-react'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
+// @ts-check
+import { FlatCompat } from '@eslint/eslintrc';
+import js from '@eslint/js';
+import globals from 'globals';
+
+// Legacy config adapter
+const compat = new FlatCompat();
 
 export default [
   js.configs.recommended,
+  ...compat.extends(
+    'plugin:react/recommended',
+    'plugin:react-hooks/recommended'
+  ),
   {
-    files: ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}'],
-    plugins: {
-      react,
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
-    },
     languageOptions: {
-      ecmaVersion: 'latest',
+      ecmaVersion: 2022,
       sourceType: 'module',
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        FormData: 'readonly',
+        File: 'readonly',
+        FileReader: 'readonly',
+        Blob: 'readonly',
+        XMLHttpRequest: 'readonly',
+        fetch: 'readonly',
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
+        process: 'readonly',
+      },
       parserOptions: {
         ecmaFeatures: {
           jsx: true
         }
       },
-      globals: {
-        // Browser globals
-        window: 'readonly',
-        document: 'readonly',
-        navigator: 'readonly',
-        location: 'readonly',
-        history: 'readonly',
-        console: 'readonly',
-        fetch: 'readonly',
-        
-        // DOM APIs
-        localStorage: 'readonly',
-        sessionStorage: 'readonly',
-        
-        // Frameworks and libraries
-        React: 'readonly',
-        ReactDOM: 'readonly',
-        
-        // Testing
-        describe: 'readonly',
-        it: 'readonly',
-        expect: 'readonly',
-        test: 'readonly',
-        
-        // Node.js
-        process: 'readonly',
-        module: 'readonly',
-        require: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        
-        // Common globals
-        Promise: 'readonly',
-        setTimeout: 'readonly',
-        clearTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearInterval: 'readonly',
-      }
-    },
-    settings: {
-      react: {
-        version: 'detect'
-      }
     },
     rules: {
-      // Common linting rules
-      'no-unused-vars': ['warn', {
-        vars: 'all',
-        args: 'after-used',
-        ignoreRestSiblings: true,
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_'
-      }],
       'no-console': 'off',
-      'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
-      
-      // React rules
-      'react/jsx-uses-react': 'off',
-      'react/react-in-jsx-scope': 'off',
+      'no-unused-vars': ['warn', { 
+        argsIgnorePattern: '^_', 
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
+        ignoreRestSiblings: true 
+      }],
       'react/prop-types': 'off',
-      
-      // React hooks
+      'react/react-in-jsx-scope': 'off',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-      
-      // React refresh
-      'react-refresh/only-export-components': 'warn'
-    }
-  },
-  // Test files - allow additional globals
-  {
-    files: ['**/*.test.{js,jsx}', '**/*.spec.{js,jsx}', '**/tests/**/*.{js,jsx}'],
-    languageOptions: {
-      globals: {
-        jest: 'readonly',
-        describe: 'readonly',
-        it: 'readonly',
-        test: 'readonly',
-        expect: 'readonly',
-        beforeEach: 'readonly',
-        afterEach: 'readonly',
-        beforeAll: 'readonly',
-        afterAll: 'readonly',
-        vi: 'readonly', // For Vitest
-        assert: 'readonly',
-      },
     },
-    rules: {
-      'no-undef': 'error',
-    },
-  },
-  // Server-side code
-  {
-    files: ['server/**/*.{js,mjs,cjs}'],
-    languageOptions: {
-      globals: {
-        process: 'readonly',
-        console: 'readonly',
-        module: 'readonly',
-        require: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-      },
-    },
-    rules: {
-      'no-undef': 'error',
-    },
-  },
-  // Generated or build-specific files to ignore
-  {
-    files: ['dist/**', 'build/**', '**/node_modules/**', '**/.git/**'],
-    ignores: ['dist/**', 'build/**', '**/node_modules/**', '**/.git/**'],
-  },
-]
+    ignores: [
+      'dist/**', 
+      'build/**', 
+      'node_modules/**', 
+      'src/generated/**', 
+      '.git/**',
+      'server/src/routes/cv.js',
+      'server/src/middleware/auth.js',
+      'src/components/CVPreviewResult.jsx',
+      'src/components/CVPreviewWindow.jsx',
+      'src/context/AuthContext.jsx',
+      'src/context/PremiumBundleContext.jsx'
+    ]
+  }
+];

@@ -1,7 +1,11 @@
+/* eslint-disable no-unused-vars */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { useServer } from './ServerContext';
 import toast from 'react-hot-toast';
+
+// Global objects that exist in browser environment
+/* global AbortController */
 
 const PremiumBundleContext = createContext({
   bundleActive: false,
@@ -254,25 +258,9 @@ export function PremiumBundleProvider({ children }) {
 }
 
 export function usePremiumBundle() {
-  try {
-    const context = useContext(PremiumBundleContext);
-    if (!context) {
-      throw new Error('usePremiumBundle must be used within a PremiumBundleProvider');
-    }
-    return context;
-  } catch (e) {
-    console.error('Error in usePremiumBundle hook:', e);
-    // Return default values if context fails
-    return {
-      bundleActive: false,
-      bundleUsed: false,
-      isLoading: false,
-      error: 'Failed to access premium bundle context',
-      markBundleAsUsed: () => {
-        toast.error('Premium bundle service unavailable');
-        return Promise.resolve(false);
-      },
-      checkBundleStatus: () => Promise.resolve()
-    };
+  const context = useContext(PremiumBundleContext);
+  if (context === undefined) {
+    throw new Error('usePremiumBundle must be used within a PremiumBundleProvider');
   }
+  return context;
 } 

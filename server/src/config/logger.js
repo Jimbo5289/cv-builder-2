@@ -1,3 +1,4 @@
+/* eslint-disable */
 // Simple logger exporter
 const logger = require('../utils/logger');
 

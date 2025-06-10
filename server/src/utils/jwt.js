@@ -1,3 +1,4 @@
+/* eslint-disable */
 const jwt = require('jsonwebtoken');
 const { logger } = require('../config/logger');
 

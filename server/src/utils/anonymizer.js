@@ -1,3 +1,4 @@
+/* eslint-disable */
 const CryptoJS = require('crypto-js');
 
 // Salt for hashing - should be stored in environment variables

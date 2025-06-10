@@ -20,7 +20,8 @@ export default function Settings() {
   // Profile form state
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
-    email: user?.email || ''
+    email: user?.email || '',
+    phone: user?.phone || ''
   });
   const [profileErrors, setProfileErrors] = useState({});
   const [profileSuccess, setProfileSuccess] = useState(false);
@@ -38,7 +39,8 @@ export default function Settings() {
     if (user) {
       setProfileData({
         name: user.name || '',
-        email: user.email || ''
+        email: user.email || '',
+        phone: user.phone || ''
       });
     }
   }, [user]);
@@ -82,6 +84,11 @@ export default function Settings() {
       errors.email = 'Invalid email format';
     }
     
+    // Phone validation (optional field)
+    if (profileData.phone && !/^[+\d\s()-]{7,20}$/.test(profileData.phone)) {
+      errors.phone = 'Please enter a valid phone number format';
+    }
+    
     // If there are errors, stop submission
     if (Object.keys(errors).length > 0) {
       setProfileErrors(errors);
@@ -91,13 +98,28 @@ export default function Settings() {
     
     try {
       // Call the updateUserInfo function from AuthContext
-      await updateUserInfo(profileData);
+      const result = await updateUserInfo(profileData);
       
-      setProfileSuccess(true);
+      if (result.success) {
+        setProfileSuccess(true);
+      } else {
+        throw new Error(result.message || 'Unknown error occurred');
+      }
     } catch (error) {
-      setProfileErrors({
-        general: error.message || 'Failed to update profile. Please try again.'
-      });
+      console.error('Profile update error:', error);
+      
+      // Handle authentication errors specifically
+      if (error.message?.toLowerCase().includes('auth') || 
+          error.message?.toLowerCase().includes('token') ||
+          error.message?.toLowerCase().includes('unauthorized')) {
+        setProfileErrors({
+          general: 'Authentication error. Please log out and log back in to update your profile.'
+        });
+      } else {
+        setProfileErrors({
+          general: error.message || 'Failed to update profile. Please try again.'
+        });
+      }
     } finally {
       setIsSubmittingProfile(false);
     }
@@ -450,6 +472,26 @@ export default function Settings() {
                         <p className="mt-1 text-sm text-red-600 dark:text-red-500 flex items-center">
                           <FiAlertCircle className="h-4 w-4 mr-1" />
                           {profileErrors.email}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Phone Number <span className="text-gray-400 text-xs">(optional)</span>
+                      </label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={profileData.phone}
+                        onChange={handleProfileChange}
+                        className={`mt-1 block w-full border ${profileErrors.phone ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} dark:bg-gray-800 dark:text-white rounded-md shadow-sm focus:ring-[#E78F81] focus:border-[#E78F81] dark:focus:ring-blue-500 dark:focus:border-blue-500 sm:text-sm h-10`}
+                        placeholder="+1 (555) 123-4567"
+                      />
+                      {profileErrors.phone && (
+                        <p className="mt-1 text-sm text-red-600 dark:text-red-500 flex items-center">
+                          <FiAlertCircle className="h-4 w-4 mr-1" />
+                          {profileErrors.phone}
                         </p>
                       )}
                     </div>

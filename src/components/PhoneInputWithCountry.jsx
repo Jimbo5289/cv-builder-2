@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { countries } from '../utils/countryCodes';
 import { getDefaultCountry } from '../utils/locationUtils';
 import { BsFillTelephoneFill } from 'react-icons/bs';
@@ -8,6 +8,10 @@ const PhoneInputWithCountry = ({ value, onChange, label, required = false }) => 
   const [countryCode, setCountryCode] = useState('+44');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [isInternalChange, setIsInternalChange] = useState(false);
+  const initialRenderRef = useRef(true);
+  const previousValueRef = useRef(value);
+  const processingRef = useRef(false);
 
   // Initialize with location detection - only run once
   useEffect(() => {
@@ -23,33 +27,93 @@ const PhoneInputWithCountry = ({ value, onChange, label, required = false }) => 
 
   // Parse initial value when provided from parent
   useEffect(() => {
-    if (value) {
-      // Extract country code and phone number from the value
-      const match = value.match(/^(\+\d+)\s(.*)$/);
-      if (match) {
-        setCountryCode(match[1]);
-        setPhoneNumber(match[2]);
-      }
+    // Skip during the first render or when the change is internal
+    if (initialRenderRef.current) {
+      initialRenderRef.current = false;
+      return;
     }
-  }, [value]); // Only run when value changes
+
+    // Skip processing if this change was triggered internally
+    if (isInternalChange) {
+      setIsInternalChange(false);
+      return;
+    }
+
+    // Skip if we're already processing to prevent loops
+    if (processingRef.current) {
+      return;
+    }
+
+    // Only process if value has changed from previous
+    if (value !== previousValueRef.current) {
+      processingRef.current = true;
+      previousValueRef.current = value;
+
+      if (value) {
+        // Extract country code and phone number from the value
+        const match = value.match(/^(\+\d+)\s(.*)$/);
+        if (match) {
+          setCountryCode(match[1]);
+          setPhoneNumber(match[2]);
+        } else if (value.startsWith('+')) {
+          // Handle case where there's just a country code with no space
+          const codeMatch = value.match(/^(\+\d+)(.*)$/);
+          if (codeMatch) {
+            setCountryCode(codeMatch[1]);
+            setPhoneNumber(codeMatch[2] || '');
+          }
+        } else {
+          // If no country code is detected, use the default and set the entire value as phone number
+          setPhoneNumber(value);
+        }
+      } else {
+        // Handle empty value case
+        setPhoneNumber('');
+      }
+      
+      // Reset processing flag after a short delay to allow state updates to complete
+      setTimeout(() => {
+        processingRef.current = false;
+      }, 0);
+    }
+  }, [value, isInternalChange]); // Run when value changes or internal change flag changes
 
   // When internal state changes, notify parent
-  // This is causing infinite loops - add conditions to prevent unnecessary updates
   useEffect(() => {
-    // Only update the parent if we have something to update with
-    if (countryCode && (phoneNumber || phoneNumber === '')) {
-      // Skip update if the formatted value is the same as the current value
-      const combinedValue = `${countryCode} ${phoneNumber}`;
-      if (combinedValue !== value) {
+    // Skip during the first render
+    if (initialRenderRef.current) {
+      return;
+    }
+
+    // Skip if we're processing an external update
+    if (processingRef.current) {
+      return;
+    }
+
+    // Only update the parent if we have something to update with and it's different
+    if (countryCode) {
+      // Format the combined value
+      const trimmedPhoneNumber = phoneNumber.trim();
+      const combinedValue = trimmedPhoneNumber ? `${countryCode} ${trimmedPhoneNumber}` : '';
+      
+      // Make sure we're not in a loop by checking if the value is actually different
+      // We normalize the strings by removing extra spaces for comparison
+      const normalizedValue = value ? value.replace(/\s+/g, ' ').trim() : '';
+      const normalizedCombined = combinedValue.replace(/\s+/g, ' ').trim();
+      
+      if (normalizedCombined !== normalizedValue && normalizedCombined !== '') {
+        setIsInternalChange(true);
+        previousValueRef.current = combinedValue;
         onChange(combinedValue);
       }
     }
   }, [countryCode, phoneNumber, onChange, value]); // Include value in dependencies
 
   const handlePhoneChange = (e) => {
-    // Just accept the input as is - we're not going to do complex validation
     const input = e.target.value;
-    setPhoneNumber(input);
+    // Remove non-numeric characters for consistency (except spaces)
+    const cleanedInput = input.replace(/[^\d\s]/g, '');
+    setPhoneNumber(cleanedInput);
   };
 
   const handleCountryCodeChange = (e) => {

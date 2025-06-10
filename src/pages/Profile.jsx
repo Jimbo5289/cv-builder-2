@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useServer } from '../context/ServerContext';
 import { Link } from 'react-router-dom';
-import { FiUser, FiMail, FiCalendar, FiCreditCard, FiClock, FiEdit, FiBarChart2, FiFileText, FiDownload, FiPrinter, FiEye } from 'react-icons/fi';
+import { FiUser, FiMail, FiCalendar, FiCreditCard, FiClock, FiEdit, FiBarChart2, FiFileText, FiDownload, FiPrinter, FiEye, FiPhone } from 'react-icons/fi';
 import { safeFetch, mockResponses } from '../utils/apiUtils';
 
 export default function Profile() {
@@ -200,6 +200,14 @@ export default function Profile() {
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Email address</dt>
                 </div>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white ml-7">{user?.email || 'Not provided'}</dd>
+              </div>
+              
+              <div className="sm:col-span-2">
+                <div className="flex items-center">
+                  <FiPhone className="flex-shrink-0 mr-2 h-5 w-5 text-gray-400 dark:text-gray-500" />
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Phone number</dt>
+                </div>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-white ml-7">{user?.phone || 'Not provided'}</dd>
               </div>
               
               <div className="sm:col-span-2">

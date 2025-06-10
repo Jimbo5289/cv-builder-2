@@ -1,102 +1,103 @@
+#!/usr/bin/env node
+
 /**
- * Development Environment Starter
- * 
- * This script ensures a clean development environment by:
- * 1. Killing any existing processes on development ports
- * 2. Starting the backend and frontend servers in sequence
- * 3. Handling proper process cleanup on exit
+ * Start script for development environment
+ * This script launches both frontend and backend in parallel
  */
-import { spawn, exec } from 'child_process';
+
+import { execSync, spawn } from 'child_process';
+import { platform } from 'os';
+import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import path from 'path';
-import fs from 'fs';
 
-// Get the directory of the current module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Store child processes
-let backendProcess = null;
-let frontendProcess = null;
+// Configuration
+const BACKEND_PORT = 3005;
+const FRONTEND_PORT = 5173;
 
-// Handle process exit and cleanup
-const handleExit = (exitCode) => {
-  console.log(`\nCleaning up resources (exit code: ${exitCode})...`);
-  
-  if (backendProcess) {
+// Check for running processes on development ports
+console.log('Checking for running processes on development ports...');
+try {
+  if (platform() === 'win32') {
+    // Windows
     try {
-      process.kill(-backendProcess.pid);
-      console.log('Backend process terminated');
+      execSync(`netstat -ano | findstr :${BACKEND_PORT} | findstr LISTENING`);
+      console.log(`Warning: Port ${BACKEND_PORT} is already in use.`);
     } catch (err) {
-      // Process might already be gone
+      // No process found, which is good
     }
+    
+    try {
+      execSync(`netstat -ano | findstr :${FRONTEND_PORT} | findstr LISTENING`);
+      console.log(`Warning: Port ${FRONTEND_PORT} is already in use.`);
+    } catch (err) {
+      // No process found, which is good
+    }
+  } else {
+    // macOS/Linux
+    try {
+      execSync(`lsof -i:${BACKEND_PORT} -t`);
+      console.log(`Warning: Port ${BACKEND_PORT} is already in use.`);
+    } catch (err) {
+      // No process found, which is good
+    }
+    
+    try {
+      execSync(`lsof -i:${FRONTEND_PORT} -t`);
+      console.log(`Warning: Port ${FRONTEND_PORT} is already in use.`);
+    } catch (err) {
+      // No process found, which is good
+    }
+  }
+} catch (err) {
+  console.error('Error checking ports:', err.message);
+}
+
+// Start the development environment
+console.log('🚀 Starting development environment...');
+
+// Start backend
+console.log(`🚀 Starting backend on port ${BACKEND_PORT}...`);
+const serverProcess = spawn('npm', ['run', 'server:dev'], {
+  stdio: 'inherit',
+  shell: true
+});
+
+// Start frontend
+console.log(`🌐 Starting frontend on port ${FRONTEND_PORT}...`);
+const frontendProcess = spawn('npm', ['run', 'frontend:dev'], {
+  stdio: 'inherit',
+  shell: true
+});
+
+// Success message
+console.log('✅ Development environment is running!');
+console.log(`Frontend: http://localhost:${FRONTEND_PORT}`);
+console.log(`Backend: http://localhost:${BACKEND_PORT}`);
+console.log('Press Ctrl+C to stop all servers');
+
+// Handle process termination
+const cleanup = (code) => {
+  console.log(`\nCleaning up resources (exit code: ${code})...`);
+  
+  if (serverProcess) {
+    console.log('Backend process terminated');
+    serverProcess.kill();
   }
   
   if (frontendProcess) {
-    try {
-      process.kill(-frontendProcess.pid);
-      console.log('Frontend process terminated');
-    } catch (err) {
-      // Process might already be gone
-    }
+    console.log('Frontend process terminated');
+    frontendProcess.kill();
   }
   
-  // Kill any remaining processes on development ports
-  try {
-    exec('lsof -ti:3005-3010,5173-5190 | xargs kill -9 2>/dev/null || true');
-  } catch (err) {
-    // Ignore errors
-  }
-  
-  process.exit(exitCode);
+  process.exit(code);
 };
 
-// Set up process handlers
-process.on('SIGINT', () => handleExit(0));
-process.on('SIGTERM', () => handleExit(0));
+// Register cleanup on process termination
+process.on('SIGINT', () => cleanup(0));
+process.on('SIGTERM', () => cleanup(0));
 process.on('uncaughtException', (err) => {
   console.error('Uncaught exception:', err);
-  handleExit(1);
-});
-
-// Kill any existing processes on development ports
-console.log('Checking for running processes on development ports...');
-exec('lsof -ti:3005-3010,5173-5190 | xargs kill -9 2>/dev/null || true', (error) => {
-  // Wait a bit for ports to be released
-  setTimeout(() => {
-    console.log('🚀 Starting development environment...');
-    
-    // Start backend
-    console.log('🚀 Starting backend on port 3005...');
-    backendProcess = spawn('npm', ['run', 'server:dev'], {
-      cwd: __dirname,
-      stdio: 'inherit',
-      shell: true,
-      detached: true
-    });
-    
-    backendProcess.on('error', (error) => {
-      console.error('Backend process error:', error);
-    });
-    
-    // Start frontend after a short delay to ensure backend is running
-    setTimeout(() => {
-      console.log('🌐 Starting frontend on port 5173...');
-      frontendProcess = spawn('npm', ['run', 'frontend:dev'], {
-        cwd: __dirname,
-        stdio: 'inherit',
-        shell: true,
-        detached: true
-      });
-      
-      frontendProcess.on('error', (error) => {
-        console.error('Frontend process error:', error);
-      });
-      
-      console.log('✅ Development environment is running!');
-      console.log('Frontend: http://localhost:5173');
-      console.log('Backend: http://localhost:3005');
-      console.log('Press Ctrl+C to stop all servers');
-    }, 3000); // Wait 3 seconds before starting frontend
-  }, 1000); // Wait 1 second after killing processes
+  cleanup(1);
 }); 

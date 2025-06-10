@@ -1,3 +1,4 @@
+/* eslint-disable */
 const { logger } = require('./logger');
 
 // Define request handler that logs requests

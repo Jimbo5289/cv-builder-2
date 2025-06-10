@@ -713,7 +713,7 @@ function Preview() {
           
           <div className="grid grid-cols-3 gap-4 mt-4">
             <button
-              onClick={() => navigate(`/edit/${id}`)}
+              onClick={() => navigate(`/create/personal-statement?cv=${id}`)}
               className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">

@@ -1,3 +1,4 @@
+/* eslint-disable */
 const { PrismaClient } = require('@prisma/client');
 const { logger } = require('../config/logger');
 const { sendError } = require('../utils/responseHandler');

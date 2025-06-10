@@ -15,6 +15,12 @@ const twoFactorRoutes = require('./routes/twoFactor');
 const { stripe } = require('./config/stripe');
 const { getSentry } = require('./config/sentry');
 const authMiddleware = require('./middleware/auth');
+const path = require('path');
+const fs = require('fs');
+const http = require('http');
+const expressWs = require('express-ws');
+const net = require('net');
+const { exec } = require('child_process');
 
 // Try to import fix-database, but don't fail if it's not available
 let ensureDevUser;
@@ -54,7 +60,19 @@ if (process.env.NODE_ENV === 'development' && process.env.SKIP_AUTH_CHECK === 't
   });
 }
 
+// Create Express app
 const app = express();
+// Create HTTP server
+const server = http.createServer(app);
+
+// Setup WebSockets with Express
+const wsInstance = expressWs(app, server, {
+  wsOptions: {
+    // Keep connections alive with ping/pong
+    perMessageDeflate: false,
+    clientTracking: true
+  }
+});
 
 // Initialize Sentry request handler (must be the first middleware)
 if (Sentry) {
@@ -71,15 +89,20 @@ if (Sentry) {
 
 // Configure CORS
 const corsOptions = {
-  origin: '*', // Allow all origins for development
+  origin: function(origin, callback) {
+    // Allow requests from the frontend in development (or no origin like Postman)
+    const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5174', 'http://127.0.0.1:5174'];
+    const originIsAllowed = !origin || allowedOrigins.includes(origin);
+    
+    callback(null, originIsAllowed ? origin : false);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
-  exposedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Length'],
   maxAge: 86400, // 24 hours
   // Add better Safari support
-  optionsSuccessStatus: 200,
-  preflightContinue: false
+  optionsSuccessStatus: 200
 };
 
 // Configure CORS
@@ -132,6 +155,7 @@ app.use(express.urlencoded({
 // Now mount routes after body parsers are set up
 app.use('/api/cv', cvRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/users', authRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
@@ -173,6 +197,139 @@ app.get('/status', authMiddleware, (req, res) => {
   });
 });
 
+// Setup WebSocket route
+app.ws('/ws', (ws, req) => {
+  const clientIp = req.socket.remoteAddress;
+  logger.info(`WebSocket connection established from ${clientIp}`);
+  
+  // Send welcome message
+  ws.send(JSON.stringify({
+    type: 'connection',
+    message: 'WebSocket connection established',
+    timestamp: Date.now(),
+    environment: process.env.NODE_ENV || 'development'
+  }));
+  
+  // Handle messages from the client
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message);
+      logger.debug('WebSocket message received:', data);
+      
+      // Echo the message back with a timestamp
+      ws.send(JSON.stringify({
+        type: 'echo',
+        originalMessage: data,
+        timestamp: Date.now()
+      }));
+    } catch (error) {
+      logger.warn('Invalid WebSocket message format:', message.toString());
+      ws.send(JSON.stringify({
+        type: 'error',
+        message: 'Invalid message format',
+        timestamp: Date.now()
+      }));
+    }
+  });
+  
+  // Handle connection close
+  ws.on('close', () => {
+    logger.info(`WebSocket connection closed from ${clientIp}`);
+  });
+  
+  // Handle errors
+  ws.on('error', (error) => {
+    logger.error('WebSocket error:', { error: error.message });
+  });
+});
+
+// Also add WebSocket endpoint at /api/ws for consistency
+app.ws('/api/ws', (ws, req) => {
+  const clientIp = req.socket.remoteAddress;
+  logger.info(`API WebSocket connection established from ${clientIp}`);
+  
+  // Send welcome message
+  ws.send(JSON.stringify({
+    type: 'connection',
+    message: 'API WebSocket connection established',
+    timestamp: Date.now()
+  }));
+  
+  // Handle messages and other events similarly to the main WebSocket handler
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message);
+      ws.send(JSON.stringify({
+        type: 'echo',
+        originalMessage: data,
+        timestamp: Date.now()
+      }));
+    } catch (error) {
+      ws.send(JSON.stringify({
+        type: 'error',
+        message: 'Invalid message format'
+      }));
+    }
+  });
+});
+
+// Define the path to the built frontend assets if in production mode
+const DIST_DIR = path.resolve(__dirname, '../../dist');
+
+// Define these variables for use later
+let PORT = process.env.PORT || 3005;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+let FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+// Support automatic detection of the frontend port (5173 or 5174)
+const checkFrontendPort = async (port) => {
+  return new Promise((resolve) => {
+    const client = net.connect({ port, host: 'localhost' }, () => {
+      client.end();
+      resolve(true);
+    });
+    client.on('error', () => {
+      resolve(false);
+    });
+  });
+};
+
+// Check if port 5173 is available, if not use 5174
+(async () => {
+  const port5173Available = await checkFrontendPort(5173);
+  if (port5173Available) {
+    FRONTEND_URL = 'http://localhost:5173';
+  } else {
+    const port5174Available = await checkFrontendPort(5174);
+    if (port5174Available) {
+      FRONTEND_URL = 'http://localhost:5174';
+    }
+  }
+  logger.info(`Using frontend URL: ${FRONTEND_URL}`);
+})();
+
+// Check if we have a built frontend 
+const hasFrontendBuild = fs.existsSync(DIST_DIR) && fs.existsSync(path.join(DIST_DIR, 'index.html'));
+
+// Serve static frontend files from the dist directory if available
+if (hasFrontendBuild) {
+  logger.info(`Serving static frontend files from ${DIST_DIR}`);
+  app.use(express.static(DIST_DIR));
+  
+  // Handle all frontend routes - serve index.html for any non-API routes
+  app.get(/^(?!\/api).*/, (req, res) => {
+    logger.debug(`Serving index.html for frontend route: ${req.path}`);
+    res.sendFile(path.join(DIST_DIR, 'index.html'));
+  });
+} else {
+  // In development, redirect to the development server for frontend routes
+  app.get(/^(?!\/api).*/, (req, res) => {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    logger.debug(`Redirecting to frontend dev server: ${frontendUrl}${req.path}`);
+    res.redirect(`${frontendUrl}${req.path}`);
+  });
+}
+
 // --- Global error handler for multer errors ---
 app.use((err, req, res, next) => {
   if (err instanceof require('multer').MulterError) {
@@ -211,78 +368,118 @@ app.use((err, req, res, _next) => {
   res.status(err.status || 500).json(response);
 });
 
-// 404 handler
-app.use((req, res) => {
-  logger.warn('Route not found:', {
+// 404 handler for API routes only
+app.use('/api/*', (req, res) => {
+  logger.warn('API route not found:', {
     path: req.path,
     method: req.method
   });
-  res.status(404).json({ error: 'Not found' });
+  res.status(404).json({ error: 'API endpoint not found' });
 });
 
-// Server startup and port management
+// Server startup function with improved error handling
 const startServer = async () => {
   try {
-    // Get the port from environment - this will be set by our port manager
-    const port = parseInt(process.env.PORT || '3005');
-    
-    // Initialize database connection
-    await database.initDatabase();
-    
     // Create HTTP server
-    app.listen(port, () => {
-      logger.info('Server started successfully', {
-        port,
-        url: `http://localhost:${port}`,
-        environment: process.env.NODE_ENV || 'development',
-        frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173'
+    const server = http.createServer(app);
+    
+    // No socket.io setup - removed to fix crashes
+    
+    // Add graceful shutdown handler
+    const gracefulShutdown = (signal) => {
+      logger.info(`Server shutting down due to ${signal}`);
+      server.close(() => {
+        logger.info('HTTP server closed');
+        
+        // Close database connection
+        database.disconnect().then(() => {
+          logger.info('Database connection closed');
+          process.exit(0);
+        }).catch(err => {
+          logger.error('Error closing database connection:', err);
+          process.exit(1);
+        });
+      });
+    };
+
+    // Handle termination signals
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+    process.on('UNCAUGHT_EXCEPTION', (err) => {
+      logger.error('Uncaught Exception:', { error: err.message, stack: err.stack });
+      gracefulShutdown('UNCAUGHT_EXCEPTION');
+    });
+
+    // Check if port is in use before starting
+    const checkPort = async (port) => {
+      return new Promise((resolve) => {
+        const tester = net.createServer()
+          .once('error', err => {
+            if (err.code === 'EADDRINUSE') {
+              logger.warn(`Port ${port} is already in use, trying to close the process...`);
+              // Try to kill the process using this port
+              try {
+                if (process.platform === 'win32') {
+                  exec(`netstat -ano | findstr :${port} | findstr LISTENING`, (error, stdout) => {
+                    if (!error && stdout) {
+                      const pid = stdout.split(/\s+/).pop();
+                      exec(`taskkill /F /PID ${pid}`);
+                      setTimeout(() => resolve(true), 1000);
+                    } else {
+                      resolve(false);
+                    }
+                  });
+                } else {
+                  // Unix-like systems
+                  exec(`lsof -i :${port} -t | xargs kill -9`, (error) => {
+                    setTimeout(() => resolve(!error), 1000);
+                  });
+                }
+              } catch (e) {
+                logger.error('Failed to kill process:', e);
+                resolve(false);
+              }
+            } else {
+              resolve(false);
+            }
+          })
+          .once('listening', () => {
+            tester.once('close', () => resolve(true))
+              .close();
+          })
+          .listen(port);
+      });
+    };
+
+    // Try to start the server with port checking
+    const portAvailable = await checkPort(PORT);
+    if (!portAvailable) {
+      logger.warn(`Could not free up port ${PORT}. Using alternative port ${PORT + 1}`);
+      PORT = PORT + 1;
+    }
+
+    // Start the server
+    server.listen(PORT, () => {
+      logger.info('Server started successfully:', { 
+        port: PORT,
+        url: `http://localhost:${PORT}`,
+        environment: NODE_ENV,
+        frontendUrl: FRONTEND_URL
       });
       
-        console.log(`🚀 Server running on port ${port}`);
-      console.log(`   Access your API at: http://localhost:${port}`);
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`   Access your API at: http://localhost:${PORT}`);
+      console.log(`   WebSocket available at: ws://localhost:${PORT}/ws`);
     });
-    
-    // Register graceful shutdown handlers
-    process.on('SIGTERM', () => shutdown('SIGTERM'));
-    process.on('SIGINT', () => shutdown('SIGINT'));
-    process.on('uncaughtException', (error) => {
-      logger.error('Uncaught Exception:', { 
-        error: error.message,
-        stack: error.stack,
-        code: error.code,
-        errno: error.errno,
-        syscall: error.syscall,
-        address: error.address,
-        port: error.port
-      });
-      shutdown('uncaughtException');
-    });
+
+    return server;
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);
   }
 };
 
-// Modify the shutdown function to only focus on clean termination
-const shutdown = async (signal) => {
-  logger.info(`Initiating graceful shutdown... (Signal: ${signal})`);
-  
-  try {
-    // Disconnect from the database
-    await database.disconnectDatabase();
-      logger.info('Database disconnected successfully');
-    
-    // Close any other resources here if needed
-    
-    logger.info('Server shut down successfully');
-      process.exit(0);
-  } catch (error) {
-    logger.error('Error during shutdown:', error);
-    process.exit(1);
-  }
-};
-
-// Initialize and start the server
+// Start the server
 startServer();
 
 module.exports = app; 

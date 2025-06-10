@@ -21,6 +21,7 @@ function Skills() {
           const token = localStorage.getItem('token');
           if (!token) return;
 
+          console.log('Fetching CV with ID:', cvId);
           const response = await fetch(`${serverUrl}/api/cv/${cvId}`, {
             headers: {
               'Authorization': `Bearer ${token}`
@@ -52,9 +53,19 @@ function Skills() {
             if (skillsData.length > 0) {
               setSkills(skillsData);
             }
+          } else {
+            // If CV not found in development mode, continue with default skills
+            console.log('CV not found, using default skills');
+            if (process.env.NODE_ENV === 'development') {
+              toast.info('Using default skills in development mode');
+            }
           }
         } catch (err) {
           console.error('Error fetching skills data:', err);
+          // In development, don't show error to user, just use default skills
+          if (process.env.NODE_ENV !== 'development') {
+            setError('Error loading skills data. Using default skills.');
+          }
         }
       };
 

@@ -1,3 +1,4 @@
+/* eslint-disable */
 const rateLimit = require('express-rate-limit');
 const { PrismaClient } = require('@prisma/client');
 

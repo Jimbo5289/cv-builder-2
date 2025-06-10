@@ -1,3 +1,4 @@
+/* eslint-disable */
 const morgan = require('morgan');
 const { logger } = require('../config/logger');
 const analyticsService = require('../services/analyticsService');

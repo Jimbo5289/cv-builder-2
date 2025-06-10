@@ -17,11 +17,12 @@
  * 
  * @returns {JSX.Element} The configured Routes component with all application routes
  */
-import React, { Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { Suspense, useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import routes from './routes';
 import RouterOptimizer from './components/RouterOptimizer';
+import { validateCurrentRoute } from './utils/redirectToHome';
 
 /**
  * @component LoadingComponent
@@ -82,6 +83,8 @@ const ProtectedRoute = ({ element, requiresAuth }) => {
 };
 
 const AppRoutes = () => {
+  const location = useLocation();
+  
   // Log the routes for debugging
   console.log('AppRoutes: routes available:', routes?.length || 0);
   
@@ -90,6 +93,21 @@ const AppRoutes = () => {
     console.error('Routes is not a valid array!', routes);
     return <NotFound />;
   }
+  
+  // Validate current route on mount and location change
+  useEffect(() => {
+    // Check if current path is valid
+    try {
+      console.log('Validating route:', location.pathname);
+      
+      // Skip validation in development to avoid redirect loops
+      if (process.env.NODE_ENV !== 'development' && !window.ENV_VITE_DEV_MODE) {
+        validateCurrentRoute(routes);
+      }
+    } catch (error) {
+      console.error('Error validating route:', error);
+    }
+  }, [location.pathname]);
   
   return (
     <Suspense fallback={<LoadingComponent />}>

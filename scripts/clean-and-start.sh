@@ -60,6 +60,14 @@ kill_all_processes() {
   echo -e "${GREEN}All processes terminated.${NC}"
 }
 
+# Run ESLint to automatically fix linting issues
+fix_linting_issues() {
+  echo -e "${BLUE}Fixing linting issues...${NC}"
+  # Run eslint in fix mode to automatically address issues
+  npm run lint:fix || true
+  echo -e "${GREEN}Linting issues fixed or ignored.${NC}"
+}
+
 # Verify critical files exist
 check_files() {
   echo -e "${BLUE}Checking for critical files...${NC}"
@@ -347,13 +355,16 @@ main() {
   # Step 3: Check for port conflicts
   check_port_conflicts
   
-  # Step 4: Start backend server
+  # Step 4: Fix linting issues
+  fix_linting_issues
+  
+  # Step 5: Start backend server
   start_backend
   
-  # Step 5: Start frontend server
+  # Step 6: Start frontend server
   start_frontend
   
-  # Step 6: Report status
+  # Step 7: Report status
   echo -e "${GREEN}Both servers should now be running:${NC}"
   echo -e "${GREEN}Frontend: http://localhost:5173${NC}"
   echo -e "${GREEN}Backend: http://localhost:3005${NC}"

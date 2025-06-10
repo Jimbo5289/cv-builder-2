@@ -105,8 +105,8 @@ const CookiePolicy = () => {
         <h3 className="text-lg font-semibold text-[#2c3e50] mt-6 mb-3">Contact Us</h3>
         <p className="text-gray-700">
           If you have any questions about our Cookie Policy, please contact us at:
-          <a href="mailto:privacy@cvbuilder.com" className="text-[#2c3e50] font-medium ml-1 hover:underline">
-            privacy@cvbuilder.com
+          <a href="mailto:privacy@mycvbuilder.co.uk" className="text-[#2c3e50] font-medium ml-1 hover:underline">
+            privacy@mycvbuilder.co.uk
           </a>
         </p>
       </div>

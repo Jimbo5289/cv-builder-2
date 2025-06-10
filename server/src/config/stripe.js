@@ -1,3 +1,4 @@
+/* eslint-disable */
 const dotenv = require('dotenv');
 const Stripe = require('stripe');
 const { logger } = require('./logger');

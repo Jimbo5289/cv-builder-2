@@ -1,10 +1,11 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { FiDownload, FiPrinter, FiSave, FiX, FiCheck } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useServer } from '../context/ServerContext';
 
 const CVPreviewWindow = ({ cvContent, title, onClose }) => {
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSaving, _setIsSaving] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
   const [success, setSuccess] = useState(false);

@@ -7,6 +7,7 @@ export default function Register() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: ''
   });
@@ -29,6 +30,11 @@ export default function Register() {
       newErrors.email = 'Email is required';
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
+    }
+    
+    // Phone validation (optional)
+    if (formData.phone && !/^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/.test(formData.phone)) {
+      newErrors.phone = 'Please enter a valid phone number';
     }
 
     // Password validation
@@ -73,7 +79,7 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      await register(formData.name, formData.email, formData.password);
+      await register(formData.name, formData.email, formData.password, formData.phone);
       navigate('/dashboard');
     } catch (err) {
       setErrors(prev => ({
@@ -164,6 +170,34 @@ export default function Register() {
                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>
               )}
             </div>
+            
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                Phone Number <span className="text-gray-400 text-xs">(optional)</span>
+              </label>
+              <div className="relative">
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
+                    errors.phone ? 'border-red-300' : 'border-gray-300'
+                  } text-gray-900 rounded-md focus:outline-none focus:ring-[#E78F81] focus:border-[#E78F81] sm:text-sm`}
+                  placeholder=""
+                />
+                {formData.phone.length === 0 && (
+                  <div className="absolute inset-0 pointer-events-none flex items-center px-3 mt-1">
+                    <span className="text-gray-400/60 italic text-sm">+1 (555) 123-4567</span>
+                  </div>
+                )}
+              </div>
+              {errors.phone && (
+                <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+              )}
+            </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
@@ -228,21 +262,9 @@ export default function Register() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#E78F81] hover:bg-[#d36e62] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] ${
-                isLoading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#E78F81] hover:bg-[#d36e62] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] disabled:opacity-50"
             >
-              {isLoading ? (
-                <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Creating account...
-                </span>
-              ) : (
-                'Create Account'
-              )}
+              {isLoading ? 'Creating account...' : 'Create account'}
             </button>
           </div>
         </form>

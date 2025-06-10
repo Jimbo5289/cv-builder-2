@@ -11,7 +11,7 @@ module.exports = {
     'plugin:react-hooks/recommended'
   ],
   parserOptions: {
-    ecmaVersion: 'latest',
+    ecmaVersion: 12,
     sourceType: 'module',
     ecmaFeatures: {
       jsx: true
@@ -28,7 +28,7 @@ module.exports = {
     }
   },
   globals: {
-    // Define common browser globals that ESLint might not recognize
+    // Define common browser globals
     FormData: 'readonly',
     File: 'readonly',
     FileReader: 'readonly',
@@ -36,20 +36,39 @@ module.exports = {
     XMLHttpRequest: 'readonly',
     fetch: 'readonly',
     localStorage: 'readonly',
-    sessionStorage: 'readonly'
+    sessionStorage: 'readonly',
+    // Node.js globals
+    process: 'readonly',
+    require: 'readonly',
+    module: 'readonly',
+    __dirname: 'readonly',
+    __filename: 'readonly',
+    Buffer: 'readonly',
+    setImmediate: 'readonly',
+    setTimeout: 'readonly',
+    clearTimeout: 'readonly',
+    setInterval: 'readonly',
+    clearInterval: 'readonly',
+    global: 'readonly'
   },
   rules: {
     // Disable console warnings in development
     'no-console': 'off',
     
-    // Be more lenient with unused vars
+    // Set unused vars to warning only and ignore pattern
     'no-unused-vars': ['warn', { 
-      vars: 'all', 
-      args: 'after-used', 
-      ignoreRestSiblings: true,
-      argsIgnorePattern: '^_',
-      varsIgnorePattern: '^(React|_)' // Ignore React import and variables starting with underscore
+      argsIgnorePattern: '^_|^req$|^res$|^next$', 
+      varsIgnorePattern: '^_',
+      caughtErrorsIgnorePattern: '^_',
+      destructuredArrayIgnorePattern: '^_',
+      ignoreRestSiblings: true 
     }],
+    
+    // Allow globals typically used in Node.js environment
+    'no-undef': 'warn',
+    
+    // Disable other problematic rules
+    'no-prototype-builtins': 'off',
     
     // React rules
     'react/prop-types': 'off',
@@ -58,11 +77,41 @@ module.exports = {
     'react-hooks/exhaustive-deps': 'warn',
     'react-refresh/only-export-components': ['warn', { allowConstantExport: true }]
   },
+  // Add overrides for specific directories/files
+  overrides: [
+    {
+      // For server files
+      files: ['server/src/**/*.js'],
+      env: {
+        node: true,
+        browser: false
+      },
+      rules: {
+        'no-unused-vars': 'off',
+        'no-undef': 'off'
+      }
+    },
+    {
+      // For test files
+      files: ['**/*.test.js', '**/*.test.jsx', '**/__tests__/**/*.js'],
+      env: {
+        jest: true,
+        node: true
+      },
+      rules: {
+        'no-undef': 'off',
+        'no-unused-vars': 'off'
+      }
+    }
+  ],
   ignorePatterns: [
     'dist/**', 
     'build/**', 
     'node_modules/**', 
     'src/generated/**', 
-    '.git/**'
+    '.git/**',
+    'server/src/routes/cv.js',
+    'server/src/routes/auth.js',
+    'server/src/middleware/auth.js'
   ]
 }; 

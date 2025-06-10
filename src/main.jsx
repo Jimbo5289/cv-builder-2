@@ -9,6 +9,9 @@ import { suppressCssWarnings } from './utils/cssCompatibility';
 import { bootstrapReact, isReactAvailable } from './utils/reactBootstrap';
 import { getRouterFutureConfig } from './utils/routerConfig';
 import ReactBootstrap from './components/ReactBootstrap';
+import routes from './routes';
+import { validateCurrentRoute } from './utils/redirectToHome';
+import './utils/initializeApp.js'; // Import the initialization code
 
 // Import our fixes for React global definitions and ESLint errors
 import './fix-react-config';
@@ -19,6 +22,24 @@ console.log('Main.jsx loading - Initializing app');
 
 // Suppress known CSS warnings that can't be fixed
 suppressCssWarnings();
+
+// Check if we should attempt to validate the current route before rendering
+try {
+  const currentPath = window.location.pathname;
+  console.log('Initial route check:', currentPath);
+  
+  // Skip for development mode
+  if (window.ENV_VITE_DEV_MODE !== "true" && process.env.NODE_ENV !== 'development') {
+    // Don't redirect from these safe paths
+    const safePaths = ['/', '/login', '/register', '/forgot-password', '/404'];
+    if (!safePaths.includes(currentPath)) {
+      console.log('Validating initial route');
+      validateCurrentRoute(routes);
+    }
+  }
+} catch (error) {
+  console.error('Error during initial route validation:', error);
+}
 
 // Set up global error handler for unhandled errors
 window.addEventListener('error', (event) => {
@@ -105,6 +126,19 @@ const FatalErrorFallback = ({ message }) => {
         </p>
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
           <button 
+            onClick={() => window.location.href = '/'} 
+            style={{
+              backgroundColor: '#3182ce',
+              color: 'white',
+              border: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '0.25rem',
+              cursor: 'pointer'
+            }}
+          >
+            Go to Home
+          </button>
+          <button 
             onClick={() => window.location.reload()} 
             style={{
               backgroundColor: '#3182ce',
@@ -170,6 +204,22 @@ const renderApp = async () => {
     // Get the future flags configuration for React Router
     const routerFutureConfig = getRouterFutureConfig();
     
+    // Add a fallback for router errors
+    window.handleRouterError = (error) => {
+      console.error('Router error caught:', error);
+      // If in development, just log the error
+      if (process.env.NODE_ENV === 'development' || window.ENV_VITE_DEV_MODE === "true") {
+        return;
+      }
+      
+      // In production, redirect to home for serious errors
+      if (error && (error.message.includes('No route matches') || 
+                     error.message.includes('Cannot match any routes'))) {
+        console.warn('Unmatched route, redirecting to home');
+        window.location.href = '/';
+      }
+    };
+    
     // Directly render the app with minimal wrapping
     console.log('Rendering application');
     root.render(
@@ -201,6 +251,11 @@ const renderApp = async () => {
                 ${error?.message || 'The application could not be loaded.'}
               </p>
               <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                <button 
+                  onclick="window.location.href = '/'" 
+                  style="background-color: #3182ce; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.25rem; cursor: pointer;">
+                  Go to Home
+                </button>
                 <button 
                   onclick="window.location.reload()" 
                   style="background-color: #3182ce; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.25rem; cursor: pointer;">

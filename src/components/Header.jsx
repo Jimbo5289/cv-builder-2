@@ -74,7 +74,7 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img src={logo} alt="CV Builder Logo" className="h-10 w-auto" />
-            <span className="ml-2 font-bold text-xl dark:text-white">CVBuilder</span>
+            <span className="ml-2 font-bold text-xl dark:text-white">MyCVBuilder.co.uk</span>
           </Link>
 
           {/* Desktop Navigation */}

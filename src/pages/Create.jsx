@@ -27,14 +27,24 @@ function Create() {
 
   useEffect(() => {
     if (user) {
+      // Initialize form with user data if available
       setFormData(prev => ({
         ...prev,
         personalInfo: {
           ...prev.personalInfo,
           fullName: user.name || '',
           email: user.email || '',
+          // Make sure we have a properly formatted phone number with country code
+          phone: user.phone && user.phone.trim() ? user.phone : '+44 ' // Default to UK if no phone provided
         }
       }));
+      
+      // Log for debugging
+      console.log('Initializing contact form with user data:', {
+        name: user.name,
+        email: user.email,
+        phone: user.phone
+      });
     }
   }, [user]);
 

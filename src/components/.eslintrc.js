@@ -12,6 +12,7 @@ module.exports = {
       argsIgnorePattern: '^_',
       ignoreRestSiblings: true,
       destructuredArrayIgnorePattern: '^_'
-    }]
+    }],
+    'react-refresh/only-export-components': 'off'
   }
 }; 

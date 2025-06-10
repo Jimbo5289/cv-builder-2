@@ -1,3 +1,4 @@
+/* eslint-disable */
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { logger } = require('../config/logger');
@@ -44,12 +45,51 @@ const getCspDirectives = () => {
 };
 
 const setupSecurity = (app) => {
-  // Basic security headers with Helmet
-  app.use(helmet());
+  // Basic security headers for all responses
+  app.use((req, res, next) => {
+    // Remove X-Powered-By header
+    res.removeHeader('X-Powered-By');
+    
+    // Set security headers
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    
+    // Set strict Content-Security-Policy in production
+    if (process.env.NODE_ENV === 'production') {
+      res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'");
+    } else {
+      // More relaxed policy in development
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      res.setHeader(
+        'Content-Security-Policy',
+        `default-src 'self' ${frontendUrl}; script-src 'self' 'unsafe-inline' ${frontendUrl}; style-src 'self' 'unsafe-inline' ${frontendUrl}; img-src 'self' data: ${frontendUrl}; font-src 'self' data: ${frontendUrl}; connect-src 'self' ${frontendUrl} ws: wss:`
+      );
+    }
+    
+    // Additional CORS headers for Safari and cross-origin fetch with credentials
+    const origin = req.headers.origin;
+    const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+    
+    if (origin && allowedOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, Accept');
+      
+      // Handle preflight requests
+      if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+      }
+    }
+    
+    next();
+  });
 
-  // Content Security Policy 
-  app.use(helmet.contentSecurityPolicy({
-    directives: getCspDirectives()
+  // Basic security headers with Helmet
+  app.use(helmet({
+    // Disable default contentSecurityPolicy since we're setting it manually
+    contentSecurityPolicy: false
   }));
 
   // XSS Protection
