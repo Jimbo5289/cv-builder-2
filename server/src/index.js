@@ -91,7 +91,13 @@ if (Sentry) {
 const corsOptions = {
   origin: function(origin, callback) {
     // Allow requests from the frontend in development (or no origin like Postman)
-    const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5174', 'http://127.0.0.1:5174'];
+    const allowedOrigins = [
+      'http://localhost:5173', 
+      'http://127.0.0.1:5173', 
+      'http://localhost:5174', 
+      'http://127.0.0.1:5174',
+      'https://cv-builder-vercel.vercel.app'
+    ];
     const originIsAllowed = !origin || allowedOrigins.includes(origin);
     
     callback(null, originIsAllowed ? origin : false);
@@ -382,8 +388,6 @@ const startServer = async () => {
   try {
     // Create HTTP server
     const server = http.createServer(app);
-    
-    // No socket.io setup - removed to fix crashes
     
     // Add graceful shutdown handler
     const gracefulShutdown = (signal) => {

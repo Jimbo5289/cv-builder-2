@@ -3,8 +3,8 @@ import Cookies from 'js-cookie';
 
 // Create context with default values
 const ServerContext = createContext({
-  serverUrl: 'http://localhost:3005',
-  apiUrl: 'http://localhost:3005',
+  serverUrl: 'https://cv-builder-api.onrender.com',
+  apiUrl: 'https://cv-builder-api.onrender.com',
   updateServerUrl: () => {},
   status: 'connected', // Always start as connected
   isConnected: true,
@@ -15,8 +15,8 @@ const ServerContext = createContext({
   retryConnection: () => {}
 });
 
-// Fixed server URL - no longer trying multiple ports
-const SERVER_URL = 'http://localhost:3005';
+// Update this URL to your production backend URL deployed on Render
+const SERVER_URL = 'https://cv-builder-api.onrender.com';
 
 // Environment detection
 const isDevelopment = () => {
@@ -56,7 +56,7 @@ export const ServerProvider = ({ children }) => {
     setIsReconnecting(true);
     try {
       // Make a simple request to check server status
-      const response = await fetch(`${SERVER_URL}/status`);
+      const response = await fetch(`${SERVER_URL}/api/health`);
       if (response.ok) {
         setStatus('connected');
         setConnectionError(null);
