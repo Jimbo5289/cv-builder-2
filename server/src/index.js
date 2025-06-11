@@ -92,27 +92,20 @@ if (Sentry) {
 // Configure CORS
 const corsOptions = {
   origin: function(origin, callback) {
-    // Allow requests from the frontend in development (or no origin like Postman)
     const allowedOrigins = [
       'http://localhost:5173', 
       'http://127.0.0.1:5173', 
       'http://localhost:5174', 
       'http://127.0.0.1:5174',
       'https://cv-builder-vercel.vercel.app',
-      'https://cv-builder-2.onrender.com',
-      'https://cv-builder-2-frontend.onrender.com'
+      'https://cv-builder-2-hvz356vyk-jimbo5289s-projects.vercel.app'
     ];
-    const originIsAllowed = !origin || allowedOrigins.includes(origin);
-    
-    callback(null, originIsAllowed ? origin : false);
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
-  exposedHeaders: ['Content-Length'],
-  maxAge: 86400, // 24 hours
-  // Add better Safari support
-  optionsSuccessStatus: 200
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
 };
 
 // Configure CORS
@@ -435,4 +428,4 @@ const startServer = async () => {
 // Start the server
 startServer();
 
-module.exports = app; 
+module.exports = app;
