@@ -10,7 +10,7 @@ This document outlines the steps to deploy the CV Builder application to Render.
    - **Name**: cv-builder-2
    - **Environment**: Node
    - **Build Command**: `npm install`
-   - **Start Command**: `cd server && node src/index.js`
+   - **Start Command**: `cd server && npm run render:start`
 
 ## Environment Variables
 
@@ -19,18 +19,31 @@ Set the following environment variables in your Render dashboard:
 ```
 NODE_ENV=production
 PORT=3005
-MOCK_DATABASE=true
+DATABASE_URL=postgresql://username:password@your-aws-rds-instance.amazonaws.com:5432/your_database_name
 FRONTEND_URL=https://cv-builder-2.onrender.com
-SKIP_AUTH_CHECK=false
+JWT_SECRET=your-secure-jwt-secret
+JWT_REFRESH_SECRET=your-secure-refresh-token-secret
 ```
 
-### Optional Database Configuration
+### AWS RDS PostgreSQL Configuration
 
-If you want to use a real PostgreSQL database instead of the mock database:
+For connecting to an AWS RDS PostgreSQL instance:
 
-1. Create a PostgreSQL database in Render
-2. Set `MOCK_DATABASE=false`
-3. Add the `DATABASE_URL` environment variable with your Render PostgreSQL connection string
+1. Ensure your RDS instance allows connections from Render IP addresses
+2. Set the `DATABASE_URL` environment variable with your AWS RDS connection string
+3. The application will automatically configure SSL for AWS RDS connections
+4. If your database requires additional configuration, you can add query parameters to the DATABASE_URL:
+   ```
+   DATABASE_URL=postgresql://username:password@your-aws-rds-instance.amazonaws.com:5432/your_database_name?schema=public&connection_limit=5
+   ```
+
+### Fallback to Mock Database
+
+If the application fails to connect to the PostgreSQL database:
+
+1. It will automatically fall back to using the mock database
+2. You'll see the message "Falling back to mock database client due to connection failure" in the logs
+3. To intentionally use the mock database, set `MOCK_DATABASE=true` and remove `DATABASE_URL`
 
 ## Troubleshooting
 

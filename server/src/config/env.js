@@ -13,17 +13,16 @@ const console_logger = {
 const envPath = path.resolve(__dirname, '../../.env');
 console_logger.info('Looking for .env file at:', envPath);
 
-// First check if the file exists
+// Check if the file exists and load it if it does, but don't show an error if missing
 if (!fs.existsSync(envPath)) {
-    console_logger.error(`ENV file not found at: ${envPath}`);
-    console_logger.warn('Continuing with environment defaults and mock services');
+    console_logger.info(`No .env file found at: ${envPath}, using system environment variables`);
 } else {
     // Load the .env file
     const result = dotenv.config({ path: envPath });
     
     if (result.error) {
-        console_logger.error('Error loading .env file:', result.error.message);
-        console_logger.warn('Continuing with environment defaults and mock services');
+        console_logger.warn('Error loading .env file:', result.error.message);
+        console_logger.info('Continuing with system environment variables');
     } else {
         console_logger.info('Environment file loaded successfully');
     }

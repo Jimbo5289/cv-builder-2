@@ -276,20 +276,23 @@ const initDatabase = async () => {
       }
       
       try {
-        // Configure Prisma client with database URL
-        client = new PrismaClient({
+        // Configure Prisma client with database URL for AWS PostgreSQL
+        const prismaConfig = {
           datasources: {
             db: {
               url: databaseUrl
             }
-          },
-          // Add SSL configuration for AWS RDS connections
-          connection: {
-            ssl: {
-              rejectUnauthorized: true
-            }
           }
-        });
+        };
+        
+        // Check if we need to add SSL for AWS RDS
+        if (process.env.NODE_ENV === 'production' || databaseUrl.includes('amazonaws.com')) {
+          logger.info('Adding SSL configuration for AWS RDS connection');
+          prismaConfig.datasources.db.url = `${databaseUrl}?sslmode=require`;
+        }
+        
+        // Initialize Prisma client
+        client = new PrismaClient(prismaConfig);
         
         logger.info('Initialized Prisma database client');
         

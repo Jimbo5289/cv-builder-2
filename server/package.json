@@ -11,6 +11,8 @@
     "migrate": "node prisma/apply-migration.js",
     "prisma:deploy": "npx prisma migrate deploy",
     "prisma:generate": "npx prisma generate",
+    "render": "node render-setup.js",
+    "render:start": "node pre-start.js",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org=${SENTRY_ORG} --project=cv-builder-server ./dist && sentry-cli sourcemaps upload --org=${SENTRY_ORG} --project=cv-builder-server ./dist"
   },
   "dependencies": {
