@@ -62,7 +62,9 @@ if (process.env.NODE_ENV === 'development' && process.env.SKIP_AUTH_CHECK === 't
 
 // Create Express app
 const app = express();
-// Create HTTP server
+
+// Setup WebSockets with Express
+// Create HTTP server - must be created BEFORE expressWs is called
 const server = http.createServer(app);
 
 // Setup WebSockets with Express
@@ -198,94 +200,14 @@ app.get('/status', authMiddleware, (req, res) => {
     status: 'authenticated',
     user: req.user,
     subscriptionStatus: req.user.subscription?.status || 'none',
-    environment: process.env.NODE_ENV,
-    mockSubscriptionData: process.env.MOCK_SUBSCRIPTION_DATA === 'true'
   });
 });
 
-// Setup WebSocket route
-app.ws('/ws', (ws, req) => {
-  const clientIp = req.socket.remoteAddress;
-  logger.info(`WebSocket connection established from ${clientIp}`);
-  
-  // Send welcome message
-  ws.send(JSON.stringify({
-    type: 'connection',
-    message: 'WebSocket connection established',
-    timestamp: Date.now(),
-    environment: process.env.NODE_ENV || 'development'
-  }));
-  
-  // Handle messages from the client
-  ws.on('message', (message) => {
-    try {
-      const data = JSON.parse(message);
-      logger.debug('WebSocket message received:', data);
-      
-      // Echo the message back with a timestamp
-      ws.send(JSON.stringify({
-        type: 'echo',
-        originalMessage: data,
-        timestamp: Date.now()
-      }));
-    } catch (error) {
-      logger.warn('Invalid WebSocket message format:', message.toString());
-      ws.send(JSON.stringify({
-        type: 'error',
-        message: 'Invalid message format',
-        timestamp: Date.now()
-      }));
-    }
-  });
-  
-  // Handle connection close
-  ws.on('close', () => {
-    logger.info(`WebSocket connection closed from ${clientIp}`);
-  });
-  
-  // Handle errors
-  ws.on('error', (error) => {
-    logger.error('WebSocket error:', { error: error.message });
-  });
-});
-
-// Also add WebSocket endpoint at /api/ws for consistency
-app.ws('/api/ws', (ws, req) => {
-  const clientIp = req.socket.remoteAddress;
-  logger.info(`API WebSocket connection established from ${clientIp}`);
-  
-  // Send welcome message
-  ws.send(JSON.stringify({
-    type: 'connection',
-    message: 'API WebSocket connection established',
-    timestamp: Date.now()
-  }));
-  
-  // Handle messages and other events similarly to the main WebSocket handler
-  ws.on('message', (message) => {
-    try {
-      const data = JSON.parse(message);
-      ws.send(JSON.stringify({
-        type: 'echo',
-        originalMessage: data,
-        timestamp: Date.now()
-      }));
-    } catch (error) {
-      ws.send(JSON.stringify({
-        type: 'error',
-        message: 'Invalid message format'
-      }));
-    }
-  });
-});
-
-// Define the path to the built frontend assets if in production mode
-const DIST_DIR = path.resolve(__dirname, '../../dist');
-
-// Define these variables for use later
-let PORT = process.env.PORT || 3005;
+// Constants for serving frontend
 const NODE_ENV = process.env.NODE_ENV || 'development';
+let PORT = process.env.PORT || 3005;
 let FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const DIST_DIR = path.join(__dirname, '../../dist');
 
 // Support automatic detection of the frontend port (5173 or 5174)
 const checkFrontendPort = async (port) => {
@@ -302,13 +224,16 @@ const checkFrontendPort = async (port) => {
 
 // Check if port 5173 is available, if not use 5174
 (async () => {
-  const port5173Available = await checkFrontendPort(5173);
-  if (port5173Available) {
-    FRONTEND_URL = 'http://localhost:5173';
-  } else {
-    const port5174Available = await checkFrontendPort(5174);
-    if (port5174Available) {
-      FRONTEND_URL = 'http://localhost:5174';
+  // Only run this in development mode
+  if (process.env.NODE_ENV !== 'production') {
+    const port5173Available = await checkFrontendPort(5173);
+    if (port5173Available) {
+      FRONTEND_URL = 'http://localhost:5173';
+    } else {
+      const port5174Available = await checkFrontendPort(5174);
+      if (port5174Available) {
+        FRONTEND_URL = 'http://localhost:5174';
+      }
     }
   }
   logger.info(`Using frontend URL: ${FRONTEND_URL}`);
@@ -386,9 +311,6 @@ app.use('/api/*', (req, res) => {
 // Server startup function with improved error handling
 const startServer = async () => {
   try {
-    // Create HTTP server
-    const server = http.createServer(app);
-    
     // Add graceful shutdown handler
     const gracefulShutdown = (signal) => {
       logger.info(`Server shutting down due to ${signal}`);
@@ -409,7 +331,7 @@ const startServer = async () => {
     // Handle termination signals
     process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-    process.on('UNCAUGHT_EXCEPTION', (err) => {
+    process.on('uncaughtException', (err) => {
       logger.error('Uncaught Exception:', { error: err.message, stack: err.stack });
       gracefulShutdown('UNCAUGHT_EXCEPTION');
     });
@@ -455,26 +377,43 @@ const startServer = async () => {
       });
     };
 
-    // Try to start the server with port checking
-    const portAvailable = await checkPort(PORT);
-    if (!portAvailable) {
-      logger.warn(`Could not free up port ${PORT}. Using alternative port ${PORT + 1}`);
-      PORT = PORT + 1;
-    }
-
-    // Start the server
-    server.listen(PORT, () => {
-      logger.info('Server started successfully:', { 
-        port: PORT,
-        url: `http://localhost:${PORT}`,
-        environment: NODE_ENV,
-        frontendUrl: FRONTEND_URL
+    // In production, don't check port or try to kill processes
+    if (process.env.NODE_ENV === 'production') {
+      // Start the server without port checking in production
+      server.listen(PORT, () => {
+        logger.info('Server started successfully:', { 
+          port: PORT,
+          url: `http://localhost:${PORT}`,
+          environment: NODE_ENV,
+          frontendUrl: FRONTEND_URL
+        });
+        
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`   Access your API at: http://localhost:${PORT}`);
+        console.log(`   WebSocket available at: ws://localhost:${PORT}/ws`);
       });
-      
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`   Access your API at: http://localhost:${PORT}`);
-      console.log(`   WebSocket available at: ws://localhost:${PORT}/ws`);
-    });
+    } else {
+      // Try to start the server with port checking in development
+      const portAvailable = await checkPort(PORT);
+      if (!portAvailable) {
+        logger.warn(`Could not free up port ${PORT}. Using alternative port ${PORT + 1}`);
+        PORT = PORT + 1;
+      }
+
+      // Start the server
+      server.listen(PORT, () => {
+        logger.info('Server started successfully:', { 
+          port: PORT,
+          url: `http://localhost:${PORT}`,
+          environment: NODE_ENV,
+          frontendUrl: FRONTEND_URL
+        });
+        
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`   Access your API at: http://localhost:${PORT}`);
+        console.log(`   WebSocket available at: ws://localhost:${PORT}/ws`);
+      });
+    }
 
     return server;
   } catch (error) {
