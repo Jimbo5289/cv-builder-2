@@ -3,9 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_DATABASE_URL")
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  directUrl    = env("DIRECT_DATABASE_URL")
   relationMode = "prisma"
 }
 
@@ -14,7 +14,6 @@ model User {
   email               String         @unique
   password            String
   name                String
-  phone               String?        // Add phone number field (optional)
   customerId          String?        @unique
   twoFactorSecret     String?
   twoFactorEnabled    Boolean        @default(false)
@@ -26,6 +25,7 @@ model User {
   resetToken          String?
   resetTokenExpiry    DateTime?
   isActive            Boolean        @default(true)
+  phone               String?
   cvs                 CV[]
   payments            Payment[]
   subscriptions       Subscription[]

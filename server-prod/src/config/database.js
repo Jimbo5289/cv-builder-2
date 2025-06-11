@@ -287,7 +287,14 @@ const initDatabase = async () => {
       }
       
       try {
-        client = new PrismaClient();
+        // Initialize Prisma client without the invalid 'connection' property
+        client = new PrismaClient({
+          datasources: {
+            db: {
+              url: process.env.DATABASE_URL
+            }
+          }
+        });
         logger.info('Initialized Prisma database client');
         
         // Test the connection
@@ -311,7 +318,7 @@ const initDatabase = async () => {
   }
 };
 
-// Initialize the database
+// Initialize the database on module load if not already initialized
 if (!client) {
   initDatabase().catch((err) => {
     logger.error('Fatal database initialization error:', err);
