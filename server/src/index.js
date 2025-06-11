@@ -383,17 +383,17 @@ const startServer = async () => {
     // In production, don't check port or try to kill processes
     if (process.env.NODE_ENV === 'production') {
       // Start the server without port checking in production
-      server.listen(PORT, () => {
+      server.listen(PORT, '0.0.0.0', () => {
         logger.info('Server started successfully:', { 
           port: PORT,
-          url: `http://localhost:${PORT}`,
+          url: `http://0.0.0.0:${PORT}`,
           environment: NODE_ENV,
           frontendUrl: FRONTEND_URL
         });
         
         console.log(`🚀 Server running on port ${PORT}`);
-        console.log(`   Access your API at: http://localhost:${PORT}`);
-        console.log(`   WebSocket available at: ws://localhost:${PORT}/ws`);
+        console.log(`   Access your API at: http://0.0.0.0:${PORT}`);
+        console.log(`   WebSocket available at: ws://0.0.0.0:${PORT}/ws`);
       });
     } else {
       // Try to start the server with port checking in development
