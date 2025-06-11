@@ -1,4 +1,6 @@
 /* eslint-disable */
+
+// Import necessary React hooks and libraries
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -11,30 +13,36 @@ import CVPreviewResult from '../components/CVPreviewResult';
 import { findCourseRecommendations } from '../data/courseRecommendations';
 import SubscriptionModal from '../components/SubscriptionModal';
 
+// CvAnalyzeByRole component handles CV analysis based on selected industry and role
 const CvAnalyzeByRole = () => {
-  const [file, setFile] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [error, setError] = useState('');
-  const [analysisResults, setAnalysisResults] = useState(null);
-  const [selectedIndustry, setSelectedIndustry] = useState('');
-  const [selectedRole, setSelectedRole] = useState('');
-  const [useGenericScope, setUseGenericScope] = useState(true);
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  
+  // State variables for managing file uploads, analysis results, and UI states
+  const [file, setFile] = useState(null); // Uploaded CV file
+  const [isDragging, setIsDragging] = useState(false); // Dragging state for CV file
+  const [isAnalyzing, setIsAnalyzing] = useState(false); // Analysis progress state
+  const [error, setError] = useState(''); // Error message state
+  const [analysisResults, setAnalysisResults] = useState(null); // Results of CV analysis
+  const [selectedIndustry, setSelectedIndustry] = useState(''); // Selected industry for analysis
+  const [selectedRole, setSelectedRole] = useState(''); // Selected role for analysis
+  const [useGenericScope, setUseGenericScope] = useState(true); // Whether to use generic analysis scope
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false); // State for subscription modal visibility
+
   // Add progress step state
-  const [progressStep, setProgressStep] = useState(1);
-  
+  const [progressStep, setProgressStep] = useState(1); // Current step in analysis progress
+
+  // Context hooks for authentication and server connection
   const { getAuthHeader, isAuthenticated } = useAuth();
   const { apiUrl, isConnected } = useServer();
+
+  // React Router hooks for navigation and location
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Log the API URL on component mount
   useEffect(() => {
     console.log('CvAnalyzeByRole: Using API URL:', apiUrl);
   }, [apiUrl]);
 
+  // Callback functions for drag-and-drop functionality
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -57,6 +65,7 @@ const CvAnalyzeByRole = () => {
     validateAndSetFile(selectedFile);
   }, []);
 
+  // Validate and set the uploaded file
   const validateAndSetFile = (file) => {
     setError('');
     setAnalysisResults(null);
@@ -78,6 +87,7 @@ const CvAnalyzeByRole = () => {
     setFile(file);
   };
 
+  // Check if the user has an active subscription
   const checkSubscription = useCallback(async () => {
     // In development mode, always return true for testing
     if (import.meta.env.DEV) {
@@ -110,6 +120,7 @@ const CvAnalyzeByRole = () => {
     }
   }, [apiUrl, isConnected, getAuthHeader, setError]);
 
+  // Analyze the uploaded CV
   const analyzeCV = useCallback(async () => {
     if (!file) {
       setError('Please upload a CV file first');
@@ -563,4 +574,4 @@ const CvAnalyzeByRole = () => {
   );
 };
 
-export default CvAnalyzeByRole; 
+export default CvAnalyzeByRole;

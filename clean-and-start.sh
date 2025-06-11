@@ -1,36 +1,47 @@
 #!/bin/bash
 
+# Script to clean the environment and start the CV Builder application
+# This script stops all running processes, verifies port availability, checks file integrity,
+# and starts the backend and frontend servers.
+
 echo "🧹 CV Builder - Clean Environment and Start"
 echo "==========================================="
 
-# Function to check for port availability
+# Function to check if a port is available
+# Arguments:
+#   $1 - Port number to check
 check_port() {
   PORT=$1
   lsof -i:$PORT >/dev/null 2>&1
   if [ $? -eq 0 ]; then
+    # Port is in use
     echo "❌ Port $PORT is still in use after cleanup."
     echo "   Run this command to see what's using it: lsof -i:$PORT"
     return 1
   else
+    # Port is available
     echo "✅ Port $PORT is available"
     return 0
   fi
 }
 
-# Step 1: Kill all processes
+# Step 1: Stop all running processes
+# This step stops processes running on specific ports and by specific names.
 echo "⏱️  Step 1/5: Stopping all processes..."
+
 # Stop processes by port
 for PORT in 3005 3006 3007 3008 3009 5173 5174 5175 5176 5177 5178 5179 5180 5181 5182; do
   PIDS=$(lsof -ti:$PORT 2>/dev/null)
   if [ ! -z "$PIDS" ]; then
     echo "   Stopping processes on port $PORT: $PIDS"
-    kill -15 $PIDS 2>/dev/null || true
+    kill -15 $PIDS 2>/dev/null || true  # Attempt graceful termination
     sleep 1
-    kill -9 $PIDS 2>/dev/null || true
+    kill -9 $PIDS 2>/dev/null || true  # Force termination if necessary
   fi
 done
 
 # Stop processes by name
+# This stops processes that match specific names, such as Node.js or Vite.
 echo "   Stopping processes by name..."
 pkill -f "node src/index.js" 2>/dev/null || true
 pkill -f "vite" 2>/dev/null || true
@@ -38,12 +49,14 @@ pkill -f "nodemon" 2>/dev/null || true
 pkill -f "npm run dev" 2>/dev/null || true
 
 # Remove PID files if they exist
+# PID files are used to track running processes; removing them ensures a clean state.
 rm -f logs/backend.pid 2>/dev/null || true
 rm -f logs/frontend.pid 2>/dev/null || true
 
 echo "✅ Process cleanup complete"
 
 # Step 2: Verify port availability
+# This step checks if the primary ports are available for use.
 echo "⏱️  Step 2/5: Verifying port availability..."
 sleep 2 # Give OS time to release ports
 
@@ -57,6 +70,7 @@ if [ "$PRIMARY_PORTS_OK" = false ]; then
 fi
 
 # Step 3: Verify file integrity
+# This step ensures that critical files required for the application are present.
 echo "⏱️  Step 3/5: Verifying file integrity..."
 
 # Check for localStorage.js
@@ -209,6 +223,7 @@ EOL
 fi
 
 # Fix ESLint config
+# This step checks and fixes invalid configurations in the ESLint setup.
 if grep -q "jsx: true," eslint.config.js; then
   echo "⚠️  Found invalid 'jsx: true' property in eslint.config.js"
   echo "   Fixing the ESLint configuration..."
@@ -220,7 +235,8 @@ fi
 
 echo "✅ File integrity check complete"
 
-# Step 4: Start the backend
+# Step 4: Start the backend server
+# This step starts the backend server with specific environment variables.
 echo "⏱️  Step 4/5: Starting backend server..."
 cd server || { echo "❌ Server directory not found!"; exit 1; }
 
@@ -245,7 +261,8 @@ else
   echo "   You may need to restart this script."
 fi
 
-# Step 5: Start the frontend
+# Step 5: Start the frontend server
+# This step starts the frontend server with specific environment variables.
 echo "⏱️  Step 5/5: Starting frontend server..."
 echo "   Starting frontend server on port 5173..."
 VITE_DEV_MODE=true VITE_MOCK_SUBSCRIPTION_DATA=true npm run dev -- --port 5173 --host localhost --force > logs/frontend.log 2>&1 &
@@ -264,6 +281,7 @@ else
 fi
 
 # Final message
+# Display the status and URLs for the backend and frontend servers.
 echo ""
 echo "✨ CV Builder should now be running!"
 echo "==============================================="
@@ -279,4 +297,4 @@ echo "   Or restart with this script: ./clean-and-start.sh"
 echo ""
 echo "💡 If you encounter any issues, check the log files"
 echo "   and try running the script again."
-echo "" 
+echo ""

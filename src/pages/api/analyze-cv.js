@@ -1,3 +1,4 @@
+// Import necessary libraries for handling file uploads and AI integration
 import { Configuration, OpenAIApi } from 'openai';
 import formidable from 'formidable';
 import fs from 'fs';
@@ -7,37 +8,50 @@ import mammoth from 'mammoth';
 // Disable the default body parser to handle form data
 export const config = {
   api: {
-    bodyParser: false,
+    bodyParser: false, // Required for handling file uploads
   },
 };
 
+// OpenAI API configuration
 const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY, // API key for OpenAI
 });
 const openai = new OpenAIApi(configuration);
 
-// Function to extract text from PDF
+// Function to extract text from PDF files
+// Arguments:
+//   filePath - Path to the PDF file
+// Returns:
+//   Extracted text from the PDF
 async function extractTextFromPDF(filePath) {
-  const dataBuffer = fs.readFileSync(filePath);
-  const data = await pdf(dataBuffer);
-  return data.text;
+  const dataBuffer = fs.readFileSync(filePath); // Read file as buffer
+  const data = await pdf(dataBuffer); // Parse PDF data
+  return data.text; // Return extracted text
 }
 
-// Function to extract text from DOCX
+// Function to extract text from DOCX files
+// Arguments:
+//   filePath - Path to the DOCX file
+// Returns:
+//   Extracted text from the DOCX
 async function extractTextFromDOCX(filePath) {
-  const buffer = fs.readFileSync(filePath);
-  const result = await mammoth.extractRawText({ buffer });
-  return result.value;
+  const buffer = fs.readFileSync(filePath); // Read file as buffer
+  const result = await mammoth.extractRawText({ buffer }); // Extract text using Mammoth
+  return result.value; // Return extracted text
 }
 
+// API handler for analyzing CVs
+// Handles file uploads and integrates with OpenAI for analysis
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
+    // Reject non-POST requests
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const form = formidable();
+    const form = formidable(); // Initialize formidable for file parsing
     
+    // Parse form data to extract fields and files
     const [fields, files] = await new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
         if (err) reject(err);
@@ -45,8 +59,9 @@ export default async function handler(req, res) {
       });
     });
 
-    const file = files.file;
+    const file = files.file; // Extract uploaded file
     if (!file) {
+      // Return error if no file is uploaded
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
@@ -89,7 +104,8 @@ export default async function handler(req, res) {
 
     return res.status(200).json(analysisResult);
   } catch (error) {
-    console.error('Error processing CV:', error);
-    return res.status(500).json({ error: 'Error processing CV' });
+    // Handle errors during file parsing or analysis
+    console.error('Error processing request:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
-} 
+}

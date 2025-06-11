@@ -1,6 +1,8 @@
 /* eslint-disable */
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
+
+// Import necessary React hooks and libraries
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -15,34 +17,39 @@ import { findCourseRecommendations } from '../data/courseRecommendations';
 // Global objects that exist in browser environment
 /* global FormData, File */
 
+// CvAnalyze component handles CV analysis functionality
 const CvAnalyze = () => {
-  const [file, setFile] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState(null);
-  const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('upload'); // 'upload' or 'paste'
-  const [cvText, setCvText] = useState('');
+  // State variables for managing file uploads, analysis results, and UI states
+  const [file, setFile] = useState(null); // Uploaded CV file
+  const [isDragging, setIsDragging] = useState(false); // Dragging state for CV file
+  const [isAnalyzing, setIsAnalyzing] = useState(false); // Analysis progress state
+  const [analysisResults, setAnalysisResults] = useState(null); // Results of CV analysis
+  const [error, setError] = useState(''); // Error message state
+  const [activeTab, setActiveTab] = useState('upload'); // Active tab for CV input ('upload' or 'paste')
+  const [cvText, setCvText] = useState(''); // Text of CV for analysis
 
+  // Context hooks for authentication and server connection
   const { isAuthenticated, user, getAuthHeader } = useAuth();
   const { apiUrl, isConnected } = useServer();
+
+  // React Router hooks for navigation and location
   const navigate = useNavigate();
   const location = useLocation();
 
   // Add progress step state
-  const [progressStep, setProgressStep] = useState(1);
+  const [progressStep, setProgressStep] = useState(1); // Current step in analysis progress
 
-  // Check if coming from home page
+  // Check if user navigated from the home page
   const comingFromHome = location.state?.fromHome;
 
-  // Get environment variables
+  // Environment variables for feature toggles
   const mockSubscription = window.ENV_VITE_MOCK_SUBSCRIPTION_DATA === "true";
   const premiumEnabled = window.ENV_VITE_PREMIUM_FEATURES_ENABLED === "true";
   const devMode = window.ENV_VITE_DEV_MODE === "true";
   const bypassPayment = window.ENV_VITE_BYPASS_PAYMENT === "true";
 
   useEffect(() => {
-    // Check if user is coming from home page and prompt about premium feature
+    // Prompt user about premium features if coming from home page
     if (comingFromHome) {
       setTimeout(() => {
         checkSubscription();
@@ -476,4 +483,4 @@ const CvAnalyze = () => {
   );
 };
 
-export default CvAnalyze; 
+export default CvAnalyze;
