@@ -260,7 +260,14 @@ const initDatabase = async () => {
     
     // Only create a real client if not already initialized
     if (!client) {
-      if (!process.env.DATABASE_URL) {
+      // Get database URL from environment or use a default for local development
+      const databaseUrl = process.env.DATABASE_URL || (
+        process.env.NODE_ENV === 'production' 
+          ? null  // Don't use default in production
+          : 'postgresql://postgres:postgres@localhost:5432/cvbuilder'
+      );
+      
+      if (!databaseUrl) {
         logger.error('DATABASE_URL not set. Check your environment variables.');
         // Return a mock client as fallback
         client = new MockDatabase();
@@ -269,7 +276,21 @@ const initDatabase = async () => {
       }
       
       try {
-        client = new PrismaClient();
+        // Configure Prisma client with database URL
+        client = new PrismaClient({
+          datasources: {
+            db: {
+              url: databaseUrl
+            }
+          },
+          // Add SSL configuration for AWS RDS connections
+          connection: {
+            ssl: {
+              rejectUnauthorized: true
+            }
+          }
+        });
+        
         logger.info('Initialized Prisma database client');
         
         // Test the connection

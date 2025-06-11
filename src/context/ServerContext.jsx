@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import api, { API_BASE_URL } from '../utils/api';
 
 // Create context with default values
 const ServerContext = createContext({
-  serverUrl: 'https://cv-builder-api.onrender.com',
-  apiUrl: 'https://cv-builder-api.onrender.com',
+  serverUrl: API_BASE_URL,
+  apiUrl: API_BASE_URL,
   updateServerUrl: () => {},
   status: 'connected', // Always start as connected
   isConnected: true,
@@ -14,9 +15,6 @@ const ServerContext = createContext({
   lastChecked: null,
   retryConnection: () => {}
 });
-
-// Update this URL to your production backend URL deployed on Render
-const SERVER_URL = 'https://cv-builder-api.onrender.com';
 
 // Environment detection
 const isDevelopment = () => {
@@ -29,8 +27,8 @@ const isDevelopment = () => {
 };
 
 export const ServerProvider = ({ children }) => {
-  // Always use the fixed server URL
-  const [serverUrl] = useState(SERVER_URL);
+  // Use API_BASE_URL from our api.js configuration
+  const [serverUrl] = useState(API_BASE_URL);
   
   // In development mode, always consider connected
   const [status, setStatus] = useState(isDevelopment() ? 'connected' : 'checking');
@@ -41,10 +39,10 @@ export const ServerProvider = ({ children }) => {
   
   // Simple no-op function since we don't allow changing the server URL
   const updateServerUrl = () => {
-    console.log('Server URL is fixed to', SERVER_URL);
+    console.log('Server URL is fixed to', API_BASE_URL);
   };
   
-  // Retry connection function - simplified for development
+  // Retry connection function using our configured axios instance
   const retryConnection = async () => {
     if (isDevelopment()) {
       // In development, just pretend it's connected
@@ -55,9 +53,9 @@ export const ServerProvider = ({ children }) => {
     
     setIsReconnecting(true);
     try {
-      // Make a simple request to check server status
-      const response = await fetch(`${SERVER_URL}/api/health`);
-      if (response.ok) {
+      // Make a simple request to check server status using our configured api
+      const response = await api.get('/health');
+      if (response.status === 200) {
         setStatus('connected');
         setConnectionError(null);
       } else {

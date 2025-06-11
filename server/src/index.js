@@ -98,7 +98,9 @@ const corsOptions = {
       'http://127.0.0.1:5173', 
       'http://localhost:5174', 
       'http://127.0.0.1:5174',
-      'https://cv-builder-vercel.vercel.app'
+      'https://cv-builder-vercel.vercel.app',
+      'https://cv-builder-2.onrender.com',
+      'https://cv-builder-2-frontend.onrender.com'
     ];
     const originIsAllowed = !origin || allowedOrigins.includes(origin);
     
@@ -235,6 +237,14 @@ const checkFrontendPort = async (port) => {
         FRONTEND_URL = 'http://localhost:5174';
       }
     }
+  } else if (process.env.FRONTEND_URL) {
+    // In production, use the environment variable
+    FRONTEND_URL = process.env.FRONTEND_URL;
+    logger.info(`Using production frontend URL from environment: ${FRONTEND_URL}`);
+  } else {
+    // Default production URL if not specified
+    FRONTEND_URL = 'https://cv-builder-2.onrender.com';
+    logger.info(`Using default production frontend URL: ${FRONTEND_URL}`);
   }
   logger.info(`Using frontend URL: ${FRONTEND_URL}`);
 })();
