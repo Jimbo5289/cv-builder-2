@@ -10,24 +10,20 @@ process.env.JWT_SECRET = process.env.JWT_SECRET || 'secure_jwt_secret_for_produc
 process.env.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'secure_refresh_token_secret_for_production';
 process.env.FRONTEND_URL = process.env.FRONTEND_URL || 'https://cv-builder-2-git-main-jimbo5289s-projects.vercel.app';
 
-// Check if we have a DATABASE_URL
-if (process.env.DATABASE_URL) {
-  console.log('[info] : DATABASE_URL found, will attempt to connect to PostgreSQL database');
-  
-  // If using AWS RDS, ensure we have SSL mode set
-  if (process.env.DATABASE_URL.includes('amazonaws.com') && !process.env.DATABASE_URL.includes('sslmode=')) {
-    console.log('[info] : AWS RDS detected, ensuring SSL mode is configured');
-    // Don't modify the original environment variable as it might cause issues with Prisma
-  } else {
-    console.log('[info] : Using provided DATABASE_URL configuration');
-  }
-  
-  // Disable mock database when we have a real database URL
+// Set DATABASE_URL if not already set
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = 'postgresql://postgres:reqvip-ciftag-2Qizgo@cvbuilder-db.c1augguy6rx8.eu-central-1.rds.amazonaws.com:5432/cvbuilder-db?sslmode=require';
+  console.log('[info] : Setting DATABASE_URL from pre-start script');
+}
+
+// If using AWS RDS, ensure we're not using mock database
+if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('amazonaws.com')) {
+  console.log('[info] : AWS RDS database detected, disabling mock database');
   process.env.MOCK_DATABASE = 'false';
 } else {
-  // No database URL, enable mock database
+  // No valid database URL, enable mock database
+  console.log('[info] : No valid DATABASE_URL found, enabling mock database');
   process.env.MOCK_DATABASE = 'true';
-  console.log('[info] : No DATABASE_URL found, enabling mock database');
   
   // Ensure the mock database directory exists
   const fs = require('fs');

@@ -285,11 +285,13 @@ const initDatabase = async () => {
           }
         };
         
-        // Check if we need to add SSL for AWS RDS
-        if (process.env.NODE_ENV === 'production' || databaseUrl.includes('amazonaws.com')) {
-          logger.info('Adding SSL configuration for AWS RDS connection');
+        // If the URL doesn't already include sslmode=require, add it for AWS RDS
+        if (databaseUrl.includes('amazonaws.com') && !databaseUrl.includes('sslmode=')) {
+          logger.info('Adding sslmode=require for AWS RDS connection');
           prismaConfig.datasources.db.url = `${databaseUrl}?sslmode=require`;
         }
+        
+        logger.info('Attempting to connect to database with URL: ' + databaseUrl.replace(/postgresql:\/\/[^:]+:[^@]+@/, 'postgresql://[username]:[password]@'));
         
         // Initialize Prisma client
         client = new PrismaClient(prismaConfig);
