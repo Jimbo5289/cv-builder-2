@@ -13,19 +13,13 @@ const contactRoutes = require('./routes/contact');
 const paymentRoutes = require('./routes/payment');
 const subscriptionRoutes = require('./routes/subscription');
 const twoFactorRoutes = require('./routes/twoFactor');
-const { stripe } = require('./config/stripe');
 const { getSentry } = require('./config/sentry');
 const authMiddleware = require('./middleware/auth');
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
-const expressWs = require('express-ws');
 const net = require('net');
 const { exec } = require('child_process');
-const axios = require('axios');
-const userRoutes = require('./routes/users');
-const healthRoutes = require('./routes/health');
-const adminRoutes = require('./routes/admin');
 
 // Try to import fix-database, but don't fail if it's not available
 let ensureDevUser;
@@ -72,14 +66,19 @@ const app = express();
 // Create HTTP server - must be created BEFORE expressWs is called
 const server = http.createServer(app);
 
-// Setup WebSockets with Express
-const wsInstance = expressWs(app, server, {
-  wsOptions: {
-    // Keep connections alive with ping/pong
-    perMessageDeflate: false,
-    clientTracking: true
-  }
-});
+// Dynamic import of express-ws
+(async () => {
+  const expressWs = await import('express-ws');
+
+  // Setup WebSockets with Express
+  expressWs(app, server, {
+    wsOptions: {
+      // Keep connections alive with ping/pong
+      perMessageDeflate: false,
+      clientTracking: true
+    }
+  });
+})();
 
 // Initialize Sentry request handler (must be the first middleware)
 if (Sentry) {
@@ -94,9 +93,9 @@ if (Sentry) {
   // app.use(Sentry.Handlers.tracingHandler());
 }
 
-// Create the CORS middleware with enhanced configuration
+// Enhance CORS middleware to handle preflight requests correctly
 const corsMiddleware = createCorsMiddleware({
-  origin: 'https://cv-builder-2-ci2wkzjj-jimbo5289s-projects.vercel.app',
+  origin: 'https://cv-builder-2-5flh53dlm-jimbo5289s-projects.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
   credentials: true
@@ -108,39 +107,26 @@ app.use(corsMiddleware);
 // Add dedicated preflight handler for better OPTIONS request handling
 app.options('*', handlePreflight);
 
-// Add special endpoint for CORS testing
-app.get('/api/test-cors', (req, res) => {
-  // Add CORS headers
+// Add CORS headers to error responses
+app.use((err, req, res, next) => {
   addCorsHeaders(req, res);
-  
-  res.json({
-    success: true,
-    message: 'CORS is working correctly',
-    origin: req.headers.origin || 'No origin provided',
-    time: new Date().toISOString(),
-    headers: {
-      received: {
-        origin: req.headers.origin,
-        host: req.headers.host
-      },
-      sent: {
-        'Access-Control-Allow-Origin': res.getHeader('Access-Control-Allow-Origin'),
-        'Access-Control-Allow-Credentials': res.getHeader('Access-Control-Allow-Credentials'),
-        'Access-Control-Allow-Methods': res.getHeader('Access-Control-Allow-Methods')
-      }
-    }
-  });
+  next(err);
 });
 
 // Security setup (after CORS)
 setupSecurity(app);
 
-// Log services initialization
-if (stripe) {
-  logger.info('Stripe service initialized successfully');
-} else {
-  logger.warn('Stripe service not initialized - payment features will be limited');
-}
+// Dynamic import of stripe
+(async () => {
+  const stripe = await import('./config/stripe');
+
+  // Log services initialization
+  if (stripe) {
+    logger.info('Stripe service initialized successfully');
+  } else {
+    logger.warn('Stripe service not initialized - payment features will be limited');
+  }
+})();
 
 // Set global middleware options
 app.use((req, res, next) => {
