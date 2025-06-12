@@ -130,4 +130,4 @@ export const testApiConnection = async () => {
 
 // Export both the configured axios instance and the API endpoints
 export default api;
-export { apiConfig, API_BASE_URL, testApiConnection }; 
+export { apiConfig, API_BASE_URL }; 
