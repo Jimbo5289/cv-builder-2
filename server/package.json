@@ -15,10 +15,11 @@
     "render:start": "node pre-start.js",
     "render:direct": "PORT=$PORT node src/index.js",
     "render:test-rds": "node test-rds-render.js",
+    "render:debug": "node debug-render.js",
     "debug:port": "node debug-port.js",
     "debug:rds": "node debug-rds.js",
-    "render:debug": "node debug-port.js",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org=${SENTRY_ORG} --project=cv-builder-server ./dist && sentry-cli sourcemaps upload --org=${SENTRY_ORG} --project=cv-builder-server ./dist"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org=${SENTRY_ORG} --project=cv-builder-server ./dist && sentry-cli sourcemaps upload --org=${SENTRY_ORG} --project=cv-builder-server ./dist",
+    "update-render-ips": "node scripts/update-render-ips.js"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -55,7 +56,8 @@
     "stripe": "^14.25.0",
     "winston": "^3.11.0",
     "ws": "^8.18.2",
-    "zod": "^3.24.4"
+    "zod": "^3.24.4",
+    "@aws-sdk/client-ec2": "^3.536.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",

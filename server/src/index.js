@@ -22,6 +22,9 @@ const expressWs = require('express-ws');
 const net = require('net');
 const { exec } = require('child_process');
 const axios = require('axios');
+const userRoutes = require('./routes/users');
+const healthRoutes = require('./routes/health');
+const adminRoutes = require('./routes/admin');
 
 // Try to import fix-database, but don't fail if it's not available
 let ensureDevUser;
@@ -184,12 +187,15 @@ app.use(express.urlencoded({
 // Now mount routes after body parsers are set up
 app.use('/api/cv', cvRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/users', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/2fa', twoFactorRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/health', healthRoutes);
+app.use('/api/webhooks', webhookRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Webhook route must come after raw body parser
 app.use('/api/webhook/stripe', webhookRoutes);

@@ -4,27 +4,35 @@
 echo "==================================================="
 echo "STARTING CV BUILDER SERVER ON RENDER"
 echo "==================================================="
+
+# Print current directory and versions
 echo "Current directory: $(pwd)"
 echo "Node version: $(node -v)"
 echo "NPM version: $(npm -v)"
 
-# First, run the RDS connection test
 echo "==================================================="
 echo "RUNNING RDS CONNECTION TEST"
 echo "==================================================="
-node test-rds-render.js
 
-# Check if we should run in debug mode
-if [ "$DEBUG" = "true" ]; then
-  echo "==================================================="
-  echo "STARTING IN DEBUG MODE"
-  echo "==================================================="
-  node debug-render.js
+# Run the RDS connection test first
+npm run render:test-rds
+
+echo "==================================================="
+echo "UPDATING AWS RDS SECURITY GROUP WITH RENDER IP"
+echo "==================================================="
+
+# Run the IP update script if AWS credentials are available
+if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ] && [ -n "$AWS_RDS_SECURITY_GROUP_ID" ]; then
+  echo "AWS credentials found, updating security group..."
+  npm run update-render-ips
 else
-  # Start the server directly without using npm run render:direct
-  # This ensures we bypass any issues with how Render interprets the command
-  echo "==================================================="
-  echo "STARTING SERVER DIRECTLY"
-  echo "==================================================="
-  PORT=$PORT node src/index.js
-fi 
+  echo "AWS credentials not set, skipping security group update."
+  echo "Make sure you've added the current Render IP to your AWS RDS security group."
+fi
+
+echo "==================================================="
+echo "STARTING SERVER DIRECTLY"
+echo "==================================================="
+
+# Start the server directly
+node src/index.js 
