@@ -181,12 +181,30 @@ app.post('/api/contact/test', (req, res) => {
 
 // Add a /health endpoint for frontend connection checks
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: Date.now() });
+  // Enhanced response with more information for debugging
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: Date.now(),
+    environment: process.env.NODE_ENV || 'unknown',
+    port: PORT,
+    render: process.env.RENDER ? true : false,
+    server: 'cv-builder-api',
+    version: '1.0.0'
+  });
 });
 
 // Also add an /api/health endpoint for consistency
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
+  // Enhanced response with more information for debugging
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: Date.now(),
+    environment: process.env.NODE_ENV || 'unknown',
+    port: PORT,
+    render: process.env.RENDER ? true : false,
+    server: 'cv-builder-api',
+    version: '1.0.0'
+  });
 });
 
 // Status endpoint with auth for testing authentication
@@ -381,22 +399,38 @@ const startServer = async () => {
     };
 
     // In production, don't check port or try to kill processes
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
       // Ensure we're using the PORT from environment variable
       PORT = process.env.PORT || PORT;
       
-      // Start the server without port checking in production
-      server.listen(PORT, '0.0.0.0', () => {
+      // Make sure PORT is treated as a number
+      const portNum = parseInt(PORT, 10);
+      
+      // Log special for Render detection
+      if (process.env.RENDER) {
+        logger.info(`Starting server on Render with PORT=${portNum} and host=0.0.0.0`);
+        console.log(`Starting server on Render with PORT=${portNum} and host=0.0.0.0`);
+      }
+      
+      // Start the server without port checking in production, bind to all interfaces (0.0.0.0)
+      server.listen(portNum, '0.0.0.0', () => {
         logger.info('Server started successfully:', { 
-          port: PORT,
-          url: `http://0.0.0.0:${PORT}`,
+          port: portNum,
+          url: `http://0.0.0.0:${portNum}`,
           environment: NODE_ENV,
-          frontendUrl: FRONTEND_URL
+          frontendUrl: FRONTEND_URL,
+          render: process.env.RENDER ? 'true' : 'false'
         });
         
-        console.log(`🚀 Server running on port ${PORT}`);
-        console.log(`   Access your API at: http://0.0.0.0:${PORT}`);
-        console.log(`   WebSocket available at: ws://0.0.0.0:${PORT}/ws`);
+        console.log(`🚀 Server running on port ${portNum}`);
+        console.log(`   Access your API at: http://0.0.0.0:${portNum}`);
+        console.log(`   WebSocket available at: ws://0.0.0.0:${portNum}/ws`);
+        
+        // Add a timeout to log again for Render detection
+        setTimeout(() => {
+          logger.info(`Server still running on port ${portNum} (delayed log for Render detection)`);
+          console.log(`Server still running on port ${portNum} (delayed log for Render detection)`);
+        }, 2000);
       });
     } else {
       // Try to start the server with port checking in development

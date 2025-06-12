@@ -13,6 +13,8 @@
     "prisma:generate": "npx prisma generate",
     "render": "node render-setup.js",
     "render:start": "node pre-start.js",
+    "debug:port": "node debug-port.js",
+    "render:debug": "node debug-port.js",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org=${SENTRY_ORG} --project=cv-builder-server ./dist && sentry-cli sourcemaps upload --org=${SENTRY_ORG} --project=cv-builder-server ./dist"
   },
   "dependencies": {

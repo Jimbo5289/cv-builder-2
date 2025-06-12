@@ -6,6 +6,7 @@
 // Ensure we have the required environment variables
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 process.env.PORT = process.env.PORT || '3005';
+console.log('[info] : Using PORT:', process.env.PORT);
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'secure_jwt_secret_for_production';
 process.env.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'secure_refresh_token_secret_for_production';
 process.env.FRONTEND_URL = process.env.FRONTEND_URL || 'https://cv-builder-2-git-main-jimbo5289s-projects.vercel.app';
@@ -33,6 +34,13 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('amazonaws.com
     console.log('[info] : Creating data directory for mock database');
     fs.mkdirSync(dataDir, { recursive: true });
   }
+}
+
+// Additional checks for Render deployment
+console.log('[info] : Checking for Render deployment...');
+if (process.env.RENDER) {
+  console.log('[info] : Running on Render, ensuring correct port configuration');
+  console.log('[info] : PORT environment variable is set to:', process.env.PORT);
 }
 
 // Start the actual server
