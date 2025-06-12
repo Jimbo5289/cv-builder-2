@@ -17,21 +17,56 @@ if (!process.env.DATABASE_URL) {
   console.log('[info] : Setting DATABASE_URL from pre-start script');
 }
 
-// If using AWS RDS, ensure we're not using mock database
+// If using AWS RDS, ensure we have proper configuration
 if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('amazonaws.com')) {
-  console.log('[info] : AWS RDS database detected, disabling mock database');
+  console.log('[info] : AWS RDS database detected');
   process.env.MOCK_DATABASE = 'false';
   
-  // Enable mock database fallback for user registration on Render while DB connection issues exist
+  // Disable mock database fallback - we want to fix the real issue
+  process.env.ALLOW_MOCK_DB_FALLBACK = 'false';
+  
+  // Log the database connection info (with masked password)
+  const dbUrl = process.env.DATABASE_URL;
+  const maskedUrl = dbUrl.replace(/\/\/([^:]+):([^@]+)@/, '//[username]:[password]@');
+  console.log('[info] : Using database URL:', maskedUrl);
+  
+  // Extract hostname from DATABASE_URL for IP lookup
+  try {
+    const urlMatch = dbUrl.match(/\/\/[^:]+:[^@]+@([^:]+):/);
+    if (urlMatch && urlMatch[1]) {
+      const hostname = urlMatch[1];
+      console.log('[info] : Database hostname:', hostname);
+    }
+  } catch (err) {
+    console.error('[error] : Failed to parse database URL:', err.message);
+  }
+  
+  // If running on Render, provide more detailed connection info
   if (process.env.RENDER) {
-    console.log('[info] : Running on Render with AWS RDS. Enabling mock database fallback for registration');
-    process.env.ALLOW_MOCK_DB_FALLBACK = 'true';
+    console.log('[info] : Running on Render - ensuring AWS RDS is accessible');
+    console.log('[info] : Please check that security groups allow connections from Render IP: 52.59.103.54');
+    console.log('[info] : And other Render IPs: 35.180.39.82, 35.181.114.243, 35.181.155.97');
+    
+    // Try to determine the current IP address
+    try {
+      const { execSync } = require('child_process');
+      console.log('[info] : Attempting to determine outbound IP address...');
+      
+      const ipCommand = `curl -s https://api.ipify.org || curl -s https://ifconfig.me`;
+      const ip = execSync(ipCommand).toString().trim();
+      
+      if (ip) {
+        console.log('[info] : Current outbound IP address appears to be:', ip);
+        console.log('[info] : Please add this IP to your AWS RDS security group if connection fails');
+      }
+    } catch (err) {
+      console.error('[error] : Could not determine IP address:', err.message);
+    }
   }
 } else {
   // No valid database URL, enable mock database
   console.log('[info] : No valid DATABASE_URL found, enabling mock database');
   process.env.MOCK_DATABASE = 'true';
-  process.env.ALLOW_MOCK_DB_FALLBACK = 'true';
   
   // Ensure the mock database directory exists
   const fs = require('fs');
@@ -48,7 +83,6 @@ console.log('[info] : Checking for Render deployment...');
 if (process.env.RENDER) {
   console.log('[info] : Running on Render, ensuring correct port configuration');
   console.log('[info] : PORT environment variable is set to:', process.env.PORT);
-  console.log('[info] : ALLOW_MOCK_DB_FALLBACK is set to:', process.env.ALLOW_MOCK_DB_FALLBACK);
 }
 
 // Start the actual server

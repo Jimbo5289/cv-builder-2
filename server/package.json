@@ -15,6 +15,7 @@
     "render:start": "node pre-start.js",
     "render:direct": "PORT=$PORT node src/index.js",
     "debug:port": "node debug-port.js",
+    "debug:rds": "node debug-rds.js",
     "render:debug": "node debug-port.js",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org=${SENTRY_ORG} --project=cv-builder-server ./dist && sentry-cli sourcemaps upload --org=${SENTRY_ORG} --project=cv-builder-server ./dist"
   },
