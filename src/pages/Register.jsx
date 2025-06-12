@@ -79,12 +79,32 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      await register(formData.name, formData.email, formData.password, formData.phone);
-      navigate('/dashboard');
+      // Create userData object with structure expected by AuthContext
+      const userData = {
+        firstName: formData.name.split(' ')[0], // Extract first name
+        lastName: formData.name.split(' ').slice(1).join(' '), // Extract last name
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone
+      };
+      
+      // Call the register function from AuthContext
+      const result = await register(userData);
+      
+      if (result && result.success) {
+        // Redirect to dashboard on successful registration
+        navigate('/dashboard');
+      } else {
+        setErrors(prev => ({
+          ...prev,
+          submit: result?.error || 'Failed to create an account. Please try again.'
+        }));
+      }
     } catch (err) {
+      console.error('Registration error:', err);
       setErrors(prev => ({
         ...prev,
-        submit: 'Failed to create an account. Please try again.'
+        submit: err.message || 'Failed to create an account. Please try again.'
       }));
     } finally {
       setIsLoading(false);

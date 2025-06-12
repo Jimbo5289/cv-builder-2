@@ -588,7 +588,9 @@ function AuthProvider({ children }) {
         const mockUser = {
           id: 'mock-user-id',
           email: userData.email,
-          name: userData.firstName + ' ' + userData.lastName
+          name: userData.firstName && userData.lastName 
+            ? `${userData.firstName} ${userData.lastName}`
+            : (userData.name || 'Development User')
         };
         localStorage.setItem('user', JSON.stringify(mockUser));
         localStorage.setItem('token', 'dev-token');
@@ -605,12 +607,28 @@ function AuthProvider({ children }) {
       }
       
       // Format the data to match the backend API
-      const formattedData = {
-        name: `${userData.firstName} ${userData.lastName}`,
-        email: userData.email,
-        password: userData.password,
-        phone: userData.phone // Add phone number if provided
-      };
+      let formattedData;
+      
+      // Handle case when userData might be individual parameters from older code
+      if (arguments.length > 1) {
+        const [name, email, password, phone] = arguments;
+        formattedData = {
+          name,
+          email,
+          password,
+          phone
+        };
+      } else {
+        // Handle standard object format
+        formattedData = {
+          name: userData.firstName && userData.lastName 
+            ? `${userData.firstName} ${userData.lastName}`
+            : userData.name,
+          email: userData.email,
+          password: userData.password,
+          phone: userData.phone
+        };
+      }
       
       console.log('Attempting registration with server:', serverUrl);
       
@@ -690,7 +708,9 @@ function AuthProvider({ children }) {
         const mockUser = {
           id: 'mock-user-id',
           email: userData.email,
-          name: userData.firstName + ' ' + userData.lastName
+          name: userData.firstName && userData.lastName 
+            ? `${userData.firstName} ${userData.lastName}`
+            : (userData.name || 'Development User')
         };
         localStorage.setItem('user', JSON.stringify(mockUser));
         localStorage.setItem('token', 'dev-token');

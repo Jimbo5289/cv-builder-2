@@ -51,8 +51,8 @@ const Register = () => {
       const result = await register(formData);
       
       if (result.success) {
-        toast.success('Registration successful! Please log in.');
-        navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
+        toast.success('Registration successful!');
+        navigate('/dashboard');
       } else {
         // Handle different error cases
         if (result.error === 'Database connection issue') {
