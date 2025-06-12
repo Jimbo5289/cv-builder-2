@@ -1,41 +1,109 @@
 /* eslint-disable */
-const helmet = require('helmet');
+const express = require('express');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const { logger } = require('../config/logger');
 const { PrismaClient } = require('@prisma/client');
-const cors = require('cors');
 
 const prisma = new PrismaClient();
 
-// Import rate limiters from rateLimiter.js
-const { 
-  authLimiter: dbAuthLimiter, 
-  passwordResetLimiter, 
-  registrationLimiter 
-} = require('./rateLimiter');
+// Use a more sophisticated rate limiter that checks the database for user's IP
+const dbAuthLimiter = async (req, res, next) => {
+  // Skip limiting in development
+  if (process.env.NODE_ENV === 'development') {
+    return next();
+  }
+  
+  const ip = req.ip || req.connection.remoteAddress;
+  
+  try {
+    // Check if this IP has been rate limited
+    const ipRecord = await prisma.ipLog.findUnique({
+      where: { ip }
+    });
+    
+    if (ipRecord && ipRecord.blockedUntil && ipRecord.blockedUntil > new Date()) {
+      logger.warn(`Blocked request from rate-limited IP: ${ip}`);
+      return res.status(429).json({
+        error: 'Too many requests',
+        message: 'Please try again later'
+      });
+    }
+    
+    // Record this request
+    await prisma.ipLog.upsert({
+      where: { ip },
+      update: {
+        lastRequest: new Date(),
+        requestCount: {
+          increment: 1
+        }
+      },
+      create: {
+        ip,
+        lastRequest: new Date(),
+        requestCount: 1
+      }
+    });
+    
+    next();
+  } catch (error) {
+    // If database error, fall back to standard rate limiter
+    logger.error('Error in DB rate limiter, falling back to standard:', error);
+    standardAuthLimiter(req, res, next);
+  }
+};
 
-// Define environment-specific CSP directives
+// Standard rate limiter as fallback
+const standardAuthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // limit each IP to 20 requests per windowMs
+  message: {
+    error: 'Too many requests',
+    message: 'Please try again later'
+  }
+});
+
+// Specific rate limiter for password reset requests
+const passwordResetLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 3, // limit each IP to 3 requests per hour
+  message: {
+    error: 'Too many password reset attempts',
+    message: 'Please try again later'
+  }
+});
+
+// Specific rate limiter for registration attempts
+const registrationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5, // limit each IP to 5 registration attempts per hour
+  message: {
+    error: 'Too many registration attempts',
+    message: 'Please try again later'
+  }
+});
+
+// Function to get CSP directives based on environment
 const getCspDirectives = () => {
   if (process.env.NODE_ENV === 'production') {
     return {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", 'https://js.stripe.com'],
-      styleSrc: ["'self'", 'https:'],
-      imgSrc: ["'self'", 'data:', 'https:'],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://js.stripe.com'],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:'],
       connectSrc: ["'self'", 'https://api.stripe.com'],
       fontSrc: ["'self'", 'https:', 'data:'],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
       frameSrc: ["'self'", 'https://js.stripe.com'],
-      upgradeInsecureRequests: []
     };
   } else {
-    // Development environment - less restrictive
     return {
       defaultSrc: ["'self'", "http://localhost:*"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "http://localhost:*"],
-      styleSrc: ["'self'", "'unsafe-inline'", 'https:', "http://localhost:*"],
-      imgSrc: ["'self'", 'data:', 'https:', "http://localhost:*"],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://js.stripe.com', "http://localhost:*"],
+      styleSrc: ["'self'", "'unsafe-inline'", "http://localhost:*"],
+      imgSrc: ["'self'", 'data:', "http://localhost:*"],
       connectSrc: ["'self'", 'https://api.stripe.com', "http://localhost:*"],
       fontSrc: ["'self'", 'https:', 'data:', "http://localhost:*"],
       objectSrc: ["'none'"],
@@ -66,30 +134,6 @@ const setupSecurity = (app) => {
         'Content-Security-Policy',
         `default-src 'self' ${frontendUrl}; script-src 'self' 'unsafe-inline' ${frontendUrl}; style-src 'self' 'unsafe-inline' ${frontendUrl}; img-src 'self' data: ${frontendUrl}; font-src 'self' data: ${frontendUrl}; connect-src 'self' ${frontendUrl} ws: wss:`
       );
-    }
-    
-    // Additional CORS headers for Safari and cross-origin fetch with credentials
-    const origin = req.headers.origin;
-    const allowedOrigins = [
-      'http://localhost:5173', 
-      'http://127.0.0.1:5173',
-      'https://cv-builder-2-6jn6ti85z-jimbo5289s-projects.vercel.app',
-      'https://cv-builder-2.vercel.app',
-      'https://cv-builder-vercel.vercel.app',
-      'https://cv-builder-2-git-main-jimbo5289s-projects.vercel.app',
-      'https://cv-builder-2-hvz356vyk-jimbo5289s-projects.vercel.app'
-    ];
-    
-    if (origin && allowedOrigins.includes(origin)) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, Accept');
-      
-      // Handle preflight requests
-      if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-      }
     }
     
     next();
@@ -138,101 +182,9 @@ const setupSecurity = (app) => {
   });
 };
 
-// Create a preflight handler to help with CORS OPTIONS requests
-const handlePreflight = (req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    // Set CORS headers for preflight requests
-    // These are required for the browser to make the actual request
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, Accept, X-Requested-With');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.status(200).end();
-    return;
-  }
-  next();
-};
-
-// Function to create CORS middleware with more flexible options
-const createCorsMiddleware = (options = {}) => {
-  // Default options that work well with Vercel preview deployments
-  const defaultOptions = {
-    // List of explicitly allowed origins
-    allowedOrigins: [
-      'http://localhost:5173', 
-      'http://127.0.0.1:5173', 
-      'http://localhost:5174', 
-      'http://127.0.0.1:5174',
-      'https://cv-builder-vercel.vercel.app',
-      'https://cv-builder-2.vercel.app',
-      'https://cv-builder-2-omega.vercel.app',
-      'https://mycvbuilder.co.uk'
-    ],
-    // Patterns for dynamic origins (like Vercel preview deployments)
-    allowedPatterns: [
-      /^https:\/\/cv-builder-2-[a-z0-9]+-jimbo5289s-projects\.vercel\.app$/,
-      /^https:\/\/cv-builder-2-git-[a-z0-9]+-jimbo5289s-projects\.vercel\.app$/
-    ],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With']
-  };
-
-  // Merge provided options with defaults
-  const mergedOptions = {
-    ...defaultOptions,
-    ...options,
-    // Merge arrays if provided
-    allowedOrigins: options.allowedOrigins || defaultOptions.allowedOrigins,
-    allowedPatterns: options.allowedPatterns || defaultOptions.allowedPatterns,
-    methods: options.methods || defaultOptions.methods,
-    allowedHeaders: options.allowedHeaders || defaultOptions.allowedHeaders
-  };
-
-  // Create the origin function that checks against both explicit origins and patterns
-  const corsOptions = {
-    origin: function(origin, callback) {
-      // For debugging in production, log all origins to help diagnose CORS issues
-      if (process.env.NODE_ENV === 'production' && origin) {
-        logger.debug(`CORS request from: ${origin}`);
-      }
-      
-      // Allow all origins in development mode
-      if (process.env.NODE_ENV === 'development') {
-        callback(null, true);
-        return;
-      }
-      
-      // Check if origin is in our allowed list or matches patterns
-      if (!origin) {
-        // Allow requests with no origin (like mobile apps, curl, postman)
-        callback(null, true);
-      } else if (mergedOptions.allowedOrigins.includes(origin)) {
-        // Origin is explicitly allowed
-        callback(null, true);
-      } else if (mergedOptions.allowedPatterns.some(pattern => pattern.test(origin))) {
-        // Origin matches one of our dynamic patterns (e.g., Vercel previews)
-        logger.info(`Allowing dynamic origin: ${origin}`);
-        callback(null, true);
-      } else {
-        // Origin is not allowed
-        logger.warn(`CORS blocked request from origin: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: mergedOptions.credentials,
-    methods: mergedOptions.methods,
-    allowedHeaders: mergedOptions.allowedHeaders
-  };
-
-  return cors(corsOptions);
-};
-
 module.exports = {
   setupSecurity,
   authLimiter: dbAuthLimiter, // Use the more comprehensive auth limiter
   passwordResetLimiter,
-  registrationLimiter,
-  createCorsMiddleware,
-  handlePreflight
+  registrationLimiter
 }; 

@@ -3,6 +3,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
 const { generateToken, generateRefreshToken } = require('../utils/jwt');
+const { handlePreflight, addCorsHeaders } = require('../middleware/cors');
 const router = express.Router();
 const prisma = new PrismaClient();
 const jwt = require('jsonwebtoken');
@@ -82,8 +83,15 @@ const validateRegistrationInput = (req, res, next) => {
   next();
 };
 
+// Add explicit preflight handling for authentication routes
+router.options('/register', handlePreflight);
+router.options('/login', handlePreflight);
+router.options('/refresh-token', handlePreflight);
+
 // Register user
 router.post('/register', async (req, res) => {
+  // Add CORS headers to ensure browser accepts the response
+  addCorsHeaders(req, res);
   try {
     const validatedData = registerSchema.parse(req.body);
     const { email, password, name, phone } = validatedData;
@@ -203,6 +211,8 @@ router.post('/register', async (req, res) => {
 
 // Login user
 router.post('/login', authLimiter, async (req, res) => {
+  // Add CORS headers to ensure browser accepts the response
+  addCorsHeaders(req, res);
   try {
     const validatedData = loginSchema.parse(req.body);
     const { email, password } = validatedData;

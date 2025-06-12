@@ -3,7 +3,8 @@ const cors = require('cors');
 const { validateEnv } = require('./config/env');
 const { logger } = require('./config/logger');
 const database = require('./config/database');
-const { setupSecurity, createCorsMiddleware, handlePreflight } = require('./middleware/security');
+const { setupSecurity } = require('./middleware/security');
+const { createCorsMiddleware, handlePreflight, addCorsHeaders } = require('./middleware/cors');
 const authRoutes = require('./routes/auth');
 const cvRoutes = require('./routes/cv');
 const checkoutRoutes = require('./routes/checkout');
@@ -342,8 +343,26 @@ app.use((err, req, res, _next) => {
     error: err.message,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
     path: req.path,
-    method: req.method
+    method: req.method,
+    origin: req.headers.origin || 'unknown'
   });
+
+  // Add CORS headers to error responses to prevent CORS errors
+  addCorsHeaders(req, res);
+
+  // Detect CORS errors and handle them specially
+  if (err.message && (
+    err.message.includes('CORS') || 
+    err.message.includes('Access-Control-Allow-Origin') ||
+    err.message.includes('not allowed by Origin')
+  )) {
+    return res.status(403).json({
+      error: 'CORS Error',
+      message: 'Cross-Origin Request Blocked',
+      allowedOrigin: req.headers.origin || 'unknown',
+      fixInstructions: 'Please ensure you are accessing the API from an allowed origin'
+    });
+  }
 
   // Don't leak error details in production
   const response = {
