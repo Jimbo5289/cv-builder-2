@@ -117,65 +117,27 @@ router.get('/test-cors', (req, res) => {
 
 // Register user
 router.post('/register', async (req, res) => {
-  // Add CORS headers to ensure browser accepts the response
   addCorsHeaders(req, res);
   try {
     const validatedData = registerSchema.parse(req.body);
     const { email, password, name, phone } = validatedData;
 
-    // Log registration attempt
     logger.info('Registration attempt:', { email, name });
 
     try {
-      // Check if user exists
       const existingUser = await prisma.user.findUnique({
         where: { email }
       });
 
       if (existingUser) {
         logger.warn('Registration failed: Email already exists', { email });
-        // Add CORS headers to ensure browser accepts the error response
         addCorsHeaders(req, res);
         return res.status(400).json({ error: 'Email already registered' });
       }
     } catch (dbError) {
-      logger.error('Database error checking for existing user:', { error: dbError.message });
-      
-      // Check if this is a connection error
-      if (dbError.message.includes("Can't reach database server")) {
-        // For production, decide if you want to allow registration with mock database
-        if (process.env.ALLOW_MOCK_DB_FALLBACK === 'true') {
-          logger.warn('Database connection error - falling back to mock database for registration');
-          
-          // Generate a unique ID
-          const userId = require('crypto').randomUUID();
-          
-          // Return success with mock data
-          return res.status(201).json({
-            token: require('jsonwebtoken').sign(
-              { id: userId },
-              process.env.JWT_SECRET || 'fallback-secret',
-              { expiresIn: '7d' }
-            ),
-            user: {
-              id: userId,
-              name,
-              email,
-              phone,
-              createdAt: new Date()
-            }
-          });
-        } else {
-          // Return a specific error for database connection issues
-          return res.status(503).json({ 
-            error: 'Database connection issue', 
-            message: 'Unable to create account due to database connection issues. Please try again later.'
-          });
-        }
-      }
-      
-      // For other database errors, return a generic error
-      return res.status(500).json({ error: 'Database error', message: 'An error occurred while creating your account' });
+      console.error('Database error during registration:', dbError);
+      addCorsHeaders(req, res);
+      return res.status(500).json({ error: 'Internal server error' });
     }
 
     // Hash password
@@ -229,12 +191,10 @@ router.post('/register', async (req, res) => {
       // For other errors
       return res.status(500).json({ error: 'Database error', message: 'An error occurred while creating your account' });
     }
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
-    }
-    logger.error('Registration error:', { error: error.message, stack: error.stack });
-    res.status(500).json({ error: 'Server error', message: 'An unexpected error occurred while processing your request' });
+  } catch (validationError) {
+    console.error('Validation error during registration:', validationError);
+    addCorsHeaders(req, res);
+    return res.status(400).json({ error: 'Invalid input' });
   }
 });
 
@@ -758,7 +718,7 @@ router.get('/profile', auth, async (req, res) => {
         id: true,
         email: true,
         name: true,
-        phone: true, // Include phone field in the selection
+        phone: true, // Include phone in selection
         createdAt: true
       }
     });
@@ -1010,4 +970,4 @@ router.put('/users/profile', auth, async (req, res) => {
   }
 });
 
-module.exports = router; 
+module.exports = router;

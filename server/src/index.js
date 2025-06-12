@@ -96,10 +96,10 @@ if (Sentry) {
 
 // Create the CORS middleware with enhanced configuration
 const corsMiddleware = createCorsMiddleware({
-  // Update methods to include PATCH
+  origin: 'https://cv-builder-2-ci2wkzjj-jimbo5289s-projects.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  // Add X-Requested-With to allowed headers
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
+  credentials: true
 });
 
 // Apply CORS middleware

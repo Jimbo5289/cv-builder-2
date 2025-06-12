@@ -11,8 +11,18 @@ try {
   console.error('Failed to initialize Prisma client in health routes:', e);
 }
 
+// Function to add CORS headers
+function addCorsHeaders(req, res) {
+  const origin = req.headers.origin || '*';
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+}
+
 // Basic health check endpoint
 router.get('/', async (req, res) => {
+  addCorsHeaders(req, res);
   try {
     return res.status(200).json({
       status: 'ok',
@@ -21,6 +31,7 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Error in health check:', error);
+    addCorsHeaders(req, res);
     return res.status(500).json({ error: 'Health check failed' });
   }
 });
@@ -122,4 +133,4 @@ router.get('/db', async (req, res) => {
   }
 });
 
-module.exports = router; 
+module.exports = router;
