@@ -20,6 +20,7 @@ const fs = require('fs');
 const http = require('http');
 const net = require('net');
 const { exec } = require('child_process');
+const userRoutes = require('./routes/user');
 
 // Try to import fix-database, but don't fail if it's not available
 let ensureDevUser;
@@ -68,16 +69,16 @@ const server = http.createServer(app);
 
 // Dynamic import of express-ws
 (async () => {
-  const expressWs = await import('express-ws');
-
-  // Setup WebSockets with Express
-  expressWs(app, server, {
-    wsOptions: {
-      // Keep connections alive with ping/pong
-      perMessageDeflate: false,
-      clientTracking: true
+  try {
+    const expressWs = await import('express-ws');
+    if (expressWs && typeof expressWs.default === 'function') {
+      expressWs.default(app, server);
+    } else {
+      logger.warn('expressWs is not a function, WebSocket features may be limited');
     }
-  });
+  } catch (error) {
+    logger.error('Failed to initialize expressWs:', error);
+  }
 })();
 
 // Initialize Sentry request handler (must be the first middleware)
@@ -95,7 +96,11 @@ if (Sentry) {
 
 // Enhance CORS middleware to handle preflight requests correctly
 const corsMiddleware = createCorsMiddleware({
-  origin: ['https://cv-builder-2-5flh53dlm-jimbo5289s-projects.vercel.app', 'http://localhost:5173'],
+  origin: [
+    'https://cv-builder-2-qkccpu31f-jimbo5289s-projects.vercel.app',
+    'http://localhost:5173',
+    'https://cv-builder-backend-2jax.onrender.com'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
   credentials: true
@@ -118,13 +123,15 @@ setupSecurity(app);
 
 // Dynamic import of stripe
 (async () => {
-  const stripe = await import('./config/stripe');
-
-  // Log services initialization
-  if (stripe) {
-    logger.info('Stripe service initialized successfully');
-  } else {
-    logger.warn('Stripe service not initialized - payment features will be limited');
+  try {
+    const stripe = await import('../config/stripe.js');
+    if (stripe) {
+      logger.info('Stripe service initialized successfully');
+    } else {
+      logger.warn('Stripe service not initialized - payment features will be limited');
+    }
+  } catch (error) {
+    logger.error('Failed to initialize Stripe service:', error);
   }
 })();
 
@@ -553,6 +560,11 @@ const startServer = async () => {
   try {
     // Add graceful shutdown handler
     const gracefulShutdown = (signal) => {
+      logger.info(`Server shutting down due to ${signal}`);
+      server.close(() => {
+        logger.info('HTTP server closed');
+        
+        // Close
       logger.info(`Server shutting down due to ${signal}`);
       server.close(() => {
         logger.info('HTTP server closed');
