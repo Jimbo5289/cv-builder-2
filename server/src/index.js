@@ -563,12 +563,7 @@ const startServer = async () => {
       logger.info(`Server shutting down due to ${signal}`);
       server.close(() => {
         logger.info('HTTP server closed');
-        
-        // Close
-      logger.info(`Server shutting down due to ${signal}`);
-      server.close(() => {
-        logger.info('HTTP server closed');
-        
+
         // Close database connection
         database.disconnect().then(() => {
           logger.info('Database connection closed');
