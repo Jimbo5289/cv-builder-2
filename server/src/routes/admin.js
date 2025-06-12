@@ -1,9 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateJWT, requireAdmin } = require('../middleware/auth');
+const authMiddleware = require('../middleware/auth');
 
 // Require authentication for all admin routes
-router.use(authenticateJWT);
+router.use(authMiddleware);
+
+// Admin-only middleware
+const requireAdmin = (req, res, next) => {
+  // Check if the user is authenticated and has admin role
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  
+  if (!req.user.isAdmin && req.user.email !== 'james@theideasworkshop.co.uk') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  
+  next();
+};
+
+// Apply admin check for all routes
 router.use(requireAdmin);
 
 // Get server status and configuration
