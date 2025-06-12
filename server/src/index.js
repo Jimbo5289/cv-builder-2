@@ -111,9 +111,9 @@ const corsOptions = {
       'https://mycvbuilder.co.uk'
     ];
     
-    // Log all CORS requests in production for debugging
-    if (process.env.NODE_ENV === 'production') {
-      console.log(`CORS request from origin: ${origin}`);
+    // Log only blocked CORS requests in production (actual error cases)
+    if (process.env.NODE_ENV === 'production' && origin && !allowedOrigins.includes(origin)) {
+      console.warn(`CORS blocked request from origin: ${origin}`);
     }
     
     // Allow all origins in development mode
@@ -125,7 +125,6 @@ const corsOptions = {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.warn(`CORS blocked request from origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -155,6 +154,32 @@ app.use((req, res, next) => {
   // Make environment variables available to middleware
   req.skipAuthCheck = process.env.SKIP_AUTH_CHECK === 'true';
   req.mockSubscription = process.env.MOCK_SUBSCRIPTION_DATA === 'true';
+  
+  // Skip logging for health checks and frequent requests to reduce noise
+  const isHealthCheck = req.path.includes('/health') || req.path === '/';
+  const isCommonRequest = req.path.includes('/api/health') || req.path === '/status';
+  
+  // Only log actual API requests (not health checks or static files) and only once per minute per path
+  if (process.env.NODE_ENV === 'production' && !isHealthCheck && !isCommonRequest) {
+    // Use a simplified path for logging (remove query parameters and IDs)
+    const simplifiedPath = req.path.replace(/\/[0-9a-f-]{36}/g, '/:id').split('?')[0];
+    
+    // Log requests with rate limiting (once per minute per path)
+    const cacheKey = `${simplifiedPath}-${Math.floor(Date.now() / 60000)}`;
+    if (!global.requestLogCache) global.requestLogCache = new Set();
+    
+    if (!global.requestLogCache.has(cacheKey)) {
+      global.requestLogCache.add(cacheKey);
+      logger.info(`Request: ${req.method} ${simplifiedPath} from ${req.headers.origin || 'unknown'}`);
+      
+      // Clean up old cache entries (keep only the last 100)
+      if (global.requestLogCache.size > 100) {
+        const iterator = global.requestLogCache.values();
+        global.requestLogCache.delete(iterator.next().value);
+      }
+    }
+  }
+  
   next();
 });
 
