@@ -102,7 +102,9 @@ const corsOptions = {
       'https://cv-builder-2-hvz356vyk-jimbo5289s-projects.vercel.app',
       'https://cv-builder-2.vercel.app',
       'https://cv-builder-2-git-main-jimbo5289s-projects.vercel.app',
-      'https://cv-builder-2-6jn6ti85z-jimbo5289s-projects.vercel.app'
+      'https://cv-builder-2-6jn6ti85z-jimbo5289s-projects.vercel.app',
+      'https://cv-builder-2-3ftqk4yl5-jimbo5289s-projects.vercel.app',
+      'https://mycvbuilder.co.uk'
     ];
     
     // Allow all origins in development mode
@@ -428,6 +430,20 @@ app.get('/diagnostics', async (req, res) => {
       MOCK_DATABASE: process.env.MOCK_DATABASE
     };
     
+    // 6. Request information
+    const requestInfo = {
+      origin: req.headers.origin || 'unknown',
+      userAgent: req.headers['user-agent'] || 'unknown',
+      ip: req.ip || req.connection.remoteAddress || 'unknown',
+      method: req.method,
+      path: req.path,
+      headers: {
+        ...req.headers,
+        // Mask any auth headers
+        authorization: req.headers.authorization ? '[masked]' : undefined
+      }
+    };
+    
     // Combine all diagnostics
     const diagnostics = {
       serverInfo,
@@ -436,7 +452,8 @@ app.get('/diagnostics', async (req, res) => {
         status: dbStatus,
         error: dbError
       },
-      environment: envVars
+      environment: envVars,
+      request: requestInfo
     };
     
     res.json(diagnostics);
@@ -446,6 +463,28 @@ app.get('/diagnostics', async (req, res) => {
       message: error.message
     });
   }
+});
+
+// Add a special CORS test endpoint
+app.get('/cors-test', (req, res) => {
+  // Log all headers for debugging
+  console.log('CORS test request received:');
+  console.log('  Origin:', req.headers.origin);
+  console.log('  User-Agent:', req.headers['user-agent']);
+  console.log('  Headers:', JSON.stringify(req.headers, null, 2));
+  
+  // Send a simple response with the origin
+  res.json({
+    success: true,
+    message: 'CORS test successful',
+    origin: req.headers.origin || 'No origin header',
+    timestamp: new Date().toISOString(),
+    cors: {
+      enabled: true,
+      allowedOrigins: corsOptions.origin instanceof Function ? 
+        'Dynamic function' : corsOptions.origin
+    }
+  });
 });
 
 // Server startup function with improved error handling
