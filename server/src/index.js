@@ -104,8 +104,14 @@ const corsOptions = {
       'https://cv-builder-2-git-main-jimbo5289s-projects.vercel.app',
       'https://cv-builder-2-6jn6ti85z-jimbo5289s-projects.vercel.app',
       'https://cv-builder-2-3ftqk4yl5-jimbo5289s-projects.vercel.app',
+      'https://cv-builder-2-omega.vercel.app',
       'https://mycvbuilder.co.uk'
     ];
+    
+    // Log all CORS requests in production for debugging
+    if (process.env.NODE_ENV === 'production') {
+      console.log(`CORS request from origin: ${origin}`);
+    }
     
     // Allow all origins in development mode
     if (process.env.NODE_ENV === 'development') {
@@ -127,6 +133,9 @@ const corsOptions = {
 
 // Configure CORS
 app.use(cors(corsOptions));
+
+// Add explicit OPTIONS handler for preflight requests
+app.options('*', cors(corsOptions));
 
 // Security setup (after CORS)
 setupSecurity(app);
@@ -471,7 +480,6 @@ app.get('/cors-test', (req, res) => {
   console.log('CORS test request received:');
   console.log('  Origin:', req.headers.origin);
   console.log('  User-Agent:', req.headers['user-agent']);
-  console.log('  Headers:', JSON.stringify(req.headers, null, 2));
   
   // Send a simple response with the origin
   res.json({
@@ -485,6 +493,31 @@ app.get('/cors-test', (req, res) => {
         'Dynamic function' : corsOptions.origin
     }
   });
+});
+
+// Add a special endpoint to check environment variables (with sensitive info masked)
+app.get('/api/debug/env', (req, res) => {
+  // Only allow in production for specific testing
+  const environment = {
+    NODE_ENV: process.env.NODE_ENV,
+    PORT: process.env.PORT,
+    RENDER: process.env.RENDER === 'true',
+    DATABASE_URL: process.env.DATABASE_URL ? '[MASKED]' : undefined,
+    FRONTEND_URL: process.env.FRONTEND_URL,
+    REQUEST_HEADERS: {
+      origin: req.headers.origin,
+      host: req.headers.host,
+      referer: req.headers.referer,
+      'user-agent': req.headers['user-agent'],
+      'content-type': req.headers['content-type'],
+      'accept': req.headers.accept,
+    },
+    CORS_ENABLED: true,
+    SERVER_TIME: new Date().toISOString(),
+    SERVER_UPTIME: process.uptime()
+  };
+  
+  res.json(environment);
 });
 
 // Server startup function with improved error handling
