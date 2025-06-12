@@ -138,6 +138,21 @@ const setupSecurity = (app) => {
   });
 };
 
+// Create a preflight handler to help with CORS OPTIONS requests
+const handlePreflight = (req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    // Set CORS headers for preflight requests
+    // These are required for the browser to make the actual request
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, Accept, X-Requested-With');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.status(200).end();
+    return;
+  }
+  next();
+};
+
 // Function to create CORS middleware with more flexible options
 const createCorsMiddleware = (options = {}) => {
   // Default options that work well with Vercel preview deployments
@@ -211,24 +226,6 @@ const createCorsMiddleware = (options = {}) => {
   };
 
   return cors(corsOptions);
-};
-
-// Export the CORS middleware creator
-exports.createCorsMiddleware = createCorsMiddleware;
-
-// Create a preflight handler to help with CORS OPTIONS requests
-exports.handlePreflight = (req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    // Set CORS headers for preflight requests
-    // These are required for the browser to make the actual request
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, Accept, X-Requested-With');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.status(200).end();
-    return;
-  }
-  next();
 };
 
 module.exports = {
