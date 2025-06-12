@@ -23,6 +23,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "analyze": "vite build --mode analyze",
+    "build:optimized": "vite build --mode production",
     "server:check": "node check-server.js",
     "server:kill": "lsof -ti:3005 | xargs kill -9 2>/dev/null || true",
     "debug:router": "node scripts/debug-router.js",
@@ -68,6 +69,7 @@
     "postcss": "^8.4.23",
     "prettier": "^3.2.2",
     "prisma": "^6.9.0",
+    "rollup-plugin-visualizer": "^5.0.0",
     "tailwindcss": "^3.3.2",
     "vite": "^6.3.5",
     "vitest": "^3.2.2"

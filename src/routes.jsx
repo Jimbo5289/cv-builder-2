@@ -28,23 +28,23 @@ import { Navigate } from 'react-router-dom';
 const Home = React.lazy(() => import('./pages/Home'));
 const Login = React.lazy(() => import('./pages/Login'));
 const Register = React.lazy(() => import('./pages/Register'));
-const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'));
-const ResetPassword = React.lazy(() => import('./pages/ResetPassword'));
-const Templates = React.lazy(() => import('./pages/Templates'));
-const Examples = React.lazy(() => import('./pages/Examples'));
-const Pricing = React.lazy(() => import('./pages/Pricing'));
-const Blog = React.lazy(() => import('./pages/Blog'));
-const Contact = React.lazy(() => import('./pages/Contact'));
-const CvTips = React.lazy(() => import('./pages/CvTips'));
+const ForgotPassword = React.lazy(() => import(/* webpackChunkName: "forgot-password" */ './pages/ForgotPassword'));
+const ResetPassword = React.lazy(() => import(/* webpackChunkName: "reset-password" */ './pages/ResetPassword'));
+const Templates = React.lazy(() => import(/* webpackChunkName: "templates" */ './pages/Templates'));
+const Examples = React.lazy(() => import(/* webpackChunkName: "examples" */ './pages/Examples'));
+const Pricing = React.lazy(() => import(/* webpackChunkName: "pricing" */ './pages/Pricing'));
+const Blog = React.lazy(() => import(/* webpackChunkName: "blog" */ './pages/Blog'));
+const Contact = React.lazy(() => import(/* webpackChunkName: "contact" */ './pages/Contact'));
+const CvTips = React.lazy(() => import(/* webpackChunkName: "cv-tips" */ './pages/CvTips'));
 // Using American spelling consistently
-const CvAnalyze = React.lazy(() => import('./pages/CvAnalyze'));
-const CvAnalyzeByRole = React.lazy(() => import('./pages/CvAnalyzeByRole'));
-const Settings = React.lazy(() => import('./pages/Settings'));
-const Create = React.lazy(() => import('./pages/Create'));
-const Preview = React.lazy(() => import('./pages/Preview'));
-const Profile = React.lazy(() => import('./pages/Profile'));
-const PersonalStatement = React.lazy(() => import('./pages/PersonalStatement'));
-const Experience = React.lazy(() => import('./pages/Experience'));
+const CvAnalyze = React.lazy(() => import(/* webpackChunkName: "cv-analyze" */ './pages/CvAnalyze'));
+const CvAnalyzeByRole = React.lazy(() => import(/* webpackChunkName: "cv-analyze-by-role" */ './pages/CvAnalyzeByRole'));
+const Settings = React.lazy(() => import(/* webpackChunkName: "settings" */ './pages/Settings'));
+const Create = React.lazy(() => import(/* webpackChunkName: "create" */ './pages/Create'));
+const Preview = React.lazy(() => import(/* webpackChunkName: "preview" */ './pages/Preview'));
+const Profile = React.lazy(() => import(/* webpackChunkName: "profile" */ './pages/Profile'));
+const PersonalStatement = React.lazy(() => import(/* webpackChunkName: "personal-statement" */ './pages/PersonalStatement'));
+const Experience = React.lazy(() => import(/* webpackChunkName: "experience" */ './pages/Experience'));
 const Education = React.lazy(() => import('./pages/Education'));
 const Skills = React.lazy(() => import('./pages/Skills'));
 const References = React.lazy(() => import('./pages/References'));
@@ -86,8 +86,8 @@ const routes = [
    * and ensure users with old links still reach the correct pages
    */
   { path: '/analyse', Component: () => <Navigate to="/analyze" replace /> },
-  { path: '/cv-analyse', Component: () => <Navigate to="/cv-analyze" replace /> },
-  { path: '/cv-analyse-by-role', Component: () => <Navigate to="/cv-analyze-by-role" replace /> },
+  { path: '/cv-analyse', Component: () => <Navigate to="/cv-analyse" replace /> },
+  { path: '/cv-analyse-by-role', Component: () => <Navigate to="/cv-analyse-by-role" replace /> },
   
   /**
    * Protected Routes

@@ -95,7 +95,7 @@ if (Sentry) {
 
 // Enhance CORS middleware to handle preflight requests correctly
 const corsMiddleware = createCorsMiddleware({
-  origin: 'https://cv-builder-2-5flh53dlm-jimbo5289s-projects.vercel.app',
+  origin: ['https://cv-builder-2-5flh53dlm-jimbo5289s-projects.vercel.app', 'http://localhost:5173'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
   credentials: true

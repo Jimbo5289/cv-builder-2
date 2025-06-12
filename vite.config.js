@@ -60,7 +60,7 @@ export default defineConfig(({ mode }) => {
     appType: 'spa',
     build: {
       outDir: 'dist',
-      sourcemap: true,
+      sourcemap: false,
       chunkSizeWarningLimit: 1000,
       // Ensure React is part of the initial bundle
       assetsInlineLimit: 0,
