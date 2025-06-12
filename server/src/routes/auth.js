@@ -88,6 +88,33 @@ router.options('/register', handlePreflight);
 router.options('/login', handlePreflight);
 router.options('/refresh-token', handlePreflight);
 
+// Special debug endpoint for CORS testing
+router.options('/test-cors', handlePreflight);
+router.get('/test-cors', (req, res) => {
+  // Add CORS headers
+  addCorsHeaders(req, res);
+  
+  // Return useful debugging information
+  res.status(200).json({
+    success: true,
+    message: 'CORS test successful',
+    origin: req.headers.origin || 'No origin header',
+    time: new Date().toISOString(),
+    headers: {
+      received: {
+        origin: req.headers.origin,
+        host: req.headers.host,
+        referer: req.headers.referer
+      },
+      sent: {
+        'Access-Control-Allow-Origin': res.getHeader('Access-Control-Allow-Origin'),
+        'Access-Control-Allow-Credentials': res.getHeader('Access-Control-Allow-Credentials'),
+        'Access-Control-Allow-Methods': res.getHeader('Access-Control-Allow-Methods')
+      }
+    }
+  });
+});
+
 // Register user
 router.post('/register', async (req, res) => {
   // Add CORS headers to ensure browser accepts the response
@@ -107,6 +134,8 @@ router.post('/register', async (req, res) => {
 
       if (existingUser) {
         logger.warn('Registration failed: Email already exists', { email });
+        // Add CORS headers to ensure browser accepts the error response
+        addCorsHeaders(req, res);
         return res.status(400).json({ error: 'Email already registered' });
       }
     } catch (dbError) {

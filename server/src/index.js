@@ -110,11 +110,25 @@ app.options('*', handlePreflight);
 
 // Add special endpoint for CORS testing
 app.get('/api/test-cors', (req, res) => {
+  // Add CORS headers
+  addCorsHeaders(req, res);
+  
   res.json({
     success: true,
     message: 'CORS is working correctly',
     origin: req.headers.origin || 'No origin provided',
-    time: new Date().toISOString()
+    time: new Date().toISOString(),
+    headers: {
+      received: {
+        origin: req.headers.origin,
+        host: req.headers.host
+      },
+      sent: {
+        'Access-Control-Allow-Origin': res.getHeader('Access-Control-Allow-Origin'),
+        'Access-Control-Allow-Credentials': res.getHeader('Access-Control-Allow-Credentials'),
+        'Access-Control-Allow-Methods': res.getHeader('Access-Control-Allow-Methods')
+      }
+    }
   });
 });
 

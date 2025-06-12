@@ -68,6 +68,12 @@ function createCorsMiddleware(options = {}) {
         logger.info(`CORS request from: ${origin}`);
       }
       
+      // TEMPORARY: Allow all origins in both development and production
+      // This is for debugging purposes and should be removed later
+      callback(null, true);
+      return;
+      
+      /* COMMENTED OUT FOR DEBUGGING - RESTORE LATER
       // Allow all origins in development mode
       if (process.env.NODE_ENV === 'development') {
         callback(null, true);
@@ -90,6 +96,7 @@ function createCorsMiddleware(options = {}) {
         logger.warn(`CORS blocked request from origin: ${origin}`);
         callback(new Error(`Origin ${origin} not allowed by CORS`));
       }
+      */
     },
     credentials: mergedOptions.credentials,
     methods: mergedOptions.methods,
@@ -110,8 +117,8 @@ function createCorsMiddleware(options = {}) {
 function handlePreflight(req, res, next) {
   if (req.method === 'OPTIONS') {
     // Set CORS headers for preflight requests
-    const origin = req.headers.origin || '*';
-    res.header('Access-Control-Allow-Origin', origin);
+    // TEMPORARY: Allow all origins
+    res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, Accept, X-Requested-With');
     res.header('Access-Control-Allow-Credentials', 'true');
@@ -129,10 +136,8 @@ function handlePreflight(req, res, next) {
  * @param {Object} res Express response
  */
 function addCorsHeaders(req, res) {
-  const origin = req.headers.origin;
-  
-  // Set CORS headers
-  res.header('Access-Control-Allow-Origin', origin || '*');
+  // TEMPORARY: Allow all origins
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, Accept, X-Requested-With');
