@@ -69,7 +69,15 @@ const setupSecurity = (app) => {
     
     // Additional CORS headers for Safari and cross-origin fetch with credentials
     const origin = req.headers.origin;
-    const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+    const allowedOrigins = [
+      'http://localhost:5173', 
+      'http://127.0.0.1:5173',
+      'https://cv-builder-2-6jn6ti85z-jimbo5289s-projects.vercel.app',
+      'https://cv-builder-2.vercel.app',
+      'https://cv-builder-vercel.vercel.app',
+      'https://cv-builder-2-git-main-jimbo5289s-projects.vercel.app',
+      'https://cv-builder-2-hvz356vyk-jimbo5289s-projects.vercel.app'
+    ];
     
     if (origin && allowedOrigins.includes(origin)) {
       res.setHeader('Access-Control-Allow-Origin', origin);

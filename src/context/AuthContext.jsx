@@ -579,7 +579,7 @@ function AuthProvider({ children }) {
     }
   }
 
-  async function register(name, email, password) {
+  async function register(userData) {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
@@ -587,8 +587,8 @@ function AuthProvider({ children }) {
       if (import.meta.env.DEV && import.meta.env.VITE_DEV_MODE === 'true') {
         const mockUser = {
           id: 'mock-user-id',
-          email,
-          name
+          email: userData.email,
+          name: userData.firstName + ' ' + userData.lastName
         };
         localStorage.setItem('user', JSON.stringify(mockUser));
         localStorage.setItem('token', 'dev-token');
@@ -604,12 +604,23 @@ function AuthProvider({ children }) {
         return { success: true };
       }
       
+      // Format the data to match the backend API
+      const formattedData = {
+        name: `${userData.firstName} ${userData.lastName}`,
+        email: userData.email,
+        password: userData.password
+      };
+      
+      console.log('Attempting registration with server:', serverUrl);
+      
+      // Use the API utility instead of direct fetch
       const response = await fetch(`${serverUrl}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ name, email, password })
+        body: JSON.stringify(formattedData),
+        credentials: 'include'
       });
 
       const data = await response.json();
@@ -618,10 +629,10 @@ function AuthProvider({ children }) {
         setState(prev => ({ 
           ...prev, 
           loading: false, 
-          error: data.message || 'Registration failed' 
+          error: data.error || data.message || 'Registration failed' 
         }));
-        toast.error(data.message || 'Registration failed');
-        return { success: false, message: data.message };
+        toast.error(data.error || data.message || 'Registration failed');
+        return { success: false, message: data.error || data.message };
       }
 
       localStorage.setItem('token', data.token);
@@ -644,8 +655,8 @@ function AuthProvider({ children }) {
         console.warn('DEV MODE: Server unreachable, using mock registration');
         const mockUser = {
           id: 'mock-user-id',
-          email,
-          name
+          email: userData.email,
+          name: userData.firstName + ' ' + userData.lastName
         };
         localStorage.setItem('user', JSON.stringify(mockUser));
         localStorage.setItem('token', 'dev-token');

@@ -98,14 +98,28 @@ const corsOptions = {
       'http://localhost:5174', 
       'http://127.0.0.1:5174',
       'https://cv-builder-vercel.vercel.app',
-      'https://cv-builder-2-hvz356vyk-jimbo5289s-projects.vercel.app'
+      'https://cv-builder-2-hvz356vyk-jimbo5289s-projects.vercel.app',
+      'https://cv-builder-2.vercel.app',
+      'https://cv-builder-2-git-main-jimbo5289s-projects.vercel.app',
+      'https://cv-builder-2-6jn6ti85z-jimbo5289s-projects.vercel.app'
     ];
+    
+    // Allow all origins in development mode
+    if (process.env.NODE_ENV === 'development') {
+      callback(null, true);
+      return;
+    }
+    
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.warn(`CORS blocked request from origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
-  }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept']
 };
 
 // Configure CORS

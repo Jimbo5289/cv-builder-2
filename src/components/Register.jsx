@@ -37,10 +37,23 @@ const Register = () => {
     }
 
     try {
+      console.log('Starting registration process with data:', {
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        // Don't log the password for security reasons
+      });
+      
       // Call the register function from AuthContext
-      await register(formData);
-      navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
+      const result = await register(formData);
+      
+      if (result.success) {
+        navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
+      } else {
+        setError(result.message || 'Registration failed. Please try again.');
+      }
     } catch (err) {
+      console.error('Registration error in component:', err);
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
