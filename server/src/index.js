@@ -3,7 +3,7 @@ const cors = require('cors');
 const { validateEnv } = require('./config/env');
 const { logger } = require('./config/logger');
 const database = require('./config/database');
-const { setupSecurity } = require('./middleware/security');
+const { setupSecurity, createCorsMiddleware, handlePreflight } = require('./middleware/security');
 const authRoutes = require('./routes/auth');
 const cvRoutes = require('./routes/cv');
 const checkoutRoutes = require('./routes/checkout');
@@ -93,51 +93,29 @@ if (Sentry) {
   // app.use(Sentry.Handlers.tracingHandler());
 }
 
-// Configure CORS
-const corsOptions = {
-  origin: function(origin, callback) {
-    const allowedOrigins = [
-      'http://localhost:5173', 
-      'http://127.0.0.1:5173', 
-      'http://localhost:5174', 
-      'http://127.0.0.1:5174',
-      'https://cv-builder-vercel.vercel.app',
-      'https://cv-builder-2-hvz356vyk-jimbo5289s-projects.vercel.app',
-      'https://cv-builder-2.vercel.app',
-      'https://cv-builder-2-git-main-jimbo5289s-projects.vercel.app',
-      'https://cv-builder-2-6jn6ti85z-jimbo5289s-projects.vercel.app',
-      'https://cv-builder-2-3ftqk4yl5-jimbo5289s-projects.vercel.app',
-      'https://cv-builder-2-omega.vercel.app',
-      'https://mycvbuilder.co.uk'
-    ];
-    
-    // Log only blocked CORS requests in production (actual error cases)
-    if (process.env.NODE_ENV === 'production' && origin && !allowedOrigins.includes(origin)) {
-      console.warn(`CORS blocked request from origin: ${origin}`);
-    }
-    
-    // Allow all origins in development mode
-    if (process.env.NODE_ENV === 'development') {
-      callback(null, true);
-      return;
-    }
-    
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept']
-};
+// Create the CORS middleware with enhanced configuration
+const corsMiddleware = createCorsMiddleware({
+  // Update methods to include PATCH
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  // Add X-Requested-With to allowed headers
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With']
+});
 
-// Configure CORS
-app.use(cors(corsOptions));
+// Apply CORS middleware
+app.use(corsMiddleware);
 
-// Add explicit OPTIONS handler for preflight requests
-app.options('*', cors(corsOptions));
+// Add dedicated preflight handler for better OPTIONS request handling
+app.options('*', handlePreflight);
+
+// Add special endpoint for CORS testing
+app.get('/api/test-cors', (req, res) => {
+  res.json({
+    success: true,
+    message: 'CORS is working correctly',
+    origin: req.headers.origin || 'No origin provided',
+    time: new Date().toISOString()
+  });
+});
 
 // Security setup (after CORS)
 setupSecurity(app);

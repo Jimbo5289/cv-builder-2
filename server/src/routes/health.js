@@ -25,6 +25,35 @@ router.get('/', async (req, res) => {
   }
 });
 
+// CORS diagnostic endpoint - helps debug CORS issues
+router.get('/cors', async (req, res) => {
+  try {
+    // Get all headers for debugging
+    const headers = {
+      ...req.headers,
+      // Mask any sensitive headers
+      authorization: req.headers.authorization ? '[MASKED]' : undefined
+    };
+    
+    return res.status(200).json({
+      status: 'ok',
+      message: 'CORS is working correctly for this endpoint',
+      origin: req.headers.origin || 'No origin header provided',
+      requestHeaders: headers,
+      responseHeaders: {
+        'Access-Control-Allow-Origin': res.getHeader('Access-Control-Allow-Origin') || 'Not set',
+        'Access-Control-Allow-Credentials': res.getHeader('Access-Control-Allow-Credentials') || 'Not set',
+        'Access-Control-Allow-Methods': res.getHeader('Access-Control-Allow-Methods') || 'Not set',
+        'Access-Control-Allow-Headers': res.getHeader('Access-Control-Allow-Headers') || 'Not set'
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error in CORS diagnostic:', error);
+    return res.status(500).json({ error: 'CORS diagnostic failed' });
+  }
+});
+
 // Detailed health status
 router.get('/status', async (req, res) => {
   try {
