@@ -98,23 +98,14 @@ const corsOptions = {
       'http://localhost:5174', 
       'http://127.0.0.1:5174',
       'https://cv-builder-vercel.vercel.app',
-      'https://cv-builder-2-hvz356vyk-jimbo5289s-projects.vercel.app',
-      'https://cv-builder-2-6jp6ti85z-jimbo5289s-projects.vercel.app'
+      'https://cv-builder-2-hvz356vyk-jimbo5289s-projects.vercel.app'
     ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
-  exposedHeaders: ['Content-Type', 'Authorization'],
-  maxAge: 86400, // 24 hours
-  // Add better Safari support
-  optionsSuccessStatus: 200,
-  preflightContinue: false
+  }
 };
 
 // Configure CORS
@@ -391,6 +382,9 @@ const startServer = async () => {
 
     // In production, don't check port or try to kill processes
     if (process.env.NODE_ENV === 'production') {
+      // Ensure we're using the PORT from environment variable
+      PORT = process.env.PORT || PORT;
+      
       // Start the server without port checking in production
       server.listen(PORT, '0.0.0.0', () => {
         logger.info('Server started successfully:', { 

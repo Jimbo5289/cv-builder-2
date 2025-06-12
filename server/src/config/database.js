@@ -291,16 +291,40 @@ const initDatabase = async () => {
           prismaConfig.datasources.db.url = `${databaseUrl}?sslmode=require`;
         }
         
-        logger.info('Attempting to connect to database with URL: ' + databaseUrl.replace(/postgresql:\/\/[^:]+:[^@]+@/, 'postgresql://[username]:[password]@'));
+        // Log more details about the connection attempt (masking sensitive info)
+        const maskedUrl = databaseUrl.replace(/postgresql:\/\/[^:]+:[^@]+@/, 'postgresql://[username]:[password]@');
+        logger.info('Attempting to connect to database with URL: ' + maskedUrl);
+        
+        // Add additional connection details for troubleshooting
+        const urlParts = new URL(databaseUrl);
+        logger.info(`Database connection details (masked): Host: ${urlParts.hostname}, Port: ${urlParts.port}, Database: ${urlParts.pathname.substring(1)}`);
         
         // Initialize Prisma client
         client = new PrismaClient(prismaConfig);
         
         logger.info('Initialized Prisma database client');
         
-        // Test the connection
-        await client.$connect();
-        logger.info('Database connection established successfully');
+        // Try to connect with retries
+        let retries = 3;
+        let connected = false;
+        
+        while (retries > 0 && !connected) {
+          try {
+            // Test the connection
+            await client.$connect();
+            connected = true;
+            logger.info('Database connection established successfully');
+          } catch (connErr) {
+            retries--;
+            if (retries > 0) {
+              logger.warn(`Database connection attempt failed, retrying (${retries} attempts left): ${connErr.message}`);
+              // Wait before retrying
+              await new Promise(resolve => setTimeout(resolve, 5000));
+            } else {
+              throw connErr;
+            }
+          }
+        }
         
         // Apply migrations if in development mode
         if (process.env.NODE_ENV === 'development' && process.env.AUTO_APPLY_MIGRATIONS === 'true') {
