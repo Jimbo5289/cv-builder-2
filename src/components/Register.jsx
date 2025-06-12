@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -9,7 +10,8 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     firstName: '',
-    lastName: ''
+    lastName: '',
+    phone: ''
   });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -41,6 +43,7 @@ const Register = () => {
         email: formData.email,
         firstName: formData.firstName,
         lastName: formData.lastName,
+        phone: formData.phone
         // Don't log the password for security reasons
       });
       
@@ -48,13 +51,29 @@ const Register = () => {
       const result = await register(formData);
       
       if (result.success) {
+        toast.success('Registration successful! Please log in.');
         navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
       } else {
-        setError(result.message || 'Registration failed. Please try again.');
+        // Handle different error cases
+        if (result.error === 'Database connection issue') {
+          setError('Unable to create account due to server issues. Please try again later.');
+          toast.error('Server connection issue. Please try again later.');
+        } else if (result.message) {
+          setError(result.message);
+        } else {
+          setError(result.error || 'Registration failed. Please try again.');
+        }
       }
     } catch (err) {
       console.error('Registration error in component:', err);
-      setError(err.message || 'Registration failed. Please try again.');
+      
+      // Check if it's a network error
+      if (err.message && err.message.includes('Network Error')) {
+        setError('Cannot connect to the server. Please check your internet connection and try again.');
+        toast.error('Network error. Please check your connection.');
+      } else {
+        setError(err.message || 'Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -111,6 +130,17 @@ const Register = () => {
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
               required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-gray-700 mb-2">Phone Number (optional)</label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded"
             />
           </div>
           

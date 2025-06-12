@@ -608,45 +608,79 @@ function AuthProvider({ children }) {
       const formattedData = {
         name: `${userData.firstName} ${userData.lastName}`,
         email: userData.email,
-        password: userData.password
+        password: userData.password,
+        phone: userData.phone // Add phone number if provided
       };
       
       console.log('Attempting registration with server:', serverUrl);
       
-      // Use the API utility instead of direct fetch
-      const response = await fetch(`${serverUrl}/api/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formattedData),
-        credentials: 'include'
-      });
+      try {
+        // Use the API utility instead of direct fetch
+        const response = await fetch(`${serverUrl}/api/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formattedData),
+          credentials: 'include'
+        });
 
-      const data = await response.json();
+        // Check for network errors before proceeding
+        if (!response.ok) {
+          const data = await response.json();
+          console.error('Registration error response:', data);
+          
+          setState(prev => ({ 
+            ...prev, 
+            loading: false, 
+            error: data.error || data.message || 'Registration failed' 
+          }));
+          
+          // Check for specific error types
+          if (data.error === 'Database connection issue') {
+            toast.error('Server database connection issue. Please try again later.');
+          } else {
+            toast.error(data.error || data.message || 'Registration failed');
+          }
+          
+          return { 
+            success: false, 
+            error: data.error || 'Registration failed', 
+            message: data.message || 'Could not complete registration' 
+          };
+        }
 
-      if (!response.ok) {
+        const data = await response.json();
+        
+        // On success, store the user data and token
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        setState({
+          user: data.user,
+          loading: false,
+          isAuthenticated: true,
+          error: null
+        });
+        
+        toast.success('Registered successfully!');
+        return { success: true };
+      } catch (networkErr) {
+        console.error('Network error during registration:', networkErr);
+        
         setState(prev => ({ 
           ...prev, 
           loading: false, 
-          error: data.error || data.message || 'Registration failed' 
+          error: 'Network error connecting to the server' 
         }));
-        toast.error(data.error || data.message || 'Registration failed');
-        return { success: false, message: data.error || data.message };
+        
+        toast.error('Connection error. Please check your internet and try again.');
+        return { 
+          success: false, 
+          error: 'Network error', 
+          message: 'Cannot connect to the server. Please check your internet connection.' 
+        };
       }
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      setState({
-        user: data.user,
-        loading: false,
-        isAuthenticated: true,
-        error: null
-      });
-      
-      toast.success('Registered successfully!');
-      return { success: true };
     } catch (err) {
       console.error('Registration error:', err);
       

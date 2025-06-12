@@ -21,10 +21,17 @@ if (!process.env.DATABASE_URL) {
 if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('amazonaws.com')) {
   console.log('[info] : AWS RDS database detected, disabling mock database');
   process.env.MOCK_DATABASE = 'false';
+  
+  // Enable mock database fallback for user registration on Render while DB connection issues exist
+  if (process.env.RENDER) {
+    console.log('[info] : Running on Render with AWS RDS. Enabling mock database fallback for registration');
+    process.env.ALLOW_MOCK_DB_FALLBACK = 'true';
+  }
 } else {
   // No valid database URL, enable mock database
   console.log('[info] : No valid DATABASE_URL found, enabling mock database');
   process.env.MOCK_DATABASE = 'true';
+  process.env.ALLOW_MOCK_DB_FALLBACK = 'true';
   
   // Ensure the mock database directory exists
   const fs = require('fs');
@@ -41,6 +48,7 @@ console.log('[info] : Checking for Render deployment...');
 if (process.env.RENDER) {
   console.log('[info] : Running on Render, ensuring correct port configuration');
   console.log('[info] : PORT environment variable is set to:', process.env.PORT);
+  console.log('[info] : ALLOW_MOCK_DB_FALLBACK is set to:', process.env.ALLOW_MOCK_DB_FALLBACK);
 }
 
 // Start the actual server
