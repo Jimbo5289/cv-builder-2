@@ -1,25 +1,30 @@
 #!/bin/bash
 
 # Script for starting the service on Render.com
-
-echo "Starting CV Builder server on Render..."
+echo "==================================================="
+echo "STARTING CV BUILDER SERVER ON RENDER"
+echo "==================================================="
 echo "Current directory: $(pwd)"
 echo "Node version: $(node -v)"
 echo "NPM version: $(npm -v)"
 
-# Print environment information (masked)
-echo "Environment variables:"
-echo "DATABASE_URL: [masked]"
-echo "PORT: $PORT"
+# First, run the RDS connection test
+echo "==================================================="
+echo "RUNNING RDS CONNECTION TEST"
+echo "==================================================="
+node test-rds-render.js
 
-# Run the RDS connection test first
-echo "Running RDS connection test..."
-npm run render:test-rds
-
-# Debug port bindings
-echo "Checking port binding..."
-npm run debug:port
-
-# Start the server
-echo "Starting server with: npm run render:direct"
-npm run render:direct 
+# Check if we should run in debug mode
+if [ "$DEBUG" = "true" ]; then
+  echo "==================================================="
+  echo "STARTING IN DEBUG MODE"
+  echo "==================================================="
+  node debug-render.js
+else
+  # Start the server directly without using npm run render:direct
+  # This ensures we bypass any issues with how Render interprets the command
+  echo "==================================================="
+  echo "STARTING SERVER DIRECTLY"
+  echo "==================================================="
+  PORT=$PORT node src/index.js
+fi 

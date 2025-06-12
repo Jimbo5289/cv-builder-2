@@ -21,6 +21,7 @@ const http = require('http');
 const expressWs = require('express-ws');
 const net = require('net');
 const { exec } = require('child_process');
+const axios = require('axios');
 
 // Try to import fix-database, but don't fail if it's not available
 let ensureDevUser;
@@ -341,6 +342,110 @@ app.use('/api/*', (req, res) => {
     method: req.method
   });
   res.status(404).json({ error: 'API endpoint not found' });
+});
+
+// Add a /diagnostics endpoint for comprehensive troubleshooting
+app.get('/diagnostics', async (req, res) => {
+  try {
+    // 1. Basic server info
+    const serverInfo = {
+      timestamp: new Date().toISOString(),
+      hostname: require('os').hostname(),
+      platform: process.platform,
+      nodeVersion: process.version,
+      environment: process.env.NODE_ENV || 'unknown',
+      port: PORT,
+      render: process.env.RENDER ? true : false,
+      memory: process.memoryUsage(),
+      uptime: process.uptime()
+    };
+    
+    // 2. Outbound IP detection
+    let outboundIp = 'unknown';
+    try {
+      const services = [
+        'https://api.ipify.org',
+        'https://ifconfig.me/ip',
+        'https://icanhazip.com'
+      ];
+      
+      for (const service of services) {
+        try {
+          const response = await axios.get(service, { timeout: 5000 });
+          outboundIp = response.data.trim();
+          break;
+        } catch (err) {
+          console.log(`Could not get IP from ${service}: ${err.message}`);
+        }
+      }
+    } catch (err) {
+      console.error('Error determining outbound IP:', err.message);
+    }
+    
+    // 3. Database connection test (brief)
+    let dbStatus = 'not_tested';
+    let dbError = null;
+    
+    try {
+      // This won't re-establish a connection if one exists
+      const db = await database.initDatabase();
+      if (db && db.$queryRaw) {
+        const result = await db.$queryRaw`SELECT 1 as connected`;
+        dbStatus = result[0].connected === 1 ? 'connected' : 'error';
+      } else {
+        dbStatus = 'mock_database';
+      }
+    } catch (err) {
+      dbStatus = 'error';
+      dbError = err.message;
+    }
+    
+    // 4. Network diagnostics
+    const networkDiagnostics = {
+      outboundIp,
+      allowedIps: [
+        '35.180.39.82/32',
+        '35.181.114.243/32',
+        '35.181.155.97/32',
+        '52.59.103.54/32',
+        '34.242.126.209/32',
+        '52.19.145.128/32',
+        '52.19.123.36/32'
+      ],
+      rdsHost: process.env.DATABASE_URL ? 
+        new URL(process.env.DATABASE_URL).hostname : 
+        'cvbuilder-db.c1augguy6rx8.eu-central-1.rds.amazonaws.com'
+    };
+    
+    // 5. Environment variables (sanitized)
+    const envVars = {
+      NODE_ENV: process.env.NODE_ENV,
+      PORT: process.env.PORT,
+      RENDER: process.env.RENDER,
+      DATABASE_URL: process.env.DATABASE_URL ? '[masked]' : undefined,
+      FRONTEND_URL: process.env.FRONTEND_URL,
+      SKIP_AUTH_CHECK: process.env.SKIP_AUTH_CHECK,
+      MOCK_DATABASE: process.env.MOCK_DATABASE
+    };
+    
+    // Combine all diagnostics
+    const diagnostics = {
+      serverInfo,
+      networkDiagnostics,
+      database: {
+        status: dbStatus,
+        error: dbError
+      },
+      environment: envVars
+    };
+    
+    res.json(diagnostics);
+  } catch (error) {
+    res.status(500).json({
+      error: 'Diagnostics failed',
+      message: error.message
+    });
+  }
 });
 
 // Server startup function with improved error handling
