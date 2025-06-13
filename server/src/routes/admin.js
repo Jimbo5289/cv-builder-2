@@ -1,71 +1,136 @@
+/**
+ * Admin Routes
+ * 
+ * This module provides endpoints for administrative operations.
+ * These endpoints are restricted to admin users only.
+ */
+
 const express = require('express');
 const router = express.Router();
+const { PrismaClient } = require('@prisma/client');
 const authMiddleware = require('../middleware/auth');
 
-// Require authentication for all admin routes
-router.use(authMiddleware);
+// Initialize Prisma client
+const prisma = new PrismaClient();
 
-// Admin-only middleware
-const requireAdmin = (req, res, next) => {
-  // Check if the user is authenticated and has admin role
-  if (!req.user) {
-    return res.status(401).json({ error: 'Authentication required' });
+/**
+ * Admin authentication middleware
+ * Checks if the authenticated user has admin privileges
+ */
+const adminAuth = async (req, res, next) => {
+  try {
+    // Skip admin check in development mode if configured
+    if (process.env.SKIP_AUTH_CHECK === 'true' && process.env.NODE_ENV === 'development') {
+      console.log('Warning: Skipping admin authentication check in development mode');
+      return next();
+    }
+    
+    // Check if user exists and is an admin
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, isAdmin: true }
+    });
+    
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ error: 'Admin privileges required' });
+    }
+    
+    next();
+  } catch (error) {
+    console.error('Admin authentication error:', error);
+    res.status(500).json({ error: 'Admin authentication failed' });
   }
-  
-  if (!req.user.isAdmin && req.user.email !== 'james@theideasworkshop.co.uk') {
-    return res.status(403).json({ error: 'Admin access required' });
-  }
-  
-  next();
 };
 
-// Apply admin check for all routes
-router.use(requireAdmin);
-
-// Get server status and configuration
-router.get('/status', async (req, res) => {
+/**
+ * @route GET /api/admin/dashboard
+ * @desc Get admin dashboard data
+ * @access Admin only
+ */
+router.get('/dashboard', authMiddleware, adminAuth, async (req, res) => {
   try {
-    return res.status(200).json({
-      status: 'operational',
-      version: process.env.npm_package_version || 'unknown',
-      environment: process.env.NODE_ENV || 'development',
-      serverTime: new Date().toISOString()
+    // Get user statistics
+    const userCount = await prisma.user.count();
+    const activeUsers = await prisma.user.count({
+      where: { isActive: true }
+    });
+    
+    // Get CV statistics
+    const cvCount = await prisma.cV.count();
+    
+    // Get subscription statistics
+    const activeSubscriptions = await prisma.subscription.count({
+      where: { status: 'active' }
+    });
+    
+    res.status(200).json({
+      users: {
+        total: userCount,
+        active: activeUsers
+      },
+      cvs: {
+        total: cvCount
+      },
+      subscriptions: {
+        active: activeSubscriptions
+      }
     });
   } catch (error) {
-    console.error('Error getting server status:', error);
-    return res.status(500).json({ error: 'Failed to get server status' });
+    console.error('Admin dashboard error:', error);
+    res.status(500).json({ error: 'Failed to retrieve admin dashboard data' });
   }
 });
 
-// Update AWS security group with current Render IP
-router.post('/update-security-group', async (req, res) => {
+/**
+ * @route GET /api/admin/users
+ * @desc Get all users (paginated)
+ * @access Admin only
+ */
+router.get('/users', authMiddleware, adminAuth, async (req, res) => {
   try {
-    // Dynamically import the update script
-    let updateSecurityGroupWithRenderIPs;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
     
-    try {
-      ({ updateSecurityGroupWithRenderIPs } = require('../../scripts/update-render-ips'));
-    } catch (importError) {
-      console.error('Error importing security group update script:', importError);
-      return res.status(500).json({ 
-        error: 'Security group update script not available', 
-        message: importError.message 
-      });
-    }
+    const users = await prisma.user.findMany({
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+        isActive: true,
+        lastLogin: true,
+        _count: {
+          select: {
+            cvs: true,
+            subscriptions: true
+          }
+        }
+      }
+    });
     
-    // Run the update
-    await updateSecurityGroupWithRenderIPs();
+    const totalUsers = await prisma.user.count();
     
-    return res.status(200).json({ 
-      success: true, 
-      message: 'Security group update initiated. Check server logs for details.' 
+    res.status(200).json({
+      users,
+      pagination: {
+        total: totalUsers,
+        page,
+        limit,
+        pages: Math.ceil(totalUsers / limit)
+      }
     });
   } catch (error) {
-    console.error('Error triggering security group update:', error);
-    return res.status(500).json({ 
-      error: 'Failed to update security group', 
-      message: error.message 
-    });
+    console.error('Admin users list error:', error);
+    res.status(500).json({ error: 'Failed to retrieve users list' });
   }
 });
 

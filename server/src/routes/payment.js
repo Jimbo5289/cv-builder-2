@@ -1,7 +1,7 @@
 /* eslint-disable */
 const express = require('express');
 const router = express.Router();
-const { stripe } = require('../config/stripe');
+const { stripe } = require('../../config/stripe.cjs');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const PDFDocument = require('pdfkit');

@@ -21,6 +21,8 @@ const http = require('http');
 const net = require('net');
 const { exec } = require('child_process');
 const userRoutes = require('./routes/user');
+const healthRoutes = require('./routes/health');
+const adminRoutes = require('./routes/admin');
 
 // Try to import fix-database, but don't fail if it's not available
 let ensureDevUser;
@@ -121,19 +123,18 @@ app.use((err, req, res, next) => {
 // Security setup (after CORS)
 setupSecurity(app);
 
-// Dynamic import of stripe
-(async () => {
-  try {
-    const stripe = await import('../config/stripe.js');
-    if (stripe) {
-      logger.info('Stripe service initialized successfully');
-    } else {
-      logger.warn('Stripe service not initialized - payment features will be limited');
-    }
-  } catch (error) {
-    logger.error('Failed to initialize Stripe service:', error);
+// Import Stripe configuration
+try {
+  const stripeConfig = require('../config/stripe.cjs');
+  if (stripeConfig && stripeConfig.stripe) {
+    logger.info('Stripe service initialized successfully');
+    global.stripeService = stripeConfig; // Make it available globally
+  } else {
+    logger.warn('Stripe service not initialized - payment features will be limited');
   }
-})();
+} catch (error) {
+  logger.error('Failed to initialize Stripe service:', error);
+}
 
 // Set global middleware options
 app.use((req, res, next) => {
@@ -555,6 +556,30 @@ app.get('/api/debug/env', (req, res) => {
   res.json(environment);
 });
 
+// Import modules for API documentation if available
+let swaggerUi, YAML;
+try {
+  swaggerUi = require('swagger-ui-express');
+  YAML = require('yamljs');
+} catch (error) {
+  logger.warn('API documentation dependencies not available. Docs will not be served.');
+}
+
+// Setup API documentation if dependencies are available
+if (swaggerUi && YAML) {
+  try {
+    const swaggerDocument = YAML.load(path.join(__dirname, '../openapi.yaml'));
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+      explorer: true,
+      customCss: '.swagger-ui .topbar { display: none }',
+      customSiteTitle: 'CV Builder API Documentation',
+    }));
+    logger.info('API documentation available at /api-docs');
+  } catch (error) {
+    logger.error('Failed to load API documentation:', error);
+  }
+}
+
 // Server startup function with improved error handling
 const startServer = async () => {
   try {
@@ -565,13 +590,18 @@ const startServer = async () => {
         logger.info('HTTP server closed');
 
         // Close database connection
-        database.disconnect().then(() => {
-          logger.info('Database connection closed');
+        if (database.disconnectDatabase && typeof database.disconnectDatabase === 'function') {
+          database.disconnectDatabase().then(() => {
+            logger.info('Database connection closed');
+            process.exit(0);
+          }).catch(err => {
+            logger.error('Error closing database connection:', err);
+            process.exit(1);
+          });
+        } else {
+          logger.info('No database disconnect method available, exiting anyway');
           process.exit(0);
-        }).catch(err => {
-          logger.error('Error closing database connection:', err);
-          process.exit(1);
-        });
+        }
       });
     };
 

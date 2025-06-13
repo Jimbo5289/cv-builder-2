@@ -1,15 +1,18 @@
+/**
+ * Health Check Routes
+ * 
+ * This module provides endpoints for health checking and status monitoring.
+ * These endpoints are used by monitoring tools and load balancers to verify
+ * that the application is running correctly.
+ */
+
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const os = require('os');
 
-// Create Prisma client with error handling
-let prisma;
-try {
-  prisma = new PrismaClient();
-} catch (e) {
-  console.error('Failed to initialize Prisma client in health routes:', e);
-}
+// Initialize Prisma client
+const prisma = new PrismaClient();
 
 // Function to add CORS headers
 function addCorsHeaders(req, res) {
@@ -20,19 +23,82 @@ function addCorsHeaders(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 }
 
-// Basic health check endpoint
+/**
+ * @route GET /health
+ * @desc Basic health check endpoint
+ * @access Public
+ */
 router.get('/', async (req, res) => {
   addCorsHeaders(req, res);
   try {
-    return res.status(200).json({
-      status: 'ok',
-      message: 'Server is running',
+    // Return simple OK response
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  } catch (error) {
+    console.error('Health check error:', error);
+    addCorsHeaders(req, res);
+    res.status(500).json({ status: 'error', message: 'Health check failed' });
+  }
+});
+
+/**
+ * @route GET /health/db
+ * @desc Database connection health check
+ * @access Public
+ */
+router.get('/db', async (req, res) => {
+  try {
+    // Test database connection
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({ 
+      status: 'ok', 
+      database: 'connected',
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Error in health check:', error);
-    addCorsHeaders(req, res);
-    return res.status(500).json({ error: 'Health check failed' });
+    console.error('Database health check error:', error);
+    res.status(500).json({ 
+      status: 'error', 
+      database: 'disconnected',
+      message: 'Database connection failed',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+/**
+ * @route GET /health/full
+ * @desc Comprehensive health check of all system components
+ * @access Public
+ */
+router.get('/full', async (req, res) => {
+  try {
+    // Check database connection
+    let dbStatus = 'error';
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      dbStatus = 'ok';
+    } catch (dbError) {
+      console.error('Database health check error:', dbError);
+    }
+
+    // Return comprehensive health status
+    res.status(dbStatus === 'ok' ? 200 : 500).json({
+      status: dbStatus === 'ok' ? 'ok' : 'error',
+      components: {
+        server: 'ok',
+        database: dbStatus,
+      },
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  } catch (error) {
+    console.error('Full health check error:', error);
+    res.status(500).json({ 
+      status: 'error', 
+      message: 'Health check failed',
+      timestamp: new Date().toISOString()
+    });
   }
 });
 
@@ -105,31 +171,6 @@ router.get('/status', async (req, res) => {
   } catch (error) {
     console.error('Error in detailed health check:', error);
     return res.status(500).json({ error: 'Detailed health check failed' });
-  }
-});
-
-// Database connectivity test
-router.get('/db', async (req, res) => {
-  try {
-    if (!prisma) {
-      return res.status(500).json({ error: 'Prisma client not initialized' });
-    }
-    
-    // Attempt a simple database query
-    const result = await prisma.$queryRaw`SELECT NOW() as server_time`;
-    
-    return res.status(200).json({
-      status: 'ok',
-      message: 'Database connection successful',
-      serverTime: result[0]?.server_time || new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('Database health check failed:', error);
-    return res.status(503).json({
-      status: 'error',
-      message: 'Database connection failed',
-      error: error.message
-    });
   }
 });
 

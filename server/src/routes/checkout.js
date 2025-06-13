@@ -1,7 +1,7 @@
 /* eslint-disable */
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
-const { stripe } = require('../config/stripe');
+const { stripe } = require('../../config/stripe.cjs');
 const authMiddleware = require('../middleware/auth');
 const { logger } = require('../config/logger');
 const { sendSuccess, sendError, asyncHandler } = require('../utils/responseHandler');

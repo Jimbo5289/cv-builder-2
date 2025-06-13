@@ -1,7 +1,7 @@
 /* eslint-disable */
 const express = require('express');
 const router = express.Router();
-const { stripe, verifyWebhookSignature } = require('../config/stripe');
+const { stripe, verifyWebhookSignature } = require('../../config/stripe.cjs');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const emailService = require('../services/emailService');

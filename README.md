@@ -34,6 +34,9 @@ cd cv-builder-2
 npm install
 cd server && npm install && cd ..
 
+# Set up environment files
+./setup-env.sh
+
 # Start the application with the reliable script
 node start-reliable.js
 ```
@@ -45,6 +48,19 @@ This will:
 4. Connect everything correctly
 
 Then open http://localhost:5173 in your browser.
+
+## Environment Setup
+
+Before running the application, you need to set up your environment variables:
+
+1. Run the setup script to create environment files:
+   ```bash
+   ./setup-env.sh
+   ```
+
+2. Edit the following files with your actual credentials:
+   - `.env` - Frontend environment variables
+   - `server/.env` - Backend environment variables
 
 ## Manual Setup
 
@@ -86,6 +102,18 @@ cd cv-builder-2
 npm run dev -- --port 5173
 ```
 
+## API Documentation
+
+The project includes OpenAPI documentation for the backend API:
+
+1. Start the documentation server:
+   ```bash
+   cd server
+   npm run docs
+   ```
+
+2. Open http://localhost:3006/api-docs in your browser to view the API documentation.
+
 ## Troubleshooting
 
 ### Port Conflicts
@@ -126,6 +154,7 @@ cv-builder/
 │   │   ├── routes/     # API routes
 │   │   ├── middleware/ # Express middlewares
 │   │   └── index.js    # Server entry point
+│   ├── openapi.yaml    # API documentation
 │   └── development.env # Development environment variables
 │
 ├── package.json        # Frontend dependencies and scripts
@@ -144,8 +173,9 @@ cv-builder/
 
 - **Backend**:
   - Node.js with Express
-  - Mock database for development
+  - PostgreSQL with Prisma ORM
   - JWT for authentication
+  - Stripe for payment processing
 
 ## License
 

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "CV Builder Backend Server",
   "main": "src/index.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node debug-ip.js && node src/index.js",
     "dev": "npx nodemon src/index.js",
@@ -19,7 +20,8 @@
     "debug:port": "node debug-port.js",
     "debug:rds": "node debug-rds.js",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org=${SENTRY_ORG} --project=cv-builder-server ./dist && sentry-cli sourcemaps upload --org=${SENTRY_ORG} --project=cv-builder-server ./dist",
-    "update-render-ips": "node scripts/update-render-ips.js"
+    "update-render-ips": "node scripts/update-render-ips.js",
+    "docs": "node src/docs/serve-docs.js"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -54,8 +56,10 @@
     "qrcode": "^1.5.4",
     "speakeasy": "^2.0.0",
     "stripe": "^14.25.0",
+    "swagger-ui-express": "^5.0.0",
     "winston": "^3.11.0",
     "ws": "^8.18.2",
+    "yamljs": "^0.3.0",
     "zod": "^3.24.4",
     "@aws-sdk/client-ec2": "^3.536.0"
   },
