@@ -69,19 +69,19 @@ const app = express();
 // Create HTTP server - must be created BEFORE expressWs is called
 const server = http.createServer(app);
 
-// Dynamic import of express-ws
-(async () => {
-  try {
-    const expressWs = await import('express-ws');
-    if (expressWs && typeof expressWs.default === 'function') {
-      expressWs.default(app, server);
-    } else {
-      logger.warn('expressWs is not a function, WebSocket features may be limited');
-    }
-  } catch (error) {
-    logger.error('Failed to initialize expressWs:', error);
+// Use regular require instead of dynamic import for express-ws
+let expressWs;
+try {
+  expressWs = require('express-ws');
+  if (expressWs && typeof expressWs === 'function') {
+    expressWs(app, server);
+    logger.info('WebSocket support initialized successfully');
+  } else {
+    logger.warn('expressWs is not a function, WebSocket features may be limited');
   }
-})();
+} catch (error) {
+  logger.error('Failed to initialize expressWs:', error);
+}
 
 // Initialize Sentry request handler (must be the first middleware)
 if (Sentry) {
@@ -590,8 +590,8 @@ const startServer = async () => {
         logger.info('HTTP server closed');
 
         // Close database connection
-        if (database.disconnectDatabase && typeof database.disconnectDatabase === 'function') {
-          database.disconnectDatabase().then(() => {
+        if (database.closeDatabase && typeof database.closeDatabase === 'function') {
+          database.closeDatabase().then(() => {
             logger.info('Database connection closed');
             process.exit(0);
           }).catch(err => {

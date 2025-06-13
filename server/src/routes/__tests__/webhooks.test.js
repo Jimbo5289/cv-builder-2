@@ -1,7 +1,7 @@
 const express = require('express');
 const request = require('supertest');
 const stripe = require('stripe');
-const database = require('../../../config/database');
+const { initDatabase, closeDatabase } = require('../../config/database');
 const webhookRoutes = require('../webhooks');
 
 // Mock Stripe
@@ -31,27 +31,28 @@ jest.mock('stripe', () => {
 describe('Webhook Routes', () => {
   let app;
   let server;
+  let dbClient;
 
   beforeAll(async () => {
     app = express();
-    app.use('/webhooks', webhookRoutes);
-    server = app.listen(3000);
-    await database.connect();
+    app.use('/api/webhooks', webhookRoutes);
+    server = app.listen(3002);
+    dbClient = await initDatabase();
   });
 
   afterAll(async () => {
-    await database.disconnect();
-    server.close();
+    await closeDatabase();
+    await new Promise(resolve => server.close(resolve));
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('POST /webhooks/stripe', () => {
+  describe('POST /api/webhooks/stripe', () => {
     it('should process a valid webhook event', async () => {
       const response = await request(app)
-        .post('/webhooks/stripe')
+        .post('/api/webhooks/stripe')
         .set('Stripe-Signature', 'valid_signature')
         .send({});
 
@@ -61,7 +62,7 @@ describe('Webhook Routes', () => {
 
     it('should return 400 for missing signature', async () => {
       const response = await request(app)
-        .post('/webhooks/stripe')
+        .post('/api/webhooks/stripe')
         .send({});
 
       expect(response.status).toBe(400);
@@ -78,7 +79,7 @@ describe('Webhook Routes', () => {
       }));
 
       const response = await request(app)
-        .post('/webhooks/stripe')
+        .post('/api/webhooks/stripe')
         .set('Stripe-Signature', 'invalid_signature')
         .send({});
 
