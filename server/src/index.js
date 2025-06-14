@@ -247,6 +247,21 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Add a simple root route handler
+app.get('/', (req, res) => {
+  res.status(200).json({
+    message: 'CV Builder API Server',
+    status: 'running',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      api: '/api',
+      docs: '/api-docs'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Status endpoint with auth for testing authentication
 app.get('/status', authMiddleware, (req, res) => {
   res.json({ 
