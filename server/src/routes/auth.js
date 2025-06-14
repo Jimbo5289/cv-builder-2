@@ -501,9 +501,8 @@ router.post('/logout', auth, async (req, res) => {
 // Get current user
 router.get('/me', auth, async (req, res) => {
   try {
-    // Since we're in development mode, return the mock user from req.user
-    // instead of trying to query the database
-    if (process.env.NODE_ENV === 'development' || process.env.MOCK_DATABASE === 'true') {
+    // Only use mock mode in local development, never in production
+    if (process.env.NODE_ENV === 'development' && process.env.MOCK_DATABASE === 'true') {
       const mockUser = {
         id: req.user.id,
         email: req.user.email,
@@ -698,9 +697,8 @@ router.get('/user/:id', async (req, res) => {
 // Get user profile
 router.get('/profile', auth, async (req, res) => {
   try {
-    // Since we're in development mode, return the mock user from req.user
-    // instead of trying to query the database
-    if (process.env.NODE_ENV === 'development' || process.env.MOCK_DATABASE === 'true') {
+    // Only use mock mode in local development, never in production
+    if (process.env.NODE_ENV === 'development' && process.env.MOCK_DATABASE === 'true') {
       const mockUser = {
         id: req.user.id,
         email: req.user.email,
