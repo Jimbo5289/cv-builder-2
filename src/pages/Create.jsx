@@ -172,27 +172,6 @@ function Create() {
     loadExistingCV();
   }, [cvId, user, serverUrl]);
 
-  // Separate effect to handle user data loading after component mount
-  useEffect(() => {
-    console.log('User data changed:', { user, phone: user?.phone });
-    
-    // If we have user data but no form data yet (and no CV is being loaded)
-    if (user && !isLoadingCV && !cvId && 
-        (!formData.personalInfo.fullName && !formData.personalInfo.email && !formData.personalInfo.phone)) {
-      console.log('User loaded after component mount - populating form with user data');
-      setFormData(prev => ({
-        ...prev,
-        personalInfo: {
-          fullName: user.name || '',
-          email: user.email || '',
-          phone: user.phone || '',
-          location: '',
-          socialNetwork: ''
-        }
-      }));
-    }
-  }, [user, isLoadingCV, cvId, formData.personalInfo.fullName, formData.personalInfo.email, formData.personalInfo.phone]);
-
   const handleInputChange = (section, field, value) => {
     setFormData(prev => ({
       ...prev,
