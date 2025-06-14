@@ -69,6 +69,12 @@ const app = express();
 // Create HTTP server - must be created BEFORE expressWs is called
 const server = http.createServer(app);
 
+// Use the PORT provided by Render's environment variable
+const PORT = process.env.PORT || 10000;
+
+// Log the port we're using
+logger.info(`Using PORT from environment: ${process.env.PORT || 'fallback to 10000'}`);
+
 // Use regular require instead of dynamic import for express-ws
 let expressWs;
 try {
@@ -262,7 +268,6 @@ app.get('/status', authMiddleware, (req, res) => {
 
 // Constants for serving frontend
 const NODE_ENV = process.env.NODE_ENV || 'development';
-let PORT = process.env.PORT || 3005;
 let FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const DIST_DIR = path.join(__dirname, '../../dist');
 
@@ -657,9 +662,6 @@ const startServer = async () => {
     // In production, don't check port or try to kill processes
     if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
       // Ensure we're using the PORT from environment variable
-      PORT = process.env.PORT || PORT;
-      
-      // Make sure PORT is treated as a number
       const portNum = parseInt(PORT, 10);
       
       // Log special for Render detection
@@ -693,7 +695,7 @@ const startServer = async () => {
       const portAvailable = await checkPort(PORT);
       if (!portAvailable) {
         logger.warn(`Could not free up port ${PORT}. Using alternative port ${PORT + 1}`);
-        PORT = PORT + 1;
+        const portNum = parseInt(PORT, 10) + 1;
       }
 
       // Start the server
