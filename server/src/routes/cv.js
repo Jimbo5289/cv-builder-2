@@ -348,7 +348,8 @@ router.get('/:id', authMiddleware, validateCVOwnership, async (req, res) => {
           fullName: req.user.name || 'Development User',
           email: req.user.email || 'dev@example.com',
           phone: '123-456-7890',
-          location: 'London, UK'
+          location: 'London, UK',
+          socialNetwork: 'https://linkedin.com/in/development-user'
         },
         personalStatement: "Experienced professional with a proven track record in software development and project management.",
         skills: [
@@ -427,7 +428,8 @@ router.get('/:id', authMiddleware, validateCVOwnership, async (req, res) => {
             fullName: req.user.name || 'Development User',
             email: req.user.email || 'dev@example.com',
             phone: '123-456-7890',
-            location: 'London, UK'
+            location: 'London, UK',
+            socialNetwork: 'https://linkedin.com/in/development-user'
           },
           personalStatement: "Experienced professional with a proven track record in software development and project management. Adept at delivering high-quality solutions and leading cross-functional teams to achieve business objectives. Seeking to leverage my technical expertise and leadership skills in a challenging role.",
           skills: [
@@ -524,12 +526,14 @@ router.get('/:id', authMiddleware, validateCVOwnership, async (req, res) => {
         fullName: parsedContent.personalInfo.fullName || '',
         email: parsedContent.personalInfo.email || '',
         phone: parsedContent.personalInfo.phone || '',
-        location: parsedContent.personalInfo.location || ''
+        location: parsedContent.personalInfo.location || '',
+        socialNetwork: parsedContent.personalInfo.socialNetwork || ''
       } : {
         fullName: '',
         email: '',
         phone: '',
-        location: ''
+        location: '',
+        socialNetwork: ''
       },
       personalStatement: parsedContent.personalStatement || '',
       skills: Array.isArray(parsedContent.skills) ? parsedContent.skills.map(skill => ({
