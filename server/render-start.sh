@@ -38,4 +38,4 @@ echo "STARTING SERVER DIRECTLY"
 echo "==================================================="
 
 # Start the server directly
-cd server && node src/index.js 
+node src/index.js 
