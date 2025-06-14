@@ -75,7 +75,6 @@ export default function PricingSection() {
       name: 'Pay-Per-CV',
       price: 4.99,
       interval: 'one-time',
-      priceId: 'price_pay_per_cv',
       features: [
         'Optimized CV tailored to job spec',
         'Access to premium template designs',
@@ -90,7 +89,6 @@ export default function PricingSection() {
       name: '24-Hour Access Pass',
       price: 9.99,
       interval: 'one-time',
-      priceId: 'price_24hour_access',
       features: [
         'Full access for 24 hours',
         'Advanced AI feedback & analysis',
@@ -106,7 +104,6 @@ export default function PricingSection() {
       name: 'Monthly Subscription',
       price: 9.99,
       interval: 'month',
-      priceId: 'price_monthly',
       features: [
         'Unlimited CV generations',
         'Advanced AI analysis & feedback',
@@ -123,7 +120,6 @@ export default function PricingSection() {
       name: 'Yearly Subscription',
       price: 79,
       interval: 'year',
-      priceId: 'price_annual',
       features: [
         'Everything in Monthly Subscription',
         'Early access to new features',
@@ -208,26 +204,16 @@ export default function PricingSection() {
       // Determine checkout data based on plan type
       let checkoutData = {};
       
-      if (plan.priceId) {
-        // If plan has a direct priceId, use it
-        checkoutData = { priceId: plan.priceId };
-        
-        // Add plan-specific metadata
-        if (plan.name === 'Pay-Per-CV') {
-          checkoutData.planType = 'pay-per-cv';
-        } else if (plan.name === '24-Hour Access Pass') {
-          checkoutData.planType = '24hour-access';
-          checkoutData.accessDuration = '24hours';
-        } else if (plan.interval === 'month' || plan.interval === 'year') {
-          checkoutData.planType = 'subscription';
-          checkoutData.planInterval = plan.interval === 'month' ? 'monthly' : 'annual';
-        }
-      } else {
-        // Fall back to using interval for subscription plans
-        checkoutData = { 
-          planInterval: plan.interval === 'month' ? 'monthly' : 'annual',
-          planType: 'subscription'
-        };
+      // Don't send priceId - let backend map the correct price ID
+      // Add plan-specific metadata
+      if (plan.name === 'Pay-Per-CV') {
+        checkoutData.planType = 'pay-per-cv';
+      } else if (plan.name === '24-Hour Access Pass') {
+        checkoutData.planType = '24hour-access';
+        checkoutData.accessDuration = '24hours';
+      } else if (plan.interval === 'month' || plan.interval === 'year') {
+        checkoutData.planType = 'subscription';
+        checkoutData.planInterval = plan.interval === 'month' ? 'monthly' : 'annual';
       }
 
       console.log('Sending checkout request with data:', checkoutData);
