@@ -12,8 +12,11 @@ function Create() {
   const navigate = useNavigate();
   const { user, getAuthHeader } = useAuth();
   const templateId = searchParams.get('template') || '1'; // Default to template 1 if not specified
+  const cvId = searchParams.get('cvId'); // Check if we're editing an existing CV
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingCV, setIsLoadingCV] = useState(false);
   const [error, setError] = useState('');
+  const [currentCvId, setCurrentCvId] = useState(cvId);
   const [formData, setFormData] = useState({
     personalInfo: {
       fullName: '',
@@ -25,28 +28,115 @@ function Create() {
   });
   const { serverUrl } = useServer();
 
+  // Load existing CV data if available
   useEffect(() => {
-    if (user) {
-      // Initialize form with user data if available
-      setFormData(prev => ({
-        ...prev,
-        personalInfo: {
-          ...prev.personalInfo,
-          fullName: user.name || '',
-          email: user.email || '',
-          // Make sure we have a properly formatted phone number with country code
-          phone: user.phone && user.phone.trim() ? user.phone : '+44 ' // Default to UK if no phone provided
+    const loadExistingCV = async () => {
+      try {
+        setIsLoadingCV(true);
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        let cvToLoad = null;
+
+        if (cvId) {
+          // If cvId is provided, load that specific CV
+          console.log('Loading specific CV with ID:', cvId);
+          const response = await fetch(`${serverUrl}/api/cv/${cvId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (response.ok) {
+            cvToLoad = await response.json();
+            console.log('Loaded specific CV:', cvToLoad);
+          }
+        } else {
+          // If no cvId, find the most recent CV
+          console.log('No cvId provided, looking for most recent CV');
+          const response = await fetch(`${serverUrl}/api/cv/user/all`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (response.ok) {
+            const allCVs = await response.json();
+            console.log('All user CVs:', allCVs);
+            
+            if (allCVs && allCVs.length > 0) {
+              // Get the most recent CV (they're already ordered by updatedAt desc)
+              const mostRecentCV = allCVs[0];
+              console.log('Found most recent CV:', mostRecentCV);
+              
+              // Load the full CV data
+              const cvResponse = await fetch(`${serverUrl}/api/cv/${mostRecentCV.id}`, {
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              });
+
+              if (cvResponse.ok) {
+                cvToLoad = await cvResponse.json();
+                setCurrentCvId(mostRecentCV.id);
+                console.log('Loaded most recent CV data:', cvToLoad);
+              }
+            }
+          }
         }
-      }));
-      
-      // Log for debugging
-      console.log('Initializing contact form with user data:', {
-        name: user.name,
-        email: user.email,
-        phone: user.phone
-      });
-    }
-  }, [user]);
+
+        // If we have CV data, populate the form
+        if (cvToLoad && cvToLoad.personalInfo) {
+          console.log('Populating form with CV data:', cvToLoad.personalInfo);
+          setFormData(prev => ({
+            ...prev,
+            personalInfo: {
+              fullName: cvToLoad.personalInfo.fullName || '',
+              email: cvToLoad.personalInfo.email || '',
+              phone: cvToLoad.personalInfo.phone || '',
+              location: cvToLoad.personalInfo.location || '',
+              socialNetwork: cvToLoad.personalInfo.socialNetwork || ''
+            }
+          }));
+          
+          toast.success('Loaded your existing CV data');
+        } else {
+          // No existing CV found, initialize with user profile data
+          console.log('No existing CV found, using user profile data');
+          if (user) {
+            setFormData(prev => ({
+              ...prev,
+              personalInfo: {
+                ...prev.personalInfo,
+                fullName: user.name || '',
+                email: user.email || '',
+                phone: user.phone && user.phone.trim() ? user.phone : '+44 '
+              }
+            }));
+          }
+        }
+
+      } catch (err) {
+        console.error('Error loading existing CV:', err);
+        // Fallback to user profile data
+        if (user) {
+          setFormData(prev => ({
+            ...prev,
+            personalInfo: {
+              ...prev.personalInfo,
+              fullName: user.name || '',
+              email: user.email || '',
+              phone: user.phone && user.phone.trim() ? user.phone : '+44 '
+            }
+          }));
+        }
+      } finally {
+        setIsLoadingCV(false);
+      }
+    };
+
+    loadExistingCV();
+  }, [cvId, user, serverUrl]);
 
   const handleInputChange = (section, field, value) => {
     setFormData(prev => ({
@@ -89,19 +179,25 @@ function Create() {
     setError('');
 
     try {
-      console.log('Saving CV with templateId:', templateId);
+      console.log('Saving CV with templateId:', templateId, 'currentCvId:', currentCvId);
       
-      // No special phone formatting - just send as is
+      const requestBody = {
+        templateId: templateId,
+        personalInfo: formData.personalInfo
+      };
+
+      // If we have an existing CV ID, include it to update rather than create new
+      if (currentCvId) {
+        requestBody.cvId = currentCvId;
+      }
+
       const response = await fetch(`${serverUrl}/api/cv/save`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...getAuthHeader()
         },
-        body: JSON.stringify({
-          templateId: templateId,
-          personalInfo: formData.personalInfo
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -116,6 +212,9 @@ function Create() {
       if (!data.cv || !data.cv.id) {
         throw new Error('Server did not return a valid CV ID');
       }
+      
+      // Update our current CV ID
+      setCurrentCvId(data.cv.id);
       
       toast.success('Personal information saved successfully');
       navigate(`/create/personal-statement?cvId=${data.cv.id}`);
@@ -132,6 +231,19 @@ function Create() {
     }
   };
 
+  if (isLoadingCV) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl bg-gray-50 dark:bg-gray-900">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2c3e50] dark:border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-300">Loading your CV data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl bg-gray-50 dark:bg-gray-900">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
@@ -141,8 +253,13 @@ function Create() {
             Personal Information
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
-            Let's start with your contact details
+            {currentCvId ? 'Update your contact details' : "Let's start with your contact details"}
           </p>
+          {currentCvId && (
+            <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
+              ✓ Continuing your existing CV
+            </p>
+          )}
         </div>
 
         {/* Contact Information Section */}

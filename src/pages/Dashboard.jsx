@@ -1,10 +1,65 @@
 /* eslint-disable */
 import { useAuth } from '../context/AuthContext';
+import { useServer } from '../context/ServerContext';
 import CVUploader from '../components/CVUploader';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { serverUrl } = useServer();
+  const [mostRecentCV, setMostRecentCV] = useState(null);
+  const [isLoadingCVs, setIsLoadingCVs] = useState(true);
+
+  // Load user's most recent CV to check if they have one in progress
+  useEffect(() => {
+    const loadRecentCV = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setIsLoadingCVs(false);
+          return;
+        }
+
+        const response = await fetch(`${serverUrl}/api/cv/user/all`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const allCVs = await response.json();
+          if (allCVs && allCVs.length > 0) {
+            // Get the most recent CV (they're already ordered by updatedAt desc)
+            setMostRecentCV(allCVs[0]);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading recent CV:', err);
+      } finally {
+        setIsLoadingCVs(false);
+      }
+    };
+
+    loadRecentCV();
+  }, [serverUrl]);
+
+  // Determine if the most recent CV is incomplete (missing key sections)
+  const isIncompleteCV = (cv) => {
+    if (!cv || !cv.sectionsPresent) return false;
+    
+    // Consider CV incomplete if it's missing essential sections
+    const hasPersonalInfo = cv.sectionsPresent.personalInfo;
+    const hasPersonalStatement = cv.sectionsPresent.personalStatement;
+    const hasSkills = cv.sectionsPresent.skills > 0;
+    const hasExperience = cv.sectionsPresent.experiences > 0;
+    
+    // CV is incomplete if it's missing multiple key sections
+    const completedSections = [hasPersonalInfo, hasPersonalStatement, hasSkills, hasExperience].filter(Boolean).length;
+    return completedSections < 3; // Less than 3 out of 4 key sections
+  };
+
+  const shouldShowContinue = mostRecentCV && isIncompleteCV(mostRecentCV);
 
   return (
     <div className="container mx-auto px-4 pt-12 pb-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -30,12 +85,34 @@ export default function Dashboard() {
               >
                 View Saved CVs
               </Link>
-              <Link
-                to="/create"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#E78F81] hover:bg-[#d36e62] dark:bg-[#d36e62] dark:hover:bg-[#c65c50] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] dark:focus:ring-[#d36e62] dark:focus:ring-offset-gray-900"
-              >
-                Create New CV
-              </Link>
+              
+              {isLoadingCVs ? (
+                <div className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-400 bg-gray-200 dark:bg-gray-600">
+                  Loading...
+                </div>
+              ) : shouldShowContinue ? (
+                <div className="flex gap-2">
+                  <Link
+                    to={`/create?cvId=${mostRecentCV.id}`}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:focus:ring-green-400 dark:focus:ring-offset-gray-900"
+                  >
+                    Continue CV ({mostRecentCV.title || 'In Progress'})
+                  </Link>
+                  <Link
+                    to="/create"
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-900"
+                  >
+                    Create New CV
+                  </Link>
+                </div>
+              ) : (
+                <Link
+                  to="/create"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#E78F81] hover:bg-[#d36e62] dark:bg-[#d36e62] dark:hover:bg-[#c65c50] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] dark:focus:ring-[#d36e62] dark:focus:ring-offset-gray-900"
+                >
+                  Create New CV
+                </Link>
+              )}
             </div>
           </div>
         </div>
