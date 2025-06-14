@@ -18,7 +18,7 @@ const swaggerDocument = YAML.load(openApiPath);
 
 // Create Express app
 const app = express();
-const PORT = process.env.DOCS_PORT || 3006;
+const PORT = process.env.PORT || 3000;
 
 // Enable CORS
 app.use(cors());
@@ -36,6 +36,9 @@ app.get('/', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log('===================================================');
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌐 API available at: http://localhost:${PORT}`);
+  console.log('===================================================');
 }); 
