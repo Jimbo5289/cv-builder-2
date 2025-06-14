@@ -101,7 +101,7 @@ const corsMiddleware = createCorsMiddleware({
   origin: [
     'https://cv-builder-2-qkccpu31f-jimbo5289s-projects.vercel.app',
     'http://localhost:5173',
-    'https://cv-builder-backend-2jax.onrender.com'
+    'https://cv-builder-backend-zjax.onrender.com'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
