@@ -799,8 +799,8 @@ router.put('/profile', auth, async (req, res) => {
       });
     }
 
-    // For all development/mock DB scenarios, return success without database queries
-    if (process.env.NODE_ENV === 'development' || process.env.MOCK_DATABASE === 'true') {
+    // Only use mock mode in local development, never in production
+    if (process.env.NODE_ENV === 'development' && process.env.MOCK_DATABASE === 'true') {
       return res.json({
         success: true,
         message: 'Profile updated successfully (dev mode)',
@@ -916,8 +916,8 @@ router.put('/users/profile', auth, async (req, res) => {
       });
     }
 
-    // For all development/mock DB scenarios, return success without database queries
-    if (process.env.NODE_ENV === 'development' || process.env.MOCK_DATABASE === 'true') {
+    // Only use mock mode in local development, never in production
+    if (process.env.NODE_ENV === 'development' && process.env.MOCK_DATABASE === 'true') {
       return res.json({
         success: true,
         message: 'Profile updated successfully (dev mode)',

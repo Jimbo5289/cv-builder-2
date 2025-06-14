@@ -23,8 +23,8 @@ const updateProfileSchema = z.object({
 // Get user profile
 router.get('/profile', auth, async (req, res) => {
   try {
-    // In development mode, return mock user data
-    if (process.env.NODE_ENV === 'development' || process.env.MOCK_DATABASE === 'true') {
+    // Only use mock mode in local development, never in production
+    if (process.env.NODE_ENV === 'development' && process.env.MOCK_DATABASE === 'true') {
       const mockUser = {
         id: req.user.id,
         email: req.user.email || 'dev@example.com',
@@ -99,8 +99,8 @@ router.put('/profile', auth, async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    // In development mode, return mock success
-    if (process.env.NODE_ENV === 'development' || process.env.MOCK_DATABASE === 'true') {
+    // Only use mock mode in local development, never in production
+    if (process.env.NODE_ENV === 'development' && process.env.MOCK_DATABASE === 'true') {
       logger.info('Development mode: Simulating successful profile update', {
         data: validatedData
       });
@@ -224,8 +224,8 @@ router.get('/debug/database-check', auth, async (req, res) => {
 // Get user statistics
 router.get('/stats', auth, async (req, res) => {
   try {
-    // For development mode, return mock data
-    if (process.env.NODE_ENV === 'development' || process.env.MOCK_DATABASE === 'true') {
+    // Only use mock mode in local development, never in production
+    if (process.env.NODE_ENV === 'development' && process.env.MOCK_DATABASE === 'true') {
       logger.info('Using mock statistics data in development mode');
       return res.json({
         cvsCreated: Math.floor(Math.random() * 10) + 1,
