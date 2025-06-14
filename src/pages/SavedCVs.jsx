@@ -13,6 +13,7 @@ export default function SavedCVs() {
   const [error, setError] = useState(null);
   const [selectedCV, setSelectedCV] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (serverStatus === 'connected') {
@@ -83,6 +84,53 @@ export default function SavedCVs() {
       console.error('Error setting up print:', err);
       alert('Failed to prepare CV for printing. Please try downloading instead.');
     }
+  };
+
+  const handleDeleteClick = (cv) => {
+    setSelectedCV(cv);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedCV) return;
+
+    try {
+      setDeleting(true);
+      setError(null);
+
+      const response = await fetch(`${apiUrl}/api/cv/${selectedCV.id}`, {
+        method: 'DELETE',
+        headers: {
+          ...getAuthHeader()
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || errorData.error || 'Failed to delete CV');
+      }
+
+      // Remove the CV from the local state
+      setSavedCVs(prevCVs => prevCVs.filter(cv => cv.id !== selectedCV.id));
+      
+      // Close the modal
+      setShowDeleteModal(false);
+      setSelectedCV(null);
+
+      // Show success message (you could add a toast notification here)
+      console.log('CV deleted successfully');
+
+    } catch (err) {
+      console.error('Error deleting CV:', err);
+      setError(err.message || 'Failed to delete CV. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setSelectedCV(null);
   };
 
   const formatDate = (dateString) => {
@@ -196,6 +244,15 @@ export default function SavedCVs() {
                       <FiEdit className="h-5 w-5" />
                       <span className="ml-1 md:hidden">Edit</span>
                     </Link>
+                    
+                    <button
+                      onClick={() => handleDeleteClick(cv)}
+                      className="inline-flex items-center p-2 text-sm text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                      title="Delete CV"
+                    >
+                      <FiTrash2 className="h-5 w-5" />
+                      <span className="ml-1 md:hidden">Delete</span>
+                    </button>
                   </div>
                 </div>
               ))}
@@ -208,6 +265,60 @@ export default function SavedCVs() {
               >
                 Create New CV
               </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && selectedCV && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+            <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+              <div className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="flex-shrink-0">
+                    <FiTrash2 className="h-6 w-6 text-red-600 dark:text-red-400" />
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                      Delete CV
+                    </h3>
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Are you sure you want to delete "<strong className="text-gray-900 dark:text-white">{selectedCV.title}</strong>"? 
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    This action cannot be undone and the CV will be permanently removed from your account and database.
+                  </p>
+                </div>
+                
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={handleDeleteCancel}
+                    disabled={deleting}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Cancel
+                  </button>
+                  
+                  <button
+                    onClick={handleDeleteConfirm}
+                    disabled={deleting}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                  >
+                    {deleting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Deleting...
+                      </>
+                    ) : (
+                      'Delete CV'
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

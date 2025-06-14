@@ -3818,6 +3818,109 @@ router.post('/debug/test-save', authMiddleware, async (req, res) => {
   }
 });
 
+// Delete a CV
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const cvId = req.params.id;
+    const userId = req.user.id;
+
+    logger.info('CV deletion requested', {
+      cvId,
+      userId
+    });
+
+    // Validate CV ID format
+    if (!cvId || typeof cvId !== 'string') {
+      return res.status(400).json({
+        error: 'Invalid CV ID',
+        message: 'CV ID is required and must be a valid string'
+      });
+    }
+
+    // In development mode with mock database, simulate deletion
+    if (process.env.NODE_ENV === 'development' && process.env.MOCK_DATABASE === 'true') {
+      logger.info('Development mode: Simulating CV deletion', {
+        cvId,
+        userId
+      });
+      
+      return res.json({
+        success: true,
+        message: 'CV deleted successfully (development mode)',
+        cvId
+      });
+    }
+
+    // First, verify the CV exists and belongs to the user
+    const existingCV = await database.client.CV.findFirst({
+      where: {
+        id: cvId,
+        userId: userId
+      },
+      select: {
+        id: true,
+        title: true,
+        userId: true
+      }
+    });
+
+    if (!existingCV) {
+      logger.warn('CV not found or access denied', {
+        cvId,
+        userId,
+        found: !!existingCV
+      });
+      
+      return res.status(404).json({
+        error: 'CV not found',
+        message: 'The CV you are trying to delete does not exist or you do not have permission to delete it'
+      });
+    }
+
+    // Delete the CV (this will also cascade delete any related CVSection records)
+    await database.client.CV.delete({
+      where: {
+        id: cvId
+      }
+    });
+
+    logger.info('CV deleted successfully', {
+      cvId,
+      userId,
+      title: existingCV.title
+    });
+
+    res.json({
+      success: true,
+      message: 'CV deleted successfully',
+      cvId,
+      title: existingCV.title
+    });
+
+  } catch (error) {
+    logger.error('CV deletion error:', {
+      error: error.message,
+      stack: error.stack,
+      cvId: req.params.id,
+      userId: req.user?.id
+    });
+
+    // Handle specific database errors
+    if (error.code === 'P2025') {
+      // Prisma error: Record not found
+      return res.status(404).json({
+        error: 'CV not found',
+        message: 'The CV you are trying to delete does not exist'
+      });
+    }
+
+    res.status(500).json({
+      error: 'Failed to delete CV',
+      message: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred while deleting the CV'
+    });
+  }
+});
+
 // SECURITY: Removed public debug endpoint - this was a security vulnerability
 // that allowed access to any user's CV data without authentication.
 // Use the authenticated /debug/database-check endpoint instead.
