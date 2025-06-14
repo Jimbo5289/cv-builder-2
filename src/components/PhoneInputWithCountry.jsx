@@ -49,25 +49,36 @@ const PhoneInputWithCountry = ({ value, onChange, label, required = false }) => 
       processingRef.current = true;
       previousValueRef.current = value;
 
+      console.log('PhoneInputWithCountry: Parsing value:', value);
+
       if (value) {
-        // Extract country code and phone number from the value
-        const match = value.match(/^(\+\d+)\s(.*)$/);
-        if (match) {
-          setCountryCode(match[1]);
-          setPhoneNumber(match[2]);
-        } else if (value.startsWith('+')) {
-          // Handle case where there's just a country code with no space
-          const codeMatch = value.match(/^(\+\d+)(.*)$/);
-          if (codeMatch) {
-            setCountryCode(codeMatch[1]);
-            setPhoneNumber(codeMatch[2] || '');
-          }
+        // First try to match: +XX XXXXXXXXX (country code + space + number)
+        const spaceMatch = value.match(/^(\+\d{1,4})\s+(.+)$/);
+        if (spaceMatch) {
+          console.log('PhoneInputWithCountry: Matched with space:', spaceMatch);
+          setCountryCode(spaceMatch[1]);
+          setPhoneNumber(spaceMatch[2]);
         } else {
-          // If no country code is detected, use the default and set the entire value as phone number
-          setPhoneNumber(value);
+          // Try to match: +XXXXXXXXXXX (country code directly followed by number)
+          const directMatch = value.match(/^(\+\d{1,4})(.+)$/);
+          if (directMatch) {
+            console.log('PhoneInputWithCountry: Matched direct:', directMatch);
+            setCountryCode(directMatch[1]);
+            setPhoneNumber(directMatch[2]);
+          } else if (value.startsWith('+')) {
+            // Just a country code with no number
+            console.log('PhoneInputWithCountry: Just country code:', value);
+            setCountryCode(value);
+            setPhoneNumber('');
+          } else {
+            // No country code detected, treat as phone number only
+            console.log('PhoneInputWithCountry: No country code, using as phone number:', value);
+            setPhoneNumber(value);
+          }
         }
       } else {
         // Handle empty value case
+        console.log('PhoneInputWithCountry: Empty value, clearing fields');
         setPhoneNumber('');
       }
       
