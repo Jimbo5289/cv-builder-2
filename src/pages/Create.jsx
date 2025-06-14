@@ -29,18 +29,51 @@ function Create() {
   const { serverUrl } = useServer();
 
   // Function to normalize phone number format for CV creation
+  // Converts domestic formats to international format for consistent display
   const normalizePhoneNumber = (phone) => {
     if (!phone) return '';
     
-    // If it's already in international format, return as is
-    if (phone.startsWith('+')) return phone;
+    // Clean the phone number (remove spaces, parentheses, dashes)
+    const cleaned = phone.replace(/[\s\-\(\)]/g, '');
     
-    // If it's UK domestic format (starts with 0), convert to international
-    if (phone.startsWith('0') && phone.length >= 10) {
-      return `+44 ${phone.substring(1)}`;
+    // If it's already in international format, return as is
+    if (cleaned.startsWith('+')) return phone;
+    
+    // Handle different country formats based on common patterns
+    // Note: This covers major markets but isn't exhaustive
+    
+    // UK: 07850680317 → +44 7850680317
+    if (cleaned.match(/^0\d{9,10}$/)) {
+      return `+44 ${cleaned.substring(1)}`;
     }
     
-    // For other formats, return as is
+    // US: 5551234567 → +1 5551234567
+    if (cleaned.match(/^\d{10}$/)) {
+      return `+1 ${cleaned}`;
+    }
+    
+    // US with country code: 15551234567 → +15551234567
+    if (cleaned.match(/^1\d{10}$/)) {
+      return `+${cleaned}`;
+    }
+    
+    // Australia mobile: 0412345678 → +61 412345678
+    if (cleaned.match(/^04\d{8}$/)) {
+      return `+61 ${cleaned.substring(1)}`;
+    }
+    
+    // Germany: 03012345678 or 01751234567 → +49 03012345678
+    if (cleaned.match(/^(030|040|089)\d{7,8}$/) || cleaned.match(/^01[567]\d{7,8}$/)) {
+      return `+49 ${cleaned}`;
+    }
+    
+    // France: 0123456789 → +33 123456789
+    if (cleaned.match(/^0[1-9]\d{8}$/)) {
+      return `+33 ${cleaned.substring(1)}`;
+    }
+    
+    // If no pattern matches, return as is
+    // This handles edge cases and unknown formats gracefully
     return phone;
   };
 
