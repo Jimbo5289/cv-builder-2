@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Get the API URL from environment variables or fallback to default
 // For production, this should be your Render backend URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 
                      (import.meta.env.PROD ? 
                       'https://cv-builder-backend-2jax.onrender.com' : 
                       'http://localhost:3005');

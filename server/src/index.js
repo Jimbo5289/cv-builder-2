@@ -231,29 +231,19 @@ app.post('/api/contact/test', (req, res) => {
 
 // Add a /health endpoint for frontend connection checks
 app.get('/health', (req, res) => {
-  // Enhanced response with more information for debugging
   res.status(200).json({ 
-    status: 'ok', 
-    timestamp: Date.now(),
-    environment: process.env.NODE_ENV || 'unknown',
+    status: 'ok',
     port: PORT,
-    render: process.env.RENDER ? true : false,
-    server: 'cv-builder-api',
-    version: '1.0.0'
+    timestamp: Date.now()
   });
 });
 
 // Also add an /api/health endpoint for consistency
 app.get('/api/health', (req, res) => {
-  // Enhanced response with more information for debugging
   res.status(200).json({ 
-    status: 'ok', 
-    timestamp: Date.now(),
-    environment: process.env.NODE_ENV || 'unknown',
+    status: 'ok',
     port: PORT,
-    render: process.env.RENDER ? true : false,
-    server: 'cv-builder-api',
-    version: '1.0.0'
+    timestamp: Date.now()
   });
 });
 
@@ -588,56 +578,51 @@ if (swaggerUi && YAML) {
 // Server startup function with improved error handling
 const startServer = async () => {
   try {
-    // Always use port 10000 unless explicitly overridden
-    const PORT = parseInt(process.env.PORT || '10000', 10);
+    // Use Render's PORT environment variable
+    const PORT = parseInt(process.env.PORT, 10) || 10000;
     const HOST = '0.0.0.0';
 
     logger.info(`Starting server with PORT=${PORT} and HOST=${HOST}`);
     console.log(`Starting server with PORT=${PORT} and HOST=${HOST}`);
+    console.log(`Render PORT environment variable: ${process.env.PORT}`);
 
     return new Promise((resolve, reject) => {
-      const httpServer = server.listen(PORT, HOST)
-        .once('error', (err) => {
-          logger.error('Failed to start server:', err);
-          reject(err);
-        })
-        .once('listening', () => {
-          const addr = httpServer.address();
-          logger.info('Server started successfully:', {
-            port: addr.port,
-            host: addr.address,
-            url: `http://${HOST}:${PORT}`,
-            environment: process.env.NODE_ENV,
-            frontendUrl: process.env.FRONTEND_URL,
-            render: process.env.RENDER ? 'true' : 'false'
-          });
-
-          console.log('===================================================');
-          console.log(`🚀 Server running on port ${PORT}`);
-          console.log(`   Bound to interface: ${HOST}`);
-          console.log(`   Environment: ${process.env.NODE_ENV}`);
-          if (process.env.NODE_ENV === 'production') {
-            console.log(`   Access your API at: https://cv-builder-backend-zjax.onrender.com`);
-            console.log(`   WebSocket available at: wss://cv-builder-backend-zjax.onrender.com/ws`);
-          } else {
-            console.log(`   Access your API at: http://${HOST}:${PORT}`);
-            console.log(`   WebSocket available at: ws://${HOST}:${PORT}/ws`);
-          }
-          console.log('===================================================');
-
-          // Log the server status periodically for Render
-          const interval = setInterval(() => {
-            logger.info(`Server health check: Running on port ${PORT}`);
-            console.log(`Server health check: Running on port ${PORT}`);
-          }, 30000); // Every 30 seconds
-
-          // Clean up interval on server close
-          httpServer.once('close', () => {
-            clearInterval(interval);
-          });
-
-          resolve(httpServer);
+      const server = app.listen(PORT, HOST, () => {
+        const addr = server.address();
+        logger.info('Server started successfully:', {
+          port: addr.port,
+          host: addr.address,
+          url: `http://${HOST}:${PORT}`,
+          environment: process.env.NODE_ENV,
+          frontendUrl: process.env.FRONTEND_URL,
+          render: process.env.RENDER ? 'true' : 'false'
         });
+
+        console.log('===================================================');
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`   Bound to interface: ${HOST}`);
+        console.log(`   Environment: ${process.env.NODE_ENV}`);
+        console.log(`   Render PORT: ${process.env.PORT}`);
+        if (process.env.NODE_ENV === 'production') {
+          console.log(`   Access your API at: https://cv-builder-backend-zjax.onrender.com`);
+          console.log(`   WebSocket available at: wss://cv-builder-backend-zjax.onrender.com/ws`);
+        } else {
+          console.log(`   Access your API at: http://${HOST}:${PORT}`);
+          console.log(`   WebSocket available at: ws://${HOST}:${PORT}/ws`);
+        }
+        console.log('===================================================');
+
+        resolve(server);
+      });
+
+      server.on('error', (error) => {
+        logger.error('Server error:', error);
+        console.error('Server error:', error);
+        if (error.code === 'EADDRINUSE') {
+          console.error(`Port ${PORT} is already in use`);
+        }
+        reject(error);
+      });
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

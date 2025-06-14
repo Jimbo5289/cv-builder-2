@@ -256,7 +256,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/jamesingleton/cv-builder 2/cv-builder-2-3/src/generated/prisma",
+      "value": "/Users/jamesingleton/cv-builder 2/cv-builder-2-2/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -270,11 +270,12 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/jamesingleton/cv-builder 2/cv-builder-2-3/prisma/schema.prisma",
+    "sourceFilePath": "/Users/jamesingleton/cv-builder 2/cv-builder-2-2/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null
+    "rootEnvPath": null,
+    "schemaEnvPath": "../../../.env"
   },
   "relativePath": "../../../prisma",
   "clientVersion": "6.9.0",

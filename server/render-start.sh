@@ -10,8 +10,8 @@ echo "Current directory: $(pwd)"
 echo "Node version: $(node -v)"
 echo "NPM version: $(npm -v)"
 
-# Export the port that Render expects
-export PORT=10000
+# Let Render set the PORT - don't override it
+echo "Using PORT from Render environment: $PORT"
 
 echo "==================================================="
 echo "RUNNING RDS CONNECTION TEST"
@@ -34,8 +34,8 @@ else
 fi
 
 echo "==================================================="
-echo "STARTING SERVER DIRECTLY"
+echo "STARTING SERVER"
 echo "==================================================="
 
-# Start the server directly
+# Start the server
 node src/index.js 
