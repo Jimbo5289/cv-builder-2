@@ -10,6 +10,7 @@ const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const os = require('os');
+const logger = require('../utils/logger');
 
 // Initialize Prisma client
 const prisma = new PrismaClient();
@@ -173,5 +174,126 @@ router.get('/status', async (req, res) => {
     return res.status(500).json({ error: 'Detailed health check failed' });
   }
 });
+
+// Health check endpoint
+router.get('/health', (req, res) => {
+  try {
+    const healthData = {
+      status: 'healthy',
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '1.0.0',
+      uptime: process.uptime(),
+      memory: {
+        used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+        external: Math.round(process.memoryUsage().external / 1024 / 1024)
+      },
+      database: {
+        connected: process.env.DATABASE_URL ? true : false,
+        type: process.env.MOCK_DATABASE === 'true' ? 'mock' : 'postgresql'
+      },
+      services: {
+        frontend: process.env.FRONTEND_URL || 'not-configured',
+        sentry: process.env.SENTRY_DSN ? 'configured' : 'not-configured'
+      }
+    };
+
+    logger.info('Health check requested', {
+      environment: healthData.environment,
+      uptime: healthData.uptime
+    });
+
+    res.json(healthData);
+  } catch (error) {
+    logger.error('Health check failed', { error: error.message });
+    
+    res.status(500).json({
+      status: 'unhealthy',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Detailed health check for monitoring systems
+router.get('/health/detailed', (req, res) => {
+  try {
+    const detailedHealth = {
+      status: 'healthy',
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '1.0.0',
+      uptime: {
+        seconds: process.uptime(),
+        human: formatUptime(process.uptime())
+      },
+      system: {
+        platform: process.platform,
+        nodeVersion: process.version,
+        pid: process.pid
+      },
+      memory: {
+        heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+        heapTotal: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+        external: Math.round(process.memoryUsage().external / 1024 / 1024),
+        rss: Math.round(process.memoryUsage().rss / 1024 / 1024)
+      },
+      database: {
+        connected: process.env.DATABASE_URL ? true : false,
+        type: process.env.MOCK_DATABASE === 'true' ? 'mock' : 'postgresql',
+        url: process.env.DATABASE_URL ? 'configured' : 'not-configured'
+      },
+      services: {
+        frontend: process.env.FRONTEND_URL || 'not-configured',
+        sentry: process.env.SENTRY_DSN ? 'configured' : 'not-configured',
+        stripe: process.env.STRIPE_SECRET_KEY ? 'configured' : 'not-configured'
+      },
+      environment_variables: {
+        NODE_ENV: process.env.NODE_ENV || 'not-set',
+        PORT: process.env.PORT || 'not-set',
+        FRONTEND_URL: process.env.FRONTEND_URL ? 'set' : 'not-set',
+        DATABASE_URL: process.env.DATABASE_URL ? 'set' : 'not-set',
+        MOCK_DATABASE: process.env.MOCK_DATABASE || 'not-set'
+      }
+    };
+
+    res.json(detailedHealth);
+  } catch (error) {
+    logger.error('Detailed health check failed', { error: error.message });
+    
+    res.status(500).json({
+      status: 'unhealthy',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Simple ping endpoint
+router.get('/ping', (req, res) => {
+  res.json({ 
+    pong: true, 
+    timestamp: new Date().toISOString() 
+  });
+});
+
+// Helper function to format uptime
+function formatUptime(seconds) {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  if (days > 0) {
+    return `${days}d ${hours}h ${minutes}m ${secs}s`;
+  } else if (hours > 0) {
+    return `${hours}h ${minutes}m ${secs}s`;
+  } else if (minutes > 0) {
+    return `${minutes}m ${secs}s`;
+  } else {
+    return `${secs}s`;
+  }
+}
 
 module.exports = router;
