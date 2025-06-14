@@ -144,7 +144,7 @@ function Create() {
               personalInfo: {
                 fullName: personalInfoData.fullName || '',
                 email: personalInfoData.email || '',
-                phone: normalizePhoneNumber(personalInfoData.phone) || '',
+                phone: personalInfoData.phone || '',
                 location: personalInfoData.location || '',
                 socialNetwork: personalInfoData.socialNetwork || ''
               }
