@@ -2932,6 +2932,19 @@ router.get('/user/all', authMiddleware, async (req, res) => {
         });
       }
 
+      // Calculate sections present for Dashboard logic
+      const sectionsPresent = {
+        personalInfo: !!(parsedContent.personalInfo && 
+          (parsedContent.personalInfo.fullName || parsedContent.personalInfo.email)),
+        personalStatement: !!(parsedContent.personalStatement && 
+          parsedContent.personalStatement.trim().length > 0),
+        skills: parsedContent.skills ? parsedContent.skills.length : 0,
+        experiences: parsedContent.experiences ? parsedContent.experiences.length : 0,
+        education: parsedContent.education ? parsedContent.education.length : 0,
+        references: parsedContent.references ? parsedContent.references.length : 0,
+        referencesOnRequest: parsedContent.referencesOnRequest || false
+      };
+
       // Get basic info for preview
       return {
         id: cv.id,
@@ -2939,6 +2952,7 @@ router.get('/user/all', authMiddleware, async (req, res) => {
         updatedAt: cv.updatedAt,
         createdAt: cv.createdAt,
         atsScore: cv.atsScore,
+        sectionsPresent: sectionsPresent,
         personalInfo: parsedContent.personalInfo ? {
           fullName: parsedContent.personalInfo.fullName || '',
           email: parsedContent.personalInfo.email || '',
