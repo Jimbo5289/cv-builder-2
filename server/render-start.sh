@@ -1,14 +1,17 @@
 #!/bin/bash
 
 # Script for starting the service on Render.com
-echo "==================================================="
+echo "====================================================="
 echo "STARTING CV BUILDER SERVER ON RENDER"
-echo "==================================================="
+echo "====================================================="
 
-# Print current directory and versions
+# Print current directory and Node version
 echo "Current directory: $(pwd)"
 echo "Node version: $(node -v)"
 echo "NPM version: $(npm -v)"
+
+# Export the port that Render expects
+export PORT=10000
 
 echo "==================================================="
 echo "RUNNING RDS CONNECTION TEST"
@@ -35,4 +38,4 @@ echo "STARTING SERVER DIRECTLY"
 echo "==================================================="
 
 # Start the server directly
-node src/index.js 
+cd server && node src/index.js 

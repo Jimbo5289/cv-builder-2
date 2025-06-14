@@ -588,22 +588,21 @@ if (swaggerUi && YAML) {
 // Server startup function with improved error handling
 const startServer = async () => {
   try {
-    // Always use Render's PORT in production
+    // Always use port 10000 unless explicitly overridden
     const PORT = parseInt(process.env.PORT || '10000', 10);
-    const HOST = '0.0.0.0'; // Always bind to all interfaces in production
+    const HOST = '0.0.0.0';
 
     logger.info(`Starting server with PORT=${PORT} and HOST=${HOST}`);
     console.log(`Starting server with PORT=${PORT} and HOST=${HOST}`);
 
-    // Create a promise to handle server startup
     return new Promise((resolve, reject) => {
-      server.listen(PORT, HOST)
+      const httpServer = server.listen(PORT, HOST)
         .once('error', (err) => {
           logger.error('Failed to start server:', err);
           reject(err);
         })
         .once('listening', () => {
-          const addr = server.address();
+          const addr = httpServer.address();
           logger.info('Server started successfully:', {
             port: addr.port,
             host: addr.address,
@@ -626,13 +625,18 @@ const startServer = async () => {
           }
           console.log('===================================================');
 
-          // Add a delayed log for Render detection
-          setTimeout(() => {
-            logger.info(`Server still running on port ${PORT} (delayed log for Render detection)`);
-            console.log(`Server still running on port ${PORT} (delayed log for Render detection)`);
-          }, 2000);
+          // Log the server status periodically for Render
+          const interval = setInterval(() => {
+            logger.info(`Server health check: Running on port ${PORT}`);
+            console.log(`Server health check: Running on port ${PORT}`);
+          }, 30000); // Every 30 seconds
 
-          resolve(server);
+          // Clean up interval on server close
+          httpServer.once('close', () => {
+            clearInterval(interval);
+          });
+
+          resolve(httpServer);
         });
     });
   } catch (error) {
