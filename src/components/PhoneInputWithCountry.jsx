@@ -5,6 +5,8 @@ import { getDefaultCountry } from '../utils/locationUtils';
 import { BsFillTelephoneFill } from 'react-icons/bs';
 
 const PhoneInputWithCountry = ({ value, onChange, label, required = false }) => {
+  console.log('PhoneInputWithCountry received value:', value, 'type:', typeof value);
+  
   const [countryCode, setCountryCode] = useState('+44');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isFocused, setIsFocused] = useState(false);
