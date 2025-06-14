@@ -59,18 +59,27 @@ const { auth: authMiddleware, validateCVOwnership } = require('../middleware/aut
 
 // Function to normalize phone number format
 const normalizePhoneNumber = (phone) => {
-  if (!phone) return '';
+  console.log('Backend normalizePhoneNumber called with:', phone);
+  
+  if (!phone) {
+    console.log('Backend normalizePhoneNumber: empty phone, returning empty string');
+    return '';
+  }
   
   // Clean the phone number (remove spaces, parentheses, dashes)
   const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  console.log('Backend normalizePhoneNumber: cleaned phone:', cleaned);
   
   // If it's already in international format, check for embedded domestic format
   if (cleaned.startsWith('+')) {
     // Check for UK international format with embedded domestic format: +44 07850680317
     const ukInternationalWithDomestic = cleaned.match(/^\+440(\d{9,10})$/);
     if (ukInternationalWithDomestic) {
-      return `+44 ${ukInternationalWithDomestic[1]}`;
+      const result = `+44 ${ukInternationalWithDomestic[1]}`;
+      console.log('Backend normalizePhoneNumber: UK international with domestic format detected, fixing to:', result);
+      return result;
     }
+    console.log('Backend normalizePhoneNumber: proper international format, returning:', phone);
     return phone; // Return as-is if already proper international format
   }
   
@@ -78,20 +87,27 @@ const normalizePhoneNumber = (phone) => {
   
   // UK: 07850680317 → +44 7850680317
   if (cleaned.match(/^0\d{9,10}$/)) {
-    return `+44 ${cleaned.substring(1)}`;
+    const result = `+44 ${cleaned.substring(1)}`;
+    console.log('Backend normalizePhoneNumber: UK format detected, converting to:', result);
+    return result;
   }
   
   // US: 5551234567 → +1 5551234567
   if (cleaned.match(/^\d{10}$/)) {
-    return `+1 ${cleaned}`;
+    const result = `+1 ${cleaned}`;
+    console.log('Backend normalizePhoneNumber: US format detected, converting to:', result);
+    return result;
   }
   
   // US with country code: 15551234567 → +15551234567
   if (cleaned.match(/^1\d{10}$/)) {
-    return `+${cleaned}`;
+    const result = `+${cleaned}`;
+    console.log('Backend normalizePhoneNumber: US with country code detected, converting to:', result);
+    return result;
   }
   
   // If no pattern matches, return as is
+  console.log('Backend normalizePhoneNumber: no pattern matched, returning original:', phone);
   return phone;
 };
 
