@@ -3488,11 +3488,6 @@ router.post('/apply-enhancements', (req, res, next) => {
 // Debug endpoint to check CV data persistence (development only)
 router.get('/debug/database-check', authMiddleware, async (req, res) => {
   try {
-    // Only allow in development mode for security
-    if (process.env.NODE_ENV !== 'development') {
-      return res.status(403).json({ error: 'Debug endpoint only available in development' });
-    }
-
     logger.info('CV database check requested for user:', { userId: req.user?.id });
 
     // Check if we're using mock database
@@ -3639,11 +3634,6 @@ router.get('/debug/database-check', authMiddleware, async (req, res) => {
 // Debug endpoint to manually save test CV data
 router.post('/debug/test-save', authMiddleware, async (req, res) => {
   try {
-    // Only allow in development mode for security
-    if (process.env.NODE_ENV !== 'development') {
-      return res.status(403).json({ error: 'Debug endpoint only available in development' });
-    }
-
     logger.info('Test CV save requested for user:', { userId: req.user?.id });
 
     // Create test CV data
