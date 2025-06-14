@@ -349,6 +349,8 @@ function Create() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
+              {/* Debug log for phone input */}
+              {console.log('Phone input value:', formData.personalInfo.phone, 'Full form data:', formData.personalInfo)}
               <PhoneInputWithCountry
                 label="Phone Number"
                 required={true}
