@@ -57,6 +57,44 @@ const database = require('../config/database');
 const { logger } = require('../config/logger');
 const { auth: authMiddleware, validateCVOwnership } = require('../middleware/auth');
 
+// Function to normalize phone number format
+const normalizePhoneNumber = (phone) => {
+  if (!phone) return '';
+  
+  // Clean the phone number (remove spaces, parentheses, dashes)
+  const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  
+  // If it's already in international format, check for embedded domestic format
+  if (cleaned.startsWith('+')) {
+    // Check for UK international format with embedded domestic format: +44 07850680317
+    const ukInternationalWithDomestic = cleaned.match(/^\+440(\d{9,10})$/);
+    if (ukInternationalWithDomestic) {
+      return `+44 ${ukInternationalWithDomestic[1]}`;
+    }
+    return phone; // Return as-is if already proper international format
+  }
+  
+  // Handle different country formats based on common patterns
+  
+  // UK: 07850680317 → +44 7850680317
+  if (cleaned.match(/^0\d{9,10}$/)) {
+    return `+44 ${cleaned.substring(1)}`;
+  }
+  
+  // US: 5551234567 → +1 5551234567
+  if (cleaned.match(/^\d{10}$/)) {
+    return `+1 ${cleaned}`;
+  }
+  
+  // US with country code: 15551234567 → +15551234567
+  if (cleaned.match(/^1\d{10}$/)) {
+    return `+${cleaned}`;
+  }
+  
+  // If no pattern matches, return as is
+  return phone;
+};
+
 // Define OpenAI module with fallback for development
 let _openai;
 try {
@@ -525,7 +563,7 @@ router.get('/:id', authMiddleware, validateCVOwnership, async (req, res) => {
       personalInfo: parsedContent.personalInfo ? {
         fullName: parsedContent.personalInfo.fullName || '',
         email: parsedContent.personalInfo.email || '',
-        phone: parsedContent.personalInfo.phone || '',
+        phone: normalizePhoneNumber(parsedContent.personalInfo.phone) || '',
         location: parsedContent.personalInfo.location || '',
         socialNetwork: parsedContent.personalInfo.socialNetwork || ''
       } : {
