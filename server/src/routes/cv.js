@@ -1416,132 +1416,7 @@ function generateCourseRecommendations(keySkills, jobTitle, industry) {
   return courses;
 }
 
-// CV save schema validation
-const cvSaveSchema = z.object({
-  templateId: z.string().optional().default("1"),
-  personalInfo: z.object({
-    fullName: z.string().optional(),
-    email: z.string().email().optional(),
-    phone: z.string().optional(),
-    location: z.string().optional(),
-    socialNetwork: z.string().optional()
-  }).optional()
-});
-
-// Special save route for development mode
-router.post('/save', authMiddleware, async (req, res) => {
-  try {
-    // Validate input data
-    const validatedData = cvSaveSchema.parse(req.body);
-    
-    logger.info('CV save request received', {
-      userId: req.user?.id || 'unknown',
-      templateId: validatedData.templateId
-    });
-    
-    // Generate a unique ID for the CV
-    const cvId = _uuidv4();
-    
-    // In development mode with mock database, create a mock CV
-    if (process.env.NODE_ENV === 'development' || process.env.MOCK_DATABASE === 'true') {
-      logger.info('Development mode: Creating mock CV', { cvId });
-      
-      // Create mock CV with the provided data
-      const cv = {
-        id: cvId,
-        userId: req.user.id,
-        title: `CV for ${validatedData.personalInfo.fullName}`,
-        templateId: validatedData.templateId,
-        personalInfo: validatedData.personalInfo,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      return res.json({
-        success: true,
-        message: 'CV saved successfully in development mode',
-        cv
-      });
-    }
-    
-    // For production, save to database
-    const cv = await database.prisma.cV.create({
-      data: {
-        id: cvId,
-        userId: req.user.id,
-        title: `CV for ${validatedData.personalInfo.fullName}`,
-        templateId: validatedData.templateId,
-        personalInfo: validatedData.personalInfo,
-        status: 'DRAFT',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    });
-    
-    logger.info('CV saved successfully', { cvId, userId: req.user.id });
-    
-    res.json({
-      success: true,
-      message: 'CV saved successfully',
-      cv
-    });
-  } catch (error) {
-    // Special handling for validation errors
-    if (error instanceof z.ZodError) {
-      logger.warn('CV save validation error', { 
-        errors: error.errors,
-        userId: req.user?.id || 'unknown'
-      });
-      
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid CV data',
-        errors: error.errors
-      });
-    }
-    
-    // Log the general error
-    logger.error('CV save error', {
-      error: error.message,
-      stack: error.stack,
-      userId: req.user?.id || 'unknown'
-    });
-    
-    // Development mode friendly response
-    if (process.env.NODE_ENV === 'development' || process.env.MOCK_DATABASE === 'true') {
-      // Generate a mock CV ID and return a success response even on error
-      const cvId = _uuidv4();
-      
-      logger.info('Development mode: Returning mock CV despite error', { cvId, error: error.message });
-      
-      // Extract personalInfo safely
-      const personalInfo = req.body?.personalInfo || {};
-      
-      return res.json({
-        success: true,
-        message: 'CV saved successfully in development mode (with error handling)',
-        cv: {
-          id: cvId,
-          userId: req.user?.id || 'dev-user-id',
-          title: personalInfo.fullName ? 
-            `CV for ${personalInfo.fullName}` : 
-            'New CV',
-          templateId: req.body?.templateId || '1',
-          personalInfo: personalInfo,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
-      });
-    }
-    
-    // Standard error response for production
-    res.status(500).json({
-      success: false,
-      message: 'Failed to save CV',
-      error: error.message
-    });
-  }
-});
+// Removed duplicate save endpoint and schema - using the unified one below
 
 // Create new CV
 router.post('/', authMiddleware, async (req, res) => {
@@ -3225,20 +3100,51 @@ router.post('/analyse-by-role', (req, res, next) => {
   next();
 });
 
-// Save CV from analysis data
+// Save CV from analysis data - Updated to handle both formats
 router.post('/save', authMiddleware, async (req, res) => {
   try {
-    // Validate input
-    if (!req.body.title || !req.body.content) {
-      return res.status(400).json({ error: 'CV title and content are required' });
-    }
+    logger.info('CV save request received', {
+      userId: req.user?.id || 'unknown',
+      bodyKeys: Object.keys(req.body || {}),
+      hasTitle: !!req.body.title,
+      hasContent: !!req.body.content,
+      hasTemplateId: !!req.body.templateId,
+      hasPersonalInfo: !!req.body.personalInfo
+    });
+
+    // Handle both formats: analysis format (title + content) and create format (templateId + personalInfo)
+    let title, content, templateId, personalInfo;
     
-    // Extract data from request
-    const { title, content } = req.body;
-    
-    // Basic validation of the content
-    if (!content.personalInfo || typeof content.personalInfo !== 'object') {
-      return res.status(400).json({ error: 'CV must contain personal info' });
+    if (req.body.title && req.body.content) {
+      // Analysis format
+      title = req.body.title;
+      content = req.body.content;
+      
+      // Basic validation of the content
+      if (!content.personalInfo || typeof content.personalInfo !== 'object') {
+        return res.status(400).json({ error: 'CV must contain personal info' });
+      }
+    } else if (req.body.templateId || req.body.personalInfo) {
+      // Create format
+      templateId = req.body.templateId || '1';
+      personalInfo = req.body.personalInfo;
+      
+      if (!personalInfo || typeof personalInfo !== 'object') {
+        return res.status(400).json({ error: 'Personal information is required' });
+      }
+      
+      // Convert to analysis format
+      title = personalInfo.fullName ? `CV for ${personalInfo.fullName}` : 'My CV';
+      content = {
+        personalInfo,
+        personalStatement: '',
+        skills: [],
+        experiences: [],
+        education: [],
+        references: []
+      };
+    } else {
+      return res.status(400).json({ error: 'Either (title and content) or (templateId and personalInfo) are required' });
     }
     
     // Check database connection
@@ -3252,20 +3158,67 @@ router.post('/save', authMiddleware, async (req, res) => {
       data: {
         userId: req.user.id,
         title: title,
-        content: content
+        templateId: templateId || '1',
+        content: typeof content === 'string' ? content : JSON.stringify(content)
       }
     });
     
-    logger.info(`CV saved successfully for user: ${req.user.id}`);
+    logger.info(`CV saved successfully for user: ${req.user.id}`, { cvId: cv.id });
     
-    // Return the created CV ID
+    // Return the created CV in the format expected by the frontend
     return res.status(201).json({
+      success: true,
+      message: 'CV saved successfully',
       id: cv.id,
-      message: 'CV saved successfully'
+      cv: {
+        id: cv.id,
+        title: cv.title,
+        templateId: cv.templateId,
+        content: typeof cv.content === 'string' ? JSON.parse(cv.content) : cv.content,
+        createdAt: cv.createdAt,
+        updatedAt: cv.updatedAt
+      }
     });
   } catch (error) {
-    logger.error(`Error saving CV: ${error.message}`, { error });
-    return res.status(500).json({ error: 'Failed to save CV' });
+    logger.error(`Error saving CV: ${error.message}`, { 
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id || 'unknown'
+    });
+    
+    // Development mode friendly response
+    if (process.env.NODE_ENV === 'development' || process.env.MOCK_DATABASE === 'true') {
+      const mockCvId = require('uuid').v4();
+      
+      logger.info('Development mode: Returning mock CV despite error', { mockCvId, error: error.message });
+      
+      return res.status(201).json({
+        success: true,
+        message: 'CV saved successfully in development mode (with error handling)',
+        id: mockCvId,
+        cv: {
+          id: mockCvId,
+          title: req.body.title || (req.body.personalInfo?.fullName ? `CV for ${req.body.personalInfo.fullName}` : 'My CV'),
+          templateId: req.body.templateId || '1',
+          content: req.body.content || {
+            personalInfo: req.body.personalInfo || {},
+            personalStatement: '',
+            skills: [],
+            experiences: [],
+            education: [],
+            references: []
+          },
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      });
+    }
+    
+    return res.status(500).json({ 
+      success: false,
+      error: 'Failed to save CV',
+      message: error.message
+    });
   }
 });
 
