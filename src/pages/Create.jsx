@@ -39,7 +39,7 @@ function Create() {
         let cvToLoad = null;
 
         if (cvId) {
-          // If cvId is provided, load that specific CV
+          // If cvId is provided, load that specific CV (Continue CV workflow)
           console.log('Loading specific CV with ID:', cvId);
           const response = await fetch(`${serverUrl}/api/cv/${cvId}`, {
             headers: {
@@ -52,37 +52,8 @@ function Create() {
             console.log('Loaded specific CV:', cvToLoad);
           }
         } else {
-          // If no cvId, find the most recent CV
-          console.log('No cvId provided, looking for most recent CV');
-          const response = await fetch(`${serverUrl}/api/cv/user/all`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-
-          if (response.ok) {
-            const allCVs = await response.json();
-            console.log('All user CVs:', allCVs);
-            
-            if (allCVs && allCVs.length > 0) {
-              // Get the most recent CV (they're already ordered by updatedAt desc)
-              const mostRecentCV = allCVs[0];
-              console.log('Found most recent CV:', mostRecentCV);
-              
-              // Load the full CV data
-              const cvResponse = await fetch(`${serverUrl}/api/cv/${mostRecentCV.id}`, {
-                headers: {
-                  'Authorization': `Bearer ${token}`
-                }
-              });
-
-              if (cvResponse.ok) {
-                cvToLoad = await cvResponse.json();
-                setCurrentCvId(mostRecentCV.id);
-                console.log('Loaded most recent CV data:', cvToLoad);
-              }
-            }
-          }
+          // If no cvId, this is "Build My CV" - start completely fresh
+          console.log('No cvId provided - starting fresh CV (Build My CV workflow)');
         }
 
         // If we have CV data, populate the form
@@ -142,16 +113,17 @@ function Create() {
             }
           }
         } else {
-          // No existing CV found, initialize with user profile data
-          console.log('No existing CV found, using user profile data');
+          // No existing CV found or starting fresh, initialize with user profile data only
+          console.log('Starting fresh CV - using user profile data only');
           if (user) {
             setFormData(prev => ({
               ...prev,
               personalInfo: {
-                ...prev.personalInfo,
                 fullName: user.name || '',
                 email: user.email || '',
-                phone: user.phone && user.phone.trim() ? user.phone : '+44 '
+                phone: user.phone && user.phone.trim() ? user.phone : '+44 ',
+                location: '', // Start with empty location for new CV
+                socialNetwork: '' // Start with empty social network for new CV
               }
             }));
           }
@@ -164,10 +136,11 @@ function Create() {
           setFormData(prev => ({
             ...prev,
             personalInfo: {
-              ...prev.personalInfo,
               fullName: user.name || '',
               email: user.email || '',
-              phone: user.phone && user.phone.trim() ? user.phone : '+44 '
+              phone: user.phone && user.phone.trim() ? user.phone : '+44 ',
+              location: '', // Start with empty location on error
+              socialNetwork: '' // Start with empty social network on error
             }
           }));
         }
