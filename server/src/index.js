@@ -588,130 +588,28 @@ if (swaggerUi && YAML) {
 // Server startup function with improved error handling
 const startServer = async () => {
   try {
-    // Add graceful shutdown handler
-    const gracefulShutdown = (signal) => {
-      logger.info(`Server shutting down due to ${signal}`);
-      server.close(() => {
-        logger.info('HTTP server closed');
+    const PORT = process.env.PORT || 10000;
+    const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 
-        // Close database connection
-        if (database.closeDatabase && typeof database.closeDatabase === 'function') {
-          database.closeDatabase().then(() => {
-            logger.info('Database connection closed');
-            process.exit(0);
-          }).catch(err => {
-            logger.error('Error closing database connection:', err);
-            process.exit(1);
-          });
-        } else {
-          logger.info('No database disconnect method available, exiting anyway');
-          process.exit(0);
-        }
+    server.listen(PORT, HOST, () => {
+      logger.info('Server started successfully:', { 
+        port: PORT,
+        host: HOST,
+        url: `http://${HOST}:${PORT}`,
+        environment: process.env.NODE_ENV,
+        frontendUrl: process.env.FRONTEND_URL,
+        render: process.env.RENDER ? 'true' : 'false'
       });
-    };
-
-    // Handle termination signals
-    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-    process.on('uncaughtException', (err) => {
-      logger.error('Uncaught Exception:', { error: err.message, stack: err.stack });
-      gracefulShutdown('UNCAUGHT_EXCEPTION');
+      
+      console.log(`🚀 Server running on port ${PORT}`);
+      if (process.env.NODE_ENV === 'production') {
+        console.log(`   Access your API at: https://cv-builder-backend-zjax.onrender.com`);
+        console.log(`   WebSocket available at: wss://cv-builder-backend-zjax.onrender.com/ws`);
+      } else {
+        console.log(`   Access your API at: http://${HOST}:${PORT}`);
+        console.log(`   WebSocket available at: ws://${HOST}:${PORT}/ws`);
+      }
     });
-
-    // Check if port is in use before starting
-    const checkPort = async (port) => {
-      return new Promise((resolve) => {
-        const tester = net.createServer()
-          .once('error', err => {
-            if (err.code === 'EADDRINUSE') {
-              logger.warn(`Port ${port} is already in use, trying to close the process...`);
-              // Try to kill the process using this port
-              try {
-                if (process.platform === 'win32') {
-                  exec(`netstat -ano | findstr :${port} | findstr LISTENING`, (error, stdout) => {
-                    if (!error && stdout) {
-                      const pid = stdout.split(/\s+/).pop();
-                      exec(`taskkill /F /PID ${pid}`);
-                      setTimeout(() => resolve(true), 1000);
-                    } else {
-                      resolve(false);
-                    }
-                  });
-                } else {
-                  // Unix-like systems
-                  exec(`lsof -i :${port} -t | xargs kill -9`, (error) => {
-                    setTimeout(() => resolve(!error), 1000);
-                  });
-                }
-              } catch (e) {
-                logger.error('Failed to kill process:', e);
-                resolve(false);
-              }
-            } else {
-              resolve(false);
-            }
-          })
-          .once('listening', () => {
-            tester.once('close', () => resolve(true))
-              .close();
-          })
-          .listen(port);
-      });
-    };
-
-    // In production, don't check port or try to kill processes
-    if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
-      // Ensure we're using the PORT from environment variable
-      const portNum = parseInt(PORT, 10);
-      
-      // Log special for Render detection
-      if (process.env.RENDER) {
-        logger.info(`Starting server on Render with PORT=${portNum} and host=0.0.0.0`);
-        console.log(`Starting server on Render with PORT=${portNum} and host=0.0.0.0`);
-      }
-      
-      // Start the server without port checking in production, bind to all interfaces (0.0.0.0)
-      server.listen(portNum, '0.0.0.0', () => {
-        logger.info('Server started successfully:', { 
-          port: portNum,
-          url: `http://0.0.0.0:${portNum}`,
-          environment: NODE_ENV,
-          frontendUrl: FRONTEND_URL,
-          render: process.env.RENDER ? 'true' : 'false'
-        });
-        
-        console.log(`🚀 Server running on port ${portNum}`);
-        console.log(`   Access your API at: http://0.0.0.0:${portNum}`);
-        console.log(`   WebSocket available at: ws://0.0.0.0:${portNum}/ws`);
-        
-        // Add a timeout to log again for Render detection
-        setTimeout(() => {
-          logger.info(`Server still running on port ${portNum} (delayed log for Render detection)`);
-          console.log(`Server still running on port ${portNum} (delayed log for Render detection)`);
-        }, 2000);
-      });
-    } else {
-      // Try to start the server with port checking in development
-      const portAvailable = await checkPort(PORT);
-      if (!portAvailable) {
-        logger.warn(`Could not free up port ${PORT}. Using alternative port ${PORT + 1}`);
-        const portNum = parseInt(PORT, 10) + 1;
-      }
-
-      // Start the server
-      server.listen(PORT, () => {
-        logger.info('Server started successfully:', { 
-          port: PORT,
-          url: `http://localhost:${PORT}`,
-          environment: NODE_ENV,
-          frontendUrl: FRONTEND_URL
-        });
-        
-        console.log(`🚀 Server running on port ${PORT}`);
-        console.log(`   Access your API at: http://localhost:${PORT}`);
-        console.log(`   WebSocket available at: ws://localhost:${PORT}/ws`);
-      });
-    }
 
     return server;
   } catch (error) {
