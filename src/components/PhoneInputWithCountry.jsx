@@ -70,6 +70,12 @@ const PhoneInputWithCountry = ({ value, onChange, label, required = false }) => 
             console.log('PhoneInputWithCountry: Just country code:', value);
             setCountryCode(value);
             setPhoneNumber('');
+          } else if (value.startsWith('0') && value.length >= 10) {
+            // Handle UK domestic format (07850680317) - convert to international
+            console.log('PhoneInputWithCountry: UK domestic format detected:', value);
+            setCountryCode('+44');
+            // Remove the leading 0 for international format
+            setPhoneNumber(value.substring(1));
           } else {
             // No country code detected, treat as phone number only
             console.log('PhoneInputWithCountry: No country code, using as phone number:', value);
