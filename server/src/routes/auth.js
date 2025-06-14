@@ -240,6 +240,7 @@ router.post('/login', authLimiter, async (req, res) => {
         id: true,
         email: true,
         name: true,
+        phone: true,
         password: true,
         isActive: true,
         failedLoginAttempts: true,
@@ -315,7 +316,8 @@ router.post('/login', authLimiter, async (req, res) => {
       user: {
         id: user.id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        phone: user.phone
       },
       accessToken,
       refreshToken
