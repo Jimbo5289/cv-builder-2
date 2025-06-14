@@ -44,7 +44,17 @@ function Create() {
     
     // If it's already in international format, return as is
     if (cleaned.startsWith('+')) {
-      console.log('normalizePhoneNumber: already international format, returning:', phone);
+      console.log('normalizePhoneNumber: already international format, checking for embedded domestic format');
+      
+      // Check for UK international format with embedded domestic format: +44 07850680317
+      const ukInternationalWithDomestic = cleaned.match(/^\+44\s*0(\d{9,10})$/);
+      if (ukInternationalWithDomestic) {
+        const result = `+44 ${ukInternationalWithDomestic[1]}`;
+        console.log('normalizePhoneNumber: UK international with domestic format detected, fixing to:', result);
+        return result;
+      }
+      
+      console.log('normalizePhoneNumber: proper international format, returning:', phone);
       return phone;
     }
     
