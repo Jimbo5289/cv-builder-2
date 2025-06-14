@@ -159,7 +159,7 @@ function App() {
     <ErrorBoundary fallback={SimpleErrorFallback}>
       <ThemeProvider>
         <ServerProvider>
-          <WebSocketProvider path="/ws" autoConnect={true} reconnectOnFailure={true} useMockInDev={true}>
+          <WebSocketProvider path="/ws" autoConnect={false} reconnectOnFailure={false} useMockInDev={true}>
             <AuthProvider>
               <PremiumBundleProvider>
                 {/* Main application layout */}
