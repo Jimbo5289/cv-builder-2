@@ -1480,10 +1480,10 @@ router.post('/', authMiddleware, async (req, res) => {
       const cv = await database.client.CV.create({
         data: {
           userId: req.user.id,
-          templateId: templateId || 'professional', // Default to professional if not specified
           title: personalInfo.fullName ? `${personalInfo.fullName}'s CV` : 'Untitled CV',
           content: JSON.stringify({
             personalInfo,
+            templateId: templateId || 'professional', // Store templateId in content
             skills: [],
             experiences: [],
             education: [],
@@ -1499,7 +1499,7 @@ router.post('/', authMiddleware, async (req, res) => {
         message: 'CV created successfully',
         cv: {
           id: cv.id,
-          templateId: cv.templateId,
+          templateId: templateId || 'professional',
           content: JSON.parse(cv.content)
         }
       });
@@ -3158,7 +3158,6 @@ router.post('/save', authMiddleware, async (req, res) => {
       data: {
         userId: req.user.id,
         title: title,
-        templateId: templateId || '1',
         content: typeof content === 'string' ? content : JSON.stringify(content)
       }
     });
@@ -3173,7 +3172,7 @@ router.post('/save', authMiddleware, async (req, res) => {
       cv: {
         id: cv.id,
         title: cv.title,
-        templateId: cv.templateId,
+        templateId: templateId || '1',
         content: typeof cv.content === 'string' ? JSON.parse(cv.content) : cv.content,
         createdAt: cv.createdAt,
         updatedAt: cv.updatedAt
