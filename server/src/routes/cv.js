@@ -3485,5 +3485,264 @@ router.post('/apply-enhancements', (req, res, next) => {
   }
 });
 
-// Export the router
+// Debug endpoint to check CV data persistence (development only)
+router.get('/debug/database-check', authMiddleware, async (req, res) => {
+  try {
+    // Only allow in development mode for security
+    if (process.env.NODE_ENV !== 'development') {
+      return res.status(403).json({ error: 'Debug endpoint only available in development' });
+    }
+
+    logger.info('CV database check requested for user:', { userId: req.user?.id });
+
+    // Check if we're using mock database
+    if (process.env.MOCK_DATABASE === 'true') {
+      return res.json({
+        message: 'Mock database mode - CV data not persisted to AWS',
+        mode: 'development',
+        mockUser: req.user,
+        note: 'In production, this would show real AWS RDS data',
+        recommendation: 'Set MOCK_DATABASE=false to test real database persistence'
+      });
+    }
+
+    // Try to fetch all CVs for this user from the actual database
+    let cvs = [];
+    let databaseError = null;
+    
+    try {
+      cvs = await database.client.CV.findMany({
+        where: {
+          userId: req.user.id
+        },
+        orderBy: {
+          updatedAt: 'desc'
+        },
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          createdAt: true,
+          updatedAt: true,
+          atsScore: true
+        }
+      });
+    } catch (dbError) {
+      databaseError = dbError.message;
+      logger.error('Database error fetching CVs:', dbError);
+    }
+
+    // Parse CV content to check what data is actually stored
+    const parsedCVs = cvs.map(cv => {
+      let parsedContent = {};
+      try {
+        if (typeof cv.content === 'string') {
+          parsedContent = JSON.parse(cv.content);
+        } else if (typeof cv.content === 'object' && cv.content !== null) {
+          parsedContent = cv.content;
+        }
+      } catch (parseError) {
+        logger.error('Failed to parse CV content:', { cvId: cv.id, error: parseError.message });
+        parsedContent = { error: 'Failed to parse content' };
+      }
+
+      return {
+        id: cv.id,
+        title: cv.title,
+        createdAt: cv.createdAt,
+        updatedAt: cv.updatedAt,
+        atsScore: cv.atsScore,
+        contentSummary: {
+          hasPersonalInfo: !!parsedContent.personalInfo,
+          personalInfoFields: parsedContent.personalInfo ? Object.keys(parsedContent.personalInfo) : [],
+          hasPersonalStatement: !!parsedContent.personalStatement,
+          personalStatementLength: parsedContent.personalStatement ? parsedContent.personalStatement.length : 0,
+          skillsCount: parsedContent.skills ? parsedContent.skills.length : 0,
+          experiencesCount: parsedContent.experiences ? parsedContent.experiences.length : 0,
+          educationCount: parsedContent.education ? parsedContent.education.length : 0,
+          referencesCount: parsedContent.references ? parsedContent.references.length : 0,
+          referencesOnRequest: parsedContent.referencesOnRequest || false
+        },
+        fullContent: parsedContent // Include full content for debugging
+      };
+    });
+
+    // Also check recent CV update operations
+    let recentUpdates = [];
+    try {
+      // Get CVs updated in the last 24 hours
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      recentUpdates = await database.client.CV.findMany({
+        where: {
+          userId: req.user.id,
+          updatedAt: {
+            gte: yesterday
+          }
+        },
+        orderBy: {
+          updatedAt: 'desc'
+        },
+        select: {
+          id: true,
+          title: true,
+          updatedAt: true
+        }
+      });
+    } catch (updateError) {
+      logger.error('Error fetching recent updates:', updateError);
+    }
+
+    res.json({
+      message: 'CV database check completed',
+      status: databaseError ? 'error' : 'success',
+      databaseConnection: 'AWS RDS PostgreSQL',
+      userId: req.user.id,
+      error: databaseError,
+      summary: {
+        totalCVs: cvs.length,
+        recentUpdates: recentUpdates.length,
+        lastUpdate: cvs.length > 0 ? cvs[0].updatedAt : null
+      },
+      cvData: parsedCVs,
+      recentActivity: recentUpdates,
+      recommendations: databaseError ? [
+        'Check database connection',
+        'Verify Prisma schema matches database',
+        'Check environment variables'
+      ] : cvs.length === 0 ? [
+        'No CVs found - check if CV creation is working',
+        'Verify user authentication',
+        'Check CV save endpoints'
+      ] : [
+        'CV data found in database',
+        'Check frontend CV loading logic',
+        'Verify API endpoints are being called correctly'
+      ]
+    });
+
+  } catch (error) {
+    logger.error('CV database check error:', { 
+      error: error.message, 
+      stack: error.stack,
+      userId: req.user?.id
+    });
+    
+    res.json({
+      message: 'CV database check failed',
+      error: error.message,
+      status: 'error',
+      note: 'This indicates a serious database connection issue'
+    });
+  }
+});
+
+// Debug endpoint to manually save test CV data
+router.post('/debug/test-save', authMiddleware, async (req, res) => {
+  try {
+    // Only allow in development mode for security
+    if (process.env.NODE_ENV !== 'development') {
+      return res.status(403).json({ error: 'Debug endpoint only available in development' });
+    }
+
+    logger.info('Test CV save requested for user:', { userId: req.user?.id });
+
+    // Create test CV data
+    const testCVData = {
+      personalInfo: {
+        fullName: 'Test User',
+        email: req.user.email || 'test@example.com',
+        phone: '07850680371',
+        location: 'London, UK',
+        socialNetwork: 'https://linkedin.com/in/testuser'
+      },
+      personalStatement: 'This is a test personal statement to verify database persistence.',
+      skills: [
+        { skill: 'JavaScript', level: 'Advanced' },
+        { skill: 'React', level: 'Intermediate' },
+        { skill: 'Node.js', level: 'Advanced' }
+      ],
+      experiences: [
+        {
+          position: 'Test Developer',
+          company: 'Test Company',
+          startDate: '2020-01-01',
+          endDate: 'Present',
+          description: 'Test experience description'
+        }
+      ],
+      education: [
+        {
+          institution: 'Test University',
+          degree: 'Test Degree',
+          field: 'Computer Science',
+          startDate: '2016-09-01',
+          endDate: '2020-06-30',
+          description: 'Test education description'
+        }
+      ],
+      references: [
+        {
+          name: 'Test Reference',
+          position: 'Manager',
+          company: 'Test Company',
+          email: 'reference@test.com',
+          phone: '123-456-7890'
+        }
+      ],
+      referencesOnRequest: false
+    };
+
+    // Try to save to database
+    let saveResult = null;
+    let saveError = null;
+
+    try {
+      const cv = await database.client.CV.create({
+        data: {
+          userId: req.user.id,
+          title: `Test CV - ${new Date().toISOString()}`,
+          content: JSON.stringify(testCVData)
+        }
+      });
+
+      saveResult = {
+        id: cv.id,
+        title: cv.title,
+        createdAt: cv.createdAt,
+        updatedAt: cv.updatedAt
+      };
+
+      logger.info('Test CV saved successfully:', { cvId: cv.id, userId: req.user.id });
+    } catch (dbError) {
+      saveError = dbError.message;
+      logger.error('Test CV save failed:', dbError);
+    }
+
+    res.json({
+      message: 'Test CV save completed',
+      status: saveError ? 'error' : 'success',
+      userId: req.user.id,
+      testData: testCVData,
+      saveResult: saveResult,
+      error: saveError,
+      recommendation: saveError ? 
+        'Database write operation failed - check connection and schema' :
+        'Database write successful - check CV loading logic if data not appearing in frontend'
+    });
+
+  } catch (error) {
+    logger.error('Test CV save error:', { 
+      error: error.message, 
+      stack: error.stack,
+      userId: req.user?.id
+    });
+    
+    res.json({
+      message: 'Test CV save failed',
+      error: error.message,
+      status: 'error'
+    });
+  }
+});
+
 module.exports = router; 
