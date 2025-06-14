@@ -106,46 +106,69 @@ const CvAnalyze = () => {
     }
   };
 
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Drag enter');
+    setIsDragging(true);
+  };
+
   const handleDragOver = (e) => {
     e.preventDefault();
-    setIsDragging(true);
+    e.stopPropagation();
   };
 
   const handleDragLeave = (e) => {
     e.preventDefault();
-    setIsDragging(false);
+    e.stopPropagation();
+    console.log('Drag leave');
+    // Only set dragging to false if we're leaving the drop zone itself, not a child element
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsDragging(false);
+    }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    console.log('File dropped', e.dataTransfer.files);
     setIsDragging(false);
     const droppedFile = e.dataTransfer.files[0];
-    validateAndSetFile(droppedFile);
+    if (droppedFile) {
+      validateAndSetFile(droppedFile);
+    }
   };
 
   const handleFileInput = (e) => {
+    console.log('File input triggered', e.target.files);
     setError('');
     if (e.target.files && e.target.files[0]) {
       const uploadedFile = e.target.files[0];
+      console.log('File selected:', uploadedFile.name, uploadedFile.type, uploadedFile.size);
       validateAndSetFile(uploadedFile);
     }
   };
 
   const validateAndSetFile = (uploadedFile) => {
+    console.log('Validating file:', uploadedFile);
+    
     // Check file type (PDF, DOCX, etc.)
     const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     
     if (!validTypes.includes(uploadedFile.type)) {
+      console.log('Invalid file type:', uploadedFile.type);
       setError('Please upload a PDF or DOCX file');
       return;
     }
     
     // Check file size (max 5MB)
     if (uploadedFile.size > 5 * 1024 * 1024) {
+      console.log('File too large:', uploadedFile.size);
       setError('File size should not exceed 5MB');
       return;
     }
     
+    console.log('File validation passed, setting file');
     setFile(uploadedFile);
   };
 
@@ -267,7 +290,7 @@ const CvAnalyze = () => {
   }, [analysisResults]);
 
   return (
-    <div className="container mx-auto px-4 py-8 min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="container mx-auto px-4 pt-20 pb-8 min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Existing heading */}
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">CV Analysis</h1>
@@ -324,6 +347,7 @@ const CvAnalyze = () => {
                 className={`border-2 border-dashed rounded-lg p-8 text-center ${
                   isDragging ? 'border-[#E78F81] bg-[#E78F81]/10' : 'border-gray-300 dark:border-gray-700'
                 }`}
+                onDragEnter={handleDragEnter}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
@@ -362,20 +386,20 @@ const CvAnalyze = () => {
                       Drag and drop your CV file here
                     </p>
                     <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm">
-                      or <button className="text-[#E78F81] hover:text-[#d36e62] font-medium">browse</button> to select a file
+                      or <button 
+                        type="button"
+                        className="text-[#E78F81] hover:text-[#d36e62] font-medium focus:outline-none focus:underline"
+                        onClick={() => document.getElementById('file-upload').click()}
+                      >
+                        browse
+                      </button> to select a file
                     </p>
                     <input
+                      id="file-upload"
                       type="file"
                       className="hidden"
                       onChange={handleFileInput}
                       accept=".pdf,.docx"
-                      ref={(input) => {
-                        // When the user clicks "browse", trigger the file input
-                        if (input) {
-                          const browseButton = input.previousSibling.querySelector('button');
-                          browseButton.addEventListener('click', () => input.click());
-                        }
-                      }}
                     />
                     <p className="mt-1 text-gray-500 dark:text-gray-400 text-xs">
                       PDF or DOCX up to 5MB
