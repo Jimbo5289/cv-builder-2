@@ -48,6 +48,8 @@ export default function Dashboard() {
   const isIncompleteCV = (cv) => {
     if (!cv || !cv.sectionsPresent) return false;
     
+    console.log('Checking CV completeness:', cv.sectionsPresent);
+    
     // Consider CV incomplete if it's missing essential sections
     const hasPersonalInfo = cv.sectionsPresent.personalInfo;
     const hasPersonalStatement = cv.sectionsPresent.personalStatement;
@@ -56,10 +58,23 @@ export default function Dashboard() {
     
     // CV is incomplete if it's missing multiple key sections
     const completedSections = [hasPersonalInfo, hasPersonalStatement, hasSkills, hasExperience].filter(Boolean).length;
-    return completedSections < 3; // Less than 3 out of 4 key sections
+    console.log('Completed sections count:', completedSections);
+    
+    // Show continue button if CV has some content but isn't fully complete
+    // (has at least 1 section but missing at least 1 major section)
+    const isIncomplete = completedSections >= 1 && completedSections < 4;
+    console.log('Should show continue button:', isIncomplete);
+    
+    return isIncomplete;
   };
 
   const shouldShowContinue = mostRecentCV && isIncompleteCV(mostRecentCV);
+  
+  console.log('Dashboard state:', {
+    mostRecentCV: mostRecentCV?.id,
+    shouldShowContinue,
+    isLoadingCVs
+  });
 
   return (
     <div className="container mx-auto px-4 pt-12 pb-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
