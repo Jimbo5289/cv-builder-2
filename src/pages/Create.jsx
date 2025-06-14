@@ -86,20 +86,61 @@ function Create() {
         }
 
         // If we have CV data, populate the form
-        if (cvToLoad && cvToLoad.personalInfo) {
-          console.log('Populating form with CV data:', cvToLoad.personalInfo);
-          setFormData(prev => ({
-            ...prev,
-            personalInfo: {
-              fullName: cvToLoad.personalInfo.fullName || '',
-              email: cvToLoad.personalInfo.email || '',
-              phone: cvToLoad.personalInfo.phone || '',
-              location: cvToLoad.personalInfo.location || '',
-              socialNetwork: cvToLoad.personalInfo.socialNetwork || ''
-            }
-          }));
+        if (cvToLoad) {
+          console.log('Processing CV data:', cvToLoad);
           
-          toast.success('Loaded your existing CV data');
+          let personalInfoData = null;
+          
+          // Check different possible locations for personalInfo based on API structure
+          if (cvToLoad.personalInfo) {
+            personalInfoData = cvToLoad.personalInfo;
+          } else if (cvToLoad.content && cvToLoad.content.personalInfo) {
+            personalInfoData = cvToLoad.content.personalInfo;
+          } else if (typeof cvToLoad.content === 'string') {
+            try {
+              const parsedContent = JSON.parse(cvToLoad.content);
+              if (parsedContent.personalInfo) {
+                personalInfoData = parsedContent.personalInfo;
+              }
+            } catch (e) {
+              console.error('Error parsing CV content:', e);
+            }
+          }
+          
+          if (personalInfoData) {
+            console.log('Populating form with personal info:', personalInfoData);
+            setFormData(prev => ({
+              ...prev,
+              personalInfo: {
+                fullName: personalInfoData.fullName || '',
+                email: personalInfoData.email || '',
+                phone: personalInfoData.phone || '',
+                location: personalInfoData.location || '',
+                socialNetwork: personalInfoData.socialNetwork || ''
+              }
+            }));
+            
+            // Set the current CV ID if we loaded specific CV data
+            if (cvId && cvToLoad.id) {
+              setCurrentCvId(cvToLoad.id);
+            }
+            
+            toast.success('Loaded your existing CV data');
+          } else {
+            console.log('No personal info found in CV data, using user profile data');
+            // Fallback to user profile data
+            if (user) {
+              setFormData(prev => ({
+                ...prev,
+                personalInfo: {
+                  ...prev.personalInfo,
+                  fullName: user.name || '',
+                  email: user.email || '',
+                  phone: user.phone && user.phone.trim() ? user.phone : '+44 '
+                }
+              }));
+            }
+          }
         } else {
           // No existing CV found, initialize with user profile data
           console.log('No existing CV found, using user profile data');
