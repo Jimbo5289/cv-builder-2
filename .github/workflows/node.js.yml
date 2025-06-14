@@ -44,7 +44,7 @@ jobs:
         working-directory: ./server
         run: npm ci
       - name: Fix CI Issues
-        working_directory: ./server
+        working-directory: ./server
         run: node fix-ci-issues.js
       - name: Run Backend Tests
         working-directory: ./server
