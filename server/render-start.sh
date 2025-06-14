@@ -11,6 +11,13 @@ echo "Node version: $(node -v)"
 echo "NPM version: $(npm -v)"
 
 echo "==================================================="
+echo "TESTING MINIMAL SERVER FIRST"
+echo "==================================================="
+
+# Start the minimal test server to debug port issues
+node minimal-server.js
+
+echo "==================================================="
 echo "RUNNING RDS CONNECTION TEST"
 echo "==================================================="
 
