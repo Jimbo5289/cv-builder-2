@@ -23,6 +23,7 @@ const { exec } = require('child_process');
 const userRoutes = require('./routes/user');
 const healthRoutes = require('./routes/health');
 const adminRoutes = require('./routes/admin');
+const debugRoutes = require('./routes/debug');
 
 // Try to import fix-database, but don't fail if it's not available
 let ensureDevUser;
@@ -214,6 +215,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/debug', debugRoutes);
 
 // Webhook route must come after raw body parser
 app.use('/api/webhook/stripe', webhookRoutes);

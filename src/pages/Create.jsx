@@ -107,7 +107,7 @@ function Create() {
                   ...prev.personalInfo,
                   fullName: user.name || '',
                   email: user.email || '',
-                  phone: user.phone && user.phone.trim() ? user.phone : '+44 '
+                  phone: user.phone || ''
                 }
               }));
             }
@@ -121,7 +121,7 @@ function Create() {
               personalInfo: {
                 fullName: user.name || '',
                 email: user.email || '',
-                phone: user.phone && user.phone.trim() ? user.phone : '+44 ',
+                phone: user.phone || '',
                 location: '', // Start with empty location for new CV
                 socialNetwork: '' // Start with empty social network for new CV
               }
@@ -138,7 +138,7 @@ function Create() {
             personalInfo: {
               fullName: user.name || '',
               email: user.email || '',
-              phone: user.phone && user.phone.trim() ? user.phone : '+44 ',
+              phone: user.phone || '',
               location: '', // Start with empty location on error
               socialNetwork: '' // Start with empty social network on error
             }
@@ -173,7 +173,7 @@ function Create() {
       toast.error('Email is required');
       return false;
     }
-    if (!phone.trim() || phone === '+44 ') {
+    if (!phone.trim()) {
       toast.error('Phone number is required');
       return false;
     }
