@@ -10,8 +10,14 @@ echo "Current directory: $(pwd)"
 echo "Node version: $(node -v)"
 echo "NPM version: $(npm -v)"
 
-# Let Render set the PORT - don't override it
-echo "Using PORT from Render environment: $PORT"
+# Debug environment variables
+echo "==================================================="
+echo "ENVIRONMENT DEBUGGING"
+echo "==================================================="
+echo "PORT environment variable: $PORT"
+echo "All environment variables containing 'PORT':"
+env | grep -i port || echo "No PORT-related environment variables found"
+echo "==================================================="
 
 echo "==================================================="
 echo "RUNNING RDS CONNECTION TEST"

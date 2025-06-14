@@ -578,9 +578,13 @@ if (swaggerUi && YAML) {
 // Server startup function with improved error handling
 const startServer = async () => {
   try {
-    // Use Render's PORT environment variable
-    const PORT = parseInt(process.env.PORT, 10) || 10000;
+    // Use only Render's PORT environment variable - no fallback
+    const PORT = parseInt(process.env.PORT, 10);
     const HOST = '0.0.0.0';
+
+    if (!PORT) {
+      throw new Error('PORT environment variable is required');
+    }
 
     logger.info(`Starting server with PORT=${PORT} and HOST=${HOST}`);
     console.log(`Starting server with PORT=${PORT} and HOST=${HOST}`);
