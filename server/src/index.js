@@ -590,26 +590,57 @@ const startServer = async () => {
   try {
     const PORT = process.env.PORT || 10000;
     const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+    
+    // Function to attempt server start
+    const attemptStart = (retryCount = 0) => {
+      server.listen(PORT, HOST)
+        .on('error', (err) => {
+          if (err.code === 'EADDRINUSE') {
+            logger.warn(`Port ${PORT} is in use, attempting to close existing connection...`);
+            
+            // Try to close the existing connection
+            require('child_process').exec(
+              process.platform === 'win32'
+                ? `netstat -ano | findstr :${PORT}`
+                : `lsof -i :${PORT} | grep LISTEN | awk '{print $2}' | xargs kill -9`,
+              (err) => {
+                if (err && retryCount < 3) {
+                  logger.info(`Retrying in 2 seconds... (Attempt ${retryCount + 1}/3)`);
+                  setTimeout(() => attemptStart(retryCount + 1), 2000);
+                } else if (err) {
+                  logger.error('Failed to start server after 3 attempts:', err);
+                  process.exit(1);
+                }
+              }
+            );
+          } else {
+            logger.error('Error starting server:', err);
+            process.exit(1);
+          }
+        })
+        .on('listening', () => {
+          logger.info('Server started successfully:', { 
+            port: PORT,
+            host: HOST,
+            url: `http://${HOST}:${PORT}`,
+            environment: process.env.NODE_ENV,
+            frontendUrl: process.env.FRONTEND_URL,
+            render: process.env.RENDER ? 'true' : 'false'
+          });
+          
+          console.log(`🚀 Server running on port ${PORT}`);
+          if (process.env.NODE_ENV === 'production') {
+            console.log(`   Access your API at: https://cv-builder-backend-zjax.onrender.com`);
+            console.log(`   WebSocket available at: wss://cv-builder-backend-zjax.onrender.com/ws`);
+          } else {
+            console.log(`   Access your API at: http://${HOST}:${PORT}`);
+            console.log(`   WebSocket available at: ws://${HOST}:${PORT}/ws`);
+          }
+        });
+    };
 
-    server.listen(PORT, HOST, () => {
-      logger.info('Server started successfully:', { 
-        port: PORT,
-        host: HOST,
-        url: `http://${HOST}:${PORT}`,
-        environment: process.env.NODE_ENV,
-        frontendUrl: process.env.FRONTEND_URL,
-        render: process.env.RENDER ? 'true' : 'false'
-      });
-      
-      console.log(`🚀 Server running on port ${PORT}`);
-      if (process.env.NODE_ENV === 'production') {
-        console.log(`   Access your API at: https://cv-builder-backend-zjax.onrender.com`);
-        console.log(`   WebSocket available at: wss://cv-builder-backend-zjax.onrender.com/ws`);
-      } else {
-        console.log(`   Access your API at: http://${HOST}:${PORT}`);
-        console.log(`   WebSocket available at: ws://${HOST}:${PORT}/ws`);
-      }
-    });
+    // Start the server with retry mechanism
+    attemptStart();
 
     return server;
   } catch (error) {
