@@ -219,12 +219,22 @@ router.get('/premium-bundle-status', auth, async (req, res) => {
     }
 
     // Get the user's premium bundle status from the database
-    const premiumBundle = await prisma.premiumBundle.findFirst({
-      where: {
-        userId: req.user.id,
-        active: true
-      }
-    });
+    let premiumBundle = null;
+    try {
+      premiumBundle = await prisma.premiumBundle.findFirst({
+        where: {
+          userId: req.user.id,
+          active: true
+        }
+      });
+    } catch (dbError) {
+      // Handle case where premiumBundle table doesn't exist or other DB issues
+      logger.warn('Premium bundle table not available, returning default status:', dbError.message);
+      return res.json({
+        active: false,
+        used: false
+      });
+    }
 
     res.json({
       active: !!premiumBundle,
