@@ -3100,7 +3100,7 @@ router.post('/analyse-by-role', (req, res, next) => {
   next();
 });
 
-// Save CV from analysis data - Updated to handle both formats
+// Save CV from analysis data - Updated to handle both formats and updates
 router.post('/save', authMiddleware, async (req, res) => {
   try {
     logger.info('CV save request received', {
@@ -3109,11 +3109,15 @@ router.post('/save', authMiddleware, async (req, res) => {
       hasTitle: !!req.body.title,
       hasContent: !!req.body.content,
       hasTemplateId: !!req.body.templateId,
-      hasPersonalInfo: !!req.body.personalInfo
+      hasPersonalInfo: !!req.body.personalInfo,
+      hasCvId: !!req.body.cvId
     });
 
     // Handle both formats: analysis format (title + content) and create format (templateId + personalInfo)
-    let title, content, templateId, personalInfo;
+    let title, content, templateId, personalInfo, cvId;
+    
+    // Check if we're updating an existing CV
+    cvId = req.body.cvId;
     
     if (req.body.title && req.body.content) {
       // Analysis format
@@ -3153,21 +3157,99 @@ router.post('/save', authMiddleware, async (req, res) => {
       return res.status(500).json({ error: 'Database connection error' });
     }
     
-    // Create the CV record
-    const cv = await database.client.CV.create({
-      data: {
-        userId: req.user.id,
-        title: title,
-        content: typeof content === 'string' ? content : JSON.stringify(content)
+    let cv;
+    
+    if (cvId) {
+      // Update existing CV
+      logger.info(`Updating existing CV: ${cvId} for user: ${req.user.id}`);
+      
+      // First, check if the CV exists and belongs to the user
+      const existingCV = await database.client.CV.findFirst({
+        where: {
+          id: cvId,
+          userId: req.user.id
+        }
+      });
+      
+      if (!existingCV) {
+        logger.warn(`CV not found or access denied: ${cvId} for user: ${req.user.id}`);
+        return res.status(404).json({ error: 'CV not found or access denied' });
       }
-    });
+      
+      // If we're updating with just personal info, merge with existing content
+      if (personalInfo && !req.body.content) {
+        try {
+          let existingContent = {};
+          if (typeof existingCV.content === 'string') {
+            existingContent = JSON.parse(existingCV.content);
+          } else if (typeof existingCV.content === 'object' && existingCV.content !== null) {
+            existingContent = existingCV.content;
+          }
+          
+          // Merge the personal info with existing content
+          content = {
+            ...existingContent,
+            personalInfo: personalInfo
+          };
+          
+          logger.info('Merged personal info with existing CV content', {
+            cvId,
+            hasExistingPersonalStatement: !!existingContent.personalStatement,
+            hasExistingSkills: !!(existingContent.skills && existingContent.skills.length > 0),
+            hasExistingExperiences: !!(existingContent.experiences && existingContent.experiences.length > 0)
+          });
+        } catch (parseError) {
+          logger.error('Error parsing existing CV content, using new content', { parseError: parseError.message });
+        }
+      }
+      
+      // Update the CV
+      cv = await database.client.CV.update({
+        where: { id: cvId },
+        data: {
+          title: title,
+          content: typeof content === 'string' ? content : JSON.stringify(content),
+          updatedAt: new Date()
+        }
+      });
+      
+      logger.info(`CV updated successfully: ${cvId} for user: ${req.user.id}`);
+    } else {
+      // Create new CV
+      logger.info(`Creating new CV for user: ${req.user.id}`);
+      
+      // Check CV limit (max 10 CVs per user)
+      const existingCVCount = await database.client.CV.count({
+        where: {
+          userId: req.user.id
+        }
+      });
+      
+      if (existingCVCount >= 10) {
+        logger.warn(`CV limit exceeded for user: ${req.user.id}. Current count: ${existingCVCount}`);
+        return res.status(400).json({ 
+          error: 'CV limit exceeded',
+          message: 'You can have a maximum of 10 saved CVs. Please delete some existing CVs before creating new ones.',
+          currentCount: existingCVCount,
+          maxAllowed: 10
+        });
+      }
+      
+      cv = await database.client.CV.create({
+        data: {
+          userId: req.user.id,
+          title: title,
+          content: typeof content === 'string' ? content : JSON.stringify(content)
+        }
+      });
+      
+      logger.info(`CV created successfully: ${cv.id} for user: ${req.user.id}. Total CVs: ${existingCVCount + 1}`);
+    }
     
-    logger.info(`CV saved successfully for user: ${req.user.id}`, { cvId: cv.id });
-    
-    // Return the created CV in the format expected by the frontend
-    return res.status(201).json({
+    // Return the CV in the format expected by the frontend
+    return res.status(cvId ? 200 : 201).json({
       success: true,
-      message: 'CV saved successfully',
+      message: cvId ? 'CV updated successfully' : 'CV saved successfully',
       id: cv.id,
       cv: {
         id: cv.id,
@@ -3182,12 +3264,13 @@ router.post('/save', authMiddleware, async (req, res) => {
     logger.error(`Error saving CV: ${error.message}`, { 
       error: error.message,
       stack: error.stack,
-      userId: req.user?.id || 'unknown'
+      userId: req.user?.id || 'unknown',
+      cvId: req.body.cvId
     });
     
     // Development mode friendly response
     if (process.env.NODE_ENV === 'development' || process.env.MOCK_DATABASE === 'true') {
-      const mockCvId = require('uuid').v4();
+      const mockCvId = req.body.cvId || require('uuid').v4();
       
       logger.info('Development mode: Returning mock CV despite error', { mockCvId, error: error.message });
       
