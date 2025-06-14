@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useServer } from '../context/ServerContext';
 import { loadStripe } from '@stripe/stripe-js';
 
 // Initialize Stripe with environment variable
@@ -18,6 +19,7 @@ const getRecommendedPlan = () => {
 
 export default function PricingSection() {
   const { user } = useAuth();
+  const { apiUrl } = useServer();
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'comparison'
@@ -179,16 +181,14 @@ export default function PricingSection() {
       return;
     }
 
-    try {
-      setLoading(true);
-      setSelectedPlan(plan);
+          try {
+        setLoading(true);
+        setSelectedPlan(plan);
 
-      // FIX: Use a fixed server URL instead of trying multiple ports
-      const apiUrl = 'http://localhost:3005';
-      let result = null;
+        let result = null;
       
-      // Use the fixed API URL
-      result = await tryCreateCheckoutSession(`${apiUrl}/api/checkout/create-session`, plan);
+              // Use the correct API URL and endpoint
+        result = await tryCreateCheckoutSession(`${apiUrl}/api/checkout/create-session`, plan);
       
       if (!result?.success) {
         const errorMessage = result?.error || 'Failed to connect to server. Please try again later.';
@@ -232,7 +232,7 @@ export default function PricingSection() {
 
       console.log('Sending checkout request with data:', checkoutData);
         
-      const response = await fetch('http://localhost:3005/api/checkout/create-session', {
+      const response = await fetch(checkoutUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
