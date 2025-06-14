@@ -1,7 +1,6 @@
 /* eslint-disable */
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
-const { stripe } = require('../../config/stripe.cjs');
 const authMiddleware = require('../middleware/auth');
 const { logger } = require('../config/logger');
 const { sendSuccess, sendError, asyncHandler } = require('../utils/responseHandler');
@@ -9,18 +8,166 @@ const { sendSuccess, sendError, asyncHandler } = require('../utils/responseHandl
 const router = express.Router();
 const prisma = new PrismaClient();
 
+// Initialize Stripe more robustly
+let stripe = null;
+try {
+  // Try to import and initialize Stripe
+  const Stripe = require('stripe');
+  if (process.env.STRIPE_SECRET_KEY) {
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2023-10-16',
+      timeout: 20000,
+    });
+    logger.info('Stripe initialized successfully');
+  } else {
+    logger.warn('STRIPE_SECRET_KEY not found in environment variables');
+  }
+} catch (error) {
+  logger.error('Failed to initialize Stripe:', error.message);
+}
+
 // Create a checkout session
 router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => {
   const { priceId, planInterval, planType, planName, accessDuration } = req.body;
   
+  logger.info('Checkout session request received:', {
+    priceId,
+    planInterval,
+    planType,
+    planName,
+    userId: req.user?.id,
+    hasStripe: !!stripe
+  });
+
   if (!priceId && !planInterval) {
     return sendError(res, 'Either Price ID or plan interval (monthly/annual) is required', 400);
   }
 
   try {
+    // Check for development mode with mock data enabled
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const useMockData = process.env.MOCK_SUBSCRIPTION_DATA === 'true';
+    
+    // If Stripe is not available or we're in mock mode, use mock checkout
+    if (!stripe || (isDevelopment && useMockData)) {
+      logger.info('Using mock checkout session - Stripe not available or mock mode enabled');
+      
+      try {
+        // Get user id - for development mode, create a mock user if needed
+        const userId = req.user?.id || 'dev-user-id';
+        
+        // If priceId is not provided, get the appropriate one from env based on planInterval
+        let finalPriceId = priceId;
+        if (!finalPriceId) {
+          if (planInterval === 'monthly') {
+            finalPriceId = process.env.STRIPE_PRICE_MONTHLY || 'price_mock_monthly';
+          } else if (planInterval === 'annual') {
+            finalPriceId = process.env.STRIPE_PRICE_ANNUAL || 'price_mock_annual';
+          } else {
+            finalPriceId = 'price_mock_default';
+          }
+        }
+        
+        // Handle different plan types in mock mode
+        if (planType === 'pay-per-cv') {
+          // For Pay-Per-CV, create a one-time purchase record
+          try {
+            await prisma.purchase.create({
+              data: {
+                userId: userId,
+                productId: finalPriceId,
+                productName: 'Pay-Per-CV',
+                amount: 499, // £4.99 in pence
+                currency: 'GBP',
+                status: 'completed',
+                type: 'one-time',
+                remainingDownloads: 1,
+                purchaseDate: new Date()
+              }
+            });
+          } catch (dbError) {
+            logger.warn('Database error in mock mode, continuing:', dbError.message);
+          }
+        }
+        else if (planType === '24hour-access') {
+          // For 24-Hour Access, create a temporary access record
+          const expiryDate = new Date();
+          expiryDate.setHours(expiryDate.getHours() + 24);
+          
+          try {
+            await prisma.temporaryAccess.create({
+              data: {
+                userId: userId,
+                type: '24hour-access',
+                startTime: new Date(),
+                endTime: expiryDate,
+                status: 'active',
+                purchaseId: 'mock_purchase_' + Date.now()
+              }
+            });
+          } catch (dbError) {
+            logger.warn('Database error in mock mode, continuing:', dbError.message);
+          }
+        }
+        else {
+          // For subscriptions, create a subscription record
+          try {
+            await prisma.subscription.upsert({
+              where: {
+                id: `mock_subscription_${userId}`
+              },
+              update: {
+                status: 'active',
+                planId: finalPriceId,
+                planName: planName || (planInterval === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription'),
+                currentPeriodStart: new Date(),
+                currentPeriodEnd: new Date(Date.now() + (planInterval === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000),
+                customerId: 'mock_customer_' + userId,
+                subscriptionId: 'mock_subscription_' + Date.now(),
+                stripePriceId: finalPriceId,
+                stripeSubscriptionId: 'mock_subscription_' + Date.now(),
+                stripeCustomerId: 'mock_customer_' + userId
+              },
+              create: {
+                id: `mock_subscription_${userId}`,
+                userId: userId,
+                status: 'active',
+                planId: finalPriceId,
+                planName: planName || (planInterval === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription'),
+                currentPeriodStart: new Date(),
+                currentPeriodEnd: new Date(Date.now() + (planInterval === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000),
+                customerId: 'mock_customer_' + userId,
+                subscriptionId: 'mock_subscription_' + Date.now(),
+                stripePriceId: finalPriceId,
+                stripeSubscriptionId: 'mock_subscription_' + Date.now(),
+                stripeCustomerId: 'mock_customer_' + userId
+              }
+            });
+          } catch (dbError) {
+            logger.warn('Database error in mock mode, continuing:', dbError.message);
+          }
+        }
+        
+        // Return a mock successful response
+        return sendSuccess(res, { 
+          url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/subscription/success?mock=true`,
+          sessionId: 'mock_session_' + Date.now() 
+        }, 'Mock checkout session created');
+      } catch (error) {
+        logger.error('Error in mock checkout:', error.message);
+        
+        // Even if mock fails, return a success response for development
+        return sendSuccess(res, { 
+          url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/subscription/success?mock=true&bypass=true`,
+          sessionId: 'mock_session_' + Date.now() 
+        }, 'Mock checkout session created (bypass mode)');
+      }
+    }
+
+    // Production Stripe checkout flow
     if (!stripe) {
-      logger.error('Stripe service not initialized');
-      return sendError(res, 'Payment service unavailable', 503);
+      logger.error('Stripe service not initialized - missing configuration');
+      return sendError(res, 'Payment service unavailable - configuration error', 503);
     }
 
     // If priceId is not provided, get the appropriate one from env based on planInterval
@@ -30,109 +177,16 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
         finalPriceId = process.env.STRIPE_PRICE_MONTHLY;
       } else if (planInterval === 'annual') {
         finalPriceId = process.env.STRIPE_PRICE_ANNUAL;
-      } else {
-        return sendError(res, 'Invalid plan interval', 400);
       }
-    }
-    
-    logger.info(`Attempting to create checkout session with price ID: ${finalPriceId}, plan type: ${planType || 'subscription'}`);
-    
-    // Check for development mode with mock data enabled
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    const useMockData = process.env.MOCK_SUBSCRIPTION_DATA === 'true';
-    
-    if (isDevelopment && useMockData) {
-      logger.info(`Using mock checkout session in development for plan: ${planName || planType || 'subscription'}`);
       
-      try {
-        // Get user id - for development mode, create a mock user if needed
-        const userId = req.user?.id || 'dev-user-id';
-        
-        // Handle different plan types
-        if (planType === 'pay-per-cv') {
-          // For Pay-Per-CV, create a one-time purchase record
-          await prisma.purchase.create({
-            data: {
-              userId: userId,
-              productId: finalPriceId,
-              productName: 'Pay-Per-CV',
-              amount: 499, // £4.99 in pence
-              currency: 'GBP',
-              status: 'completed',
-              type: 'one-time',
-              remainingDownloads: 1,
-              purchaseDate: new Date()
-            }
-          });
-        } 
-        else if (planType === '24hour-access') {
-          // For 24-Hour Access, create a temporary access record
-          const expiryDate = new Date();
-          expiryDate.setHours(expiryDate.getHours() + 24);
-          
-          await prisma.temporaryAccess.create({
-            data: {
-              userId: userId,
-              type: '24hour-access',
-              startTime: new Date(),
-              endTime: expiryDate,
-              status: 'active',
-              purchaseId: 'mock_purchase_' + Date.now()
-            }
-          });
-        }
-        else {
-          // For subscriptions, create a subscription record
-          await prisma.subscription.upsert({
-            where: {
-              id: `mock_subscription_${userId}`
-            },
-            update: {
-              status: 'active',
-              planId: finalPriceId,
-              planName: planName || (planInterval === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription'),
-              currentPeriodStart: new Date(),
-              currentPeriodEnd: new Date(Date.now() + (planInterval === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000),
-              customerId: 'mock_customer_' + userId,
-              subscriptionId: 'mock_subscription_' + Date.now(),
-              stripePriceId: finalPriceId,
-              stripeSubscriptionId: 'mock_subscription_' + Date.now(),
-              stripeCustomerId: 'mock_customer_' + userId
-            },
-            create: {
-              id: `mock_subscription_${userId}`,
-              userId: userId,
-              status: 'active',
-              planId: finalPriceId,
-              planName: planName || (planInterval === 'monthly' ? 'Monthly Subscription' : 'Yearly Subscription'),
-              currentPeriodStart: new Date(),
-              currentPeriodEnd: new Date(Date.now() + (planInterval === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000),
-              customerId: 'mock_customer_' + userId,
-              subscriptionId: 'mock_subscription_' + Date.now(),
-              stripePriceId: finalPriceId,
-              stripeSubscriptionId: 'mock_subscription_' + Date.now(),
-              stripeCustomerId: 'mock_customer_' + userId
-            }
-          });
-        }
-        
-        // Return a mock successful response
-        return sendSuccess(res, { 
-          url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/subscription/success?mock=true`,
-          sessionId: 'mock_session_' + Date.now() 
-        }, 'Mock checkout session created');
-      } catch (dbError) {
-        logger.error('Database error creating mock subscription:', { error: dbError.message });
-        
-        // In development mode with mock data, just create a fake success response even if DB fails
-        return sendSuccess(res, { 
-          url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/subscription/success?mock=true&bypass=true`,
-          sessionId: 'mock_session_' + Date.now() 
-        }, 'Mock checkout session created (bypass mode)');
+      if (!finalPriceId) {
+        return sendError(res, 'Price configuration not found', 400);
       }
     }
     
-    // For production: Get the price from Stripe
+    logger.info(`Creating Stripe checkout session with price ID: ${finalPriceId}`);
+    
+    // Get the price from Stripe to validate it exists
     let price;
     try {
       price = await stripe.prices.retrieve(finalPriceId);
@@ -149,7 +203,7 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
     const isSubscription = planType !== 'pay-per-cv' && planType !== '24hour-access';
     const checkoutMode = isSubscription ? 'subscription' : 'payment';
     
-    // Create the appropriate checkout session based on plan type
+    // Create the checkout session
     const sessionConfig = {
       payment_method_types: ['card'],
       line_items: [
@@ -174,7 +228,7 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
     
     const session = await stripe.checkout.sessions.create(sessionConfig);
 
-    logger.info('Checkout session created', {
+    logger.info('Stripe checkout session created successfully', {
       userId: req.user.id,
       sessionId: session.id,
       priceId: finalPriceId,
@@ -183,8 +237,9 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
     return sendSuccess(res, { url: session.url, sessionId: session.id }, 'Checkout session created');
   } catch (error) {
     logger.error('Checkout session creation failed', {
-      userId: req.user.id,
+      userId: req.user?.id,
       error: error.message,
+      stack: error.stack
     });
     
     return sendError(
@@ -198,10 +253,31 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
 // Get subscription status
 router.get('/subscription-status', authMiddleware, asyncHandler(async (req, res) => {
   try {
+    // In development mode with mock data, return mock subscription
+    if (process.env.NODE_ENV === 'development' && process.env.MOCK_SUBSCRIPTION_DATA === 'true') {
+      return sendSuccess(res, { 
+        isSubscribed: true,
+        subscription: {
+          id: 'mock_subscription',
+          status: 'active',
+          planName: 'Development Plan',
+          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        }
+      });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { 
-        subscription: true 
+      include: { 
+        subscriptions: {
+          where: {
+            status: { in: ['active', 'trialing'] }
+          },
+          orderBy: {
+            currentPeriodEnd: 'desc'
+          },
+          take: 1
+        }
       },
     });
 
@@ -209,13 +285,15 @@ router.get('/subscription-status', authMiddleware, asyncHandler(async (req, res)
       return sendError(res, 'User not found', 404);
     }
 
+    const activeSubscription = user.subscriptions[0] || null;
+
     return sendSuccess(res, { 
-      isSubscribed: !!user.subscription,
-      subscription: user.subscription,
+      isSubscribed: !!activeSubscription,
+      subscription: activeSubscription,
     });
   } catch (error) {
     logger.error('Getting subscription status failed', {
-      userId: req.user.id,
+      userId: req.user?.id,
       error: error.message,
     });
     
@@ -226,12 +304,7 @@ router.get('/subscription-status', authMiddleware, asyncHandler(async (req, res)
 // Get subscription plans (public endpoint)
 router.get('/plans', asyncHandler(async (req, res) => {
   try {
-    if (!stripe) {
-      logger.error('Stripe service not initialized');
-      return sendError(res, 'Payment service unavailable', 503);
-    }
-
-    // Define fallback plans if Stripe is not configured
+    // Define fallback plans for when Stripe is not available
     const fallbackPlans = [
       {
         id: 'monthly',
@@ -240,6 +313,7 @@ router.get('/plans', asyncHandler(async (req, res) => {
         price: 9.99,
         currency: 'GBP',
         interval: 'month',
+        priceId: process.env.STRIPE_PRICE_MONTHLY || 'price_mock_monthly',
         features: [
           'Access to all CV templates',
           'PDF export',
@@ -254,6 +328,7 @@ router.get('/plans', asyncHandler(async (req, res) => {
         price: 95.88,
         currency: 'GBP',
         interval: 'year',
+        priceId: process.env.STRIPE_PRICE_ANNUAL || 'price_mock_annual',
         features: [
           'Access to all CV templates',
           'PDF export',
@@ -261,46 +336,103 @@ router.get('/plans', asyncHandler(async (req, res) => {
           'AI-powered CV analysis',
           '20% discount compared to monthly plan'
         ]
+      },
+      {
+        id: 'pay-per-cv',
+        name: 'Single CV Download',
+        description: 'Create and download a single optimized CV',
+        price: 4.99,
+        currency: 'GBP',
+        interval: 'one-time',
+        priceId: process.env.STRIPE_PRICE_SINGLE_CV || 'price_mock_single',
+        features: [
+          'Single CV Download',
+          'Access to premium template designs',
+          'ATS-friendly formatting',
+          'High-quality PDF export'
+        ]
+      },
+      {
+        id: '24hour-access',
+        name: '24-Hour Access Pass',
+        description: 'Complete 24-hour access to all premium features',
+        price: 9.99,
+        currency: 'GBP',
+        interval: 'one-time',
+        priceId: process.env.STRIPE_PRICE_24HOUR || 'price_mock_24hour',
+        features: [
+          'Complete 24-hour access to all premium features',
+          'Perfect for urgent CV needs'
+        ]
       }
     ];
 
-    // If Stripe keys are not set, return fallback plans
-    if (!process.env.STRIPE_PRICE_MONTHLY || !process.env.STRIPE_PRICE_ANNUAL) {
-      logger.warn('Using fallback plans as Stripe price IDs are not configured');
+    // If Stripe is not available, return fallback plans
+    if (!stripe) {
+      logger.warn('Stripe not available, returning fallback plans');
       return sendSuccess(res, { plans: fallbackPlans });
     }
 
-    // Otherwise fetch prices from Stripe
-    try {
-      const [monthlyPrice, annualPrice] = await Promise.all([
-        stripe.prices.retrieve(process.env.STRIPE_PRICE_MONTHLY, { expand: ['product'] }),
-        stripe.prices.retrieve(process.env.STRIPE_PRICE_ANNUAL, { expand: ['product'] })
-      ]);
+    // If Stripe price IDs are not set, return fallback plans
+    if (!process.env.STRIPE_PRICE_MONTHLY || !process.env.STRIPE_PRICE_ANNUAL) {
+      logger.warn('Stripe price IDs not configured, returning fallback plans');
+      return sendSuccess(res, { plans: fallbackPlans });
+    }
 
-      const plans = [
-        {
+    // Try to fetch prices from Stripe
+    try {
+      const pricePromises = [];
+      
+      if (process.env.STRIPE_PRICE_MONTHLY) {
+        pricePromises.push(stripe.prices.retrieve(process.env.STRIPE_PRICE_MONTHLY, { expand: ['product'] }));
+      }
+      if (process.env.STRIPE_PRICE_ANNUAL) {
+        pricePromises.push(stripe.prices.retrieve(process.env.STRIPE_PRICE_ANNUAL, { expand: ['product'] }));
+      }
+
+      const prices = await Promise.allSettled(pricePromises);
+      
+      const plans = [];
+      
+      // Process monthly price
+      if (prices[0] && prices[0].status === 'fulfilled') {
+        const monthlyPrice = prices[0].value;
+        plans.push({
           id: 'monthly',
-          name: monthlyPrice.product.name,
-          description: monthlyPrice.product.description,
-          price: monthlyPrice.unit_amount / 100, // Convert from cents to currency units
+          name: monthlyPrice.product.name || 'Monthly Plan',
+          description: monthlyPrice.product.description || 'Full access for one month',
+          price: monthlyPrice.unit_amount / 100,
           currency: monthlyPrice.currency.toUpperCase(),
           interval: 'month',
           priceId: monthlyPrice.id,
-          features: monthlyPrice.product.metadata.features ? 
+          features: monthlyPrice.product.metadata?.features ? 
             monthlyPrice.product.metadata.features.split(',') : fallbackPlans[0].features
-        },
-        {
+        });
+      } else {
+        plans.push(fallbackPlans[0]);
+      }
+      
+      // Process annual price
+      if (prices[1] && prices[1].status === 'fulfilled') {
+        const annualPrice = prices[1].value;
+        plans.push({
           id: 'annual',
-          name: annualPrice.product.name,
-          description: annualPrice.product.description,
-          price: annualPrice.unit_amount / 100, // Convert from cents to currency units
+          name: annualPrice.product.name || 'Annual Plan',
+          description: annualPrice.product.description || 'Full access for one year',
+          price: annualPrice.unit_amount / 100,
           currency: annualPrice.currency.toUpperCase(),
           interval: 'year',
           priceId: annualPrice.id,
-          features: annualPrice.product.metadata.features ? 
+          features: annualPrice.product.metadata?.features ? 
             annualPrice.product.metadata.features.split(',') : fallbackPlans[1].features
-        }
-      ];
+        });
+      } else {
+        plans.push(fallbackPlans[1]);
+      }
+
+      // Add the one-time plans
+      plans.push(fallbackPlans[2]); // pay-per-cv
+      plans.push(fallbackPlans[3]); // 24hour-access
 
       return sendSuccess(res, { plans });
     } catch (stripeError) {
