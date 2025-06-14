@@ -33,6 +33,17 @@ function Create() {
     const loadExistingCV = async () => {
       try {
         setIsLoadingCV(true);
+        
+        // Debug logging for user data
+        console.log('Create component - loadExistingCV called with:', {
+          cvId,
+          hasUser: !!user,
+          userName: user?.name,
+          userEmail: user?.email,
+          userPhone: user?.phone,
+          userObject: user
+        });
+        
         const token = localStorage.getItem('token');
         if (!token) return;
 
@@ -99,32 +110,38 @@ function Create() {
             toast.success('Loaded your existing CV data');
           } else {
             console.log('No personal info found in CV data, using user profile data');
+            console.log('User data for fallback:', { user, phone: user?.phone });
             // Fallback to user profile data
             if (user) {
+              const newFormData = {
+                ...prev.personalInfo,
+                fullName: user.name || '',
+                email: user.email || '',
+                phone: user.phone || ''
+              };
+              console.log('Setting fallback form data:', newFormData);
               setFormData(prev => ({
                 ...prev,
-                personalInfo: {
-                  ...prev.personalInfo,
-                  fullName: user.name || '',
-                  email: user.email || '',
-                  phone: user.phone || ''
-                }
+                personalInfo: newFormData
               }));
             }
           }
         } else {
           // No existing CV found or starting fresh, initialize with user profile data only
           console.log('Starting fresh CV - using user profile data only');
+          console.log('User data for fresh CV:', { user, phone: user?.phone });
           if (user) {
+            const newFormData = {
+              fullName: user.name || '',
+              email: user.email || '',
+              phone: user.phone || '',
+              location: '', // Start with empty location for new CV
+              socialNetwork: '' // Start with empty social network for new CV
+            };
+            console.log('Setting fresh CV form data:', newFormData);
             setFormData(prev => ({
               ...prev,
-              personalInfo: {
-                fullName: user.name || '',
-                email: user.email || '',
-                phone: user.phone || '',
-                location: '', // Start with empty location for new CV
-                socialNetwork: '' // Start with empty social network for new CV
-              }
+              personalInfo: newFormData
             }));
           }
         }
@@ -132,16 +149,19 @@ function Create() {
       } catch (err) {
         console.error('Error loading existing CV:', err);
         // Fallback to user profile data
+        console.log('Error fallback - User data:', { user, phone: user?.phone });
         if (user) {
+          const newFormData = {
+            fullName: user.name || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            location: '', // Start with empty location on error
+            socialNetwork: '' // Start with empty social network on error
+          };
+          console.log('Setting error fallback form data:', newFormData);
           setFormData(prev => ({
             ...prev,
-            personalInfo: {
-              fullName: user.name || '',
-              email: user.email || '',
-              phone: user.phone || '',
-              location: '', // Start with empty location on error
-              socialNetwork: '' // Start with empty social network on error
-            }
+            personalInfo: newFormData
           }));
         }
       } finally {
@@ -151,6 +171,27 @@ function Create() {
 
     loadExistingCV();
   }, [cvId, user, serverUrl]);
+
+  // Separate effect to handle user data loading after component mount
+  useEffect(() => {
+    console.log('User data changed:', { user, phone: user?.phone });
+    
+    // If we have user data but no form data yet (and no CV is being loaded)
+    if (user && !isLoadingCV && !cvId && 
+        (!formData.personalInfo.fullName && !formData.personalInfo.email && !formData.personalInfo.phone)) {
+      console.log('User loaded after component mount - populating form with user data');
+      setFormData(prev => ({
+        ...prev,
+        personalInfo: {
+          fullName: user.name || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          location: '',
+          socialNetwork: ''
+        }
+      }));
+    }
+  }, [user, isLoadingCV, cvId, formData.personalInfo.fullName, formData.personalInfo.email, formData.personalInfo.phone]);
 
   const handleInputChange = (section, field, value) => {
     setFormData(prev => ({
