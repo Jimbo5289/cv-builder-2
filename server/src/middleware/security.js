@@ -3,64 +3,23 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const { logger } = require('../config/logger');
-const { PrismaClient } = require('@prisma/client');
 
-const prisma = new PrismaClient();
-
-// Use a more sophisticated rate limiter that checks the database for user's IP
-const dbAuthLimiter = async (req, res, next) => {
-  // Skip limiting in development
-  if (process.env.NODE_ENV === 'development') {
-    return next();
-  }
-  
-  const ip = req.ip || req.connection.remoteAddress;
-  
-  try {
-    // Check if this IP has been rate limited
-    const ipRecord = await prisma.ipLog.findUnique({
-      where: { ip }
-    });
-    
-    if (ipRecord && ipRecord.blockedUntil && ipRecord.blockedUntil > new Date()) {
-      logger.warn(`Blocked request from rate-limited IP: ${ip}`);
-      return res.status(429).json({
-        error: 'Too many requests',
-        message: 'Please try again later'
-      });
-    }
-    
-    // Record this request
-    await prisma.ipLog.upsert({
-      where: { ip },
-      update: {
-        lastRequest: new Date(),
-        requestCount: {
-          increment: 1
-        }
-      },
-      create: {
-        ip,
-        lastRequest: new Date(),
-        requestCount: 1
-      }
-    });
-    
-    next();
-  } catch (error) {
-    // If database error, fall back to standard rate limiter
-    logger.error('Error in DB rate limiter, falling back to standard:', error);
-    standardAuthLimiter(req, res, next);
-  }
-};
-
-// Standard rate limiter as fallback
-const standardAuthLimiter = rateLimit({
+// Standard rate limiter for authentication
+const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20, // limit each IP to 20 requests per windowMs
   message: {
     error: 'Too many requests',
     message: 'Please try again later'
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  handler: (req, res) => {
+    logger.warn(`Rate limit exceeded for IP: ${req.ip}`);
+    res.status(429).json({
+      error: 'Too many requests',
+      message: 'Please try again later'
+    });
   }
 });
 
@@ -184,7 +143,7 @@ const setupSecurity = (app) => {
 
 module.exports = {
   setupSecurity,
-  authLimiter: dbAuthLimiter, // Use the more comprehensive auth limiter
+  authLimiter, // Use the standard auth limiter
   passwordResetLimiter,
   registrationLimiter
 }; 
