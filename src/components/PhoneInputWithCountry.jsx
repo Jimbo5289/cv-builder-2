@@ -53,8 +53,9 @@ const PhoneInputWithCountry = ({ value, onChange, label, required = false }) => 
 
       if (value) {
         // First try to match: +XX XXXXXXXXX (country code + space + number)
-        const spaceMatch = value.match(/^(\+\d{1,4})\s+(.+)$/);
+        const spaceMatch = value.match(/^(\+\d{1,4})\s(.+)$/);
         if (spaceMatch) {
+          console.log('PhoneInputWithCountry: Matched space pattern:', spaceMatch);
           setCountryCode(spaceMatch[1]);
           setPhoneNumber(spaceMatch[2]);
         } else {
