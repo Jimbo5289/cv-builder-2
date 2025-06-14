@@ -6,7 +6,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const PDFDocument = require('pdfkit');
 const { logger } = require('../config/logger');
-const authMiddleware = require('../middleware/auth');
+const { auth: authMiddleware } = require('../middleware/auth');
 const { sendSuccess, sendError, asyncHandler } = require('../utils/responseHandler');
 
 // Create a checkout session for CV download

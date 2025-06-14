@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 const router = express.Router();
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
-const auth = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 const { logger } = require('../config/logger');
 
 /**

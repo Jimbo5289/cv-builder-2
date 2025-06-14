@@ -5,7 +5,7 @@ const { z } = require('zod');
 const { logger } = require('../config/logger');
 
 // Import auth middleware
-const auth = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 
 // Initialize Prisma client
 const prisma = new PrismaClient();

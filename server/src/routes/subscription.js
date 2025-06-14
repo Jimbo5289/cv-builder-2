@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { PrismaClient } = require('@prisma/client');
-const auth = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 const { logger } = require('../config/logger');
 
 const prisma = new PrismaClient();

@@ -1,7 +1,7 @@
 /* eslint-disable */
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
-const authMiddleware = require('../middleware/auth');
+const { auth: authMiddleware } = require('../middleware/auth');
 const { logger } = require('../config/logger');
 const { sendSuccess, sendError, asyncHandler } = require('../utils/responseHandler');
 
