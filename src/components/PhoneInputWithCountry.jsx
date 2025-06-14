@@ -49,42 +49,34 @@ const PhoneInputWithCountry = ({ value, onChange, label, required = false }) => 
       processingRef.current = true;
       previousValueRef.current = value;
 
-      console.log('PhoneInputWithCountry: Parsing value:', value);
-
       if (value) {
         // First try to match: +XX XXXXXXXXX (country code + space + number)
         const spaceMatch = value.match(/^(\+\d{1,4})\s+(.+)$/);
         if (spaceMatch) {
-          console.log('PhoneInputWithCountry: Matched with space:', spaceMatch);
           setCountryCode(spaceMatch[1]);
           setPhoneNumber(spaceMatch[2]);
         } else {
           // Try to match: +XXXXXXXXXXX (country code directly followed by number)
           const directMatch = value.match(/^(\+\d{1,4})(.+)$/);
           if (directMatch) {
-            console.log('PhoneInputWithCountry: Matched direct:', directMatch);
             setCountryCode(directMatch[1]);
             setPhoneNumber(directMatch[2]);
           } else if (value.startsWith('+')) {
             // Just a country code with no number
-            console.log('PhoneInputWithCountry: Just country code:', value);
             setCountryCode(value);
             setPhoneNumber('');
           } else if (value.startsWith('0') && value.length >= 10) {
             // Handle UK domestic format (07850680317) - convert to international
-            console.log('PhoneInputWithCountry: UK domestic format detected:', value);
             setCountryCode('+44');
             // Remove the leading 0 for international format
             setPhoneNumber(value.substring(1));
           } else {
             // No country code detected, treat as phone number only
-            console.log('PhoneInputWithCountry: No country code, using as phone number:', value);
             setPhoneNumber(value);
           }
         }
       } else {
         // Handle empty value case
-        console.log('PhoneInputWithCountry: Empty value, clearing fields');
         setPhoneNumber('');
       }
       

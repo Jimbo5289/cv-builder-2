@@ -28,21 +28,27 @@ function Create() {
   });
   const { serverUrl } = useServer();
 
+  // Function to normalize phone number format for CV creation
+  const normalizePhoneNumber = (phone) => {
+    if (!phone) return '';
+    
+    // If it's already in international format, return as is
+    if (phone.startsWith('+')) return phone;
+    
+    // If it's UK domestic format (starts with 0), convert to international
+    if (phone.startsWith('0') && phone.length >= 10) {
+      return `+44 ${phone.substring(1)}`;
+    }
+    
+    // For other formats, return as is
+    return phone;
+  };
+
   // Load existing CV data if available
   useEffect(() => {
     const loadExistingCV = async () => {
       try {
         setIsLoadingCV(true);
-        
-        // Debug logging for user data
-        console.log('Create component - loadExistingCV called with:', {
-          cvId,
-          hasUser: !!user,
-          userName: user?.name,
-          userEmail: user?.email,
-          userPhone: user?.phone,
-          userObject: user
-        });
         
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -51,7 +57,6 @@ function Create() {
 
         if (cvId) {
           // If cvId is provided, load that specific CV (Continue CV workflow)
-          console.log('Loading specific CV with ID:', cvId);
           const response = await fetch(`${serverUrl}/api/cv/${cvId}`, {
             headers: {
               'Authorization': `Bearer ${token}`
@@ -60,17 +65,13 @@ function Create() {
 
           if (response.ok) {
             cvToLoad = await response.json();
-            console.log('Loaded specific CV:', cvToLoad);
           }
         } else {
           // If no cvId, this is "Build My CV" - start completely fresh
-          console.log('No cvId provided - starting fresh CV (Build My CV workflow)');
         }
 
         // If we have CV data, populate the form
         if (cvToLoad) {
-          console.log('Processing CV data:', cvToLoad);
-          
           let personalInfoData = null;
           
           // Check different possible locations for personalInfo based on API structure
@@ -90,13 +91,12 @@ function Create() {
           }
           
           if (personalInfoData) {
-            console.log('Populating form with personal info:', personalInfoData);
             setFormData(prev => ({
               ...prev,
               personalInfo: {
                 fullName: personalInfoData.fullName || '',
                 email: personalInfoData.email || '',
-                phone: personalInfoData.phone || '',
+                phone: normalizePhoneNumber(personalInfoData.phone) || '',
                 location: personalInfoData.location || '',
                 socialNetwork: personalInfoData.socialNetwork || ''
               }
@@ -109,39 +109,32 @@ function Create() {
             
             toast.success('Loaded your existing CV data');
           } else {
-            console.log('No personal info found in CV data, using user profile data');
-            console.log('User data for fallback:', { user, phone: user?.phone });
             // Fallback to user profile data
             if (user) {
-              const newFormData = {
-                ...prev.personalInfo,
-                fullName: user.name || '',
-                email: user.email || '',
-                phone: user.phone || ''
-              };
-              console.log('Setting fallback form data:', newFormData);
               setFormData(prev => ({
                 ...prev,
-                personalInfo: newFormData
+                personalInfo: {
+                  fullName: user.name || '',
+                  email: user.email || '',
+                  phone: normalizePhoneNumber(user.phone) || '',
+                  location: '',
+                  socialNetwork: ''
+                }
               }));
             }
           }
         } else {
           // No existing CV found or starting fresh, initialize with user profile data only
-          console.log('Starting fresh CV - using user profile data only');
-          console.log('User data for fresh CV:', { user, phone: user?.phone });
           if (user) {
-            const newFormData = {
-              fullName: user.name || '',
-              email: user.email || '',
-              phone: user.phone || '',
-              location: '', // Start with empty location for new CV
-              socialNetwork: '' // Start with empty social network for new CV
-            };
-            console.log('Setting fresh CV form data:', newFormData);
             setFormData(prev => ({
               ...prev,
-              personalInfo: newFormData
+              personalInfo: {
+                fullName: user.name || '',
+                email: user.email || '',
+                phone: normalizePhoneNumber(user.phone) || '',
+                location: '', // Start with empty location for new CV
+                socialNetwork: '' // Start with empty social network for new CV
+              }
             }));
           }
         }
@@ -149,19 +142,16 @@ function Create() {
       } catch (err) {
         console.error('Error loading existing CV:', err);
         // Fallback to user profile data
-        console.log('Error fallback - User data:', { user, phone: user?.phone });
         if (user) {
-          const newFormData = {
-            fullName: user.name || '',
-            email: user.email || '',
-            phone: user.phone || '',
-            location: '', // Start with empty location on error
-            socialNetwork: '' // Start with empty social network on error
-          };
-          console.log('Setting error fallback form data:', newFormData);
           setFormData(prev => ({
             ...prev,
-            personalInfo: newFormData
+            personalInfo: {
+              fullName: user.name || '',
+              email: user.email || '',
+              phone: normalizePhoneNumber(user.phone) || '',
+              location: '', // Start with empty location on error
+              socialNetwork: '' // Start with empty social network on error
+            }
           }));
         }
       } finally {
@@ -328,8 +318,6 @@ function Create() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              {/* Debug log for phone input */}
-              {console.log('Phone input value:', formData.personalInfo.phone, 'Full form data:', formData.personalInfo)}
               <PhoneInputWithCountry
                 label="Phone Number"
                 required={true}
