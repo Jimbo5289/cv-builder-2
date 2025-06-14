@@ -4,9 +4,11 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 // Import auth middleware with a fallback
-let auth;
+let auth, validateUserAccess;
 try {
-  auth = require('../middleware/auth');
+  const authModule = require('../middleware/auth');
+  auth = authModule.auth;
+  validateUserAccess = authModule.validateUserAccess;
 } catch (error) {
   console.warn('Auth middleware not available, using fallback');
   // Fallback middleware
@@ -15,6 +17,7 @@ try {
     req.user = { id: 'fallback-user-id' };
     next();
   };
+  validateUserAccess = (req, res, next) => next();
 }
 
 // Get user profile (authenticated)

@@ -55,7 +55,7 @@ try {
 const { v4: _uuidv4 } = require('uuid');
 const database = require('../config/database');
 const { logger } = require('../config/logger');
-const authMiddleware = require('../middleware/auth');
+const { auth: authMiddleware, validateCVOwnership } = require('../middleware/auth');
 
 // Define OpenAI module with fallback for development
 let _openai;
@@ -297,7 +297,7 @@ router.get('/test-error', (_req, _res) => {
 });
 
 // Get CV by ID
-router.get('/:id', authMiddleware, async (req, res) => {
+router.get('/:id', authMiddleware, validateCVOwnership, async (req, res) => {
   try {
     // Add CORS headers for Safari compatibility
     const origin = req.headers.origin;
@@ -593,7 +593,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
 });
 
 // Download CV as PDF
-router.get('/download/:cvId', authMiddleware, async (req, res) => {
+router.get('/download/:cvId', authMiddleware, validateCVOwnership, async (req, res) => {
   try {
     const cv = await database.client.CV.findUnique({
       where: { 
@@ -1530,7 +1530,7 @@ router.post('/', authMiddleware, async (req, res) => {
 });
 
 // Update CV experience
-router.put('/:id/experience', authMiddleware, async (req, res) => {
+router.put('/:id/experience', authMiddleware, validateCVOwnership, async (req, res) => {
   try {
     const { experiences } = req.body;
     if (!Array.isArray(experiences)) {
@@ -1656,7 +1656,7 @@ router.put('/:id/experience', authMiddleware, async (req, res) => {
 });
 
 // Update CV education
-router.put('/:id/education', authMiddleware, async (req, res) => {
+router.put('/:id/education', authMiddleware, validateCVOwnership, async (req, res) => {
   try {
     const { education } = req.body;
     if (!Array.isArray(education)) {
@@ -1782,7 +1782,7 @@ router.put('/:id/education', authMiddleware, async (req, res) => {
 });
 
 // Update CV personal statement
-router.put('/:id/personal-statement', authMiddleware, async (req, res) => {
+router.put('/:id/personal-statement', authMiddleware, validateCVOwnership, async (req, res) => {
   try {
     const { personalStatement } = req.body;
     
@@ -1902,7 +1902,7 @@ router.put('/:id/personal-statement', authMiddleware, async (req, res) => {
 });
 
 // Update CV skills
-router.put('/:id/skills', authMiddleware, async (req, res) => {
+router.put('/:id/skills', authMiddleware, validateCVOwnership, async (req, res) => {
   try {
     const { skills } = req.body;
     if (!Array.isArray(skills)) {
@@ -2028,7 +2028,7 @@ router.put('/:id/skills', authMiddleware, async (req, res) => {
 });
 
 // Update CV references
-router.put('/:id/references', authMiddleware, async (req, res) => {
+router.put('/:id/references', authMiddleware, validateCVOwnership, async (req, res) => {
   try {
     // Check if using "References available on request" option
     const { references, referencesOnRequest } = req.body;
@@ -3818,119 +3818,8 @@ router.post('/debug/test-save', authMiddleware, async (req, res) => {
   }
 });
 
-// Public debug endpoint (no auth required) - for troubleshooting only
-router.get('/debug/public-check/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    
-    // Basic validation
-    if (!userId || userId.length < 10) {
-      return res.status(400).json({ 
-        error: 'Invalid user ID format',
-        note: 'User ID should be a long string like: cmbw9kuei000049h9rreazdiw'
-      });
-    }
-
-    logger.info('Public CV database check requested for user:', { userId });
-
-    // Try to fetch all CVs for this user from the actual database
-    let cvs = [];
-    let databaseError = null;
-    
-    try {
-      cvs = await database.client.CV.findMany({
-        where: {
-          userId: userId
-        },
-        orderBy: {
-          updatedAt: 'desc'
-        },
-        select: {
-          id: true,
-          title: true,
-          content: true,
-          createdAt: true,
-          updatedAt: true,
-          atsScore: true
-        }
-      });
-    } catch (dbError) {
-      databaseError = dbError.message;
-      logger.error('Database error fetching CVs:', dbError);
-    }
-
-    // Parse CV content to check what data is actually stored
-    const parsedCVs = cvs.map(cv => {
-      let parsedContent = {};
-      try {
-        if (typeof cv.content === 'string') {
-          parsedContent = JSON.parse(cv.content);
-        } else if (typeof cv.content === 'object' && cv.content !== null) {
-          parsedContent = cv.content;
-        }
-      } catch (parseError) {
-        logger.error('Failed to parse CV content:', { cvId: cv.id, error: parseError.message });
-        parsedContent = { error: 'Failed to parse content' };
-      }
-
-      return {
-        id: cv.id,
-        title: cv.title,
-        createdAt: cv.createdAt,
-        updatedAt: cv.updatedAt,
-        atsScore: cv.atsScore,
-        contentSummary: {
-          hasPersonalInfo: !!parsedContent.personalInfo,
-          personalInfoFields: parsedContent.personalInfo ? Object.keys(parsedContent.personalInfo) : [],
-          hasPersonalStatement: !!parsedContent.personalStatement,
-          personalStatementLength: parsedContent.personalStatement ? parsedContent.personalStatement.length : 0,
-          skillsCount: parsedContent.skills ? parsedContent.skills.length : 0,
-          experiencesCount: parsedContent.experiences ? parsedContent.experiences.length : 0,
-          educationCount: parsedContent.education ? parsedContent.education.length : 0,
-          referencesCount: parsedContent.references ? parsedContent.references.length : 0,
-          referencesOnRequest: parsedContent.referencesOnRequest || false
-        },
-        fullContent: parsedContent // Include full content for debugging
-      };
-    });
-
-    res.json({
-      message: 'Public CV database check completed',
-      status: databaseError ? 'error' : 'success',
-      databaseConnection: 'AWS RDS PostgreSQL',
-      userId: userId,
-      error: databaseError,
-      timestamp: new Date().toISOString(),
-      summary: {
-        totalCVs: cvs.length,
-        lastUpdate: cvs.length > 0 ? cvs[0].updatedAt : null
-      },
-      cvData: parsedCVs,
-      instructions: {
-        howToUse: 'This endpoint shows CV data for the specified user ID',
-        nextSteps: [
-          'Fill out CV sections in the frontend',
-          'Save each section',
-          'Refresh this URL to see if data appears',
-          'Compare before/after to see what sections are saving'
-        ]
-      }
-    });
-
-  } catch (error) {
-    logger.error('Public CV database check error:', { 
-      error: error.message, 
-      stack: error.stack,
-      userId: req.params.userId
-    });
-    
-    res.json({
-      message: 'Public CV database check failed',
-      error: error.message,
-      status: 'error',
-      note: 'This indicates a serious database connection issue'
-    });
-  }
-});
+// SECURITY: Removed public debug endpoint - this was a security vulnerability
+// that allowed access to any user's CV data without authentication.
+// Use the authenticated /debug/database-check endpoint instead.
 
 module.exports = router; 

@@ -160,4 +160,122 @@ const auth = async (req, res, next) => {
   }
 };
 
-module.exports = auth; 
+/**
+ * Enhanced security middleware for user data isolation
+ * Validates that any user ID parameters match the authenticated user
+ */
+const validateUserAccess = (req, res, next) => {
+  try {
+    // Skip validation in development mode
+    if (isDevelopment || useMockDb || process.env.SKIP_AUTH_CHECK === 'true') {
+      return next();
+    }
+
+    // Ensure user is authenticated
+    if (!req.user || !req.user.id) {
+      logger.warn('User access validation failed: No authenticated user');
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // Check for any user ID parameters in the request
+    const userIdParams = ['userId', 'user_id', 'uid'];
+    const userIdInPath = userIdParams.find(param => req.params[param]);
+    
+    if (userIdInPath) {
+      const requestedUserId = req.params[userIdInPath];
+      if (requestedUserId !== req.user.id) {
+        logger.warn('User access validation failed: User ID mismatch', {
+          authenticatedUserId: req.user.id,
+          requestedUserId: requestedUserId,
+          path: req.path,
+          method: req.method
+        });
+        return res.status(403).json({ error: 'Access denied: Cannot access other user data' });
+      }
+    }
+
+    // Check for user ID in request body (for POST/PUT requests)
+    if (req.body && typeof req.body === 'object') {
+      const bodyUserIdFields = ['userId', 'user_id', 'uid'];
+      const bodyUserIdField = bodyUserIdFields.find(field => req.body[field]);
+      
+      if (bodyUserIdField) {
+        const requestedUserId = req.body[bodyUserIdField];
+        if (requestedUserId !== req.user.id) {
+          logger.warn('User access validation failed: Body user ID mismatch', {
+            authenticatedUserId: req.user.id,
+            requestedUserId: requestedUserId,
+            path: req.path,
+            method: req.method
+          });
+          return res.status(403).json({ error: 'Access denied: Cannot modify other user data' });
+        }
+      }
+    }
+
+    next();
+  } catch (error) {
+    logger.error('User access validation error:', error);
+    res.status(500).json({ error: 'Access validation error' });
+  }
+};
+
+/**
+ * Middleware to validate CV ownership
+ * Ensures users can only access their own CVs
+ */
+const validateCVOwnership = async (req, res, next) => {
+  try {
+    // Skip validation in development mode
+    if (isDevelopment || useMockDb || process.env.SKIP_AUTH_CHECK === 'true') {
+      return next();
+    }
+
+    // Ensure user is authenticated
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // Check for CV ID in parameters
+    const cvId = req.params.id || req.params.cvId;
+    if (!cvId) {
+      return next(); // No CV ID to validate
+    }
+
+    // Check database connection
+    if (!database.client) {
+      logger.error('Database client not initialized for CV ownership validation');
+      return res.status(500).json({ error: 'Database connection error' });
+    }
+
+    // Verify CV ownership
+    const cv = await database.client.CV.findUnique({
+      where: { id: cvId },
+      select: { userId: true }
+    });
+
+    if (!cv) {
+      logger.warn('CV ownership validation failed: CV not found', {
+        cvId: cvId,
+        userId: req.user.id
+      });
+      return res.status(404).json({ error: 'CV not found' });
+    }
+
+    if (cv.userId !== req.user.id) {
+      logger.warn('CV ownership validation failed: Access denied', {
+        cvId: cvId,
+        authenticatedUserId: req.user.id,
+        cvOwnerId: cv.userId
+      });
+      return res.status(403).json({ error: 'Access denied: CV belongs to another user' });
+    }
+
+    next();
+  } catch (error) {
+    logger.error('CV ownership validation error:', error);
+    res.status(500).json({ error: 'Ownership validation error' });
+  }
+};
+
+module.exports = { auth, validateUserAccess, validateCVOwnership }; 
