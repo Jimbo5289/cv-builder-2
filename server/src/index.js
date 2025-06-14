@@ -588,47 +588,35 @@ if (swaggerUi && YAML) {
 // Server startup function with improved error handling
 const startServer = async () => {
   try {
-    const PORT = process.env.PORT || 10000;
-    const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
-    
-    // Function to attempt server start
-    const attemptStart = (retryCount = 0) => {
+    // Always use Render's PORT in production
+    const PORT = parseInt(process.env.PORT || '10000', 10);
+    const HOST = '0.0.0.0'; // Always bind to all interfaces in production
+
+    logger.info(`Starting server with PORT=${PORT} and HOST=${HOST}`);
+    console.log(`Starting server with PORT=${PORT} and HOST=${HOST}`);
+
+    // Create a promise to handle server startup
+    return new Promise((resolve, reject) => {
       server.listen(PORT, HOST)
-        .on('error', (err) => {
-          if (err.code === 'EADDRINUSE') {
-            logger.warn(`Port ${PORT} is in use, attempting to close existing connection...`);
-            
-            // Try to close the existing connection
-            require('child_process').exec(
-              process.platform === 'win32'
-                ? `netstat -ano | findstr :${PORT}`
-                : `lsof -i :${PORT} | grep LISTEN | awk '{print $2}' | xargs kill -9`,
-              (err) => {
-                if (err && retryCount < 3) {
-                  logger.info(`Retrying in 2 seconds... (Attempt ${retryCount + 1}/3)`);
-                  setTimeout(() => attemptStart(retryCount + 1), 2000);
-                } else if (err) {
-                  logger.error('Failed to start server after 3 attempts:', err);
-                  process.exit(1);
-                }
-              }
-            );
-          } else {
-            logger.error('Error starting server:', err);
-            process.exit(1);
-          }
+        .once('error', (err) => {
+          logger.error('Failed to start server:', err);
+          reject(err);
         })
-        .on('listening', () => {
-          logger.info('Server started successfully:', { 
-            port: PORT,
-            host: HOST,
+        .once('listening', () => {
+          const addr = server.address();
+          logger.info('Server started successfully:', {
+            port: addr.port,
+            host: addr.address,
             url: `http://${HOST}:${PORT}`,
             environment: process.env.NODE_ENV,
             frontendUrl: process.env.FRONTEND_URL,
             render: process.env.RENDER ? 'true' : 'false'
           });
-          
+
+          console.log('===================================================');
           console.log(`🚀 Server running on port ${PORT}`);
+          console.log(`   Bound to interface: ${HOST}`);
+          console.log(`   Environment: ${process.env.NODE_ENV}`);
           if (process.env.NODE_ENV === 'production') {
             console.log(`   Access your API at: https://cv-builder-backend-zjax.onrender.com`);
             console.log(`   WebSocket available at: wss://cv-builder-backend-zjax.onrender.com/ws`);
@@ -636,16 +624,20 @@ const startServer = async () => {
             console.log(`   Access your API at: http://${HOST}:${PORT}`);
             console.log(`   WebSocket available at: ws://${HOST}:${PORT}/ws`);
           }
+          console.log('===================================================');
+
+          // Add a delayed log for Render detection
+          setTimeout(() => {
+            logger.info(`Server still running on port ${PORT} (delayed log for Render detection)`);
+            console.log(`Server still running on port ${PORT} (delayed log for Render detection)`);
+          }, 2000);
+
+          resolve(server);
         });
-    };
-
-    // Start the server with retry mechanism
-    attemptStart();
-
-    return server;
+    });
   } catch (error) {
     logger.error('Failed to start server:', error);
-    process.exit(1);
+    throw error;
   }
 };
 
