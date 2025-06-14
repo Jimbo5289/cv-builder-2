@@ -120,18 +120,24 @@ function Create() {
 
         // If we have CV data, populate the form
         if (cvToLoad) {
+          console.log('=== CONTINUE MY CV PATH ===');
+          console.log('Raw CV data received:', cvToLoad);
+          
           let personalInfoData = null;
           
           // Check different possible locations for personalInfo based on API structure
           if (cvToLoad.personalInfo) {
             personalInfoData = cvToLoad.personalInfo;
+            console.log('Found personalInfo in cvToLoad.personalInfo:', personalInfoData);
           } else if (cvToLoad.content && cvToLoad.content.personalInfo) {
             personalInfoData = cvToLoad.content.personalInfo;
+            console.log('Found personalInfo in cvToLoad.content.personalInfo:', personalInfoData);
           } else if (typeof cvToLoad.content === 'string') {
             try {
               const parsedContent = JSON.parse(cvToLoad.content);
               if (parsedContent.personalInfo) {
                 personalInfoData = parsedContent.personalInfo;
+                console.log('Found personalInfo in parsed content:', personalInfoData);
               }
             } catch (e) {
               console.error('Error parsing CV content:', e);
@@ -139,16 +145,21 @@ function Create() {
           }
           
           if (personalInfoData) {
+            console.log('Setting form data with personalInfo:', personalInfoData);
+            console.log('Phone number from CV data:', personalInfoData.phone);
+            
             setFormData(prev => ({
               ...prev,
               personalInfo: {
                 fullName: personalInfoData.fullName || '',
                 email: personalInfoData.email || '',
-                phone: personalInfoData.phone || '',
+                phone: normalizePhoneNumber(personalInfoData.phone) || '',
                 location: personalInfoData.location || '',
                 socialNetwork: personalInfoData.socialNetwork || ''
               }
             }));
+            
+            console.log('Form data set for Continue My CV');
             
             // Set the current CV ID if we loaded specific CV data
             if (cvId && cvToLoad.id) {
@@ -157,8 +168,12 @@ function Create() {
             
             toast.success('Loaded your existing CV data');
           } else {
+            console.log('=== FALLBACK TO USER PROFILE (Continue My CV) ===');
             // Fallback to user profile data
             if (user) {
+              console.log('User data for fallback:', user);
+              console.log('User phone number:', user.phone);
+              
               setFormData(prev => ({
                 ...prev,
                 personalInfo: {
@@ -172,8 +187,12 @@ function Create() {
             }
           }
         } else {
+          console.log('=== BUILD MY CV PATH ===');
           // No existing CV found or starting fresh, initialize with user profile data only
           if (user) {
+            console.log('User data for Build My CV:', user);
+            console.log('User phone number:', user.phone);
+            
             setFormData(prev => ({
               ...prev,
               personalInfo: {
@@ -184,6 +203,8 @@ function Create() {
                 socialNetwork: '' // Start with empty social network for new CV
               }
             }));
+            
+            console.log('Form data set for Build My CV');
           }
         }
 
