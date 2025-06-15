@@ -62,66 +62,54 @@ router.get('/profile', auth, async (req, res) => {
 // Update user profile
 router.put('/profile', auth, async (req, res) => {
   try {
-    const { name, email, phone } = req.body;
-    
-    // Log the profile update request
-    if (process.env.NODE_ENV === 'development') {
-      logger.info('Profile update request received on /api/users/profile:', {
-        userId: req.user?.id,
-        hasData: !!req.body,
-        hasPhone: !!phone,
-        phoneValue: phone
-      });
-    }
-    
-    // Parse and validate the data
-    let validatedData = {};
-    try {
-      validatedData = updateProfileSchema.parse({
-        name: name || undefined,
-        email: email || undefined,
-        phone: phone || undefined
-      });
-    } catch (validationError) {
-      logger.warn('Profile update validation failed', {
-        error: validationError.errors,
-        userId: req.user?.id
-      });
-      return res.status(400).json({
-        error: 'Validation error',
-        details: validationError.errors
-      });
-    }
-
-    // Check if user is authenticated
-    if (!req.user?.id) {
-      logger.error('Profile update failed: No user ID in request');
-      return res.status(401).json({ error: 'Authentication required' });
-    }
-
     // Only use mock mode in local development, never in production
     if (process.env.NODE_ENV === 'development' && process.env.MOCK_DATABASE === 'true') {
-      logger.info('Development mode: Simulating successful profile update', {
-        data: validatedData
-      });
-      
+      const mockUser = {
+        id: req.user.id,
+        email: req.user.email || 'dev@example.com',
+        name: req.body.name || req.user.name || 'Development User',
+        phone: req.body.phone || req.user.phone || '',
+        createdAt: new Date()
+      };
       return res.json({
         success: true,
-        message: 'Profile updated successfully (development mode)',
-        user: {
-          id: req.user.id,
-          email: req.user.email || 'dev@example.com',
-          name: validatedData.name || req.user.name || 'Development User',
-          phone: validatedData.phone || req.user.phone || '',
-          createdAt: new Date()
+        message: 'Profile updated successfully (mock mode)',
+        user: mockUser
+      });
+    }
+
+    // Validate input
+    const validatedData = updateProfileSchema.parse(req.body);
+    
+    // Remove undefined values
+    const updateData = {};
+    if (validatedData.name !== undefined) updateData.name = validatedData.name;
+    if (validatedData.email !== undefined) updateData.email = validatedData.email;
+    if (validatedData.phone !== undefined) updateData.phone = validatedData.phone;
+
+    // If no valid fields to update
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: 'No valid fields to update' });
+    }
+
+    // Check if email is being changed and if it already exists
+    if (updateData.email) {
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          email: updateData.email,
+          NOT: { id: req.user.id }
         }
       });
+
+      if (existingUser) {
+        return res.status(400).json({ error: 'Email already in use' });
+      }
     }
 
     // Update the user profile in the database
     const updatedUser = await prisma.user.update({
       where: { id: req.user.id },
-      data: validatedData,
+      data: updateData,
       select: {
         id: true,
         email: true,
@@ -133,7 +121,7 @@ router.put('/profile', auth, async (req, res) => {
 
     logger.info('User profile updated successfully', {
       userId: req.user.id,
-      updatedFields: Object.keys(validatedData)
+      updatedFields: Object.keys(updateData)
     });
 
     res.json({
@@ -226,69 +214,45 @@ router.get('/stats', auth, async (req, res) => {
   try {
     // Only use mock mode in local development, never in production
     if (process.env.NODE_ENV === 'development' && process.env.MOCK_DATABASE === 'true') {
-      logger.info('Using mock statistics data in development mode');
       return res.json({
-        cvsCreated: Math.floor(Math.random() * 10) + 1,
-        analysesRun: Math.floor(Math.random() * 5) + 1,
-        lastActive: new Date().toISOString()
+        cvsCreated: 3,
+        analyzesRun: 1,
+        lastActive: new Date()
       });
     }
 
     const userId = req.user.id;
     
     // Get CV count
-    let cvCount = 0;
+    const cvCount = await prisma.cV.count({
+      where: { userId }
+    });
+
+    // Get analysis count (with fallback if table doesn't exist)
+    let analysisCount = 0;
     try {
-      cvCount = await prisma.cV.count({
+      analysisCount = await prisma.analysis.count({
         where: { userId }
       });
-    } catch (err) {
-      logger.warn('CV table may not exist or accessible, using count 0');
-    }
-    
-    // Get analyses count (if you have an analyses table)
-    let analysesCount = 0;
-    try {
-      analysesCount = await prisma.analysis.count({
-        where: { userId }
-      });
-    } catch (err) {
-      // If analyses table doesn't exist, just use 0
+    } catch (error) {
       logger.warn('Analysis table may not exist, using count 0');
     }
-    
-    // Get last activity time
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { 
-        lastLogin: true,
-        updatedAt: true 
-      }
+
+    // Get last activity (most recent CV update)
+    const lastCV = await prisma.cV.findFirst({
+      where: { userId },
+      orderBy: { updatedAt: 'desc' },
+      select: { updatedAt: true }
     });
-    
-    // Use the most recent activity timestamp
-    const lastActive = user && user.lastLogin && user.lastLogin > user.updatedAt 
-      ? user.lastLogin 
-      : user?.updatedAt || new Date();
-    
+
     res.json({
       cvsCreated: cvCount,
-      analysesRun: analysesCount,
-      lastActive: lastActive
+      analyzesRun: analysisCount,
+      lastActive: lastCV?.updatedAt || null
     });
   } catch (error) {
-    logger.error('Get user stats error:', { 
-      error: error.message, 
-      stack: error.stack, 
-      userId: req.user?.id 
-    });
-    
-    // Return mock data instead of error to prevent frontend issues
-    res.json({
-      cvsCreated: 0,
-      analysesRun: 0,
-      lastActive: new Date().toISOString()
-    });
+    logger.error('Get user stats error:', { error: error.message, stack: error.stack });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

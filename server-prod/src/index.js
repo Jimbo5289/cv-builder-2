@@ -1,3 +1,4 @@
+// Force deployment refresh - 2025-06-15 07:42 - Fix notifications endpoint
 const express = require('express');
 const cors = require('cors');
 const { validateEnv } = require('./config/env');

@@ -34,26 +34,33 @@ export default function PricingSection() {
 
   // Handle preselection if coming from subscription modal
   useEffect(() => {
+    // Always scroll to top first
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     if (preselect === 'premium-bundle') {
-      // Find the Premium CV Bundle plan and scroll to it
-      const bundlePlanElement = document.getElementById('premium-cv-bundle');
-      if (bundlePlanElement) {
-        bundlePlanElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        bundlePlanElement.classList.add('ring-4', 'ring-[#E78F81]', 'ring-opacity-50');
-        setTimeout(() => {
-          bundlePlanElement.classList.remove('ring-4', 'ring-[#E78F81]', 'ring-opacity-50');
-        }, 2000);
-      }
+      // Find the Premium CV Bundle plan and scroll to it after a delay
+      setTimeout(() => {
+        const bundlePlanElement = document.getElementById('premium-cv-bundle');
+        if (bundlePlanElement) {
+          bundlePlanElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          bundlePlanElement.classList.add('ring-4', 'ring-[#E78F81]', 'ring-opacity-50');
+          setTimeout(() => {
+            bundlePlanElement.classList.remove('ring-4', 'ring-[#E78F81]', 'ring-opacity-50');
+          }, 2000);
+        }
+      }, 500);
     } else if (preselect === 'subscription') {
-      // Find the Monthly Subscription plan and scroll to it
-      const subscriptionElement = document.getElementById('monthly-subscription');
-      if (subscriptionElement) {
-        subscriptionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        subscriptionElement.classList.add('ring-4', 'ring-[#E78F81]', 'ring-opacity-50');
-        setTimeout(() => {
-          subscriptionElement.classList.remove('ring-4', 'ring-[#E78F81]', 'ring-opacity-50');
-        }, 2000);
-      }
+      // Find the Monthly Subscription plan and scroll to it after a delay
+      setTimeout(() => {
+        const subscriptionElement = document.getElementById('monthly-subscription');
+        if (subscriptionElement) {
+          subscriptionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          subscriptionElement.classList.add('ring-4', 'ring-[#E78F81]', 'ring-opacity-50');
+          setTimeout(() => {
+            subscriptionElement.classList.remove('ring-4', 'ring-[#E78F81]', 'ring-opacity-50');
+          }, 2000);
+        }
+      }, 500);
     }
   }, [preselect]);
 
@@ -66,39 +73,12 @@ export default function PricingSection() {
         'Basic CV builder',
         'Standard templates',
         'PDF export',
-        'No AI analysis',
+        'Up to 10 CVs',
       ],
+      description: 'Perfect for getting started with professional CV creation',
       buttonText: 'Get Started',
-      popular: false
-    },
-    {
-      name: 'Pay-Per-CV',
-      price: 4.99,
-      interval: 'one-time',
-      features: [
-        'Basic CV builder',
-        'Basic ATS analysis & scoring',
-        'Standard templates',
-        'One CV download/print'
-      ],
-      description: 'Create and download a single CV with basic ATS analysis. Pay each time you need a new CV.',
-      buttonText: 'Get Started',
-      popular: false
-    },
-    {
-      name: '30-Day Access Pass',
-      price: 19.99,
-      interval: 'one-time',
-      features: [
-        'Full access for 30 days',
-        'All analysis & feedback tools',
-        'Skills gap identification',
-        'Upskill course recommendations',
-        'All premium templates'
-      ],
-      description: 'Complete 30-day access to all premium features - perfect for intensive job searching',
-      buttonText: 'Get 30-Day Access',
-      popular: false
+      popular: false,
+      category: 'basic'
     },
     {
       name: 'Monthly Subscription',
@@ -107,30 +87,61 @@ export default function PricingSection() {
       features: [
         'Unlimited CV generations',
         'Advanced AI analysis & feedback',
-        'Skills gap identification',
-        'Cover letter builder',
         'All premium templates',
+        'Cover letter builder',
         'Priority support'
       ],
-      description: 'Complete access to all premium features with unlimited CV creation and ongoing updates',
+      description: 'Complete access to all premium features with unlimited CV creation',
       buttonText: 'Subscribe Now',
-      popular: true
+      popular: true,
+      category: 'subscription'
     },
     {
       name: 'Yearly Subscription',
       price: 79,
       interval: 'year',
       features: [
-        'Everything in Monthly Subscription',
+        'Everything in Monthly',
+        'Save 34% vs monthly',
         'Early access to new features',
-        'Career progression insights & planning',
-        'AI interview preparation tools',
-        'LinkedIn profile optimization',
-        'Save 34% compared to monthly'
+        'Career progression insights',
+        'LinkedIn profile optimization'
       ],
-      description: 'Our best value plan with all premium features unlocked and exclusive career planning tools',
+      description: 'Best value plan with all premium features and exclusive career tools',
       buttonText: 'Save 34%',
-      popular: false
+      popular: false,
+      category: 'subscription'
+    },
+    {
+      name: 'Pay-Per-CV',
+      price: 4.99,
+      interval: 'one-time',
+      features: [
+        'Basic CV builder',
+        'Basic ATS analysis',
+        'Standard templates',
+        'One CV download'
+      ],
+      description: 'Perfect for one-time CV creation with basic analysis',
+      buttonText: 'Single Purchase',
+      popular: false,
+      category: 'oneTime'
+    },
+    {
+      name: '30-Day Access Pass',
+      price: 19.99,
+      interval: 'one-time',
+      features: [
+        'Full premium access',
+        'All analysis tools',
+        'Skills gap identification',
+        'All premium templates',
+        'Valid for 30 days'
+      ],
+      description: 'Complete 30-day access to all premium features for intensive job searching',
+      buttonText: 'Get 30-Day Access',
+      popular: false,
+      category: 'oneTime'
     }
   ];
 
@@ -376,134 +387,178 @@ export default function PricingSection() {
         )}
 
         {viewMode === 'grid' ? (
-          /* Pricing Cards - Grid View */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-3 max-w-7xl mx-auto">
-            {pricingPlans.map((plan, index) => (
-              <div
-                key={plan.name}
-                id={plan.name === '30-Day Access Pass' 
-                    ? 'premium-cv-bundle' 
-                    : plan.name === 'Monthly Subscription' 
-                      ? 'monthly-subscription' 
-                      : undefined}
-                className={`bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 flex flex-col h-full
-                  ${plan.popular ? 'ring-2 ring-[#E78F81] md:transform md:scale-105 z-10' : ''}
-                  ${plan.name === getBestValuePlan() ? 'border-b-4 border-b-green-500' : ''}
-                  ${plan.name === getRecommendedPlan() ? 'border-b-4 border-b-blue-500' : ''}
-                  hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300
-                `}
-              >
-                {plan.popular && (
-                  <div className="bg-[#E78F81] text-white text-center py-1.5 sm:py-2 text-xs sm:text-sm font-medium">
-                    Most Popular
-                  </div>
-                )}
-                {plan.name === getBestValuePlan() && !plan.popular && (
-                  <div className="bg-green-500 text-white text-center py-1.5 sm:py-2 text-xs sm:text-sm font-medium">
-                    Best Value
-                  </div>
-                )}
-                {plan.name === getRecommendedPlan() && !plan.popular && (
-                  <div className="bg-blue-500 text-white text-center py-1.5 sm:py-2 text-xs sm:text-sm font-medium">
-                    Recommended
-                  </div>
-                )}
-                <div className="p-5 sm:p-6 flex-grow flex flex-col">
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <div className="mb-4">
-                    <span className="text-2xl sm:text-3xl font-bold">{plan.price === 0 ? 'Free' : `£${plan.price}`}</span>
-                    {plan.interval && (
-                      <span className="text-gray-500 text-sm">/{plan.interval}</span>
-                    )}
-                  </div>
-                  
-                  {/* Plan description based on type */}
-                  <p className="text-sm text-gray-600 mb-5 min-h-[40px]">
-                    {plan.description || (
-                      plan.name === 'Free' && 'Get started with basic CV creation.' ||
-                      plan.name === 'Pay-Per-CV' && 'Create a single optimized CV.'
-                    )}
-                  </p>
-                  
-                  {/* Key benefit tag */}
-                  {plan.name === '30-Day Access Pass' && (
-                    <div className="mb-4 bg-blue-50 text-blue-700 text-xs font-medium px-2.5 py-1.5 rounded-md inline-flex items-center">
-                      <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                      </svg>
-                      30-Day Premium Access
-                    </div>
-                  )}
-                  
-                  {plan.name === 'Monthly Subscription' && (
-                    <div className="mb-4 bg-rose-50 text-rose-700 text-xs font-medium px-2.5 py-1.5 rounded-md inline-flex items-center">
-                      <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                      </svg>
-                      Complete Access With Unlimited CVs
-                    </div>
-                  )}
-                  
-                  {plan.name === 'Yearly Subscription' && (
-                    <div className="mb-4 bg-green-50 text-green-700 text-xs font-medium px-2.5 py-1.5 rounded-md inline-flex items-center">
-                      <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                      </svg>
-                      Best Value With Exclusive Tools
-                    </div>
-                  )}
-                  
-                  {plan.name === 'Pay-Per-CV' && (
-                    <div className="mb-4 bg-yellow-50 text-yellow-700 text-xs font-medium px-2.5 py-1.5 rounded-md inline-flex items-center">
-                      <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      </svg>
-                      Single CV Download
-                    </div>
-                  )}
-                  
-                  <div className="h-px w-full bg-gray-100 my-4"></div>
-                  
-                  <ul className="space-y-3 mb-6 text-sm flex-grow">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start text-gray-600">
-                        <svg
-                          className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="p-5 bg-gray-50 border-t border-gray-100">
-                  <button
-                    onClick={() => handleSubscribe(plan)}
-                    disabled={loading && selectedPlan === plan}
-                    className={`w-full py-2.5 px-4 rounded-md text-white text-sm font-medium transition-colors duration-200 ${
-                      plan.popular
-                        ? 'bg-[#E78F81] hover:bg-[#d36e62]'
-                        : plan.name === 'Free'
-                          ? 'bg-gray-500 hover:bg-gray-600'
-                          : plan.name === getRecommendedPlan()
-                            ? 'bg-blue-600 hover:bg-blue-700'
-                            : plan.name === getBestValuePlan()
-                              ? 'bg-green-600 hover:bg-green-700'
-                              : 'bg-[#2c3e50] hover:bg-[#1a2530]'
-                    } ${(loading && selectedPlan === plan) ? 'opacity-50 cursor-not-allowed' : ''} shadow-sm hover:shadow`}
-                  >
-                    {(loading && selectedPlan === plan) ? 'Processing...' : plan.buttonText}
-                  </button>
-                </div>
+          <div className="space-y-16">
+            {/* Main Plans Section */}
+            <div>
+              <div className="text-center mb-12">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Choose Your Plan</h2>
+                <p className="text-gray-600 max-w-2xl mx-auto">Start free or unlock premium features with our flexible pricing options</p>
               </div>
-            ))}
+              
+              {/* Main 3 Plans - Featured */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
+                {pricingPlans.filter(plan => ['Free', 'Monthly Subscription', 'Yearly Subscription'].includes(plan.name)).map((plan, index) => (
+                  <div
+                    key={plan.name}
+                    id={plan.name === '30-Day Access Pass' 
+                        ? 'premium-cv-bundle' 
+                        : plan.name === 'Monthly Subscription' 
+                          ? 'monthly-subscription' 
+                          : undefined}
+                    className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 flex flex-col h-full relative
+                      ${plan.popular ? 'ring-2 ring-[#E78F81] transform scale-105 z-10' : ''}
+                      ${plan.name === getBestValuePlan() ? 'border-t-4 border-t-green-500' : ''}
+                      hover:shadow-2xl hover:translate-y-[-8px] transition-all duration-300
+                    `}
+                  >
+                    {plan.popular && (
+                      <div className="bg-gradient-to-r from-[#E78F81] to-[#d36e62] text-white text-center py-3 text-sm font-semibold">
+                        ⭐ Most Popular Choice
+                      </div>
+                    )}
+                    {plan.name === getBestValuePlan() && !plan.popular && (
+                      <div className="bg-gradient-to-r from-green-500 to-green-600 text-white text-center py-3 text-sm font-semibold">
+                        💰 Best Value
+                      </div>
+                    )}
+                    
+                    <div className="p-8 flex-grow flex flex-col">
+                      <div className="text-center mb-6">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                        <div className="mb-4">
+                          <span className="text-4xl font-bold text-gray-900">{plan.price === 0 ? 'Free' : `£${plan.price}`}</span>
+                          {plan.interval && (
+                            <span className="text-gray-500 text-lg">/{plan.interval}</span>
+                          )}
+                        </div>
+                        <p className="text-gray-600 text-sm leading-relaxed">{plan.description}</p>
+                      </div>
+                      
+                      <div className="flex-grow">
+                        <ul className="space-y-4 mb-8">
+                          {plan.features.map((feature) => (
+                            <li key={feature} className="flex items-start text-gray-700">
+                              <svg
+                                className="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5"
+                                fill="none"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path d="M5 13l4 4L19 7"></path>
+                              </svg>
+                              <span className="text-sm">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      
+                      <button
+                        onClick={() => handleSubscribe(plan)}
+                        disabled={loading && selectedPlan === plan}
+                        className={`w-full py-4 px-6 rounded-xl text-white font-semibold text-lg transition-all duration-200 ${
+                          plan.popular
+                            ? 'bg-gradient-to-r from-[#E78F81] to-[#d36e62] hover:from-[#d36e62] hover:to-[#c25a4d] shadow-lg'
+                            : plan.name === 'Free'
+                              ? 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700'
+                              : plan.name === getBestValuePlan()
+                                ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg'
+                                : 'bg-gradient-to-r from-[#2c3e50] to-[#34495e] hover:from-[#1a2530] hover:to-[#2c3e50]'
+                        } ${(loading && selectedPlan === plan) ? 'opacity-50 cursor-not-allowed' : ''} transform hover:scale-105 shadow-md hover:shadow-lg`}
+                      >
+                        {(loading && selectedPlan === plan) ? 'Processing...' : plan.buttonText}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Alternative Options Section */}
+            <div>
+              <div className="text-center mb-12">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Alternative Options</h2>
+                <p className="text-gray-600 max-w-2xl mx-auto">Flexible one-time purchase options for specific needs</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                {pricingPlans.filter(plan => plan.category === 'oneTime').map((plan, index) => (
+                  <div
+                    key={plan.name}
+                    className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 flex flex-col h-full relative
+                      ${plan.popular ? 'ring-2 ring-[#E78F81] transform scale-105 z-10' : ''}
+                      ${plan.name === getBestValuePlan() ? 'border-t-4 border-t-green-500' : ''}
+                      hover:shadow-2xl hover:translate-y-[-8px] transition-all duration-300
+                    `}
+                  >
+                    {plan.popular && (
+                      <div className="bg-gradient-to-r from-[#E78F81] to-[#d36e62] text-white text-center py-3 text-sm font-semibold">
+                        ⭐ Most Popular Choice
+                      </div>
+                    )}
+                    {plan.name === getBestValuePlan() && !plan.popular && (
+                      <div className="bg-gradient-to-r from-green-500 to-green-600 text-white text-center py-3 text-sm font-semibold">
+                        💰 Best Value
+                      </div>
+                    )}
+                    
+                    <div className="p-8 flex-grow flex flex-col">
+                      <div className="text-center mb-6">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                        <div className="mb-4">
+                          <span className="text-4xl font-bold text-gray-900">{plan.price === 0 ? 'Free' : `£${plan.price}`}</span>
+                          {plan.interval && (
+                            <span className="text-gray-500 text-lg">/{plan.interval}</span>
+                          )}
+                        </div>
+                        <p className="text-gray-600 text-sm leading-relaxed">{plan.description}</p>
+                      </div>
+                      
+                      <div className="flex-grow">
+                        <ul className="space-y-4 mb-8">
+                          {plan.features.map((feature) => (
+                            <li key={feature} className="flex items-start text-gray-700">
+                              <svg
+                                className="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5"
+                                fill="none"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path d="M5 13l4 4L19 7"></path>
+                              </svg>
+                              <span className="text-sm">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      
+                      <button
+                        onClick={() => handleSubscribe(plan)}
+                        disabled={loading && selectedPlan === plan}
+                        className={`w-full py-4 px-6 rounded-xl text-white font-semibold text-lg transition-all duration-200 ${
+                          plan.popular
+                            ? 'bg-gradient-to-r from-[#E78F81] to-[#d36e62] hover:from-[#d36e62] hover:to-[#c25a4d] shadow-lg'
+                            : plan.name === 'Free'
+                              ? 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700'
+                              : plan.name === getBestValuePlan()
+                                ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg'
+                                : plan.name === '30-Day Access Pass'
+                                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg'
+                                  : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg'
+                        } ${(loading && selectedPlan === plan) ? 'opacity-50 cursor-not-allowed' : ''} transform hover:scale-105 shadow-md hover:shadow-lg`}
+                      >
+                        {(loading && selectedPlan === plan) ? 'Processing...' : plan.buttonText}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
           /* Comparison Table View */
@@ -667,98 +722,62 @@ export default function PricingSection() {
           </div>
         )}
 
-        {/* Value Proposition - New Section */}
-        <div className="max-w-5xl mx-auto mt-20 mb-16 text-center px-4">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Why Choose Our CV Builder?</h2>
+        {/* Value Proposition - Simplified */}
+        <div className="max-w-4xl mx-auto mt-20 mb-16 text-center px-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-12">Why Choose Our CV Builder?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow transform hover:-translate-y-1 duration-300">
-              <div className="mx-auto w-16 h-16 flex items-center justify-center bg-blue-100 rounded-full mb-5">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="mx-auto w-16 h-16 flex items-center justify-center bg-blue-100 rounded-full mb-6">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3">ATS-Optimized</h3>
-              <p className="text-gray-600">Our templates are designed to pass through Applicant Tracking Systems to ensure your CV gets seen by recruiters.</p>
+              <h3 className="text-xl font-semibold mb-4 text-gray-900">ATS-Optimized</h3>
+              <p className="text-gray-600 leading-relaxed">Templates designed to pass through Applicant Tracking Systems and get seen by recruiters.</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow transform hover:-translate-y-1 duration-300">
-              <div className="mx-auto w-16 h-16 flex items-center justify-center bg-green-100 rounded-full mb-5">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="mx-auto w-16 h-16 flex items-center justify-center bg-green-100 rounded-full mb-6">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3">AI-Powered</h3>
-              <p className="text-gray-600">Advanced AI analysis provides personalized recommendations to improve your CV and increase your chances of landing interviews.</p>
+              <h3 className="text-xl font-semibold mb-4 text-gray-900">AI-Powered</h3>
+              <p className="text-gray-600 leading-relaxed">Advanced AI analysis provides personalized recommendations to improve your CV.</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow transform hover:-translate-y-1 duration-300">
-              <div className="mx-auto w-16 h-16 flex items-center justify-center bg-purple-100 rounded-full mb-5">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="mx-auto w-16 h-16 flex items-center justify-center bg-purple-100 rounded-full mb-6">
+                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-3">Customizable</h3>
-              <p className="text-gray-600">Tailor your CV for specific job applications with our easy-to-use tools and professional templates.</p>
+              <h3 className="text-xl font-semibold mb-4 text-gray-900">Professional</h3>
+              <p className="text-gray-600 leading-relaxed">Beautiful, customizable templates that make a great first impression.</p>
             </div>
           </div>
         </div>
 
-        {/* Add-ons Section - Improved */}
+        {/* Add-ons Section - Simplified */}
         <div className="mt-20 sm:mt-24">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-gray-900 mb-6 sm:mb-8">Optional Add-ons</h2>
-          <div className="max-w-3xl mx-auto bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">Optional Add-on</h2>
+          <div className="max-w-2xl mx-auto bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
             {addons.map((addon) => (
-              <div
-                key={addon.name}
-                className="p-6 sm:p-8"
-              >
-                <div className="flex flex-col md:flex-row md:items-center justify-between">
-                  <div className="mb-6 md:mb-0 md:mr-8">
-                    <div className="flex items-center mb-4">
-                      <div className="bg-indigo-100 p-2.5 rounded-full mr-4">
-                        <svg className="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                      </div>
-                      <h3 className="text-xl md:text-2xl font-bold text-gray-900">{addon.name}</h3>
-                    </div>
-                    <div className="mb-4">
-                      <span className="text-3xl font-bold">£{addon.price}</span>
-                      <span className="text-gray-500 text-sm sm:text-base"> one-time</span>
-                    </div>
-                    <p className="text-gray-600 mb-5 text-base">
-                      {addon.description}
-                    </p>
-                    <div className="bg-white bg-opacity-50 rounded-lg p-4 mb-4">
-                      <ul className="space-y-3 mb-2">
-                        <li className="flex items-start text-sm text-gray-600">
-                          <svg className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                            <path d="M5 13l4 4L19 7"></path>
-                          </svg>
-                          <span>Get AI-powered feedback on your LinkedIn profile</span>
-                        </li>
-                        <li className="flex items-start text-sm text-gray-600">
-                          <svg className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                            <path d="M5 13l4 4L19 7"></path>
-                          </svg>
-                          <span>Optimization recommendations for better visibility</span>
-                        </li>
-                        <li className="flex items-start text-sm text-gray-600">
-                          <svg className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                            <path d="M5 13l4 4L19 7"></path>
-                          </svg>
-                          <span>Content suggestions aligned with industry trends</span>
-                        </li>
-                      </ul>
-                    </div>
+              <div key={addon.name} className="p-8">
+                <div className="text-center">
+                  <div className="mx-auto w-16 h-16 flex items-center justify-center bg-indigo-100 rounded-full mb-6">
+                    <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
                   </div>
-                  <div className="flex-shrink-0">
-                    <button
-                      onClick={() => handleSubscribe(addon)}
-                      disabled={loading && selectedPlan === addon}
-                      className="w-full md:w-auto py-3 px-6 bg-indigo-600 text-white text-sm sm:text-base rounded-md hover:bg-indigo-700 transition-colors duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0"
-                    >
-                      {(loading && selectedPlan === addon) ? 'Processing...' : addon.buttonText}
-                    </button>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{addon.name}</h3>
+                  <div className="mb-6">
+                    <span className="text-3xl font-bold text-gray-900">£{addon.price}</span>
+                    <span className="text-gray-500 text-lg"> one-time</span>
                   </div>
+                  <p className="text-gray-600 mb-8 leading-relaxed">{addon.description}</p>
+                  
+                  <button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg">
+                    {addon.buttonText}
+                  </button>
                 </div>
               </div>
             ))}

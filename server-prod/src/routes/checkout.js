@@ -161,6 +161,21 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
           const isSubscription = planType !== 'pay-per-cv' && planType !== '30day-access';
     const checkoutMode = isSubscription ? 'subscription' : 'payment';
     
+    // Validate frontend URL before creating session
+    const frontendUrl = process.env.FRONTEND_URL;
+    if (!frontendUrl) {
+      logger.error('FRONTEND_URL environment variable not set');
+      return sendError(res, 'Frontend URL not configured', 500);
+    }
+    
+    // Basic URL validation
+    try {
+      new URL(frontendUrl);
+    } catch (urlError) {
+      logger.error('Invalid FRONTEND_URL:', { url: frontendUrl, error: urlError.message });
+      return sendError(res, 'Invalid frontend URL configuration', 500);
+    }
+    
     // Create the appropriate checkout session based on plan type
     const sessionConfig = {
       payment_method_types: ['card'],
@@ -171,8 +186,8 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
         },
       ],
       mode: checkoutMode,
-      success_url: `${process.env.FRONTEND_URL}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}/subscription/cancel`,
+      success_url: `${frontendUrl}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${frontendUrl}/subscription/cancel`,
       customer_email: req.user.email,
       metadata: {
         userId: req.user.id,
@@ -183,6 +198,14 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
       },
       client_reference_id: req.user.id
     };
+    
+    // Log the URLs being used for debugging
+    logger.info('Creating Stripe checkout session with URLs:', {
+      frontendUrl: frontendUrl,
+      successUrl: sessionConfig.success_url,
+      cancelUrl: sessionConfig.cancel_url,
+      userId: req.user.id
+    });
     
     const session = await stripe.checkout.sessions.create(sessionConfig);
 
