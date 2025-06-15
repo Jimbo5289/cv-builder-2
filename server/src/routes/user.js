@@ -10,6 +10,11 @@ const { auth } = require('../middleware/auth');
 // Initialize Prisma client
 const prisma = new PrismaClient();
 
+// Debug logging for Prisma client
+console.log('[DEBUG] Prisma client initialized:', !!prisma);
+console.log('[DEBUG] Prisma client type:', typeof prisma);
+console.log('[DEBUG] Prisma client methods:', Object.keys(prisma).slice(0, 5));
+
 // Input validation schema for profile update
 const updateProfileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').optional(),
@@ -279,6 +284,8 @@ router.get('/notifications', auth, async (req, res) => {
     }
 
     // Check for expiring subscriptions
+    console.log('[DEBUG] About to call prisma.subscription.findMany, prisma is:', typeof prisma, !!prisma);
+    console.log('[DEBUG] prisma.subscription exists:', !!prisma?.subscription);
     const activeSubscriptions = await prisma.subscription.findMany({
       where: {
         userId: req.user.id,
