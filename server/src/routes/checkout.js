@@ -89,16 +89,16 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
             logger.warn('Database error in mock mode, continuing:', dbError.message);
           }
         }
-        else if (planType === '24hour-access') {
-          // For 24-Hour Access, create a temporary access record
+        else if (planType === '30day-access') {
+          // For 30-Day Access, create a temporary access record (30 days from purchase)
           const expiryDate = new Date();
-          expiryDate.setHours(expiryDate.getHours() + 24);
+          expiryDate.setDate(expiryDate.getDate() + 30);
           
           try {
             await prisma.temporaryAccess.create({
               data: {
                 userId: userId,
-                type: '24hour-access',
+                type: '30day-access',
                 startTime: new Date(),
                 endTime: expiryDate,
                 status: 'active',
@@ -204,7 +204,7 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
     }
     
     // Determine checkout mode based on plan type
-    const isSubscription = planType !== 'pay-per-cv' && planType !== '24hour-access';
+            const isSubscription = planType !== 'pay-per-cv' && planType !== '30day-access';
     const checkoutMode = isSubscription ? 'subscription' : 'payment';
     
     // Create the checkout session
@@ -344,29 +344,29 @@ router.get('/plans', asyncHandler(async (req, res) => {
       {
         id: 'pay-per-cv',
         name: 'Single CV Download',
-        description: 'Create and download a single optimized CV',
+        description: 'Create and download a single CV with basic ATS analysis',
         price: 4.99,
         currency: 'GBP',
         interval: 'one-time',
         priceId: process.env.STRIPE_PRICE_CV_DOWNLOAD || 'price_mock_single',
         features: [
-          'Single CV Download',
-          'Access to premium template designs',
-          'ATS-friendly formatting',
-          'High-quality PDF export'
+          'Basic CV builder',
+          'Basic ATS analysis & scoring',
+          'Standard templates',
+          'One CV download/print'
         ]
       },
       {
-        id: '24hour-access',
-        name: '24-Hour Access Pass',
-        description: 'Complete 24-hour access to all premium features',
-        price: 9.99,
+        id: '30day-access',
+                  name: '30-Day Access Pass',
+          description: 'Complete 30-day access to all premium features',
+        price: 19.99,
         currency: 'GBP',
         interval: 'one-time',
-        priceId: process.env.STRIPE_PRICE_ENHANCED_CV_DOWNLOAD || 'price_mock_24hour',
+        priceId: process.env.STRIPE_PRICE_ENHANCED_CV_DOWNLOAD || 'price_mock_1month',
         features: [
-          'Complete 24-hour access to all premium features',
-          'Perfect for urgent CV needs'
+          'Complete 1-month access to all premium features',
+          'Perfect for intensive job searching'
         ]
       }
     ];
@@ -436,7 +436,7 @@ router.get('/plans', asyncHandler(async (req, res) => {
 
       // Add the one-time plans
       plans.push(fallbackPlans[2]); // pay-per-cv
-      plans.push(fallbackPlans[3]); // 24hour-access
+              plans.push(fallbackPlans[3]); // 30day-access
 
       return sendSuccess(res, { plans });
     } catch (stripeError) {

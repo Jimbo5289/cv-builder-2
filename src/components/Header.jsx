@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect } from 'react';
 import logo from "../assets/A_cartoon-style_digital_illustration_logo_features.png";
+import NotificationBell from './NotificationBell';
 
 // Simple ChevronDown component to replace the heroicons import
 const ChevronDownIcon = ({ className }) => (
@@ -149,6 +150,7 @@ const Header = () => {
             {/* Auth Links */}
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
+                <NotificationBell />
                 <NavLink 
                   to="/profile" 
                   className={({ isActive }) => 

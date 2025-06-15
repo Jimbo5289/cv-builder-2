@@ -708,6 +708,41 @@ router.get('/download/:cvId', authMiddleware, validateCVOwnership, async (req, r
     // Finalize PDF
     doc.end();
 
+    // Check if this is a Pay-Per-CV user and decrement remaining downloads
+    try {
+      const { PrismaClient } = require('@prisma/client');
+      const prisma = new PrismaClient();
+      
+      const purchase = await prisma.purchase.findFirst({
+        where: {
+          userId: req.user.id,
+          productName: 'Pay-Per-CV',
+          status: 'completed',
+          remainingDownloads: { gt: 0 }
+        }
+      });
+      
+      if (purchase) {
+        await prisma.purchase.update({
+          where: { id: purchase.id },
+          data: { 
+            remainingDownloads: { decrement: 1 },
+            lastDownloadAt: new Date()
+          }
+        });
+        
+        logger.info('Pay-Per-CV download tracked:', {
+          purchaseId: purchase.id,
+          remainingDownloads: purchase.remainingDownloads - 1,
+          userId: req.user.id,
+          cvId: cv.id
+        });
+      }
+    } catch (error) {
+      logger.error('Error tracking Pay-Per-CV download:', error);
+      // Don't fail the download if tracking fails
+    }
+
     // Log successful download
     console.log('CV downloaded successfully:', {
       cvId: cv.id,
@@ -2308,6 +2343,42 @@ router.get('/examples', async (req, res) => {
   }
 });
 
+// Check Pay-Per-CV purchase status
+router.get('/pay-per-cv-status', authMiddleware, async (req, res) => {
+  try {
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+    
+    const purchase = await prisma.purchase.findFirst({
+      where: {
+        userId: req.user.id,
+        productName: 'Pay-Per-CV',
+        status: 'completed'
+      },
+      orderBy: { purchaseDate: 'desc' }
+    });
+    
+    if (!purchase) {
+      return res.json({
+        hasPayPerCv: false,
+        remainingDownloads: 0,
+        totalDownloads: 0
+      });
+    }
+    
+    res.json({
+      hasPayPerCv: true,
+      remainingDownloads: purchase.remainingDownloads || 0,
+      totalDownloads: 1, // Pay-Per-CV always gets 1 download
+      purchaseDate: purchase.purchaseDate,
+      lastDownloadAt: purchase.lastDownloadAt
+    });
+  } catch (error) {
+    logger.error('Error checking Pay-Per-CV status:', error);
+    res.status(500).json({ error: 'Failed to check Pay-Per-CV status' });
+  }
+});
+
 // Get pricing plans
 router.get('/pricing', async (req, res) => {
   try {
@@ -2318,10 +2389,10 @@ router.get('/pricing', async (req, res) => {
           price: 4.99,
           interval: 'one-time',
           features: [
-            'Optimized CV tailored to job spec',
-            'Access to premium template designs',
-            'ATS-friendly formatting',
-            'High-quality PDF export'
+            'Basic CV builder',
+            'Basic ATS analysis & scoring',
+            'Standard templates',
+            'One CV download/print'
           ],
           buttonText: 'Get Started',
           popular: false
@@ -2436,7 +2507,7 @@ router.post('/analyze-only', (req, res, next) => {
   
   // For production, apply auth middleware
   return authMiddleware(req, res, next);
-}, (req, res, next) => {
+}, async (req, res, next) => {
   // Log authentication status
   logger.info(`CV analyze-only request received with auth:`, {
     hasUser: !!req.user,
@@ -2463,14 +2534,38 @@ router.post('/analyze-only', (req, res, next) => {
     return next();
   }
   
-  // For production, verify subscription
-  if (!req.user || !req.user.subscription || req.user.subscription.status !== 'active') {
-    logger.warn('User attempted to use premium feature without subscription', {
+  // For production, verify subscription or Pay-Per-CV purchase
+  const hasActiveSubscription = req.user?.subscription?.status === 'active';
+  
+  // Check for Pay-Per-CV purchase
+  let hasPayPerCvAccess = false;
+  if (req.user?.id) {
+    try {
+      const { PrismaClient } = require('@prisma/client');
+      const prisma = new PrismaClient();
+      
+      const purchase = await prisma.purchase.findFirst({
+        where: {
+          userId: req.user.id,
+          productName: 'Pay-Per-CV',
+          status: 'completed',
+          remainingDownloads: { gt: 0 }
+        }
+      });
+      
+      hasPayPerCvAccess = !!purchase;
+    } catch (error) {
+      logger.error('Error checking Pay-Per-CV purchase:', error);
+    }
+  }
+  
+  if (!hasActiveSubscription && !hasPayPerCvAccess) {
+    logger.warn('User attempted to use premium feature without subscription or Pay-Per-CV purchase', {
       userId: req.user?.id || 'unknown'
     });
     return res.status(403).json({ 
-      error: 'Subscription required',
-      message: 'This feature requires an active subscription'
+      error: 'Subscription or Pay-Per-CV purchase required',
+      message: 'This feature requires an active subscription or Pay-Per-CV purchase'
     });
   }
   

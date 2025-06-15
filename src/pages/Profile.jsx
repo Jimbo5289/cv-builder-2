@@ -5,6 +5,7 @@ import { useServer } from '../context/ServerContext';
 import { Link } from 'react-router-dom';
 import { FiUser, FiMail, FiCalendar, FiCreditCard, FiClock, FiEdit, FiBarChart2, FiFileText, FiDownload, FiPrinter, FiEye, FiPhone } from 'react-icons/fi';
 import { safeFetch, mockResponses } from '../utils/apiUtils';
+import ExpirationNotifications from '../components/ExpirationNotifications';
 
 export default function Profile() {
   const { user, getAuthHeader } = useAuth();
@@ -168,6 +169,9 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Expiration Notifications */}
+        <ExpirationNotifications />
+        
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
           {/* Profile Header */}
           <div className="px-4 py-5 sm:px-6 bg-blue-50 dark:bg-blue-900/20">

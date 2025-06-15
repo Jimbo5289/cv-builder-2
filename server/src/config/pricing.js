@@ -16,17 +16,16 @@ module.exports = {
     },
     premiumBundle: {
       id: process.env.STRIPE_PRICE_ENHANCED_CV_DOWNLOAD || 'price_1RTLEoKSDrkHMuUnAmL6Hzmk',
-      name: 'Premium CV Bundle',
+      name: '30-Day Access Pass',
       price: 19.99,
       currency: 'gbp',
       type: 'one_time',
       features: [
-        'One complete CV creation',
+        'Full access for 30 days',
         'All analysis & feedback tools',
         'Skills gap identification',
         'Upskill course recommendations',
-        'Premium templates',
-        'One-time download/print'
+        'All premium templates'
       ]
     },
     payPerCV: {
@@ -36,10 +35,10 @@ module.exports = {
       currency: 'gbp',
       type: 'one_time',
       features: [
-        'Optimized CV tailored to job spec',
-        'Access to premium template designs',
-        'ATS-friendly formatting',
-        'High-quality PDF export'
+        'Basic CV builder',
+        'Basic ATS analysis & scoring',
+        'Standard templates',
+        'One CV download/print'
       ]
     },
     monthly: {
@@ -50,12 +49,12 @@ module.exports = {
       type: 'recurring',
       interval: 'month',
       features: [
-        'Everything in Pay-Per-CV',
-        'Unlimited CV generations + downloads',
-        'Unlimited job spec comparisons',
+        'Unlimited CV generations',
+        'Advanced AI analysis & feedback',
+        'Skills gap identification',
         'Cover letter builder',
-        'Career progression insights + AI interview prep',
-        'Priority customer support'
+        'All premium templates',
+        'Priority support'
       ]
     },
     yearly: {
@@ -66,12 +65,11 @@ module.exports = {
       type: 'recurring',
       interval: 'year',
       features: [
-        'Everything in Pay-Per-CV',
-        'Unlimited CV generations + downloads',
-        'Unlimited job spec comparisons',
-        'Cover letter builder',
-        'Career progression insights + AI interview prep',
-        'Priority customer support',
+        'Everything in Monthly Subscription',
+        'Early access to new features',
+        'Career progression insights & planning',
+        'AI interview preparation tools',
+        'LinkedIn profile optimization',
         'Save 34% compared to monthly'
       ]
     }

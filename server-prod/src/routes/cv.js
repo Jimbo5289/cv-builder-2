@@ -936,10 +936,10 @@ router.get('/pricing', async (req, res) => {
           price: 4.99,
           interval: 'one-time',
           features: [
-            'Optimized CV tailored to job spec',
-            'Access to premium template designs',
-            'ATS-friendly formatting',
-            'High-quality PDF export'
+            'Basic CV builder',
+            'Basic ATS analysis & scoring',
+            'Standard templates',
+            'One CV download/print'
           ],
           buttonText: 'Get Started',
           popular: false

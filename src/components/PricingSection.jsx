@@ -76,28 +76,28 @@ export default function PricingSection() {
       price: 4.99,
       interval: 'one-time',
       features: [
-        'Optimized CV tailored to job spec',
-        'Access to premium template designs',
-        'ATS-friendly formatting',
-        'High-quality PDF export'
+        'Basic CV builder',
+        'Basic ATS analysis & scoring',
+        'Standard templates',
+        'One CV download/print'
       ],
-      description: 'Create and download a single optimized CV. Pay each time you need a new CV.',
+      description: 'Create and download a single CV with basic ATS analysis. Pay each time you need a new CV.',
       buttonText: 'Get Started',
       popular: false
     },
     {
-      name: '24-Hour Access Pass',
-      price: 9.99,
+      name: '30-Day Access Pass',
+      price: 19.99,
       interval: 'one-time',
       features: [
-        'Full access for 24 hours',
-        'Advanced AI feedback & analysis',
+        'Full access for 30 days',
+        'All analysis & feedback tools',
         'Skills gap identification',
-        'Personalized upskill recommendations',
+        'Upskill course recommendations',
         'All premium templates'
       ],
-      description: 'Complete 24-hour access to all premium features - perfect for creating the perfect CV in one focused session',
-      buttonText: 'Get 24-Hour Access',
+      description: 'Complete 30-day access to all premium features - perfect for intensive job searching',
+      buttonText: 'Get 30-Day Access',
       popular: false
     },
     {
@@ -208,9 +208,9 @@ export default function PricingSection() {
       // Add plan-specific metadata
       if (plan.name === 'Pay-Per-CV') {
         checkoutData.planType = 'pay-per-cv';
-      } else if (plan.name === '24-Hour Access Pass') {
-        checkoutData.planType = '24hour-access';
-        checkoutData.accessDuration = '24hours';
+      } else if (plan.name === '30-Day Access Pass') {
+        checkoutData.planType = '30day-access';
+        checkoutData.accessDuration = '30days';
       } else if (plan.interval === 'month' || plan.interval === 'year') {
         checkoutData.planType = 'subscription';
         checkoutData.planInterval = plan.interval === 'month' ? 'monthly' : 'annual';
@@ -381,7 +381,7 @@ export default function PricingSection() {
             {pricingPlans.map((plan, index) => (
               <div
                 key={plan.name}
-                id={plan.name === '24-Hour Access Pass' 
+                id={plan.name === '30-Day Access Pass' 
                     ? 'premium-cv-bundle' 
                     : plan.name === 'Monthly Subscription' 
                       ? 'monthly-subscription' 
@@ -426,12 +426,12 @@ export default function PricingSection() {
                   </p>
                   
                   {/* Key benefit tag */}
-                  {plan.name === '24-Hour Access Pass' && (
+                  {plan.name === '30-Day Access Pass' && (
                     <div className="mb-4 bg-blue-50 text-blue-700 text-xs font-medium px-2.5 py-1.5 rounded-md inline-flex items-center">
                       <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                       </svg>
-                      Advanced AI Analysis & Personal Guidance
+                      30-Day Premium Access
                     </div>
                   )}
                   
@@ -600,7 +600,7 @@ export default function PricingSection() {
                       <svg className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                         <path d="M5 13l4 4L19 7"></path>
                       </svg>
-                      <span className="text-blue-700 font-medium">24 Hours</span>
+                      <span className="text-blue-700 font-medium">1 Month</span>
                     </div>
                   </td>
                   <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(true, '30 Days')}</td>
@@ -625,7 +625,7 @@ export default function PricingSection() {
                 <tr className="bg-gray-50 bg-opacity-30">
                   <td className="py-3 px-6 text-sm font-medium text-gray-900 border-r border-gray-200">Number of CVs</td>
                   <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(true, 'Limited')}</td>
-                  <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(false, 'One')}</td>
+                  <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(true, 'One')}</td>
                   <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(true, 'Multiple')}</td>
                   <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(true, 'Unlimited')}</td>
                   <td className="py-3 px-4 text-center">{renderFeatureAvailability(true, 'Unlimited')}</td>
@@ -633,10 +633,18 @@ export default function PricingSection() {
                 <tr>
                   <td className="py-3 px-6 text-sm font-medium text-gray-900 border-r border-gray-200">Downloads per purchase</td>
                   <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(true, 'Unlimited')}</td>
-                  <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(true, 'One CV')}</td>
+                  <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(true, 'One')}</td>
                   <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(true, 'Multiple')}</td>
                   <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(true, 'Unlimited')}</td>
                   <td className="py-3 px-4 text-center">{renderFeatureAvailability(true, 'Unlimited')}</td>
+                </tr>
+                <tr className="bg-gray-50 bg-opacity-30">
+                  <td className="py-3 px-6 text-sm font-medium text-gray-900 border-r border-gray-200">ATS Analysis</td>
+                  <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(false, 'None')}</td>
+                  <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(true, 'Basic')}</td>
+                  <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(true, 'Advanced')}</td>
+                  <td className="py-3 px-4 text-center border-r border-gray-200">{renderFeatureAvailability(true, 'Advanced')}</td>
+                  <td className="py-3 px-4 text-center">{renderFeatureAvailability(true, 'Advanced')}</td>
                 </tr>
                 <tr className="bg-gray-50 bg-opacity-30">
                   <td className="py-3 px-6 text-sm font-medium text-gray-900 border-r border-gray-200">ATS Optimization</td>
@@ -762,16 +770,16 @@ export default function PricingSection() {
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-gray-900 mb-8">Frequently Asked Questions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">What's the difference between 24-Hour Access and Monthly Subscription?</h3>
-              <p className="text-gray-600">The <span className="font-medium text-blue-700">24-Hour Access Pass (£9.99)</span> gives you complete access to all premium features for 24 hours - perfect for creating your CV in one focused session. The <span className="font-medium text-rose-700">Monthly Subscription (£9.99/month)</span> provides the same premium features but with ongoing access and priority support, ideal if you're actively job hunting and need to create multiple CVs over time.</p>
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">What's the difference between 1-Month Access and Monthly Subscription?</h3>
+              <p className="text-gray-600">The <span className="font-medium text-blue-700">1-Month Access Pass (£19.99)</span> gives you complete access to all premium features for 1 month with a one-time payment - perfect for intensive job searching. The <span className="font-medium text-rose-700">Monthly Subscription (£9.99/month)</span> provides the same premium features but with ongoing access and priority support, ideal if you need continuous access.</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">How does the 24-Hour Access Pass work?</h3>
-              <p className="text-gray-600">After purchasing the 24-Hour Access Pass, you'll have full access to all premium features including advanced AI analysis, skills gap identification, and all premium templates for exactly 24 hours from the time of purchase. This is ideal if you want to create a perfect CV in one focused session without committing to a subscription.</p>
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">How does the 1-Month Access Pass work?</h3>
+              <p className="text-gray-600">After purchasing the 1-Month Access Pass, you'll have full access to all premium features including advanced AI analysis, skills gap identification, and all premium templates for exactly 1 month from the time of purchase. This is ideal if you want intensive access without committing to a recurring subscription.</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
               <h3 className="text-lg font-semibold mb-3 text-gray-800">Can I cancel my subscription anytime?</h3>
-              <p className="text-gray-600">Yes, you can cancel your Monthly or Yearly subscription at any time. Your access will continue until the end of your current billing period. If you only need our services for a short time, consider the 24-Hour Access Pass for a one-time payment with no subscription required.</p>
+              <p className="text-gray-600">Yes, you can cancel your Monthly or Yearly subscription at any time. Your access will continue until the end of your current billing period. If you only need our services for a short time, consider the 1-Month Access Pass for a one-time payment with no subscription required.</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
               <h3 className="text-lg font-semibold mb-3 text-gray-800">What's included in the Monthly Subscription?</h3>
@@ -779,7 +787,7 @@ export default function PricingSection() {
             </div>
             <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
               <h3 className="text-lg font-semibold mb-3 text-gray-800">How does the Pay-Per-CV option work?</h3>
-              <p className="text-gray-600">With the Pay-Per-CV option (£4.99), you can create, edit, and download a single optimized CV. This includes basic ATS optimization, premium template access, and formatting help. After downloading your completed CV, you would need to make another purchase to create a new CV. This is ideal if you only need one CV and don't require advanced AI analysis or ongoing access.</p>
+              <p className="text-gray-600">With the Pay-Per-CV option (£4.99), you can create, edit, and download a single CV with basic ATS analysis and scoring. This includes access to standard templates and basic formatting help. After downloading your completed CV, you would need to make another purchase to create a new CV. This is ideal if you only need one CV with basic ATS feedback and don't require advanced AI features or ongoing access.</p>
             </div>
           </div>
         </div>

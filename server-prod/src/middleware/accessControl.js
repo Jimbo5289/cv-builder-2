@@ -60,11 +60,11 @@ const requirePremiumAccess = (requiredFeatures = []) => {
         // Subscriptions have access to all features
         hasAccess = true;
       }
-      // Check 24-hour access pass
+      // Check 1-month access pass
       else if (hasTemporaryAccess) {
         const tempAccess = user.temporaryAccess[0];
-        if (tempAccess.type === '24hour-access') {
-          // 24-hour access pass has access to most premium features
+        if (tempAccess.type === '30day-access') {
+                      // 30-day access pass has access to most premium features
           hasAccess = true;
           
           // Special case: if the feature is 'priority-support', only full subscriptions have access
@@ -78,7 +78,7 @@ const requirePremiumAccess = (requiredFeatures = []) => {
         const purchase = user.purchases[0];
         if (purchase.type === 'one-time' && purchase.productName === 'Pay-Per-CV') {
           // Pay-per-CV has limited feature access
-          const payPerCvFeatures = ['basic-ats-check', 'premium-templates', 'pdf-export'];
+          const payPerCvFeatures = ['basic-ats-analysis', 'basic-ats-check', 'standard-templates', 'pdf-export', 'cv-builder'];
           
           // Check if all required features are available in pay-per-cv
           hasAccess = requiredFeatures.every(feature => 

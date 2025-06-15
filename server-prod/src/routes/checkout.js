@@ -64,15 +64,15 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
             }
           });
         } 
-        else if (planType === '24hour-access') {
-          // For 24-Hour Access, create a temporary access record
+        else if (planType === '30day-access') {
+          // For 30-Day Access, create a temporary access record (30 days from purchase)
           const expiryDate = new Date();
-          expiryDate.setHours(expiryDate.getHours() + 24);
+          expiryDate.setDate(expiryDate.getDate() + 30);
           
           await prisma.temporaryAccess.create({
             data: {
               userId: userId,
-              type: '24hour-access',
+              type: '30day-access',
               startTime: new Date(),
               endTime: expiryDate,
               status: 'active',
@@ -145,7 +145,7 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
     }
     
     // Determine checkout mode based on plan type
-    const isSubscription = planType !== 'pay-per-cv' && planType !== '24hour-access';
+          const isSubscription = planType !== 'pay-per-cv' && planType !== '30day-access';
     const checkoutMode = isSubscription ? 'subscription' : 'payment';
     
     // Create the appropriate checkout session based on plan type
