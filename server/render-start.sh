@@ -34,6 +34,15 @@ else
 fi
 
 echo "==================================================="
+echo "GENERATING PRISMA CLIENT"
+echo "==================================================="
+
+# Generate Prisma client to ensure it's available
+echo "Running Prisma client generation..."
+npx prisma generate
+echo "Prisma client generation completed"
+
+echo "==================================================="
 echo "STARTING SERVER"
 echo "==================================================="
 
