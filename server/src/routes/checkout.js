@@ -175,7 +175,7 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
     if (!finalPriceId) {
       if (planType === 'pay-per-cv') {
         finalPriceId = process.env.STRIPE_PRICE_CV_DOWNLOAD;
-      } else if (planType === '24hour-access') {
+      } else if (planType === '30day-access') {
         finalPriceId = process.env.STRIPE_PRICE_ENHANCED_CV_DOWNLOAD;
       } else if (planInterval === 'monthly') {
         finalPriceId = process.env.STRIPE_PRICE_MONTHLY;

@@ -106,6 +106,7 @@ app.use(express.urlencoded({
 // Now mount routes after body parsers are set up
 app.use('/api/cv', cvRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/users', require('./routes/user'));
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);

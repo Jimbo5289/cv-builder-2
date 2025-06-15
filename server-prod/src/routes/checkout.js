@@ -12,9 +12,12 @@ const prisma = new PrismaClient();
 router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => {
   const { priceId, planInterval, planType, planName, accessDuration } = req.body;
   
-  if (!priceId && !planInterval) {
-    return sendError(res, 'Either Price ID or plan interval (monthly/annual) is required', 400);
-  }
+  logger.info('Checkout session request received:', {
+    planType,
+    planName,
+    userId: req.user.id,
+    hasStripe: !!stripe
+  });
 
   try {
     if (!stripe) {
@@ -22,16 +25,26 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
       return sendError(res, 'Payment service unavailable', 503);
     }
 
-    // If priceId is not provided, get the appropriate one from env based on planInterval
+    // Map plan types to price IDs
     let finalPriceId = priceId;
     if (!finalPriceId) {
       if (planInterval === 'monthly') {
         finalPriceId = process.env.STRIPE_PRICE_MONTHLY;
       } else if (planInterval === 'annual') {
         finalPriceId = process.env.STRIPE_PRICE_ANNUAL;
+      } else if (planType === 'pay-per-cv') {
+        finalPriceId = process.env.STRIPE_PRICE_CV_DOWNLOAD;
+      } else if (planType === '30day-access') {
+        finalPriceId = process.env.STRIPE_PRICE_ENHANCED_CV_DOWNLOAD;
+      } else if (!planInterval && !planType) {
+        return sendError(res, 'Either Price ID, plan interval, or plan type is required', 400);
       } else {
-        return sendError(res, 'Invalid plan interval', 400);
+        return sendError(res, 'Invalid plan configuration', 400);
       }
+    }
+
+    if (!finalPriceId) {
+      return sendError(res, 'Price ID not configured for this plan type', 400);
     }
     
     logger.info(`Attempting to create checkout session with price ID: ${finalPriceId}, plan type: ${planType || 'subscription'}`);
