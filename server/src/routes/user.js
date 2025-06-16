@@ -13,7 +13,13 @@ const prisma = new PrismaClient();
 // Debug logging for Prisma client
 console.log('[DEBUG] Prisma client initialized:', !!prisma);
 console.log('[DEBUG] Prisma client type:', typeof prisma);
-console.log('[DEBUG] Prisma client methods:', Object.keys(prisma).slice(0, 5));
+if (prisma && typeof prisma === 'object') {
+  console.log('[DEBUG] Prisma client methods:', Object.keys(prisma).slice(0, 10));
+  console.log('[DEBUG] Has subscription property:', 'subscription' in prisma);
+  console.log('[DEBUG] Has temporaryAccess property:', 'temporaryAccess' in prisma);
+} else {
+  console.log('[DEBUG] Prisma client is not an object:', prisma);
+}
 
 // Input validation schema for profile update
 const updateProfileSchema = z.object({
@@ -350,6 +356,21 @@ router.get('/notifications', auth, async (req, res) => {
     logger.error('Get notifications error:', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Server error' });
   }
+});
+
+// Test endpoint to debug Prisma client
+router.get('/debug-prisma', auth, (req, res) => {
+  console.log('[DEBUG] Debug endpoint called');
+  console.log('[DEBUG] Prisma client at runtime:', typeof prisma, !!prisma);
+  console.log('[DEBUG] Prisma client keys:', prisma ? Object.keys(prisma).slice(0, 5) : 'N/A');
+  
+  res.json({
+    prismaClientExists: !!prisma,
+    prismaClientType: typeof prisma,
+    hasSubscription: !!(prisma && prisma.subscription),
+    hasTemporaryAccess: !!(prisma && prisma.temporaryAccess),
+    timestamp: new Date().toISOString()
+  });
 });
 
 module.exports = router;
