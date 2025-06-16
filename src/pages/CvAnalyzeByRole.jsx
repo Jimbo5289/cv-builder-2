@@ -103,14 +103,14 @@ const CvAnalyzeByRole = () => {
         return false;
       }
       
-      const response = await fetch(`${apiUrl}/api/subscriptions/status`, {
+      const response = await fetch(`${apiUrl}/api/subscriptions/premium-status`, {
         method: 'GET',
         headers: getAuthHeader()
       });
       
       if (response.ok) {
         const data = await response.json();
-        return data.hasActiveSubscription;
+        return data.hasPremiumAccess;
       }
       
       return false;

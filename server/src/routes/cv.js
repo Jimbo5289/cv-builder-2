@@ -3078,10 +3078,13 @@ router.post('/analyze-by-role', (req, res, _next) => {
   
   // For production, apply auth middleware
   return authMiddleware(req, res, () => {
-    // Then apply upload middleware
-    upload.fields([
-      { name: 'cv', maxCount: 1 }
-    ])(req, res, () => processRoleAnalysis(req, res));
+    // Check for subscription, temporary access, or Pay-Per-CV purchase
+    checkSubscription(req, res, () => {
+      // Then apply upload middleware
+      upload.fields([
+        { name: 'cv', maxCount: 1 }
+      ])(req, res, () => processRoleAnalysis(req, res));
+    });
   });
 });
 
