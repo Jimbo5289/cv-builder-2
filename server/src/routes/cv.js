@@ -2607,7 +2607,6 @@ router.post('/analyze-only', (req, res, next) => {
       const temporaryAccess = await prisma.temporaryAccess.findFirst({
         where: {
           userId: req.user.id,
-          status: 'active',
           endTime: { gt: new Date() }
         }
       });
@@ -2781,7 +2780,6 @@ router.post('/analyze', (req, res, next) => {
       const temporaryAccess = await prisma.temporaryAccess.findFirst({
         where: {
           userId: req.user.id,
-          status: 'active',
           endTime: { gt: new Date() }
         }
       });
