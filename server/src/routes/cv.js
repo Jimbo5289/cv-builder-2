@@ -175,7 +175,7 @@ try {
 }
 
 // Define the checkSubscription middleware
-const checkSubscription = (_req, _res, next) => {
+const checkSubscription = async (_req, _res, next) => {
   // Add CORS headers specifically for this route to help Safari
   _res.header('Access-Control-Allow-Origin', '*');
   _res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -212,20 +212,65 @@ const checkSubscription = (_req, _res, next) => {
       return next();
     }
     
-    // For production, verify subscription
-    if (!_req.user || !_req.user.subscription || _req.user.subscription.status !== 'active') {
+    // For production, verify subscription, temporary access, or Pay-Per-CV purchase
+    const hasActiveSubscription = _req.user?.subscription?.status === 'active';
+    
+    // Check for temporary access (30-day access pass)
+    let hasTemporaryAccess = false;
+    if (_req.user?.id) {
+      try {
+        const { PrismaClient } = require('@prisma/client');
+        const prisma = new PrismaClient();
+        
+        const temporaryAccess = await prisma.temporaryAccess.findFirst({
+          where: {
+            userId: _req.user.id,
+            status: 'active',
+            endTime: { gt: new Date() }
+          }
+        });
+        
+        hasTemporaryAccess = !!temporaryAccess;
+      } catch (error) {
+        logger.error('Error checking temporary access:', error);
+      }
+    }
+    
+    // Check for Pay-Per-CV purchase
+    let hasPayPerCvAccess = false;
+    if (_req.user?.id) {
+      try {
+        const { PrismaClient } = require('@prisma/client');
+        const prisma = new PrismaClient();
+        
+        const purchase = await prisma.purchase.findFirst({
+          where: {
+            userId: _req.user.id,
+            productName: 'Pay-Per-CV',
+            status: 'completed',
+            remainingDownloads: { gt: 0 }
+          }
+        });
+        
+        hasPayPerCvAccess = !!purchase;
+      } catch (error) {
+        logger.error('Error checking Pay-Per-CV purchase:', error);
+      }
+    }
+    
+    if (!hasActiveSubscription && !hasTemporaryAccess && !hasPayPerCvAccess) {
       // Allow development bypass with _req.skipAuthCheck
       if (_req.skipAuthCheck) {
         logger.info('Auth check skipped for development mode');
         return next();
       }
       
-      logger.warn('User attempted to use premium feature without subscription', {
+      logger.warn('User attempted to use premium feature without subscription, temporary access, or Pay-Per-CV purchase', {
         userId: _req.user?.id || 'unknown'
       });
       return _res.status(403).json({ 
-        error: 'Subscription required',
-        message: 'This feature requires an active subscription'
+        error: 'Premium access required',
+        message: 'This feature requires an active subscription, 30-day access pass, or Pay-Per-CV purchase'
       });
     }
     
