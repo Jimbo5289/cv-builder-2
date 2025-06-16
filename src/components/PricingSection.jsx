@@ -244,33 +244,43 @@ export default function PricingSection() {
 
       let errorText = '';
       try {
-        const errorData = await response.json();
+        const responseData = await response.json();
         if (!response.ok) {
-          console.error('Checkout error response:', errorData);
-          errorText = errorData.error || 'Unknown error occurred';
+          console.error('Checkout error response:', responseData);
+          errorText = responseData.error || 'Unknown error occurred';
           return {success: false, error: errorText};
         }
         
-        console.log('Checkout response:', errorData);
+        console.log('Checkout response:', responseData);
         
         // Handle mock session in development 
-        if (errorData.data?.url && errorData.data.url.includes('mock=true')) {
-          window.location.href = errorData.data.url;
+        if (responseData.data?.url && responseData.data.url.includes('mock=true')) {
+          window.location.href = responseData.data.url;
           return {success: true};
         }
         
-        // Otherwise proceed with Stripe checkout
-        const stripe = await stripePromise;
-        const { error } = await stripe.redirectToCheckout({
-          sessionId: errorData.data.sessionId,
-        });
-
-        if (error) {
-          console.error('Stripe error:', error);
-          return {success: false, error: error.message};
+        // For production Stripe checkout, redirect directly to the checkout URL
+        if (responseData.data?.url) {
+          window.location.href = responseData.data.url;
+          return {success: true};
         }
         
-        return {success: true};
+        // Fallback: Use sessionId with Stripe redirect (if URL not provided)
+        if (responseData.data?.sessionId) {
+          const stripe = await stripePromise;
+          const { error } = await stripe.redirectToCheckout({
+            sessionId: responseData.data.sessionId,
+          });
+
+          if (error) {
+            console.error('Stripe error:', error);
+            return {success: false, error: error.message};
+          }
+          
+          return {success: true};
+        }
+        
+        return {success: false, error: 'No checkout URL or session ID received'};
       } catch (parseError) {
         console.error('Error parsing response:', parseError);
         return {success: false, error: 'Failed to parse server response'};
