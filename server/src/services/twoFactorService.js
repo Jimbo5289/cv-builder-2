@@ -385,9 +385,38 @@ class TwoFactorService {
    * @returns {Promise<string>} Hashed code
    */
   async hashBackupCode(code) {
-    // In a real implementation, use a proper hashing function
-    // This is just a placeholder
-    return code;
+    const bcrypt = require('bcryptjs');
+    // Use bcrypt to hash backup codes for secure storage
+    const saltRounds = 12;
+    return await bcrypt.hash(code, saltRounds);
+  }
+
+  /**
+   * Verify a backup code against stored hashed codes
+   * @param {string} code - Backup code to verify
+   * @param {string[]} hashedCodes - Array of hashed backup codes
+   * @returns {Promise<boolean>} True if code is valid
+   */
+  async verifyBackupCode(code, hashedCodes) {
+    const bcrypt = require('bcryptjs');
+    if (!hashedCodes || hashedCodes.length === 0) {
+      return false;
+    }
+
+    // Check each hashed code to see if any match
+    for (const hashedCode of hashedCodes) {
+      try {
+        const isValid = await bcrypt.compare(code, hashedCode);
+        if (isValid) {
+          return true;
+        }
+      } catch (error) {
+        logger.error('Error verifying backup code:', error);
+        continue;
+      }
+    }
+    
+    return false;
   }
 }
 
