@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useServer } from '../context/ServerContext';
 import { Link } from 'react-router-dom';
-import { FiUser, FiMail, FiCalendar, FiCreditCard, FiClock, FiEdit, FiBarChart2, FiFileText, FiDownload, FiPrinter, FiEye, FiPhone, FiTrash2 } from 'react-icons/fi';
+import { FiUser, FiMail, FiCalendar, FiCreditCard, FiClock, FiEdit, FiBarChart2, FiFileText, FiDownload, FiPrinter, FiEye, FiPhone, FiTrash2, FiShield } from 'react-icons/fi';
 import { safeFetch, mockResponses } from '../utils/apiUtils';
 import ExpirationNotifications from '../components/ExpirationNotifications';
 import toast from 'react-hot-toast';
@@ -342,10 +342,16 @@ export default function Profile() {
                 <h3 className="text-2xl font-bold leading-6 text-gray-900 dark:text-white">Profile</h3>
                 <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">Personal details and subscription information</p>
               </div>
-              <Link to="/settings" className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-800">
-                <FiEdit className="mr-2 -ml-0.5 h-4 w-4" />
-                Settings
-              </Link>
+              <div className="flex space-x-2">
+                <Link to="/consent-preferences" className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-800">
+                  <FiShield className="mr-2 -ml-0.5 h-4 w-4" />
+                  Privacy
+                </Link>
+                <Link to="/settings" className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-800">
+                  <FiEdit className="mr-2 -ml-0.5 h-4 w-4" />
+                  Settings
+                </Link>
+              </div>
             </div>
           </div>
           

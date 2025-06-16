@@ -6368,6 +6368,7 @@ export namespace Prisma {
     customerId: string | null
     twoFactorSecret: string | null
     twoFactorEnabled: boolean | null
+    marketingConsent: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
     failedLoginAttempts: number | null
@@ -6385,6 +6386,7 @@ export namespace Prisma {
     customerId: string | null
     twoFactorSecret: string | null
     twoFactorEnabled: boolean | null
+    marketingConsent: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
     failedLoginAttempts: number | null
@@ -6403,6 +6405,7 @@ export namespace Prisma {
     twoFactorSecret: number
     twoFactorEnabled: number
     backupCodes: number
+    marketingConsent: number
     createdAt: number
     updatedAt: number
     failedLoginAttempts: number
@@ -6430,6 +6433,7 @@ export namespace Prisma {
     customerId?: true
     twoFactorSecret?: true
     twoFactorEnabled?: true
+    marketingConsent?: true
     createdAt?: true
     updatedAt?: true
     failedLoginAttempts?: true
@@ -6447,6 +6451,7 @@ export namespace Prisma {
     customerId?: true
     twoFactorSecret?: true
     twoFactorEnabled?: true
+    marketingConsent?: true
     createdAt?: true
     updatedAt?: true
     failedLoginAttempts?: true
@@ -6465,6 +6470,7 @@ export namespace Prisma {
     twoFactorSecret?: true
     twoFactorEnabled?: true
     backupCodes?: true
+    marketingConsent?: true
     createdAt?: true
     updatedAt?: true
     failedLoginAttempts?: true
@@ -6570,6 +6576,7 @@ export namespace Prisma {
     twoFactorSecret: string | null
     twoFactorEnabled: boolean
     backupCodes: string[]
+    marketingConsent: boolean
     createdAt: Date
     updatedAt: Date
     failedLoginAttempts: number
@@ -6607,6 +6614,7 @@ export namespace Prisma {
     twoFactorSecret?: boolean
     twoFactorEnabled?: boolean
     backupCodes?: boolean
+    marketingConsent?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     failedLoginAttempts?: boolean
@@ -6632,6 +6640,7 @@ export namespace Prisma {
     twoFactorSecret?: boolean
     twoFactorEnabled?: boolean
     backupCodes?: boolean
+    marketingConsent?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     failedLoginAttempts?: boolean
@@ -6650,6 +6659,7 @@ export namespace Prisma {
     twoFactorSecret?: boolean
     twoFactorEnabled?: boolean
     backupCodes?: boolean
+    marketingConsent?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     failedLoginAttempts?: boolean
@@ -6668,6 +6678,7 @@ export namespace Prisma {
     twoFactorSecret?: boolean
     twoFactorEnabled?: boolean
     backupCodes?: boolean
+    marketingConsent?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     failedLoginAttempts?: boolean
@@ -6677,7 +6688,7 @@ export namespace Prisma {
     resetTokenExpiry?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "password" | "name" | "customerId" | "twoFactorSecret" | "twoFactorEnabled" | "backupCodes" | "createdAt" | "updatedAt" | "failedLoginAttempts" | "lastLogin" | "lockedUntil" | "resetToken" | "resetTokenExpiry", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "password" | "name" | "customerId" | "twoFactorSecret" | "twoFactorEnabled" | "backupCodes" | "marketingConsent" | "createdAt" | "updatedAt" | "failedLoginAttempts" | "lastLogin" | "lockedUntil" | "resetToken" | "resetTokenExpiry", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     CV?: boolean | User$CVArgs<ExtArgs>
     Payment?: boolean | User$PaymentArgs<ExtArgs>
@@ -6709,6 +6720,7 @@ export namespace Prisma {
       twoFactorSecret: string | null
       twoFactorEnabled: boolean
       backupCodes: string[]
+      marketingConsent: boolean
       createdAt: Date
       updatedAt: Date
       failedLoginAttempts: number
@@ -7153,6 +7165,7 @@ export namespace Prisma {
     readonly twoFactorSecret: FieldRef<"User", 'String'>
     readonly twoFactorEnabled: FieldRef<"User", 'Boolean'>
     readonly backupCodes: FieldRef<"User", 'String[]'>
+    readonly marketingConsent: FieldRef<"User", 'Boolean'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
     readonly failedLoginAttempts: FieldRef<"User", 'Int'>
@@ -13123,6 +13136,7 @@ export namespace Prisma {
     twoFactorSecret: 'twoFactorSecret',
     twoFactorEnabled: 'twoFactorEnabled',
     backupCodes: 'backupCodes',
+    marketingConsent: 'marketingConsent',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     failedLoginAttempts: 'failedLoginAttempts',
@@ -13640,6 +13654,7 @@ export namespace Prisma {
     twoFactorSecret?: StringNullableFilter<"User"> | string | null
     twoFactorEnabled?: BoolFilter<"User"> | boolean
     backupCodes?: StringNullableListFilter<"User">
+    marketingConsent?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     failedLoginAttempts?: IntFilter<"User"> | number
@@ -13664,6 +13679,7 @@ export namespace Prisma {
     twoFactorSecret?: SortOrderInput | SortOrder
     twoFactorEnabled?: SortOrder
     backupCodes?: SortOrder
+    marketingConsent?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     failedLoginAttempts?: SortOrder
@@ -13691,6 +13707,7 @@ export namespace Prisma {
     twoFactorSecret?: StringNullableFilter<"User"> | string | null
     twoFactorEnabled?: BoolFilter<"User"> | boolean
     backupCodes?: StringNullableListFilter<"User">
+    marketingConsent?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     failedLoginAttempts?: IntFilter<"User"> | number
@@ -13715,6 +13732,7 @@ export namespace Prisma {
     twoFactorSecret?: SortOrderInput | SortOrder
     twoFactorEnabled?: SortOrder
     backupCodes?: SortOrder
+    marketingConsent?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     failedLoginAttempts?: SortOrder
@@ -13741,6 +13759,7 @@ export namespace Prisma {
     twoFactorSecret?: StringNullableWithAggregatesFilter<"User"> | string | null
     twoFactorEnabled?: BoolWithAggregatesFilter<"User"> | boolean
     backupCodes?: StringNullableListFilter<"User">
+    marketingConsent?: BoolWithAggregatesFilter<"User"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     failedLoginAttempts?: IntWithAggregatesFilter<"User"> | number
@@ -14384,6 +14403,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -14408,6 +14428,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -14432,6 +14453,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -14456,6 +14478,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -14480,6 +14503,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -14498,6 +14522,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -14516,6 +14541,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -15300,6 +15326,7 @@ export namespace Prisma {
     twoFactorSecret?: SortOrder
     twoFactorEnabled?: SortOrder
     backupCodes?: SortOrder
+    marketingConsent?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     failedLoginAttempts?: SortOrder
@@ -15321,6 +15348,7 @@ export namespace Prisma {
     customerId?: SortOrder
     twoFactorSecret?: SortOrder
     twoFactorEnabled?: SortOrder
+    marketingConsent?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     failedLoginAttempts?: SortOrder
@@ -15338,6 +15366,7 @@ export namespace Prisma {
     customerId?: SortOrder
     twoFactorSecret?: SortOrder
     twoFactorEnabled?: SortOrder
+    marketingConsent?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     failedLoginAttempts?: SortOrder
@@ -16339,6 +16368,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -16362,6 +16392,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -16429,6 +16460,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -16452,6 +16484,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -16568,6 +16601,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -16591,6 +16625,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -16630,6 +16665,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -16653,6 +16689,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -16676,6 +16713,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -16699,6 +16737,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -16738,6 +16777,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -16761,6 +16801,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -17143,6 +17184,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -17166,6 +17208,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -17205,6 +17248,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -17228,6 +17272,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -17251,6 +17296,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -17274,6 +17320,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -17313,6 +17360,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -17336,6 +17384,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -17359,6 +17408,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -17382,6 +17432,7 @@ export namespace Prisma {
     twoFactorSecret?: string | null
     twoFactorEnabled?: boolean
     backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
     createdAt?: Date | string
     updatedAt: Date | string
     failedLoginAttempts?: number
@@ -17421,6 +17472,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number
@@ -17444,6 +17496,7 @@ export namespace Prisma {
     twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     failedLoginAttempts?: IntFieldUpdateOperationsInput | number

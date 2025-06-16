@@ -1,9 +1,14 @@
 /* eslint-disable */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useServer } from '../context/ServerContext';
 
 const CookieConsent = ({ onConsentChange }) => {
   const [visible, setVisible] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const { user, getAuthHeader, isAuthenticated } = useAuth();
+  const { apiUrl } = useServer();
 
   useEffect(() => {
     // Check if user has already accepted cookies
@@ -22,12 +27,49 @@ const CookieConsent = ({ onConsentChange }) => {
     }
   }, [onConsentChange]);
 
-  const handleConsentChange = (accepted) => {
-    // Save consent in localStorage
+  const saveConsentToDatabase = async (accepted) => {
+    // Only save to database if user is authenticated
+    if (!isAuthenticated || !user || !apiUrl) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const response = await fetch(`${apiUrl}/api/users/consent`, {
+        method: 'PUT',
+        headers: {
+          ...getAuthHeader(),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          marketingConsent: accepted,
+          cookieConsent: accepted ? 'accepted' : 'declined',
+          consentTimestamp: new Date().toISOString()
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Failed to save consent to database:', response.status);
+      } else {
+        console.log('Cookie consent saved to database:', accepted);
+      }
+    } catch (error) {
+      console.error('Error saving consent to database:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleConsentChange = async (accepted) => {
+    // Save consent in localStorage immediately
     localStorage.setItem('cookieConsent', accepted ? 'accepted' : 'declined');
     setVisible(false);
     // Remove padding when banner is hidden
     document.body.style.paddingBottom = '0';
+    
+    // Also save to database for marketing purposes
+    await saveConsentToDatabase(accepted);
+    
     if (onConsentChange) onConsentChange(true);
   };
 
@@ -47,7 +89,7 @@ const CookieConsent = ({ onConsentChange }) => {
       <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 md:flex md:items-center md:justify-between">
         <div className="md:flex-1 md:pr-6">
           <p className="text-sm text-gray-700">
-            We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. By clicking "Accept", you consent to our use of cookies.
+            We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. By clicking "Accept", you consent to our use of cookies and agree to receive marketing communications.
             <Link to="/cookie-policy" className="text-[#2c3e50] font-medium ml-1 hover:underline">
               Read our Cookie Policy
             </Link>
@@ -56,15 +98,21 @@ const CookieConsent = ({ onConsentChange }) => {
         <div className="mt-4 md:mt-0 flex space-x-3">
           <button
             onClick={declineCookies}
-            className="flex-shrink-0 text-sm bg-gray-200 px-4 py-2 rounded-md font-medium text-gray-800 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            disabled={saving}
+            className={`flex-shrink-0 text-sm bg-gray-200 px-4 py-2 rounded-md font-medium text-gray-800 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 ${
+              saving ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             Decline
           </button>
           <button
             onClick={acceptCookies}
-            className="flex-shrink-0 text-sm bg-[#2c3e50] px-4 py-2 rounded-md font-medium text-white hover:bg-[#1f2b38] focus:outline-none focus:ring-2 focus:ring-[#2c3e50]"
+            disabled={saving}
+            className={`flex-shrink-0 text-sm bg-[#2c3e50] px-4 py-2 rounded-md font-medium text-white hover:bg-[#1f2b38] focus:outline-none focus:ring-2 focus:ring-[#2c3e50] ${
+              saving ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
-            Accept
+            {saving ? 'Saving...' : 'Accept'}
           </button>
         </div>
       </div>

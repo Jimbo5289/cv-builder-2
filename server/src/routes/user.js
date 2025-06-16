@@ -31,6 +31,13 @@ const updateProfileSchema = z.object({
       { message: 'Phone number format is invalid' })
 });
 
+// Input validation schema for consent update
+const updateConsentSchema = z.object({
+  marketingConsent: z.boolean(),
+  cookieConsent: z.string().optional(),
+  consentTimestamp: z.string().optional()
+});
+
 // Get user profile
 router.get('/profile', auth, async (req, res) => {
   try {
@@ -149,6 +156,78 @@ router.put('/profile', auth, async (req, res) => {
     
     res.status(500).json({ 
       error: 'Failed to update profile',
+      message: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
+    });
+  }
+});
+
+// Update user consent preferences
+router.put('/consent', auth, async (req, res) => {
+  try {
+    // Validate input
+    const validatedData = updateConsentSchema.parse(req.body);
+    
+    logger.info('Consent update requested', {
+      userId: req.user.id,
+      marketingConsent: validatedData.marketingConsent,
+      cookieConsent: validatedData.cookieConsent
+    });
+
+    // Only use mock mode in local development, never in production
+    if (process.env.NODE_ENV === 'development' && process.env.MOCK_DATABASE === 'true') {
+      return res.json({
+        success: true,
+        message: 'Consent updated successfully (mock mode)',
+        marketingConsent: validatedData.marketingConsent,
+        cookieConsent: validatedData.cookieConsent
+      });
+    }
+
+    // Update the user's marketing consent in the database
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { 
+        marketingConsent: validatedData.marketingConsent,
+        updatedAt: new Date()
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        marketingConsent: true,
+        updatedAt: true
+      }
+    });
+
+    logger.info('User consent updated successfully', {
+      userId: req.user.id,
+      marketingConsent: validatedData.marketingConsent,
+      timestamp: validatedData.consentTimestamp
+    });
+
+    res.json({
+      success: true,
+      message: 'Consent preferences updated successfully',
+      marketingConsent: updatedUser.marketingConsent,
+      cookieConsent: validatedData.cookieConsent,
+      user: updatedUser
+    });
+  } catch (error) {
+    if (error.name === 'ZodError') {
+      return res.status(400).json({ 
+        error: 'Invalid consent data',
+        details: error.errors
+      });
+    }
+
+    logger.error('Update consent error:', { 
+      error: error.message, 
+      stack: error.stack,
+      userId: req.user?.id
+    });
+    
+    res.status(500).json({ 
+      error: 'Failed to update consent preferences',
       message: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
     });
   }
@@ -371,6 +450,145 @@ router.get('/debug-prisma', auth, (req, res) => {
     hasTemporaryAccess: !!(prisma && prisma.temporaryAccess),
     timestamp: new Date().toISOString()
   });
+});
+
+// Get users with marketing consent (for marketing purposes - admin only)
+router.get('/marketing-consent', auth, async (req, res) => {
+  try {
+    // Only allow admin users or specific authenticated access
+    // You might want to add admin role checking here
+    const isAdmin = req.user.role === 'admin' || req.user.email === 'jamesingleton1971@gmail.com';
+    
+    if (!isAdmin) {
+      return res.status(403).json({ 
+        error: 'Access denied',
+        message: 'Only administrators can access marketing consent data'
+      });
+    }
+
+    // Query parameters for filtering
+    const page = parseInt(req.query.page) || 1;
+    const limit = Math.min(parseInt(req.query.limit) || 50, 1000); // Max 1000 per request
+    const skip = (page - 1) * limit;
+    const consentFilter = req.query.consent; // 'true', 'false', or undefined for all
+
+    // Build where clause
+    const whereClause = {};
+    if (consentFilter === 'true') {
+      whereClause.marketingConsent = true;
+    } else if (consentFilter === 'false') {
+      whereClause.marketingConsent = false;
+    }
+
+    logger.info('Marketing consent query requested', {
+      adminUserId: req.user.id,
+      adminEmail: req.user.email,
+      page,
+      limit,
+      consentFilter
+    });
+
+    // Only use mock mode in local development, never in production
+    if (process.env.NODE_ENV === 'development' && process.env.MOCK_DATABASE === 'true') {
+      const mockUsers = [
+        {
+          id: 'mock-user-1',
+          email: 'user1@example.com',
+          name: 'John Doe',
+          marketingConsent: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 'mock-user-2',
+          email: 'user2@example.com',
+          name: 'Jane Smith',
+          marketingConsent: false,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      ];
+
+      return res.json({
+        success: true,
+        users: mockUsers.filter(u => 
+          consentFilter === undefined || 
+          u.marketingConsent === (consentFilter === 'true')
+        ),
+        pagination: {
+          page,
+          limit,
+          total: mockUsers.length,
+          pages: 1
+        },
+        metadata: {
+          queryTimestamp: new Date().toISOString(),
+          consentFilter,
+          mode: 'development'
+        }
+      });
+    }
+
+    // Get users with their consent status
+    const users = await prisma.user.findMany({
+      where: whereClause,
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        marketingConsent: true,
+        createdAt: true,
+        updatedAt: true,
+        lastLogin: true
+      }
+    });
+
+    // Get total count for pagination
+    const totalUsers = await prisma.user.count({
+      where: whereClause
+    });
+
+    logger.info('Marketing consent data retrieved', {
+      adminUserId: req.user.id,
+      totalUsersReturned: users.length,
+      totalUsersMatching: totalUsers,
+      consentFilter
+    });
+
+    res.json({
+      success: true,
+      users,
+      pagination: {
+        page,
+        limit,
+        total: totalUsers,
+        pages: Math.ceil(totalUsers / limit)
+      },
+      metadata: {
+        queryTimestamp: new Date().toISOString(),
+        consentFilter,
+        summary: {
+          totalUsersReturned: users.length,
+          usersWithConsent: users.filter(u => u.marketingConsent).length,
+          usersWithoutConsent: users.filter(u => !u.marketingConsent).length
+        }
+      }
+    });
+  } catch (error) {
+    logger.error('Marketing consent query error:', { 
+      error: error.message, 
+      stack: error.stack,
+      adminUserId: req.user?.id
+    });
+    
+    res.status(500).json({ 
+      error: 'Failed to retrieve marketing consent data',
+      message: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
+    });
+  }
 });
 
 module.exports = router;

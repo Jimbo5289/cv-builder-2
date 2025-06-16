@@ -84,7 +84,7 @@ const CookiePolicy = () => {
           You can change your cookie preferences at any time by clicking the "Cookie Settings" button below.
         </p>
 
-        <div className="mt-6">
+        <div className="mt-6 space-x-4">
           <button 
             onClick={() => {
               // Clear consent and reload
@@ -93,8 +93,15 @@ const CookiePolicy = () => {
             }}
             className="bg-[#2c3e50] text-white px-4 py-2 rounded-md hover:bg-[#1f2b38] transition"
           >
-            Cookie Settings
+            Reset Cookie Banner
           </button>
+          
+          <Link 
+            to="/consent-preferences"
+            className="inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+          >
+            Manage All Preferences
+          </Link>
         </div>
 
         <h3 className="text-lg font-semibold text-[#2c3e50] mt-8 mb-3">Changes to This Cookie Policy</h3>

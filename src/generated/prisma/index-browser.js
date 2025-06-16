@@ -175,6 +175,7 @@ exports.Prisma.UserScalarFieldEnum = {
   twoFactorSecret: 'twoFactorSecret',
   twoFactorEnabled: 'twoFactorEnabled',
   backupCodes: 'backupCodes',
+  marketingConsent: 'marketingConsent',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   failedLoginAttempts: 'failedLoginAttempts',
