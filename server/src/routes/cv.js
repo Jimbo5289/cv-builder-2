@@ -2553,12 +2553,12 @@ router.post('/analyze-only', (req, res, next) => {
         "teamwork",
         "problem-solving"
       ],
-      improvementSuggestions: {
-        content: "Focus on adding specific, measurable achievements to your experience section. Quantify your impact where possible.",
-        format: "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
-        structure: "Consider reordering sections to place the most relevant information first. Your most impressive qualifications should be immediately visible.",
-        keywords: "Research job descriptions in your target field and incorporate relevant keywords to pass ATS systems."
-      }
+      improvements: [
+        "Focus on adding specific, measurable achievements to your experience section. Quantify your impact where possible.",
+        "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
+        "Consider reordering sections to place the most relevant information first. Your most impressive qualifications should be immediately visible.",
+        "Research job descriptions in your target field and incorporate relevant keywords to pass ATS systems."
+      ]
     };
 
     // Return mock data immediately
@@ -2710,12 +2710,12 @@ router.post('/analyze-only', (req, res, next) => {
         "teamwork",
         "problem-solving"
       ].slice(0, 4 + Math.floor(_seed * 3)),
-      improvementSuggestions: {
-        content: "Focus on adding specific, measurable achievements to your experience section. Quantify your impact where possible.",
-        format: "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
-        structure: "Consider reordering sections to place the most relevant information first. Your most impressive qualifications should be immediately visible.",
-        keywords: "Research job descriptions in your target field and incorporate relevant keywords to pass ATS systems."
-      }
+      improvements: [
+        "Focus on adding specific, measurable achievements to your experience section. Quantify your impact where possible.",
+        "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
+        "Consider reordering sections to place the most relevant information first. Your most impressive qualifications should be immediately visible.",
+        "Research job descriptions in your target field and incorporate relevant keywords to pass ATS systems."
+      ]
     };
     
     // Simulate processing time - short delay to appear realistic
@@ -3032,12 +3032,12 @@ router.post('/analyze', (req, res, next) => {
         "teamwork",
         "problem-solving"
       ].slice(0, 4 + (baseScore % 3)),
-      improvementSuggestions: {
-        content: `Focus on highlighting specific achievements that demonstrate your ${role} skills and ${industry} experience.`,
-        format: "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
-        structure: "Consider reordering sections to emphasize experience most relevant to the job description.",
-        keywords: `Research ${role} job descriptions in the ${industry} sector and incorporate those keywords.`
-      },
+      improvements: [
+        `Focus on highlighting specific achievements that demonstrate your ${role} skills and ${industry} experience.`,
+        "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
+        "Consider reordering sections to emphasize experience most relevant to the job description.",
+        `Research ${role} job descriptions in the ${industry} sector and incorporate those keywords.`
+      ],
       jobDescriptionSource: _jobDescriptionSource
     };
     
@@ -3169,18 +3169,18 @@ async function processRoleAnalysis(req, res) {
         "problem-solving",
         "communication skills"
       ].slice(0, 4 + (baseScore % 3)),
-      improvementSuggestions: {
-        content: isGenericAnalysis 
+      improvements: [
+        isGenericAnalysis 
           ? "Focus on adding specific, measurable achievements to your experience section. Quantify your impact where possible."
           : `Focus on highlighting specific achievements that demonstrate your ${role} skills and ${industry} experience.`,
-        format: "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
-        structure: isGenericAnalysis
+        "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
+        isGenericAnalysis
           ? "Consider reordering sections to place the most relevant information first. Your most impressive qualifications should be immediately visible."
           : `Consider reordering sections to emphasize experience most relevant to ${industry} ${role} positions.`,
-        keywords: isGenericAnalysis
+        isGenericAnalysis
           ? "Research job descriptions for your target roles and incorporate those keywords."
           : `Research ${role} job descriptions in the ${industry} sector and incorporate those keywords.`
-      }
+      ]
     };
     
     // Simulate processing time
