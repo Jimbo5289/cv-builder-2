@@ -10,7 +10,7 @@ const CookiePolicy = () => {
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <h2 className="text-xl font-semibold text-[#2c3e50] mb-4">Last Updated: May 15, 2025</h2>
         <p className="mb-4 text-gray-700">
-          This Cookie Policy explains how CV Builder ("we", "us", or "our") uses cookies and similar tracking technologies on our website. This policy is part of our 
+          This Cookie Policy explains how MyCVBuilder Ltd ("we", "us", or "our") uses cookies and similar tracking technologies on our website. This policy is part of our 
           <Link to="/privacy-policy" className="text-[#2c3e50] font-medium mx-1 hover:underline">
             Privacy Policy
           </Link>

@@ -44,4 +44,46 @@ The application is configured to use SSL with the AWS RDS instance. The `?sslmod
 
 ## Fallback to Mock Database
 
-If the database connection fails for any reason, the application will automatically fall back to using the mock database. You'll see a message in the logs indicating this fallback occurred. 
+If the database connection fails for any reason, the application will automatically fall back to using the mock database. You'll see a message in the logs indicating this fallback occurred.
+
+# CV Builder - Render.com Database Setup
+
+## Database Configuration
+
+### AWS RDS PostgreSQL Database
+The application uses an AWS RDS PostgreSQL database instance for production data storage.
+
+**Database Details:**
+- Host: cvbuilder-db.c1augguy6rx8.eu-central-1.rds.amazonaws.com
+- Port: 5432
+- Database: cvbuilder-db
+- SSL Mode: Required
+
+**Connection String:**
+```
+DATABASE_URL=postgresql://postgres:reqvip-ciftag-2Qizgo@cvbuilder-db.c1augguy6rx8.eu-central-1.rds.amazonaws.com:5432/cvbuilder-db?sslmode=require
+```
+
+### Security Configuration
+
+#### Encryption at Rest
+**Important**: Ensure your AWS RDS instance has encryption at rest enabled:
+
+1. **For New Instances**: Enable encryption during creation
+   - In AWS Console: RDS → Create Database → Additional Configuration → Encryption
+   - Check "Enable encryption"
+   - Select AWS KMS key (aws/rds or custom key)
+
+2. **For Existing Instances**: 
+   - Take a snapshot of your current database
+   - Create a new encrypted instance from the snapshot
+   - Update your connection string accordingly
+
+3. **Verification**: 
+   ```bash
+   aws rds describe-db-instances --db-instance-identifier cvbuilder-db --query 'DBInstances[0].StorageEncrypted'
+   ```
+   Should return `true`
+
+#### SSL/TLS Configuration
+The application is configured to use SSL with the AWS RDS instance. The `?sslmode=require` parameter is automatically added to the connection string if it's missing. 

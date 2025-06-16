@@ -80,7 +80,8 @@ const PrivacyPolicy = () => {
           We implement appropriate technical and organizational security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. This includes:
         </p>
         <ul className="list-disc pl-5 mb-4 text-gray-700">
-          <li>Encryption of data in transit and at rest</li>
+          <li>Encryption of data in transit via SSL/TLS</li>
+          <li>Secure password hashing and authentication systems</li>
           <li>Regular security assessments and updates</li>
           <li>Limited access to personal data on a need-to-know basis</li>
           <li>Secure payment processing through PCI-compliant providers</li>

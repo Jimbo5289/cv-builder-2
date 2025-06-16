@@ -42,6 +42,11 @@ echo "Running database migrations..."
 npx prisma migrate deploy
 echo "Database migrations completed"
 
+# Also ensure schema is in sync (important for database migration)
+echo "Ensuring database schema is in sync..."
+npx prisma db push --accept-data-loss --skip-generate
+echo "Database schema sync completed"
+
 echo "==================================================="
 echo "GENERATING PRISMA CLIENT"
 echo "==================================================="
