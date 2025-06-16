@@ -40,6 +40,7 @@ const CookiePolicy = React.lazy(() => import(/* webpackChunkName: "cookie-policy
 const PrivacyPolicy = React.lazy(() => import(/* webpackChunkName: "privacy-policy" */ './pages/PrivacyPolicy'));
 const FAQ = React.lazy(() => import(/* webpackChunkName: "faq" */ './pages/FAQ'));
 const ConsentPreferences = React.lazy(() => import(/* webpackChunkName: "consent-preferences" */ './pages/ConsentPreferences'));
+const CompanyInfo = React.lazy(() => import(/* webpackChunkName: "company-info" */ './pages/CompanyInfo'));
 // Using American spelling consistently
 const CvAnalyze = React.lazy(() => import(/* webpackChunkName: "cv-analyze" */ './pages/CvAnalyze'));
 const CvAnalyzeByRole = React.lazy(() => import(/* webpackChunkName: "cv-analyze-by-role" */ './pages/CvAnalyzeByRole'));
@@ -57,6 +58,7 @@ const Analyze = React.lazy(() => import('./pages/Analyze'));
 const SubscriptionSuccess = React.lazy(() => import('./pages/SubscriptionSuccess'));
 const Subscription = React.lazy(() => import('./pages/Subscription'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Edit = React.lazy(() => import(/* webpackChunkName: "edit" */ './pages/Edit'));
 
 /**
  * Route configuration array
@@ -87,6 +89,7 @@ const routes = [
   { path: '/privacy-policy', Component: PrivacyPolicy },
   { path: '/faq', Component: FAQ },
   { path: '/consent-preferences', Component: ConsentPreferences },
+  { path: '/company-info', Component: CompanyInfo },
   
   /**
    * Redirects for backward compatibility
@@ -123,6 +126,7 @@ const routes = [
   { path: '/saved', Component: SavedCVs, protected: true },
   { path: '/subscription-success', Component: SubscriptionSuccess, protected: true },
   { path: '/subscription', Component: Subscription, protected: true },
+  { path: '/edit/:id', Component: Edit, protected: true },
 ];
 
 export default routes;

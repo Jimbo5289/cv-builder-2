@@ -86,11 +86,19 @@ function Footer() {
         
         {/* Copyright section */}
         <div className="border-t border-gray-700 mt-6 md:mt-8 pt-6 md:pt-8 text-center text-gray-300 text-sm">
-          <p className="mb-2">&copy; {new Date().getFullYear()} CV Builder. All rights reserved.</p>
+          <div className="mb-4">
+            <p className="mb-2">&copy; {new Date().getFullYear()} MyCVBuilder Ltd. All rights reserved.</p>
+            <p className="mb-1">Trading as MyCVBuilder.co.uk</p>
+            <p className="mb-1">Company registered in England and Wales</p>
+            <p className="mb-1">Company Number: 16521310</p>
+            <p>Registered Office: 4th Floor, Silverstream House, 45 Fitzroy Street, Fitzrovia, London, W1T 6EB</p>
+          </div>
           <div className="flex justify-center space-x-4">
             <Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <span className="text-gray-500">•</span>
             <Link to="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link>
+            <span className="text-gray-500">•</span>
+            <Link to="/company-info" className="hover:text-white transition-colors">Company Information</Link>
           </div>
         </div>
       </div>

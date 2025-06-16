@@ -23,6 +23,7 @@ export default function Profile() {
   const [showAllCVs, setShowAllCVs] = useState(false);
   const [deletingCVs, setDeletingCVs] = useState(new Set());
   const [recentlyDeleted, setRecentlyDeleted] = useState(null);
+  const [selectedCVs, setSelectedCVs] = useState(new Set());
   
   // Calculate days until subscription expires
   const getDaysUntilExpiration = () => {
@@ -62,6 +63,65 @@ export default function Profile() {
       return 'Canceling at period end';
     }
     return subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1);
+  };
+
+  // Handle individual CV selection
+  const handleCVSelection = (cvId) => {
+    setSelectedCVs(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(cvId)) {
+        newSet.delete(cvId);
+      } else {
+        newSet.add(cvId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle select all/none
+  const handleSelectAll = () => {
+    const displayedCVs = showAllCVs ? savedCVs : savedCVs.slice(0, 5);
+    const allDisplayedSelected = displayedCVs.every(cv => selectedCVs.has(cv.id));
+    
+    if (allDisplayedSelected) {
+      // Deselect all displayed CVs
+      setSelectedCVs(prev => {
+        const newSet = new Set(prev);
+        displayedCVs.forEach(cv => newSet.delete(cv.id));
+        return newSet;
+      });
+    } else {
+      // Select all displayed CVs
+      setSelectedCVs(prev => {
+        const newSet = new Set(prev);
+        displayedCVs.forEach(cv => newSet.add(cv.id));
+        return newSet;
+      });
+    }
+  };
+
+  // Handle edit selected CV (only works for single selection)
+  const handleEditSelectedCV = () => {
+    if (selectedCVs.size === 1) {
+      const cvId = Array.from(selectedCVs)[0];
+      window.location.href = `/edit/${cvId}`;
+    }
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = async () => {
+    if (selectedCVs.size === 0) return;
+    
+    const confirmMessage = `Are you sure you want to delete ${selectedCVs.size} CV${selectedCVs.size > 1 ? 's' : ''}? This action cannot be undone.`;
+    if (!confirm(confirmMessage)) return;
+
+    const selectedCVData = savedCVs.filter(cv => selectedCVs.has(cv.id));
+    
+    for (const cv of selectedCVData) {
+      await handleDelete(cv);
+    }
+    
+    setSelectedCVs(new Set());
   };
 
   // Download CV handler
@@ -476,10 +536,37 @@ export default function Profile() {
               <h4 className="text-lg font-medium text-gray-900 dark:text-white flex items-center">
                 <FiFileText className="mr-2 h-5 w-5 text-gray-400 dark:text-gray-500" />
                 Your CVs
+                {selectedCVs.size > 0 && (
+                  <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                    {selectedCVs.size} selected
+                  </span>
+                )}
               </h4>
-              <Link to="/create" className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-800">
-                Create New CV
-              </Link>
+              <div className="flex space-x-2">
+                {selectedCVs.size > 0 && (
+                  <>
+                    {selectedCVs.size === 1 && (
+                      <button
+                        onClick={handleEditSelectedCV}
+                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                      >
+                        <FiEdit className="mr-1 h-4 w-4" />
+                        Edit Selected CV
+                      </button>
+                    )}
+                    <button
+                      onClick={handleBulkDelete}
+                      className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    >
+                      <FiTrash2 className="mr-1 h-4 w-4" />
+                      Delete Selected ({selectedCVs.size})
+                    </button>
+                  </>
+                )}
+                <Link to="/create" className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:focus:ring-offset-gray-800">
+                  Create New CV
+                </Link>
+              </div>
             </div>
             
             {savedCVs.length === 0 ? (
@@ -488,13 +575,39 @@ export default function Profile() {
               </div>
             ) : (
               <div className="overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
+                {savedCVs.length > 0 && (
+                  <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        checked={(() => {
+                          const displayedCVs = showAllCVs ? savedCVs : savedCVs.slice(0, 5);
+                          return displayedCVs.length > 0 && displayedCVs.every(cv => selectedCVs.has(cv.id));
+                        })()}
+                        onChange={handleSelectAll}
+                      />
+                      <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Select All Displayed
+                      </span>
+                    </label>
+                  </div>
+                )}
                 <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                   {(showAllCVs ? savedCVs : savedCVs.slice(0, 5)).map((cv) => (
                     <li key={cv.id} className="px-3 py-3 hover:bg-gray-50 dark:hover:bg-gray-700">
                       <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{cv.title}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">Last updated: {formatDate(cv.updatedAt)}</p>
+                        <div className="flex items-center flex-1 min-w-0">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-3"
+                            checked={selectedCVs.has(cv.id)}
+                            onChange={() => handleCVSelection(cv.id)}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{cv.title}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Last updated: {formatDate(cv.updatedAt)}</p>
+                          </div>
                         </div>
                         <div className="flex space-x-2">
                           <button
