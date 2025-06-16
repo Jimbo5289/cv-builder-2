@@ -235,8 +235,8 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
         },
       ],
       mode: checkoutMode,
-      success_url: `${process.env.FRONTEND_URL}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}/subscription/cancel`,
+      success_url: `${process.env.FRONTEND_URL}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL}/subscription-cancel`,
       customer_email: req.user.email,
       metadata: {
         userId: req.user.id,

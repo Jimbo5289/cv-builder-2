@@ -56,6 +56,7 @@ const References = React.lazy(() => import('./pages/References'));
 const SavedCVs = React.lazy(() => import('./pages/SavedCVs'));
 const Analyze = React.lazy(() => import('./pages/Analyze'));
 const SubscriptionSuccess = React.lazy(() => import('./pages/SubscriptionSuccess'));
+const SubscriptionCancel = React.lazy(() => import('./pages/SubscriptionCancel'));
 const Subscription = React.lazy(() => import('./pages/Subscription'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Edit = React.lazy(() => import(/* webpackChunkName: "edit" */ './pages/Edit'));
@@ -125,6 +126,7 @@ const routes = [
   { path: '/references', Component: References, protected: true },
   { path: '/saved', Component: SavedCVs, protected: true },
   { path: '/subscription-success', Component: SubscriptionSuccess, protected: true },
+  { path: '/subscription-cancel', Component: SubscriptionCancel, protected: true },
   { path: '/subscription', Component: Subscription, protected: true },
   { path: '/edit/:id', Component: Edit, protected: true },
 ];
