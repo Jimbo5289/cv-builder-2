@@ -108,9 +108,15 @@ const CvAnalyzeByRole = () => {
         headers: getAuthHeader()
       });
       
+      console.log('Premium status response:', response.status, response.statusText);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('Premium status data:', data);
         return data.hasPremiumAccess;
+      } else {
+        const errorData = await response.text();
+        console.error('Premium status error:', response.status, errorData);
       }
       
       return false;
