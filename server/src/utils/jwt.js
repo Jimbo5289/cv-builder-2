@@ -9,8 +9,8 @@ if (!JWT_SECRET) {
 }
 
 // Use longer access token life and even longer refresh token life
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '4h'; // Longer lifetime for better user experience
-const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRY || process.env.JWT_EXPIRES_IN || '4h'; // Longer lifetime for better user experience
+const REFRESH_TOKEN_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRY || process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
 
 /**
  * Generate a JWT token
