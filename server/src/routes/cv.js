@@ -195,86 +195,94 @@ const checkSubscription = async (_req, _res, next) => {
     return next();
   }
   
-  // For production, apply auth middleware
-  return authMiddleware(_req, _res, (err) => {
+  // For production, apply auth middleware first
+  return authMiddleware(_req, _res, async (err) => {
     if (err) return next(err);
     
-    // Check for development mode, premium features enabled, or mock subscription data
-    const bypassCheck = 
-      process.env.NODE_ENV === 'development' || 
-      process.env.MOCK_SUBSCRIPTION_DATA === 'true' ||
-      process.env.PREMIUM_FEATURES_ENABLED === 'true' ||
-      process.env.BYPASS_PAYMENT === 'true' ||
-      _req.mockSubscription === true;
-  
-    if (bypassCheck) {
-      logger.info('Bypassing subscription check for CV enhancement - testing mode enabled');
-      return next();
-    }
+    try {
+      // Check for development mode, premium features enabled, or mock subscription data
+      const bypassCheck = 
+        process.env.NODE_ENV === 'development' || 
+        process.env.MOCK_SUBSCRIPTION_DATA === 'true' ||
+        process.env.PREMIUM_FEATURES_ENABLED === 'true' ||
+        process.env.BYPASS_PAYMENT === 'true' ||
+        _req.mockSubscription === true;
     
-    // For production, verify subscription, temporary access, or Pay-Per-CV purchase
-    const hasActiveSubscription = _req.user?.subscription?.status === 'active';
-    
-    // Check for temporary access (30-day access pass)
-    let hasTemporaryAccess = false;
-    if (_req.user?.id) {
-      try {
-        const { PrismaClient } = require('@prisma/client');
-        const prisma = new PrismaClient();
-        
-        const temporaryAccess = await prisma.temporaryAccess.findFirst({
-          where: {
-            userId: _req.user.id,
-            status: 'active',
-            endTime: { gt: new Date() }
-          }
-        });
-        
-        hasTemporaryAccess = !!temporaryAccess;
-      } catch (error) {
-        logger.error('Error checking temporary access:', error);
-      }
-    }
-    
-    // Check for Pay-Per-CV purchase
-    let hasPayPerCvAccess = false;
-    if (_req.user?.id) {
-      try {
-        const { PrismaClient } = require('@prisma/client');
-        const prisma = new PrismaClient();
-        
-        const purchase = await prisma.purchase.findFirst({
-          where: {
-            userId: _req.user.id,
-            productName: 'Pay-Per-CV',
-            status: 'completed',
-            remainingDownloads: { gt: 0 }
-          }
-        });
-        
-        hasPayPerCvAccess = !!purchase;
-      } catch (error) {
-        logger.error('Error checking Pay-Per-CV purchase:', error);
-      }
-    }
-    
-    if (!hasActiveSubscription && !hasTemporaryAccess && !hasPayPerCvAccess) {
-      // Allow development bypass with _req.skipAuthCheck
-      if (_req.skipAuthCheck) {
-        logger.info('Auth check skipped for development mode');
+      if (bypassCheck) {
+        logger.info('Bypassing subscription check for CV enhancement - testing mode enabled');
         return next();
       }
       
-      logger.warn('User attempted to use premium feature without subscription, temporary access, or Pay-Per-CV purchase', {
-        userId: _req.user?.id || 'unknown'
-      });
-      return _res.status(403).json({ 
-        error: 'Premium access required',
-        message: 'This feature requires an active subscription, 30-day access pass, or Pay-Per-CV purchase'
+      // For production, verify subscription, temporary access, or Pay-Per-CV purchase
+      const hasActiveSubscription = _req.user?.subscription?.status === 'active';
+      
+      // Check for temporary access (30-day access pass)
+      let hasTemporaryAccess = false;
+      if (_req.user?.id) {
+        try {
+          const { PrismaClient } = require('@prisma/client');
+          const prisma = new PrismaClient();
+          
+          const temporaryAccess = await prisma.temporaryAccess.findFirst({
+            where: {
+              userId: _req.user.id,
+              status: 'active',
+              endTime: { gt: new Date() }
+            }
+          });
+          
+          hasTemporaryAccess = !!temporaryAccess;
+        } catch (error) {
+          logger.error('Error checking temporary access:', error);
+        }
+      }
+      
+      // Check for Pay-Per-CV purchase
+      let hasPayPerCvAccess = false;
+      if (_req.user?.id) {
+        try {
+          const { PrismaClient } = require('@prisma/client');
+          const prisma = new PrismaClient();
+          
+          const purchase = await prisma.purchase.findFirst({
+            where: {
+              userId: _req.user.id,
+              productName: 'Pay-Per-CV',
+              status: 'completed',
+              remainingDownloads: { gt: 0 }
+            }
+          });
+          
+          hasPayPerCvAccess = !!purchase;
+        } catch (error) {
+          logger.error('Error checking Pay-Per-CV purchase:', error);
+        }
+      }
+      
+      if (!hasActiveSubscription && !hasTemporaryAccess && !hasPayPerCvAccess) {
+        // Allow development bypass with _req.skipAuthCheck
+        if (_req.skipAuthCheck) {
+          logger.info('Auth check skipped for development mode');
+          return next();
+        }
+        
+        logger.warn('User attempted to use premium feature without subscription, temporary access, or Pay-Per-CV purchase', {
+          userId: _req.user?.id || 'unknown'
+        });
+        return _res.status(403).json({ 
+          error: 'Premium access required',
+          message: 'This feature requires an active subscription, 30-day access pass, or Pay-Per-CV purchase'
+        });
+      }
+      
+      next();
+    } catch (error) {
+      logger.error('Error in checkSubscription middleware:', error);
+      return _res.status(500).json({ 
+        error: 'Internal server error',
+        message: 'Failed to verify access permissions'
       });
     }
-    
-    next();
   });
 };
 
