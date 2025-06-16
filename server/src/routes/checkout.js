@@ -39,14 +39,32 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
     hasStripe: !!stripe
   });
 
-  if (!priceId && !planInterval) {
-    return sendError(res, 'Either Price ID or plan interval (monthly/annual) is required', 400);
+  // Debug environment variables
+  logger.info('Environment variables check:', {
+    STRIPE_PRICE_ENHANCED_CV_DOWNLOAD: !!process.env.STRIPE_PRICE_ENHANCED_CV_DOWNLOAD,
+    STRIPE_PRICE_CV_DOWNLOAD: !!process.env.STRIPE_PRICE_CV_DOWNLOAD,
+    STRIPE_PRICE_MONTHLY: !!process.env.STRIPE_PRICE_MONTHLY,
+    STRIPE_PRICE_ANNUAL: !!process.env.STRIPE_PRICE_ANNUAL,
+    NODE_ENV: process.env.NODE_ENV,
+    MOCK_SUBSCRIPTION_DATA: process.env.MOCK_SUBSCRIPTION_DATA
+  });
+
+  if (!priceId && !planInterval && !planType) {
+    return sendError(res, 'Either Price ID, plan interval (monthly/annual), or plan type is required', 400);
   }
 
   try {
     // Check for development mode with mock data enabled
     const isDevelopment = process.env.NODE_ENV === 'development';
     const useMockData = process.env.MOCK_SUBSCRIPTION_DATA === 'true';
+    const stripeAvailable = !!stripe;
+    
+    logger.info('Checkout mode decision:', {
+      isDevelopment,
+      useMockData,
+      stripeAvailable,
+      willUseMock: !stripe || (isDevelopment && useMockData)
+    });
     
     // If Stripe is not available or we're in mock mode, use mock checkout
     if (!stripe || (isDevelopment && useMockData)) {
