@@ -110,8 +110,8 @@ const PrivacyPolicy = () => {
         </ul>
         <p className="mb-4 text-gray-700">
           To exercise these rights, please contact us at 
-          <a href="mailto:privacy@mycvbuilder.co.uk" className="text-[#2c3e50] font-medium ml-1 hover:underline">
-            privacy@mycvbuilder.co.uk
+          <a href="mailto:support@mycvbuilder.co.uk" className="text-[#2c3e50] font-medium ml-1 hover:underline">
+            support@mycvbuilder.co.uk
           </a>
         </p>
 
@@ -152,8 +152,8 @@ const PrivacyPolicy = () => {
         </p>
         <ul className="list-none mb-4 text-gray-700">
           <li><strong>Email:</strong> 
-            <a href="mailto:privacy@mycvbuilder.co.uk" className="text-[#2c3e50] font-medium ml-1 hover:underline">
-              privacy@mycvbuilder.co.uk
+            <a href="mailto:support@mycvbuilder.co.uk" className="text-[#2c3e50] font-medium ml-1 hover:underline">
+              support@mycvbuilder.co.uk
             </a>
           </li>
           <li><strong>Website:</strong> 
