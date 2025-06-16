@@ -77,6 +77,86 @@ router.get('/status', auth, async (req, res) => {
   }
 });
 
+// Get all premium access (subscriptions + temporary access)
+router.get('/premium-status', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // For development purposes, allow bypassing subscription check
+    if (process.env.NODE_ENV !== 'production' && (process.env.MOCK_SUBSCRIPTION_DATA === 'true')) {
+      logger.info('Using mock premium status data in development mode');
+      return res.json({
+        hasPremiumAccess: true,
+        hasAccess: true,
+        accessType: 'subscription',
+        subscriptionData: {
+          id: 'mock-subscription',
+          userId: userId,
+          status: 'active',
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          cancelAtPeriodEnd: false
+        },
+        temporaryAccess: null
+      });
+    }
+    
+    // Check for active subscription
+    const activeSubscription = await prisma.subscription.findFirst({
+      where: {
+        userId,
+        status: { in: ['active', 'trialing'] },
+        currentPeriodEnd: {
+          gt: new Date() // Subscription period has not ended
+        }
+      }
+    });
+    
+    // Check for active temporary access (30-day access pass)
+    const temporaryAccess = await prisma.temporaryAccess.findFirst({
+      where: {
+        userId,
+        endTime: {
+          gt: new Date() // Access has not expired
+        }
+      },
+      orderBy: {
+        endTime: 'desc' // Get the most recent one
+      }
+    });
+    
+    // Determine access type and return appropriate data
+    if (activeSubscription) {
+      return res.json({
+        hasPremiumAccess: true,
+        hasAccess: true,
+        accessType: 'subscription',
+        subscriptionData: activeSubscription,
+        temporaryAccess: null
+      });
+    } else if (temporaryAccess) {
+      return res.json({
+        hasPremiumAccess: true,
+        hasAccess: true,
+        accessType: 'temporary',
+        subscriptionData: null,
+        temporaryAccess: temporaryAccess
+      });
+    } else {
+      return res.json({
+        hasPremiumAccess: false,
+        hasAccess: false,
+        accessType: null,
+        subscriptionData: null,
+        temporaryAccess: null
+      });
+    }
+  } catch (error) {
+    logger.error('Error checking premium status:', { error: error.message, userId: req.user?.id });
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Cancel subscription
 router.post('/cancel', auth, async (req, res) => {
   try {
