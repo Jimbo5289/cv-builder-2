@@ -60,8 +60,8 @@ function SubscriptionProtectedRoute({ children, skipCheck = false }) {
     
     const tryFetchSubscription = async (baseUrl) => {
       try {
-        console.log(`Trying to check subscription at ${baseUrl}/api/subscriptions/status`);
-        const response = await fetch(`${baseUrl}/api/subscriptions/status`, {
+        console.log(`Trying to check premium access at ${baseUrl}/api/subscriptions/premium-status`);
+        const response = await fetch(`${baseUrl}/api/subscriptions/premium-status`, {
           headers: {
             ...getAuthHeader(),
           }
@@ -69,18 +69,19 @@ function SubscriptionProtectedRoute({ children, skipCheck = false }) {
         
         if (response.ok) {
           const data = await response.json();
-          setHasActiveSubscription(data.hasActiveSubscription);
+          // Check if user has either subscription or temporary access
+          setHasActiveSubscription(data.hasAccess);
           return true;
         } else if (response.status === 401) {
           // Authentication error - handled by auth context
-          console.error('Authentication error while checking subscription');
+          console.error('Authentication error while checking premium access');
           return false;
         } else {
-          console.error('Failed to check subscription status:', response.status);
+          console.error('Failed to check premium access status:', response.status);
           return false;
         }
       } catch (error) {
-        console.error(`Failed to check subscription at ${baseUrl}:`, error);
+        console.error(`Failed to check premium access at ${baseUrl}:`, error);
         return false;
       }
     };

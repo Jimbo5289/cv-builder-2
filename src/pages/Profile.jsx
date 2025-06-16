@@ -12,6 +12,7 @@ export default function Profile() {
   const { user, getAuthHeader } = useAuth();
   const { apiUrl, status: serverStatus } = useServer();
   const [subscription, setSubscription] = useState(null);
+  const [premiumAccess, setPremiumAccess] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [savedCVs, setSavedCVs] = useState([]);
@@ -25,11 +26,19 @@ export default function Profile() {
   const [recentlyDeleted, setRecentlyDeleted] = useState(null);
   const [selectedCVs, setSelectedCVs] = useState(new Set());
   
-  // Calculate days until subscription expires
+  // Calculate days until access expires
   const getDaysUntilExpiration = () => {
-    if (!subscription || !subscription.currentPeriodEnd) return null;
+    if (!premiumAccess || !premiumAccess.hasAccess) return null;
     
-    const endDate = new Date(subscription.currentPeriodEnd);
+    let endDate;
+    if (premiumAccess.accessType === 'subscription' && premiumAccess.subscriptionData) {
+      endDate = new Date(premiumAccess.subscriptionData.currentPeriodEnd);
+    } else if (premiumAccess.accessType === 'temporary' && premiumAccess.temporaryAccess) {
+      endDate = new Date(premiumAccess.temporaryAccess.endTime);
+    } else {
+      return null;
+    }
+    
     const today = new Date();
     const diffTime = endDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -56,13 +65,21 @@ export default function Profile() {
     return 'bg-green-100 text-green-800';
   };
   
-  // Get subscription status text
-  const getSubscriptionStatus = () => {
-    if (!subscription) return 'No Active Subscription';
-    if (subscription.status === 'active' && subscription.cancelAtPeriodEnd) {
-      return 'Canceling at period end';
+  // Get access status text
+  const getAccessStatus = () => {
+    if (!premiumAccess || !premiumAccess.hasAccess) return 'No Active Access';
+    
+    if (premiumAccess.accessType === 'subscription') {
+      const sub = premiumAccess.subscriptionData;
+      if (sub.status === 'active' && sub.cancelAtPeriodEnd) {
+        return 'Canceling at period end';
+      }
+      return sub.status.charAt(0).toUpperCase() + sub.status.slice(1);
+    } else if (premiumAccess.accessType === 'temporary') {
+      return '30-Day Access Pass';
     }
-    return subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1);
+    
+    return 'Unknown';
   };
 
   // Handle individual CV selection
@@ -332,15 +349,19 @@ export default function Profile() {
       }
       
       try {
-        // Fetch subscription information
-        const subData = await safeFetch(
-          `${apiUrl}/api/subscriptions`, 
+        // Fetch premium access information (subscriptions + temporary access)
+        const premiumData = await safeFetch(
+          `${apiUrl}/api/subscriptions/premium-status`, 
           { headers: getAuthHeader() },
           mockResponses.subscriptions
         );
         
-        if (subData) {
-          setSubscription(subData);
+        if (premiumData) {
+          setPremiumAccess(premiumData);
+          // For backward compatibility, set subscription if it exists
+          if (premiumData.subscriptionData) {
+            setSubscription(premiumData.subscriptionData);
+          }
         }
         
         // Fetch usage statistics
@@ -452,18 +473,18 @@ export default function Profile() {
             </dl>
           </div>
           
-          {/* Subscription Information */}
+          {/* Premium Access Information */}
           <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-5 sm:p-6 bg-gray-50 dark:bg-gray-850">
-            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Subscription Details</h4>
+            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Premium Access Details</h4>
             
-            {!subscription ? (
+            {!premiumAccess || !premiumAccess.hasAccess ? (
               <div className="rounded-md bg-blue-50 dark:bg-blue-900/20 p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
                     <FiCreditCard className="h-5 w-5 text-blue-400" />
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300">No Active Subscription</h3>
+                    <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300">No Active Premium Access</h3>
                     <div className="mt-2 text-sm text-blue-700 dark:text-blue-400">
                       <p>You are currently on the free plan. Upgrade to access premium features.</p>
                     </div>
@@ -477,13 +498,36 @@ export default function Profile() {
               </div>
             ) : (
               <div>
+                {premiumAccess.accessType === 'temporary' ? (
+                  // 30-Day Access Pass Display
+                  <div className="rounded-md bg-green-50 dark:bg-green-900/20 p-4 mb-6">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <FiClock className="h-5 w-5 text-green-400" />
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-green-800 dark:text-green-300">30-Day Access Pass Active</h3>
+                        <div className="mt-2 text-sm text-green-700 dark:text-green-400">
+                          <p>You have full access to all premium features until {formatDate(premiumAccess.temporaryAccess.endTime)}.</p>
+                          <p className="mt-1">Purchased on {formatDate(premiumAccess.temporaryAccess.createdAt)} for £19.99</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
                 <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                   <div>
                     <div className="flex items-center">
                       <FiCreditCard className="flex-shrink-0 mr-2 h-5 w-5 text-gray-400 dark:text-gray-500" />
-                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Plan</dt>
+                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Access Type</dt>
                     </div>
-                    <dd className="mt-1 text-sm text-gray-900 dark:text-white ml-7">{subscription.planId || 'Premium'}</dd>
+                    <dd className="mt-1 text-sm text-gray-900 dark:text-white ml-7">
+                      {premiumAccess.accessType === 'subscription' 
+                        ? (premiumAccess.subscriptionData?.planId || 'Premium Subscription')
+                        : '30-Day Access Pass'
+                      }
+                    </dd>
                   </div>
                   
                   <div>
@@ -492,8 +536,13 @@ export default function Profile() {
                       <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</dt>
                     </div>
                     <dd className="mt-1 text-sm text-gray-900 dark:text-white ml-7 flex items-center">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${subscription.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'}`}>
-                        {getSubscriptionStatus()}
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        (premiumAccess.accessType === 'subscription' && premiumAccess.subscriptionData?.status === 'active') || 
+                        premiumAccess.accessType === 'temporary'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' 
+                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                      }`}>
+                        {getAccessStatus()}
                       </span>
                     </dd>
                   </div>
@@ -501,10 +550,15 @@ export default function Profile() {
                   <div>
                     <div className="flex items-center">
                       <FiCalendar className="flex-shrink-0 mr-2 h-5 w-5 text-gray-400 dark:text-gray-500" />
-                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Current Period</dt>
+                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        {premiumAccess.accessType === 'subscription' ? 'Current Period' : 'Access Period'}
+                      </dt>
                     </div>
                     <dd className="mt-1 text-sm text-gray-900 dark:text-white ml-7">
-                      {formatDate(subscription.currentPeriodStart)} - {formatDate(subscription.currentPeriodEnd)}
+                      {premiumAccess.accessType === 'subscription' 
+                        ? `${formatDate(premiumAccess.subscriptionData?.currentPeriodStart)} - ${formatDate(premiumAccess.subscriptionData?.currentPeriodEnd)}`
+                        : `${formatDate(premiumAccess.temporaryAccess?.createdAt)} - ${formatDate(premiumAccess.temporaryAccess?.endTime)}`
+                      }
                     </dd>
                   </div>
                   
