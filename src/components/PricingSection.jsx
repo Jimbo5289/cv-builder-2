@@ -296,7 +296,7 @@ export default function PricingSection() {
         >
           <path d="M5 13l4 4L19 7"></path>
         </svg>
-        <span className="text-gray-700">{featureName}</span>
+        <span className="text-gray-700 dark:text-gray-300">{featureName}</span>
       </div>
     ) : (
       <div className="flex items-center">
@@ -311,17 +311,17 @@ export default function PricingSection() {
         >
           <path d="M6 18L18 6M6 6l12 12"></path>
         </svg>
-        <span className="text-gray-400">{featureName}</span>
+        <span className="text-gray-400 dark:text-gray-500">{featureName}</span>
       </div>
     );
   };
 
   return (
-    <div className="bg-gray-50 py-8 sm:py-12 md:py-16">
+    <div className="bg-gray-50 dark:bg-gray-900 py-8 sm:py-12 md:py-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12 sm:mb-14 md:mb-16">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-5">Simple, Transparent Pricing</h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-8 max-w-3xl mx-auto">Choose the plan that's right for you and take your CV to the next level</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-5">Simple, Transparent Pricing</h1>
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">Choose the plan that's right for you and take your CV to the next level</p>
           
           {/* View toggle */}
           <div className="inline-flex p-1 bg-gray-100 rounded-lg shadow-sm mx-auto">
@@ -360,7 +360,7 @@ export default function PricingSection() {
 
         {/* Premium Feature Notice */}
         {isPremiumUpgrade && (
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 max-w-3xl mx-auto">
+          <div className="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-8 max-w-3xl mx-auto">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -368,14 +368,14 @@ export default function PricingSection() {
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm text-blue-700">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
                   <span className="font-medium">Premium Feature Access</span> - Subscribe to a plan below to unlock {premiumFeature} and all other premium features.
                 </p>
                 {fromPath && (
                   <p className="mt-2">
                     <button 
                       onClick={() => navigate(fromPath)}
-                      className="text-sm text-blue-600 hover:text-blue-800"
+                      className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
                     >
                       Return to previous page
                     </button>
@@ -391,8 +391,8 @@ export default function PricingSection() {
             {/* Main Plans Section */}
             <div>
               <div className="text-center mb-12">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Choose Your Plan</h2>
-                <p className="text-gray-600 max-w-2xl mx-auto">Start free or unlock premium features with our flexible pricing options</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Choose Your Plan</h2>
+                <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">Start free or unlock premium features with our flexible pricing options</p>
               </div>
               
               {/* Main 3 Plans - Featured */}

@@ -12,6 +12,7 @@ const { auth } = require('../middleware/auth');
 const { authLimiter } = require('../middleware/security');
 const { z } = require('zod');
 const { sendPasswordResetEmail } = require('../services/emailService');
+const { addUserToMailingList } = require('../services/mailchimpService');
 const { logger } = require('../config/logger');
 // eslint-disable-next-line no-unused-vars
 const database = require('../config/database');
@@ -171,6 +172,15 @@ router.post('/register', async (req, res) => {
         process.env.JWT_SECRET || 'fallback-secret',
         { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
       );
+
+      // Add user to mailing list (non-blocking)
+      addUserToMailingList(user).catch(err => {
+        logger.warn('Failed to add user to mailing list:', { 
+          userId: user.id, 
+          email: user.email, 
+          error: err.message 
+        });
+      });
 
       logger.info('User registered successfully', { userId: user.id, email });
       return res.status(201).json({

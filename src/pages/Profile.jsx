@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useServer } from '../context/ServerContext';
 import { Link } from 'react-router-dom';
-import { FiUser, FiMail, FiCalendar, FiCreditCard, FiClock, FiEdit, FiBarChart2, FiFileText, FiDownload, FiPrinter, FiEye, FiPhone } from 'react-icons/fi';
+import { FiUser, FiMail, FiCalendar, FiCreditCard, FiClock, FiEdit, FiBarChart2, FiFileText, FiDownload, FiPrinter, FiEye, FiPhone, FiTrash2 } from 'react-icons/fi';
 import { safeFetch, mockResponses } from '../utils/apiUtils';
 import ExpirationNotifications from '../components/ExpirationNotifications';
+import toast from 'react-hot-toast';
 
 export default function Profile() {
   const { user, getAuthHeader } = useAuth();
@@ -20,6 +21,8 @@ export default function Profile() {
     lastActive: null
   });
   const [showAllCVs, setShowAllCVs] = useState(false);
+  const [deletingCVs, setDeletingCVs] = useState(new Set());
+  const [recentlyDeleted, setRecentlyDeleted] = useState(null);
   
   // Calculate days until subscription expires
   const getDaysUntilExpiration = () => {
@@ -99,6 +102,136 @@ export default function Profile() {
     } catch (err) {
       console.error('Error setting up print:', err);
       alert('Failed to prepare CV for printing. Please try downloading instead.');
+    }
+  };
+
+  // Delete CV handler with undo functionality
+  const handleDelete = async (cv) => {
+    try {
+      // Add to deleting set to show loading state
+      setDeletingCVs(prev => new Set([...prev, cv.id]));
+      
+      // Remove from the UI immediately for responsive feedback
+      setSavedCVs(prevCVs => prevCVs.filter(savedCV => savedCV.id !== cv.id));
+      
+      // Store the deleted CV data for potential undo
+      setRecentlyDeleted({
+        cv,
+        timestamp: Date.now()
+      });
+
+      // Show undo toast notification for 5 seconds
+      const undoToastId = toast((t) => (
+        <div className="flex items-center justify-between w-full">
+          <span>CV "{cv.title}" deleted</span>
+          <button
+            onClick={() => {
+              handleUndo(cv);
+              toast.dismiss(t.id);
+            }}
+            className="ml-3 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          >
+            Undo
+          </button>
+        </div>
+      ), {
+        duration: 5000,
+        style: {
+          background: '#ef4444',
+          color: '#white',
+          maxWidth: '400px'
+        },
+        onClose: () => {
+          // If toast closes without undo, proceed with actual deletion
+          if (recentlyDeleted && recentlyDeleted.cv.id === cv.id) {
+            performActualDeletion(cv.id);
+          }
+        }
+      });
+
+      // Auto-delete after 5 seconds if no undo
+      setTimeout(() => {
+        if (recentlyDeleted && recentlyDeleted.cv.id === cv.id) {
+          performActualDeletion(cv.id);
+          toast.dismiss(undoToastId);
+        }
+      }, 5000);
+
+    } catch (err) {
+      console.error('Error during delete process:', err);
+      toast.error('Failed to delete CV. Please try again.');
+      // Remove from deleting set and restore to UI
+      setDeletingCVs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(cv.id);
+        return newSet;
+      });
+      setSavedCVs(prevCVs => [...prevCVs, cv].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)));
+    }
+  };
+
+  // Undo delete handler
+  const handleUndo = (cv) => {
+    // Restore the CV to the UI
+    setSavedCVs(prevCVs => {
+      const updatedCVs = [...prevCVs, cv];
+      return updatedCVs.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    });
+    
+    // Remove from deleting set
+    setDeletingCVs(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(cv.id);
+      return newSet;
+    });
+    
+    // Clear recently deleted
+    setRecentlyDeleted(null);
+    
+    toast.success(`CV "${cv.title}" restored`);
+  };
+
+  // Perform actual deletion from database
+  const performActualDeletion = async (cvId) => {
+    try {
+      const response = await fetch(`${apiUrl}/api/cv/${cvId}`, {
+        method: 'DELETE',
+        headers: {
+          ...getAuthHeader()
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || errorData.error || 'Failed to delete CV');
+      }
+
+      // Remove from deleting set
+      setDeletingCVs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(cvId);
+        return newSet;
+      });
+
+      // Clear recently deleted if it matches
+      setRecentlyDeleted(prev => {
+        if (prev && prev.cv.id === cvId) {
+          return null;
+        }
+        return prev;
+      });
+
+      console.log('CV deleted successfully from database');
+
+    } catch (err) {
+      console.error('Error deleting CV from database:', err);
+      // Since the CV was already removed from UI, we don't need to show error to user
+      // Just log it and remove from deleting set
+      setDeletingCVs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(cvId);
+        return newSet;
+      });
     }
   };
 
@@ -360,6 +493,14 @@ export default function Profile() {
                           >
                             <FiEdit className="h-4 w-4" />
                           </Link>
+                          
+                          <button
+                            onClick={() => handleDelete(cv)}
+                            className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                            title="Delete CV"
+                          >
+                            <FiTrash2 className="h-4 w-4" />
+                          </button>
                         </div>
                       </div>
                     </li>
