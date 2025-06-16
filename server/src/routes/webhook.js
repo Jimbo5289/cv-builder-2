@@ -188,7 +188,7 @@ async function handleCheckoutSessionCompleted(session) {
     } 
     // Handle one-time payment checkout
     else if (mode === 'payment') {
-      logger.info(`One-time payment completed for user ${user.id}`);
+      logger.info(`One-time payment completed for user ${user.id}`, { metadata: session.metadata });
       
       try {
         // Record the payment in the database using correct field names
@@ -202,6 +202,24 @@ async function handleCheckoutSessionCompleted(session) {
             status: 'succeeded'
           }
         });
+        
+        // Check if this is a 30-day access purchase and create TemporaryAccess record
+        if (session.metadata && session.metadata.planType === '30day-access') {
+          const expiryDate = new Date();
+          expiryDate.setDate(expiryDate.getDate() + 30);
+          
+          await prisma.temporaryAccess.create({
+            data: {
+              id: cuid(),
+              userId: user.id,
+              type: '30day-access',
+              startTime: new Date(),
+              endTime: expiryDate
+            }
+          });
+          
+          logger.info(`30-day access created for user ${user.id}, expires: ${expiryDate}`);
+        }
         
         // Send a payment success email
         await emailService.sendPaymentSuccessNotification({
