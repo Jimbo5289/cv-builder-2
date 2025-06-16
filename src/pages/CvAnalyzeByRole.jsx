@@ -274,6 +274,14 @@ const CvAnalyzeByRole = () => {
     return 'text-red-600';
   };
 
+  const getScoreLabel = (score) => {
+    if (score >= 90) return 'Excellent';
+    if (score >= 80) return 'Very Good';
+    if (score >= 70) return 'Good';
+    if (score >= 60) return 'Fair';
+    return 'Needs Improvement';
+  };
+
   // Effect to update progress step to 4 after results are shown
   useEffect(() => {
     if (analysisResults) {
@@ -286,9 +294,9 @@ const CvAnalyzeByRole = () => {
   }, [analysisResults]);
 
   return (
-    <div className="container mx-auto px-4 py-8 min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Title section */}
-      <div className="container mx-auto px-4 max-w-4xl mb-8">
+      <div className="container mx-auto px-4 max-w-4xl pt-8 pb-8">
         <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-2">
           Role Related CV Analysis
         </h1>
@@ -300,7 +308,7 @@ const CvAnalyzeByRole = () => {
         <AnalysisProgressTracker currentStep={progressStep} isAnalyzing={isAnalyzing} />
       </div>
       
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto px-4">
         {/* Subscription Modal */}
         {showSubscriptionModal && (
           <SubscriptionModal
@@ -351,20 +359,18 @@ const CvAnalyzeByRole = () => {
                       Drag and drop your CV file here
                     </p>
                     <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm">
-                      or <button className="text-[#E78F81] hover:text-[#d36e62] font-medium">browse</button> to select a file
+                      or{' '}
+                      <label htmlFor="file-upload" className="text-[#E78F81] hover:text-[#d36e62] font-medium cursor-pointer">
+                        browse
+                      </label>{' '}
+                      to select a file
                     </p>
                     <input
+                      id="file-upload"
                       type="file"
                       className="hidden"
                       onChange={handleFileInput}
                       accept=".pdf,.docx"
-                      ref={(input) => {
-                        // When the user clicks "browse", trigger the file input
-                        if (input) {
-                          const browseButton = input.previousSibling.querySelector('button');
-                          browseButton.addEventListener('click', () => input.click());
-                        }
-                      }}
                     />
                     <p className="mt-1 text-gray-500 dark:text-gray-400 text-xs">
                       PDF or DOCX up to 5MB
@@ -406,8 +412,8 @@ const CvAnalyzeByRole = () => {
                       >
                         <option value="">Select an industry</option>
                         {INDUSTRIES.map((industry) => (
-                          <option key={industry} value={industry}>
-                            {industry}
+                          <option key={industry.value} value={industry.value}>
+                            {industry.label}
                           </option>
                         ))}
                       </select>
@@ -426,8 +432,8 @@ const CvAnalyzeByRole = () => {
                         >
                           <option value="">Select a job role</option>
                           {ROLES_BY_INDUSTRY[selectedIndustry]?.map((role) => (
-                            <option key={role} value={role}>
-                              {role}
+                            <option key={role.value} value={role.value}>
+                              {role.label}
                             </option>
                           ))}
                         </select>
@@ -499,9 +505,13 @@ const CvAnalyzeByRole = () => {
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Suggested Improvements</h3>
                   <ul className="space-y-2 list-disc list-inside text-gray-600 dark:text-gray-300">
-                    {analysisResults.improvements.map((improvement, index) => (
-                      <li key={index}>{improvement}</li>
-                    ))}
+                    {analysisResults.improvements && analysisResults.improvements.length > 0 ? (
+                      analysisResults.improvements.map((improvement, index) => (
+                        <li key={index}>{improvement}</li>
+                      ))
+                    ) : (
+                      <li>No specific improvements identified at this time.</li>
+                    )}
                   </ul>
                 </div>
                 
