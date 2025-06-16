@@ -105,13 +105,26 @@ export default function Profile() {
     }
   };
 
-  // Delete CV handler with undo functionality
+  // Delete CV handler with immediate deletion and undo functionality
   const handleDelete = async (cv) => {
     try {
       // Add to deleting set to show loading state
       setDeletingCVs(prev => new Set([...prev, cv.id]));
       
-      // Remove from the UI immediately for responsive feedback
+      // Delete from database immediately
+      const response = await fetch(`${apiUrl}/api/cv/${cv.id}`, {
+        method: 'DELETE',
+        headers: {
+          ...getAuthHeader()
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || errorData.error || 'Failed to delete CV');
+      }
+
+      // Remove from the UI after successful deletion
       setSavedCVs(prevCVs => prevCVs.filter(savedCV => savedCV.id !== cv.id));
       
       // Store the deleted CV data for potential undo
@@ -120,7 +133,14 @@ export default function Profile() {
         timestamp: Date.now()
       });
 
-      // Show undo toast notification for 5 seconds
+      // Remove from deleting set
+      setDeletingCVs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(cv.id);
+        return newSet;
+      });
+
+      // Show undo toast notification for 10 seconds
       const undoToastId = toast((t) => (
         <div className="flex items-center justify-between w-full">
           <span>CV "{cv.title}" deleted</span>
@@ -135,105 +155,114 @@ export default function Profile() {
           </button>
         </div>
       ), {
-        duration: 5000,
+        duration: 10000, // 10 seconds for undo
         style: {
           background: '#ef4444',
           color: '#white',
           maxWidth: '400px'
         },
         onClose: () => {
-          // If toast closes without undo, proceed with actual deletion
+          // Clear recently deleted when toast closes
           if (recentlyDeleted && recentlyDeleted.cv.id === cv.id) {
-            performActualDeletion(cv.id);
+            setRecentlyDeleted(null);
           }
         }
       });
 
-      // Auto-delete after 5 seconds if no undo
+      // Clear recently deleted after 10 seconds
       setTimeout(() => {
         if (recentlyDeleted && recentlyDeleted.cv.id === cv.id) {
-          performActualDeletion(cv.id);
+          setRecentlyDeleted(null);
           toast.dismiss(undoToastId);
         }
-      }, 5000);
+      }, 10000);
+
+      console.log('CV deleted successfully from database');
 
     } catch (err) {
       console.error('Error during delete process:', err);
       toast.error('Failed to delete CV. Please try again.');
-      // Remove from deleting set and restore to UI
+      // Remove from deleting set on error
       setDeletingCVs(prev => {
         const newSet = new Set(prev);
         newSet.delete(cv.id);
         return newSet;
       });
-      setSavedCVs(prevCVs => [...prevCVs, cv].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)));
+      // Don't restore to UI since deletion may have partially succeeded
     }
   };
 
-  // Undo delete handler
-  const handleUndo = (cv) => {
-    // Restore the CV to the UI
-    setSavedCVs(prevCVs => {
-      const updatedCVs = [...prevCVs, cv];
-      return updatedCVs.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-    });
-    
-    // Remove from deleting set
-    setDeletingCVs(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(cv.id);
-      return newSet;
-    });
-    
-    // Clear recently deleted
-    setRecentlyDeleted(null);
-    
-    toast.success(`CV "${cv.title}" restored`);
-  };
-
-  // Perform actual deletion from database
-  const performActualDeletion = async (cvId) => {
+  // Undo delete handler - recreates CV in database
+  const handleUndo = async (cv) => {
     try {
-      const response = await fetch(`${apiUrl}/api/cv/${cvId}`, {
-        method: 'DELETE',
+      // First restore to UI immediately for responsive feedback
+      setSavedCVs(prevCVs => {
+        const updatedCVs = [...prevCVs, cv];
+        return updatedCVs.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      });
+
+      // Recreate the CV in the database
+      const response = await fetch(`${apiUrl}/api/cv/restore`, {
+        method: 'POST',
         headers: {
-          ...getAuthHeader()
-        }
+          ...getAuthHeader(),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          cvId: cv.id,
+          title: cv.title,
+          content: cv.content || cv,
+          originalCreatedAt: cv.createdAt,
+          originalUpdatedAt: cv.updatedAt
+        })
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || errorData.error || 'Failed to delete CV');
-      }
+        // If restoration fails, try creating a new CV with the same data
+        const fallbackResponse = await fetch(`${apiUrl}/api/cv/save`, {
+          method: 'POST',
+          headers: {
+            ...getAuthHeader(),
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title: cv.title,
+            content: cv.content || cv
+          })
+        });
 
-      // Remove from deleting set
-      setDeletingCVs(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(cvId);
-        return newSet;
-      });
-
-      // Clear recently deleted if it matches
-      setRecentlyDeleted(prev => {
-        if (prev && prev.cv.id === cvId) {
-          return null;
+        if (!fallbackResponse.ok) {
+          throw new Error('Failed to restore CV');
         }
-        return prev;
-      });
 
-      console.log('CV deleted successfully from database');
-
+        const restoredCV = await fallbackResponse.json();
+        
+        // Update the CV in the state with the new ID
+        setSavedCVs(prevCVs => 
+          prevCVs.map(savedCV => 
+            savedCV.id === cv.id 
+              ? { ...restoredCV.cv, title: cv.title }
+              : savedCV
+          )
+        );
+      }
+      
+      // Clear recently deleted
+      setRecentlyDeleted(null);
+      
+      toast.success(`CV "${cv.title}" restored`);
+      
     } catch (err) {
-      console.error('Error deleting CV from database:', err);
-      // Since the CV was already removed from UI, we don't need to show error to user
-      // Just log it and remove from deleting set
-      setDeletingCVs(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(cvId);
-        return newSet;
-      });
+      console.error('Error restoring CV:', err);
+      
+      // Remove from UI again since restoration failed
+      setSavedCVs(prevCVs => prevCVs.filter(savedCV => savedCV.id !== cv.id));
+      
+      toast.error('Failed to restore CV. The deletion cannot be undone.');
     }
   };
+
+
 
   useEffect(() => {
     const fetchProfileData = async () => {

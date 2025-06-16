@@ -3985,6 +3985,77 @@ router.post('/debug/test-save', authMiddleware, async (req, res) => {
   }
 });
 
+// Restore a deleted CV (for undo functionality)
+router.post('/restore', authMiddleware, async (req, res) => {
+  try {
+    const { cvId, title, content, originalCreatedAt, originalUpdatedAt } = req.body;
+    const userId = req.user.id;
+
+    logger.info('CV restoration requested', {
+      cvId,
+      userId,
+      title
+    });
+
+    // Check if a CV with this ID already exists
+    const existingCV = await database.client.CV.findFirst({
+      where: {
+        id: cvId,
+        userId: userId
+      }
+    });
+
+    if (existingCV) {
+      logger.info('CV already exists, no restoration needed', {
+        cvId,
+        userId
+      });
+      
+      return res.json({
+        success: true,
+        message: 'CV already exists',
+        cv: existingCV
+      });
+    }
+
+    // Recreate the CV with the original data
+    const restoredCV = await database.client.CV.create({
+      data: {
+        id: cvId, // Try to preserve the original ID
+        userId: userId,
+        title: title,
+        content: typeof content === 'string' ? content : JSON.stringify(content),
+        createdAt: new Date(originalCreatedAt) || new Date(),
+        updatedAt: new Date(originalUpdatedAt) || new Date()
+      }
+    });
+
+    logger.info('CV restored successfully', {
+      cvId: restoredCV.id,
+      userId
+    });
+
+    res.json({
+      success: true,
+      message: 'CV restored successfully',
+      cv: restoredCV
+    });
+
+  } catch (error) {
+    logger.error('CV restoration error:', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id
+    });
+
+    // If restoration with original ID fails, this will be handled by the frontend fallback
+    res.status(500).json({
+      error: 'Failed to restore CV',
+      message: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred while restoring the CV'
+    });
+  }
+});
+
 // Delete a CV
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
