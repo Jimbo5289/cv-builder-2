@@ -34,6 +34,15 @@ else
 fi
 
 echo "==================================================="
+echo "DEPLOYING DATABASE MIGRATIONS"
+echo "==================================================="
+
+# Deploy any pending migrations to production database
+echo "Running database migrations..."
+npx prisma migrate deploy
+echo "Database migrations completed"
+
+echo "==================================================="
 echo "GENERATING PRISMA CLIENT"
 echo "==================================================="
 
