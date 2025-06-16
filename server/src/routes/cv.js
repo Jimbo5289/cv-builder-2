@@ -226,36 +226,43 @@ const checkSubscription = async (_req, _res, next) => {
           const temporaryAccess = await prisma.temporaryAccess.findFirst({
             where: {
               userId: _req.user.id,
-              status: 'active',
               endTime: { gt: new Date() }
             }
           });
           
           hasTemporaryAccess = !!temporaryAccess;
+          
+          if (temporaryAccess) {
+            logger.info('Found valid temporary access:', {
+              userId: _req.user.id,
+              type: temporaryAccess.type,
+              endTime: temporaryAccess.endTime
+            });
+          }
         } catch (error) {
           logger.error('Error checking temporary access:', error);
         }
       }
       
-      // Check for Pay-Per-CV purchase
+      // Note: Pay-Per-CV functionality not implemented yet - using Payment model as fallback
       let hasPayPerCvAccess = false;
       if (_req.user?.id) {
         try {
           const { PrismaClient } = require('@prisma/client');
           const prisma = new PrismaClient();
           
-          const purchase = await prisma.purchase.findFirst({
+          // Check for pay-per-cv payments in the Payment table
+          const payment = await prisma.payment.findFirst({
             where: {
               userId: _req.user.id,
-              productName: 'Pay-Per-CV',
-              status: 'completed',
-              remainingDownloads: { gt: 0 }
-            }
+              status: 'succeeded'
+            },
+            orderBy: { createdAt: 'desc' }
           });
           
-          hasPayPerCvAccess = !!purchase;
+          hasPayPerCvAccess = !!payment;
         } catch (error) {
-          logger.error('Error checking Pay-Per-CV purchase:', error);
+          logger.error('Error checking Pay-Per-CV payment:', error);
         }
       }
       
@@ -2606,6 +2613,14 @@ router.post('/analyze-only', (req, res, next) => {
       });
       
       hasTemporaryAccess = !!temporaryAccess;
+      
+      if (temporaryAccess) {
+        logger.info('Found valid temporary access:', {
+          userId: req.user.id,
+          type: temporaryAccess.type,
+          endTime: temporaryAccess.endTime
+        });
+      }
     } catch (error) {
       logger.error('Error checking temporary access:', error);
     }
@@ -2618,18 +2633,17 @@ router.post('/analyze-only', (req, res, next) => {
       const { PrismaClient } = require('@prisma/client');
       const prisma = new PrismaClient();
       
-      const purchase = await prisma.purchase.findFirst({
+      const purchase = await prisma.payment.findFirst({
         where: {
           userId: req.user.id,
-          productName: 'Pay-Per-CV',
-          status: 'completed',
-          remainingDownloads: { gt: 0 }
-        }
+          status: 'succeeded'
+        },
+        orderBy: { createdAt: 'desc' }
       });
       
       hasPayPerCvAccess = !!purchase;
     } catch (error) {
-      logger.error('Error checking Pay-Per-CV purchase:', error);
+      logger.error('Error checking Pay-Per-CV payment:', error);
     }
   }
   
@@ -2773,6 +2787,14 @@ router.post('/analyze', (req, res, next) => {
       });
       
       hasTemporaryAccess = !!temporaryAccess;
+      
+      if (temporaryAccess) {
+        logger.info('Found valid temporary access:', {
+          userId: req.user.id,
+          type: temporaryAccess.type,
+          endTime: temporaryAccess.endTime
+        });
+      }
     } catch (error) {
       logger.error('Error checking temporary access:', error);
     }
@@ -2785,18 +2807,17 @@ router.post('/analyze', (req, res, next) => {
       const { PrismaClient } = require('@prisma/client');
       const prisma = new PrismaClient();
       
-      const purchase = await prisma.purchase.findFirst({
+      const purchase = await prisma.payment.findFirst({
         where: {
           userId: req.user.id,
-          productName: 'Pay-Per-CV',
-          status: 'completed',
-          remainingDownloads: { gt: 0 }
-        }
+          status: 'succeeded'
+        },
+        orderBy: { createdAt: 'desc' }
       });
       
       hasPayPerCvAccess = !!purchase;
     } catch (error) {
-      logger.error('Error checking Pay-Per-CV purchase:', error);
+      logger.error('Error checking Pay-Per-CV payment:', error);
     }
   }
   
