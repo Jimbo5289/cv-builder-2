@@ -11,7 +11,7 @@ const PrivacyPolicy = () => {
         <h2 className="text-xl font-semibold text-[#2c3e50] mb-4">Last Updated: June 16, 2025</h2>
         
         <p className="mb-4 text-gray-700">
-          CV Builder ("we", "us", or "our") operates MyCVBuilder.co.uk. This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our service and the choices you have associated with that data.
+          MyCVBuilder Ltd ("we", "us", or "our") operates MyCVBuilder.co.uk. This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our service and the choices you have associated with that data.
         </p>
 
         <h3 className="text-lg font-semibold text-[#2c3e50] mt-6 mb-3">Information We Collect</h3>
