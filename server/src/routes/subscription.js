@@ -82,29 +82,98 @@ router.get('/status', auth, async (req, res) => {
 router.post('/cancel', auth, async (req, res) => {
   try {
     const userId = req.user.id;
+    const { immediate = false } = req.body; // Allow immediate cancellation
     
     // Find the active subscription
     const subscription = await prisma.subscription.findFirst({
       where: {
         userId,
         status: 'active'
+      },
+      include: {
+        user: true
       }
     });
     
     if (!subscription) {
-      return res.status(404).json({ error: 'No active subscription found' });
+      return res.status(404).json({ 
+        error: 'No active subscription found',
+        message: 'You do not have an active subscription to cancel.'
+      });
     }
     
-    // Update subscription to cancel at period end
-    const updatedSubscription = await prisma.subscription.update({
-      where: { id: subscription.id },
-      data: { cancelAtPeriodEnd: true }
-    });
-    
-    res.json(updatedSubscription);
+    // Cancel the subscription in Stripe
+    try {
+      if (immediate) {
+        // Cancel immediately in Stripe
+        await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
+        
+        // Update local database to reflect immediate cancellation
+        const updatedSubscription = await prisma.subscription.update({
+          where: { id: subscription.id },
+          data: { 
+            status: 'canceled',
+            cancelAtPeriodEnd: false,
+            canceledAt: new Date()
+          }
+        });
+        
+        logger.info(`Subscription immediately canceled for user ${userId}:`, {
+          subscriptionId: subscription.stripeSubscriptionId
+        });
+        
+        return res.json({
+          ...updatedSubscription,
+          message: 'Your subscription has been canceled immediately. You will lose access to premium features right away.',
+          success: true
+        });
+      } else {
+        // Cancel at period end in Stripe
+        await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+          cancel_at_period_end: true
+        });
+        
+        // Update local database
+        const updatedSubscription = await prisma.subscription.update({
+          where: { id: subscription.id },
+          data: { cancelAtPeriodEnd: true }
+        });
+        
+        const endDate = new Date(updatedSubscription.currentPeriodEnd).toLocaleDateString();
+        
+        logger.info(`Subscription scheduled for cancellation for user ${userId}:`, {
+          subscriptionId: subscription.stripeSubscriptionId,
+          endDate: endDate
+        });
+        
+        return res.json({
+          ...updatedSubscription,
+          message: `Your subscription will be canceled at the end of your current billing period (${endDate}). You will continue to have access to premium features until then.`,
+          success: true
+        });
+      }
+    } catch (stripeError) {
+      logger.error('Stripe cancellation error:', {
+        error: stripeError.message,
+        subscriptionId: subscription.stripeSubscriptionId,
+        userId
+      });
+      
+      return res.status(500).json({ 
+        error: 'Failed to cancel subscription with payment provider',
+        message: 'There was an issue canceling your subscription. Please try again or contact support.'
+      });
+    }
   } catch (error) {
-    logger.error('Error canceling subscription:', { error: error.message });
-    res.status(500).json({ error: 'Internal server error' });
+    logger.error('Error canceling subscription:', { 
+      error: error.message, 
+      stack: error.stack,
+      userId: req.user?.id
+    });
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: 'An unexpected error occurred. Please try again later.'
+    });
   }
 });
 
@@ -122,19 +191,55 @@ router.post('/reactivate', auth, async (req, res) => {
     });
     
     if (!subscription) {
-      return res.status(404).json({ error: 'No subscription found for reactivation' });
+      return res.status(404).json({ 
+        error: 'No subscription found for reactivation',
+        message: 'You do not have a subscription scheduled for cancellation.'
+      });
     }
     
-    // Update subscription to not cancel at period end
-    const updatedSubscription = await prisma.subscription.update({
-      where: { id: subscription.id },
-      data: { cancelAtPeriodEnd: false }
-    });
-    
-    res.json(updatedSubscription);
+    // Reactivate the subscription in Stripe
+    try {
+      await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+        cancel_at_period_end: false
+      });
+      
+      // Update local database
+      const updatedSubscription = await prisma.subscription.update({
+        where: { id: subscription.id },
+        data: { cancelAtPeriodEnd: false }
+      });
+      
+      logger.info(`Subscription reactivated for user ${userId}:`, {
+        subscriptionId: subscription.stripeSubscriptionId
+      });
+      
+      res.json({
+        ...updatedSubscription,
+        message: 'Your subscription has been reactivated successfully. Auto-renewal is now enabled.',
+        success: true
+      });
+    } catch (stripeError) {
+      logger.error('Stripe reactivation error:', {
+        error: stripeError.message,
+        subscriptionId: subscription.stripeSubscriptionId,
+        userId
+      });
+      
+      return res.status(500).json({ 
+        error: 'Failed to reactivate subscription with payment provider',
+        message: 'There was an issue reactivating your subscription. Please try again or contact support.'
+      });
+    }
   } catch (error) {
-    logger.error('Error reactivating subscription:', { error: error.message });
-    res.status(500).json({ error: 'Internal server error' });
+    logger.error('Error reactivating subscription:', { 
+      error: error.message,
+      stack: error.stack, 
+      userId: req.user?.id
+    });
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: 'An unexpected error occurred. Please try again later.'
+    });
   }
 });
 

@@ -67,18 +67,19 @@ model Payment {
 }
 
 model Subscription {
-  id                   String   @id @default(cuid())
+  id                   String    @id @default(cuid())
   userId               String
   status               String
   currentPeriodStart   DateTime
   currentPeriodEnd     DateTime
-  cancelAtPeriodEnd    Boolean  @default(false)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  cancelAtPeriodEnd    Boolean   @default(false)
+  canceledAt           DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
   stripeCustomerId     String
   stripePriceId        String
   stripeSubscriptionId String
-  user                 User     @relation(fields: [userId], references: [id])
+  user                 User      @relation(fields: [userId], references: [id])
 }
 
 model TemporaryAccess {

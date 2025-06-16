@@ -46,18 +46,19 @@ model Payment {
 }
 
 model Subscription {
-  id                   String   @id
+  id                   String    @id
   userId               String
   status               String
   currentPeriodStart   DateTime
   currentPeriodEnd     DateTime
-  cancelAtPeriodEnd    Boolean  @default(false)
-  createdAt            DateTime @default(now())
+  cancelAtPeriodEnd    Boolean   @default(false)
+  canceledAt           DateTime?
+  createdAt            DateTime  @default(now())
   updatedAt            DateTime
   stripeCustomerId     String
   stripePriceId        String
   stripeSubscriptionId String
-  User                 User     @relation(fields: [userId], references: [id])
+  User                 User      @relation(fields: [userId], references: [id])
 }
 
 model User {
