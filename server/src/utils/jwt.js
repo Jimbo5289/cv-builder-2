@@ -8,8 +8,8 @@ if (!JWT_SECRET) {
   logger.error('JWT_SECRET is not set in environment variables - authentication will fail');
 }
 
-// Use shorter access token life and longer refresh token life
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m'; // Shorter lifetime for better security
+// Use longer access token life and even longer refresh token life
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '4h'; // Longer lifetime for better user experience
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
 
 /**

@@ -61,6 +61,153 @@ function AuthProvider({ children }) {
     }
   });
 
+  // Automatic token refresh function
+  const refreshToken = useCallback(async () => {
+    try {
+      const refreshTokenValue = localStorage.getItem('refreshToken');
+      if (!refreshTokenValue) {
+        console.warn('No refresh token available');
+        return null;
+      }
+
+      console.log('Refreshing access token...');
+      const response = await fetch(`${serverUrl}/api/auth/refresh-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken: refreshTokenValue })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Token refresh failed:', errorData);
+        
+        // If refresh token is expired or invalid, clear tokens and redirect to login
+        if (response.status === 401) {
+          console.warn('Refresh token expired, clearing tokens');
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          setState({
+            user: null,
+            loading: false,
+            isAuthenticated: false,
+            error: 'Session expired. Please log in again.'
+          });
+          return null;
+        }
+        
+        throw new Error(errorData.error || 'Failed to refresh token');
+      }
+
+      const data = await response.json();
+      console.log('Token refreshed successfully');
+      
+      // Update the access token
+      localStorage.setItem('token', data.accessToken);
+      setAuthHeader(data.accessToken);
+      
+      return data.accessToken;
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      // If refresh fails, clear tokens
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      setState({
+        user: null,
+        loading: false,
+        isAuthenticated: false,
+        error: 'Authentication failed. Please log in again.'
+      });
+      return null;
+    }
+  }, [serverUrl]);
+
+  // Setup axios interceptor for automatic token refresh
+  useEffect(() => {
+    let isRefreshing = false;
+    let failedQueue = [];
+
+    const processQueue = (error, token = null) => {
+      failedQueue.forEach(prom => {
+        if (error) {
+          prom.reject(error);
+        } else {
+          prom.resolve(token);
+        }
+      });
+      
+      failedQueue = [];
+    };
+
+    // Request interceptor to add auth header
+    const requestInterceptor = axios.interceptors.request.use(
+      (config) => {
+        const token = localStorage.getItem('token');
+        if (token && token !== 'undefined' && token !== 'null') {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    // Response interceptor to handle token expiration
+    const responseInterceptor = axios.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
+
+        // Check if error is 401 and we haven't already tried to refresh
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          console.log('Received 401 error, attempting token refresh...');
+          
+          if (isRefreshing) {
+            // If already refreshing, queue this request
+            return new Promise((resolve, reject) => {
+              failedQueue.push({ resolve, reject });
+            }).then(token => {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+              return axios(originalRequest);
+            }).catch(err => {
+              return Promise.reject(err);
+            });
+          }
+
+          originalRequest._retry = true;
+          isRefreshing = true;
+
+          try {
+            const newToken = await refreshToken();
+            if (newToken) {
+              processQueue(null, newToken);
+              originalRequest.headers.Authorization = `Bearer ${newToken}`;
+              return axios(originalRequest);
+            } else {
+              processQueue(new Error('Failed to refresh token'), null);
+              return Promise.reject(error);
+            }
+          } catch (refreshError) {
+            processQueue(refreshError, null);
+            return Promise.reject(refreshError);
+          } finally {
+            isRefreshing = false;
+          }
+        }
+
+        return Promise.reject(error);
+      }
+    );
+
+    // Cleanup interceptors on unmount
+    return () => {
+      axios.interceptors.request.eject(requestInterceptor);
+      axios.interceptors.response.eject(responseInterceptor);
+    };
+  }, [refreshToken]);
+
   const checkUserAuth = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
@@ -144,49 +291,11 @@ function AuthProvider({ children }) {
               error: null
             }));
             return;
-          } else {
-            // Create a new mock user
-            const mockUser = {
-              id: 'dev-user-id',
-              email: 'dev@example.com',
-              name: 'Development User',
-              role: 'admin',
-              isPremium: true,
-              premiumTier: 'professional',
-              subscription: {
-                status: 'active',
-                plan: 'professional',
-                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-                features: ['cv-analysis', 'job-matching', 'ai-enhancement', 'unlimited-cvs', 'export-formats']
-              },
-              preferences: {
-                theme: 'light',
-                notifications: true,
-                analytics: true
-              },
-              usage: {
-                cvCount: 5,
-                analyzeCount: 10,
-                downloadCount: 15
-              },
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            };
-            localStorage.setItem('user', JSON.stringify(mockUser));
-            
-            setState(prev => ({
-              ...prev,
-              user: mockUser,
-              loading: false,
-              isAuthenticated: true,
-              error: null
-            }));
-            return;
           }
         }
       }
 
-      // Try to authenticate with server
+      // Production authentication check with automatic retry on failure
       try {
         const response = await fetch(`${serverUrl}/api/auth/me`, {
           method: 'GET',
@@ -198,8 +307,39 @@ function AuthProvider({ children }) {
 
         if (!response.ok) {
           if (response.status === 401) {
+            // Try to refresh token
+            console.log('Auth check failed with 401, attempting token refresh...');
+            const newToken = await refreshToken();
+            
+            if (newToken) {
+              // Retry auth check with new token
+              const retryResponse = await fetch(`${serverUrl}/api/auth/me`, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${newToken}`
+                }
+              });
+              
+              if (retryResponse.ok) {
+                const retryData = await retryResponse.json();
+                if (retryData && retryData.user) {
+                  localStorage.setItem('user', JSON.stringify(retryData.user));
+                  
+                  setState({
+                    user: retryData.user,
+                    loading: false,
+                    isAuthenticated: true,
+                    error: null
+                  });
+                  return;
+                }
+              }
+            }
+            
             // Clear invalid token
             localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
             setState(prev => ({ ...prev, loading: false, isAuthenticated: false, user: null }));
             
@@ -319,7 +459,7 @@ function AuthProvider({ children }) {
         error: error.message
       }));
     }
-  }, [serverUrl]);
+  }, [serverUrl, refreshToken]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -470,6 +610,15 @@ function AuthProvider({ children }) {
       // Regular successful login
       localStorage.setItem('token', data.accessToken);
       localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Store refresh token if provided
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+        console.log('Refresh token stored for automatic token refresh');
+      }
+      
+      // Set auth headers
+      setAuthHeader(data.accessToken);
       
       setState({
         user: data.user,
@@ -738,7 +887,11 @@ function AuthProvider({ children }) {
 
   function logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
+    
+    // Clear auth headers
+    setAuthHeader(null);
     
     setState({
       user: null,
