@@ -31,7 +31,7 @@ function Footer() {
   return (
     <footer className="bg-[#2c3e50] dark:bg-gray-900 text-white py-10 px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Company information section */}
           <div>
             <h3 className="text-lg md:text-xl font-bold mb-4">CV Builder</h3>
@@ -52,7 +52,7 @@ function Footer() {
           </div>
           
           {/* Resources section */}
-          <div className="col-span-2 sm:col-span-1">
+          <div>
             <h4 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Resources</h4>
             <ul className="space-y-2 text-sm md:text-base">
               <li><Link to="/cv-tips" className="text-gray-300 hover:text-white">CV Tips</Link></li>
@@ -61,8 +61,17 @@ function Footer() {
             </ul>
           </div>
           
+          {/* Legal section */}
+          <div>
+            <h4 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Legal</h4>
+            <ul className="space-y-2 text-sm md:text-base">
+              <li><Link to="/privacy-policy" className="text-gray-300 hover:text-white">Privacy Policy</Link></li>
+              <li><Link to="/cookie-policy" className="text-gray-300 hover:text-white">Cookie Policy</Link></li>
+            </ul>
+          </div>
+          
           {/* Social media connections section */}
-          <div className="col-span-2 sm:col-span-1">
+          <div>
             <h4 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Connect</h4>
             <div className="flex flex-wrap gap-6 text-sm md:text-base">
               {/* LinkedIn link - Previously had Facebook and Twitter which were removed */}
@@ -77,7 +86,12 @@ function Footer() {
         
         {/* Copyright section */}
         <div className="border-t border-gray-700 mt-6 md:mt-8 pt-6 md:pt-8 text-center text-gray-300 text-sm">
-          <p>&copy; {new Date().getFullYear()} CV Builder. All rights reserved.</p>
+          <p className="mb-2">&copy; {new Date().getFullYear()} CV Builder. All rights reserved.</p>
+          <div className="flex justify-center space-x-4">
+            <Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <span className="text-gray-500">•</span>
+            <Link to="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link>
+          </div>
         </div>
       </div>
     </footer>

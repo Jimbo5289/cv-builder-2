@@ -36,6 +36,9 @@ const Pricing = React.lazy(() => import(/* webpackChunkName: "pricing" */ './pag
 const Blog = React.lazy(() => import(/* webpackChunkName: "blog" */ './pages/Blog'));
 const Contact = React.lazy(() => import(/* webpackChunkName: "contact" */ './pages/Contact'));
 const CvTips = React.lazy(() => import(/* webpackChunkName: "cv-tips" */ './pages/CvTips'));
+const CookiePolicy = React.lazy(() => import(/* webpackChunkName: "cookie-policy" */ './pages/CookiePolicy'));
+const PrivacyPolicy = React.lazy(() => import(/* webpackChunkName: "privacy-policy" */ './pages/PrivacyPolicy'));
+const FAQ = React.lazy(() => import(/* webpackChunkName: "faq" */ './pages/FAQ'));
 // Using American spelling consistently
 const CvAnalyze = React.lazy(() => import(/* webpackChunkName: "cv-analyze" */ './pages/CvAnalyze'));
 const CvAnalyzeByRole = React.lazy(() => import(/* webpackChunkName: "cv-analyze-by-role" */ './pages/CvAnalyzeByRole'));
@@ -79,6 +82,9 @@ const routes = [
   { path: '/contact', Component: Contact },
   { path: '/cv-tips', Component: CvTips },
   { path: '/analyze', Component: Analyze },
+  { path: '/cookie-policy', Component: CookiePolicy },
+  { path: '/privacy-policy', Component: PrivacyPolicy },
+  { path: '/faq', Component: FAQ },
   
   /**
    * Redirects for backward compatibility
