@@ -564,7 +564,7 @@ const CvAnalyzeByRole = () => {
             </div>
             
             {/* Course Recommendations based on missing skills */}
-            {analysisResults.recommendedCourses && analysisResults.recommendedCourses.length > 0 && (
+            {(analysisResults.recommendedCourses && analysisResults.recommendedCourses.length > 0) ? (
               <CourseRecommendations 
                 courses={analysisResults.recommendedCourses}
                 title={useGenericScope 
@@ -572,6 +572,20 @@ const CvAnalyzeByRole = () => {
                   : `Recommended Courses for ${selectedRole} Roles`
                 }
               />
+            ) : (
+              // Generate course recommendations from missingKeywords or keySkillGaps if recommendedCourses is not available
+              (analysisResults.missingKeywords || analysisResults.keySkillGaps || analysisResults._keySkillGaps) && (
+                <CourseRecommendations 
+                  courses={findCourseRecommendations(
+                    analysisResults.missingKeywords || analysisResults.keySkillGaps || analysisResults._keySkillGaps, 
+                    4
+                  )}
+                  title={useGenericScope 
+                    ? "Recommended Courses to Improve Your CV" 
+                    : `Recommended Courses for ${selectedRole} in ${selectedIndustry}`
+                  }
+                />
+              )
             )}
             
             {/* Preview and download/save CV component - Only for paid users */}
