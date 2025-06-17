@@ -8,6 +8,7 @@ const multer = require('multer');
 const fs = require('fs');
 const { logger } = require('../config/logger');
 const { z } = require('zod');
+const aiAnalysisService = require('../services/aiAnalysisService');
 
 // Personal info validation schema
 const personalInfoSchema = z.object({
@@ -1088,57 +1089,47 @@ router.post('/analyze-only', authMiddleware, async (req, res, next) => {
       mockMode: process.env.MOCK_SUBSCRIPTION_DATA === 'true'
     });
 
-    // Get CV text from file or directly from input
-    let sourceType = 'unknown';
-    let fileName = 'cv-text';
+    // Extract CV text for analysis
+    let cvText = '';
     
     if (req.file) {
-      sourceType = 'file';
-      fileName = req.file.originalname;
-    } else {
-      sourceType = 'text';
+      cvText = await extractTextFromFile(req.file);
+    } else if (req.body.cvText) {
+      cvText = req.body.cvText;
     }
 
-    // Use seed based on filename or a default
-    const seed = Math.random();
-    
-    // Generate mock results - always use mock to prevent memory issues
-    const mockResults = {
-      score: Math.floor(70 + (seed * 20)),
-      formatScore: Math.floor(65 + (seed * 25)),
-      contentScore: Math.floor(75 + (seed * 15)),
-      strengths: [
-        "Clear professional summary",
-        "Good experience section structure",
-        "Appropriate CV length",
-        "Relevant skills highlighted"
-      ].slice(0, 3 + Math.floor(seed * 2)),
-      recommendations: [
-        "Add more quantifiable achievements",
-        "Improve skill presentation with proficiency levels",
-        "Include more industry-specific keywords",
-        "Strengthen your professional summary"
-      ].slice(0, 3 + Math.floor(seed * 2)),
-      missingKeywords: [
-        "quantifiable results",
-        "leadership",
-        "communication skills",
-        "project management",
-        "teamwork",
-        "problem-solving"
-      ].slice(0, 4 + Math.floor(seed * 3)),
+    // Use AI analysis service for real generic analysis
+    const analysisResults = await aiAnalysisService.analyzeCV(
+      cvText, 
+      null, // no industry specified
+      null, // no role specified
+      true  // isGeneric = true
+    );
+
+    // Format results for backward compatibility
+    const formattedResults = {
+      score: analysisResults.score,
+      formatScore: analysisResults.formatScore,
+      contentScore: analysisResults.contentScore,
+      strengths: analysisResults.strengths,
+      recommendations: analysisResults.recommendations,
+      missingKeywords: analysisResults.missingKeywords,
       improvementSuggestions: {
-        content: "Focus on adding specific, measurable achievements to your experience section. Quantify your impact where possible.",
-        format: "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
-        structure: "Consider reordering sections to place the most relevant information first. Your most impressive qualifications should be immediately visible.",
-        keywords: "Research job descriptions in your target field and incorporate relevant keywords to pass ATS systems."
-      }
+        content: analysisResults.improvements?.[0] || "Focus on adding specific, measurable achievements to your experience section.",
+        format: analysisResults.improvements?.[1] || "Ensure consistent formatting throughout your CV.",
+        structure: analysisResults.improvements?.[2] || "Consider reordering sections to place the most relevant information first.",
+        keywords: analysisResults.improvements?.[3] || "Research job descriptions in your target field and incorporate relevant keywords."
+      },
+      experienceLevel: analysisResults.experienceLevel,
+      analysis: analysisResults.analysis
     };
+
+    logger.info('Basic CV analysis completed', {
+      score: formattedResults.score,
+      aiEnabled: aiAnalysisService.isEnabled
+    });
     
-    // Simulate processing time - short delay to appear realistic
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    res.json(mockResults);
+    res.json(formattedResults);
   } catch (error) {
     logger.error('Error analyzing CV:', error);
     res.status(500).json({ error: 'Failed to analyze CV', message: error.message });
@@ -1408,74 +1399,46 @@ router.post('/analyze-by-role', authMiddleware, async (req, res, next) => {
       isGenericAnalysis
     });
 
-    // Generate a random seed for consistent but varied results
-    const seed = Math.random();
+    // Extract CV text for analysis
+    const cvText = await extractTextFromFile(req.file);
     
-    // Generate industry-specific skill gaps for course recommendations
-    let keySkillGaps = [];
-    
-    if (industry === 'technology') {
-      keySkillGaps = ['programming', 'data analysis', 'cybersecurity'];
-    } else if (industry === 'healthcare') {
-      keySkillGaps = ['healthcare', 'patient care', 'medical terminology'];
-    } else if (industry === 'finance') {
-      keySkillGaps = ['finance', 'accounting', 'financial analysis'];
-    } else if (industry === 'marketing') {
-      keySkillGaps = ['marketing', 'digital marketing', 'social media'];
-    } else if (industry === 'education') {
-      keySkillGaps = ['education', 'curriculum development', 'teaching'];
-    } else if (industry === 'engineering') {
-      keySkillGaps = ['engineering', 'technical design', 'project management'];
-    } else {
-      // Default skill gaps
-      keySkillGaps = ['leadership', 'project management', 'communication'];
-    }
-    
-    // Generate mock analysis results with industry and role context if available
-    const mockResults = {
-      score: Math.floor(70 + (seed * 20)),
-      formatScore: Math.floor(65 + (seed * 25)),
-      contentScore: Math.floor(75 + (seed * 15)),
-      strengths: [
-        isGenericAnalysis ? "Clear professional summary" : `Good representation of ${role} skills`,
-        isGenericAnalysis ? "Good experience section structure" : `Matches ${industry} industry expectations`,
-        "Appropriate CV length",
-        "Clear contact information"
-      ].slice(0, 3 + Math.floor(seed * 2)),
-      recommendations: [
-        isGenericAnalysis ? "Add more quantifiable achievements" : `Include more ${industry}-specific terminology`,
-        isGenericAnalysis ? "Improve skill presentation" : `Highlight achievements relevant to ${role} positions`,
-        "Add more quantifiable results",
-        "Ensure consistent formatting throughout"
-      ].slice(0, 3 + Math.floor(seed * 2)),
-      // Add key skill gaps for course recommendations
-      keySkillGaps: keySkillGaps,
-      missingKeywords: [
-        isGenericAnalysis ? "quantifiable results" : `${role} experience`,
-        isGenericAnalysis ? "leadership" : `${industry} knowledge`,
-        "project management",
-        "teamwork",
-        "problem-solving",
-        "communication skills"
-      ].slice(0, 4 + Math.floor(seed * 3)),
+    // Use AI analysis service for real analysis
+    const analysisResults = await aiAnalysisService.analyzeCV(
+      cvText, 
+      isGenericAnalysis ? null : industry, 
+      isGenericAnalysis ? null : role, 
+      isGenericAnalysis
+    );
+
+    // Ensure backward compatibility with expected response format
+    const formattedResults = {
+      score: analysisResults.score,
+      formatScore: analysisResults.formatScore,
+      contentScore: analysisResults.contentScore,
+      jobFitScore: analysisResults.jobFitScore,
+      strengths: analysisResults.strengths,
+      recommendations: analysisResults.recommendations,
+      missingKeywords: analysisResults.missingKeywords,
+      keySkillGaps: analysisResults.keySkillGaps || analysisResults.missingKeywords?.slice(0, 3) || ['leadership', 'communication', 'project management'],
       improvementSuggestions: {
-        content: isGenericAnalysis 
-          ? "Focus on adding specific, measurable achievements to your experience section. Quantify your impact where possible."
-          : `Focus on highlighting specific achievements that demonstrate your ${role} skills and ${industry} experience.`,
-        format: "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
-        structure: isGenericAnalysis
-          ? "Consider reordering sections to place the most relevant information first. Your most impressive qualifications should be immediately visible."
-          : `Consider reordering sections to emphasize experience most relevant to ${role} positions in the ${industry} industry.`,
-        keywords: isGenericAnalysis
-          ? "Research job descriptions in your target field and incorporate relevant keywords to pass ATS systems."
-          : `Research ${role} job descriptions in the ${industry} sector and incorporate those keywords.`
-      }
+        content: analysisResults.improvements?.[0] || "Focus on adding specific, measurable achievements to your experience section.",
+        format: analysisResults.improvements?.[1] || "Ensure consistent formatting throughout your CV.",
+        structure: analysisResults.improvements?.[2] || "Consider reordering sections to place the most relevant information first.",
+        keywords: analysisResults.improvements?.[3] || "Research job descriptions in your target field and incorporate relevant keywords."
+      },
+      experienceLevel: analysisResults.experienceLevel,
+      competitiveAdvantages: analysisResults.competitiveAdvantages,
+      analysis: analysisResults.analysis
     };
 
-    // Simulate processing time for realism
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    logger.info('CV analysis completed', {
+      industry: industry || 'generic',
+      role: role || 'generic',
+      score: formattedResults.score,
+      aiEnabled: aiAnalysisService.isEnabled
+    });
     
-    res.json(mockResults);
+    res.json(formattedResults);
   } catch (error) {
     logger.error('Error in CV role-based analysis:', error);
     res.status(500).json({ 
