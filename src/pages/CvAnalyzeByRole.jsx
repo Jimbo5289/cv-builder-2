@@ -308,7 +308,7 @@ const CvAnalyzeByRole = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Title section */}
-      <div className="container mx-auto px-4 max-w-4xl pt-8 pb-8">
+      <div className="container mx-auto px-4 max-w-4xl pt-20 pb-8">
         <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-2">
           Role Related CV Analysis
         </h1>
