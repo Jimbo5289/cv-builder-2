@@ -103,9 +103,12 @@ const CvAnalyzeByRole = () => {
         return false;
       }
       
+      const headers = getAuthHeader();
+      console.log('Auth headers:', headers);
+      
       const response = await fetch(`${apiUrl}/api/subscriptions/premium-status`, {
         method: 'GET',
-        headers: getAuthHeader()
+        headers: headers
       });
       
       console.log('Premium status response:', response.status, response.statusText);
@@ -113,10 +116,11 @@ const CvAnalyzeByRole = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Premium status data:', data);
-        return data.hasPremiumAccess;
+        return data.hasPremiumAccess || data.hasAccess;
       } else {
         const errorData = await response.text();
         console.error('Premium status error:', response.status, errorData);
+        console.error('Request URL:', `${apiUrl}/api/subscriptions/premium-status`);
       }
       
       return false;

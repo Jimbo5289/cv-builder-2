@@ -28,7 +28,10 @@ export default function Profile() {
   
   // Calculate days until access expires
   const getDaysUntilExpiration = () => {
-    if (!premiumAccess || !premiumAccess.hasAccess) return null;
+    if (!premiumAccess || !premiumAccess.hasAccess) {
+      console.log('No premium access or hasAccess is false:', premiumAccess);
+      return null;
+    }
     
     let endDate;
     if (premiumAccess.accessType === 'subscription' && premiumAccess.subscriptionData) {
@@ -36,12 +39,20 @@ export default function Profile() {
     } else if (premiumAccess.accessType === 'temporary' && premiumAccess.temporaryAccess) {
       endDate = new Date(premiumAccess.temporaryAccess.endTime);
     } else {
+      console.log('Could not determine end date from premium access:', premiumAccess);
       return null;
     }
     
     const today = new Date();
     const diffTime = endDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    console.log('Countdown calculation:', {
+      endDate: endDate.toISOString(),
+      today: today.toISOString(),
+      diffTime,
+      diffDays
+    });
     
     return diffDays > 0 ? diffDays : 0;
   };
