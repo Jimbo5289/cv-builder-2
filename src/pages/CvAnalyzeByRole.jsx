@@ -116,7 +116,9 @@ const CvAnalyzeByRole = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Premium status data:', data);
-        return data.hasPremiumAccess || data.hasAccess;
+        const hasAccess = data.hasPremiumAccess || data.hasAccess;
+        console.log('Calculated hasAccess:', hasAccess);
+        return hasAccess;
       } else {
         const errorData = await response.text();
         console.error('Premium status error:', response.status, errorData);

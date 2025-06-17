@@ -361,11 +361,16 @@ export default function Profile() {
       
       try {
         // Fetch premium access information (subscriptions + temporary access)
+        console.log('Fetching premium data from:', `${apiUrl}/api/subscriptions/premium-status`);
+        console.log('Auth headers:', getAuthHeader());
+        
         const premiumData = await safeFetch(
           `${apiUrl}/api/subscriptions/premium-status`, 
           { headers: getAuthHeader() },
           mockResponses.subscriptions
         );
+        
+        console.log('Premium data received:', premiumData);
         
         if (premiumData) {
           setPremiumAccess(premiumData);
