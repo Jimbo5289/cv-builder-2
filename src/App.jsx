@@ -40,6 +40,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import CookieConsent from './components/CookieConsent';
 import ServerStatusIndicator from './components/ServerStatusIndicator';
+import ScrollToTop from './components/ScrollToTop';
 import { setupErrorHandler } from './utils/errorHandler';
 import storageUtils from './utils/storageCleanup';
 
@@ -169,6 +170,9 @@ function App() {
                   
                   {/* Header navigation */}
                   <Header />
+                  
+                  {/* Scroll restoration for navigation */}
+                  <ScrollToTop />
                   
                   {/* Main content area with routing */}
                   <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow">
