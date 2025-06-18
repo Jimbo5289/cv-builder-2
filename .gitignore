@@ -42,6 +42,10 @@ logs
 .env.test.local
 .env.production.local
 
+# Server production environment files
+server-prod/development.env
+server-prod/production.env
+
 # Logs
 logs
 *.log
