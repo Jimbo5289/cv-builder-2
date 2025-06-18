@@ -108,7 +108,7 @@ try {
 }
 
 // Initialize Sentry request handler (must be the first middleware)
-if (Sentry) {
+if (Sentry && Sentry.Handlers && Sentry.Handlers.requestHandler) {
   app.use(Sentry.Handlers.requestHandler({
     // Include user information in errors
     user: ['id', 'email'],
@@ -118,6 +118,8 @@ if (Sentry) {
   
   // Remove the tracing handler since it requires additional setup
   // app.use(Sentry.Handlers.tracingHandler());
+} else {
+  logger.info('Sentry handlers not available, skipping request handler setup');
 }
 
 // Enhance CORS middleware to handle preflight requests correctly
@@ -366,13 +368,15 @@ app.use((err, req, res, next) => {
 });
 
 // Sentry error handler (must come before any other error middleware and after all controllers)
-if (Sentry) {
+if (Sentry && Sentry.Handlers && Sentry.Handlers.errorHandler) {
   app.use(Sentry.Handlers.errorHandler({
     shouldHandleError(error) {
       // Only report errors with status code >= 400
       return error.status >= 400 || !error.status;
     }
   }));
+} else {
+  logger.info('Sentry error handler not available, skipping error handler setup');
 }
 
 // Global error handler
