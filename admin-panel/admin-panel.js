@@ -76,7 +76,7 @@ async function apiCall(endpoint, options = {}) {
         
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ message: 'Network error' }));
-            throw new Error(errorData.message || `HTTP ${response.status}`);
+            throw new Error(errorData.error || errorData.message || `HTTP ${response.status}`);
         }
 
         return await response.json();
@@ -94,14 +94,22 @@ async function login(email, password) {
             body: JSON.stringify({ email, password })
         });
 
-        if (response.token && response.user && response.user.isAdmin) {
-            authToken = response.token;
+        // Handle the actual backend response structure
+        if (response.accessToken && response.user) {
+            // Check if user has admin privileges
+            const isAdmin = response.user.email === 'jamesingleton1971@gmail.com' || response.user.isAdmin;
+            
+            if (!isAdmin) {
+                throw new Error('Access denied. Admin privileges required.');
+            }
+            
+            authToken = response.accessToken;
             currentUser = response.user;
             localStorage.setItem('adminToken', authToken);
             localStorage.setItem('adminUser', JSON.stringify(currentUser));
             return true;
         } else {
-            throw new Error('Access denied. Admin privileges required.');
+            throw new Error('Invalid login response from server.');
         }
     } catch (error) {
         throw error;
@@ -151,10 +159,11 @@ async function loadDashboardStats() {
     try {
         const stats = await apiCall('/api/admin/dashboard');
         
-        document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
-        document.getElementById('activeUsers').textContent = stats.activeUsers || 0;
-        document.getElementById('totalCVs').textContent = stats.totalCVs || 0;
-        document.getElementById('activeSubscriptions').textContent = stats.activeSubscriptions || 0;
+        // Handle the actual backend response structure
+        document.getElementById('totalUsers').textContent = stats.users?.total || 0;
+        document.getElementById('activeUsers').textContent = stats.users?.active || 0;
+        document.getElementById('totalCVs').textContent = stats.cvs?.total || 0;
+        document.getElementById('activeSubscriptions').textContent = stats.subscriptions?.active || 0;
         
     } catch (error) {
         console.error('Failed to load dashboard stats:', error);
@@ -174,9 +183,10 @@ async function loadUsers(page = 1, search = '') {
         
         const response = await apiCall(`/api/admin/users?${params}`);
         
+        // Handle the actual backend response structure
         allUsers = response.users || [];
         filteredUsers = allUsers;
-        totalUsers = response.total || 0;
+        totalUsers = response.pagination?.total || 0;
         currentPage = page;
         
         renderUsersTable();
@@ -203,13 +213,16 @@ function renderUsersTable() {
             ? '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>'
             : '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>';
             
-        const adminBadge = user.isAdmin 
+        const adminBadge = (user.email === 'jamesingleton1971@gmail.com' || user.isAdmin)
             ? '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 ml-2">Admin</span>'
             : '';
             
         const marketingConsent = user.marketingConsent 
             ? '<i class="fas fa-check text-green-500"></i>'
             : '<i class="fas fa-times text-red-500"></i>';
+        
+        // Handle name display (backend might return 'name' instead of firstName/lastName)
+        const displayName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'N/A';
         
         row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap">
@@ -220,7 +233,7 @@ function renderUsersTable() {
                         </div>
                     </div>
                     <div class="ml-4">
-                        <div class="text-sm font-medium text-gray-900">${user.firstName} ${user.lastName}</div>
+                        <div class="text-sm font-medium text-gray-900">${displayName}</div>
                         <div class="text-sm text-gray-500">${user.email}</div>
                     </div>
                 </div>
@@ -232,32 +245,32 @@ function renderUsersTable() {
                 ${formatDateShort(user.createdAt)}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                ${formatDateShort(user.lastLoginAt)}
+                ${formatDateShort(user.lastLogin)}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                ${user.cvCount || 0}
+                ${user._count?.cvs || 0}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                 ${marketingConsent}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div class="flex space-x-2">
-                    <button onclick="viewUser(${user.id})" 
+                    <button onclick="viewUser('${user.id}')" 
                             class="text-blue-600 hover:text-blue-900 px-2 py-1 rounded">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button onclick="exportUser(${user.id})" 
+                    <button onclick="exportUser('${user.id}')" 
                             class="text-green-600 hover:text-green-900 px-2 py-1 rounded" 
                             title="Export Data">
                         <i class="fas fa-download"></i>
                     </button>
-                    ${!user.isAdmin ? `
-                        <button onclick="toggleUserStatus(${user.id}, ${!user.isActive})" 
+                    ${!adminBadge ? `
+                        <button onclick="toggleUserStatus('${user.id}', ${!user.isActive})" 
                                 class="text-yellow-600 hover:text-yellow-900 px-2 py-1 rounded"
                                 title="${user.isActive ? 'Deactivate' : 'Activate'} User">
                             <i class="fas fa-${user.isActive ? 'pause' : 'play'}"></i>
                         </button>
-                        <button onclick="deleteUser(${user.id}, '${user.email}')" 
+                        <button onclick="deleteUser('${user.id}', '${user.email}')" 
                                 class="text-red-600 hover:text-red-900 px-2 py-1 rounded" 
                                 title="Delete User">
                             <i class="fas fa-trash"></i>
@@ -334,7 +347,8 @@ function updatePaginationInfo() {
 async function viewUser(userId) {
     try {
         showElement('loadingOverlay');
-        const user = await apiCall(`/api/admin/users/${userId}`);
+        const response = await apiCall(`/api/admin/users/${userId}`);
+        const user = response.user || response; // Handle different response formats
         showUserModal(user);
     } catch (error) {
         console.error('Failed to load user details:', error);
@@ -352,9 +366,11 @@ function showUserModal(user) {
         ? '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>'
         : '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>';
         
-    const adminBadge = user.isAdmin 
+    const adminBadge = (user.email === 'jamesingleton1971@gmail.com' || user.isAdmin)
         ? '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 ml-2">Admin</span>'
         : '';
+    
+    const displayName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'N/A';
     
     content.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -363,7 +379,7 @@ function showUserModal(user) {
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Full Name</label>
-                    <p class="mt-1 text-sm text-gray-900">${user.firstName} ${user.lastName}</p>
+                    <p class="mt-1 text-sm text-gray-900">${displayName}</p>
                 </div>
                 
                 <div>
@@ -388,7 +404,7 @@ function showUserModal(user) {
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Last Login</label>
-                    <p class="mt-1 text-sm text-gray-900">${formatDate(user.lastLoginAt)}</p>
+                    <p class="mt-1 text-sm text-gray-900">${formatDate(user.lastLogin)}</p>
                 </div>
             </div>
             
@@ -398,14 +414,14 @@ function showUserModal(user) {
                 <div class="bg-gray-50 rounded-lg p-4">
                     <div class="flex items-center justify-between">
                         <span class="text-sm font-medium text-gray-700">Total CVs</span>
-                        <span class="text-xl font-semibold text-gray-900">${user.cvCount || 0}</span>
+                        <span class="text-xl font-semibold text-gray-900">${user.cvs?.length || 0}</span>
                     </div>
                 </div>
                 
                 <div class="bg-gray-50 rounded-lg p-4">
                     <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-700">Subscription Status</span>
-                        <span class="text-sm text-gray-900">${user.subscriptionStatus || 'Free'}</span>
+                        <span class="text-sm font-medium text-gray-700">Subscriptions</span>
+                        <span class="text-sm text-gray-900">${user.subscriptions?.length || 0}</span>
                     </div>
                 </div>
                 
@@ -425,19 +441,19 @@ function showUserModal(user) {
             </div>
         </div>
         
-        ${!user.isAdmin ? `
+        ${!adminBadge ? `
             <div class="mt-6 pt-6 border-t border-gray-200">
                 <div class="flex space-x-3">
-                    <button onclick="exportUser(${user.id})" 
+                    <button onclick="exportUser('${user.id}')" 
                             class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm">
                         <i class="fas fa-download mr-2"></i>Export Data
                     </button>
-                    <button onclick="toggleUserStatus(${user.id}, ${!user.isActive})" 
+                    <button onclick="toggleUserStatus('${user.id}', ${!user.isActive})" 
                             class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm">
                         <i class="fas fa-${user.isActive ? 'pause' : 'play'} mr-2"></i>
                         ${user.isActive ? 'Deactivate' : 'Activate'} User
                     </button>
-                    <button onclick="deleteUser(${user.id}, '${user.email}')" 
+                    <button onclick="deleteUser('${user.id}', '${user.email}')" 
                             class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
                         <i class="fas fa-trash mr-2"></i>Delete User
                     </button>
@@ -557,8 +573,8 @@ function showAdminDashboard() {
     showElement('adminDashboard');
     
     // Update admin info
-    document.getElementById('adminUserInfo').textContent = 
-        `Logged in as ${currentUser.firstName} ${currentUser.lastName}`;
+    const displayName = currentUser.name || `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || currentUser.email;
+    document.getElementById('adminUserInfo').textContent = `Logged in as ${displayName}`;
     
     // Load dashboard data
     loadDashboardStats();
