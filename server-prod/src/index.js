@@ -138,6 +138,22 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Root endpoint - provide basic API information
+app.get('/', (req, res) => {
+  res.json({
+    name: 'CV Builder API',
+    version: '1.0.0',
+    status: 'running',
+    environment: process.env.NODE_ENV || 'development',
+    endpoints: {
+      health: '/health',
+      api: '/api',
+      docs: '/api-docs'
+    },
+    message: 'CV Builder backend API is running successfully'
+  });
+});
+
 // Status endpoint with auth for testing authentication
 app.get('/status', authMiddleware, (req, res) => {
   res.json({ 
@@ -189,10 +205,19 @@ app.use((err, req, res, next) => {
 
 // 404 handler
 app.use((req, res) => {
-  logger.warn('Route not found:', {
-    path: req.path,
-    method: req.method
-  });
+  // Only log 404s for actual API requests, not health checks or common requests
+  const isHealthCheck = req.path.includes('/health') || req.path === '/favicon.ico';
+  const isApiRequest = req.path.startsWith('/api/');
+  
+  if (isApiRequest && !isHealthCheck) {
+    logger.warn('Request error:', {
+      method: req.method,
+      path: req.path,
+      statusCode: 404,
+      ip: req.ip || 'unknown'
+    });
+  }
+  
   res.status(404).json({ error: 'Not found' });
 });
 

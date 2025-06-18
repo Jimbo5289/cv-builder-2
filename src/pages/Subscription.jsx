@@ -11,6 +11,8 @@ export default function Subscription() {
   const { user, getAuthHeader } = useAuth();
   const location = useLocation();
   const [subscription, setSubscription] = useState(null);
+  const [temporaryAccess, setTemporaryAccess] = useState(null);
+  const [accessType, setAccessType] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -46,30 +48,29 @@ export default function Subscription() {
     
     const tryFetchSubscription = async (baseUrl) => {
       try {
-        console.log(`Trying to fetch subscription at ${baseUrl}/api/subscriptions`);
-        const response = await fetch(`${baseUrl}/api/subscriptions`, {
+        console.log(`Trying to fetch premium status at ${baseUrl}/api/subscriptions/premium-status`);
+        const response = await fetch(`${baseUrl}/api/subscriptions/premium-status`, {
           headers: {
             ...getAuthHeader()
           }
         });
         
-        if (response.status === 404) {
-          // No subscription found is not an error
-          setSubscription(null);
-          return true;
-        }
-        
         if (!response.ok) {
-          // Log error but continue trying
-          console.error(`Failed to fetch subscription from ${baseUrl}`);
+          console.error(`Failed to fetch premium status from ${baseUrl}:`, response.status);
           return false;
         } 
         
         const data = await response.json();
-        setSubscription(data);
+        console.log('Premium status data:', data);
+        
+        // Set the appropriate data based on access type
+        setAccessType(data.accessType);
+        setSubscription(data.subscriptionData);
+        setTemporaryAccess(data.temporaryAccess);
+        
         return true;
       } catch (err) {
-        console.error(`Subscription fetch error at ${baseUrl}:`, err);
+        console.error(`Premium status fetch error at ${baseUrl}:`, err);
         return false;
       }
     };
@@ -170,8 +171,9 @@ export default function Subscription() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Subscription Management</h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Subscription Management</h1>
       
       {showUpgradePrompt && renderUpgradePrompt()}
       
@@ -229,10 +231,10 @@ export default function Subscription() {
         </div>
       )}
       
-      {!subscription ? (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">No Active Subscription</h2>
-          <p className="mb-4">You are currently on the free plan.</p>
+      {!subscription && !temporaryAccess ? (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">No Active Subscription</h2>
+          <p className="mb-4 text-gray-600 dark:text-gray-300">You are currently on the free plan.</p>
           <Link
             to="/pricing"
             className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
@@ -242,34 +244,87 @@ export default function Subscription() {
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Current Plan</h2>
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div>
-              <p className="text-gray-600">Plan</p>
-              <p className="font-semibold">{subscription.planId || 'Premium'}</p>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Current Plan</h2>
+          
+          {/* Display information based on access type */}
+          {accessType === 'temporary' && temporaryAccess ? (
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <p className="text-gray-600 dark:text-gray-400">Plan</p>
+                <p className="font-semibold text-gray-900 dark:text-white">30-Day Access Pass</p>
+              </div>
+              <div>
+                <p className="text-gray-600 dark:text-gray-400">Status</p>
+                <p className="font-semibold text-green-600 capitalize">Active</p>
+              </div>
+              <div>
+                <p className="text-gray-600 dark:text-gray-400">Access Expires</p>
+                <p className="font-semibold text-gray-900 dark:text-white">
+                  {new Date(temporaryAccess.endTime).toLocaleDateString()}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-600 dark:text-gray-400">Type</p>
+                <p className="font-semibold text-gray-900 dark:text-white">One-time Purchase</p>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-600">Status</p>
-              <p className="font-semibold capitalize">{subscription.status}</p>
+          ) : subscription ? (
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <p className="text-gray-600 dark:text-gray-400">Plan</p>
+                <p className="font-semibold text-gray-900 dark:text-white">{subscription.planId || 'Premium Subscription'}</p>
+              </div>
+              <div>
+                <p className="text-gray-600 dark:text-gray-400">Status</p>
+                <p className="font-semibold text-gray-900 dark:text-white capitalize">{subscription.status}</p>
+              </div>
+              <div>
+                <p className="text-gray-600 dark:text-gray-400">Current Period</p>
+                <p className="font-semibold text-gray-900 dark:text-white">
+                  {new Date(subscription.currentPeriodStart).toLocaleDateString()} -{' '}
+                  {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-600 dark:text-gray-400">Auto-Renewal</p>
+                <p className="font-semibold text-gray-900 dark:text-white">
+                  {subscription.cancelAtPeriodEnd ? 'Disabled' : 'Enabled'}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-600">Current Period</p>
-              <p className="font-semibold">
-                {new Date(subscription.currentPeriodStart).toLocaleDateString()} -{' '}
-                {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
-              </p>
+          ) : null}
+
+          {/* Show relevant actions based on access type */}
+          {accessType === 'temporary' && temporaryAccess && (
+            <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300">30-Day Access Pass</h3>
+                  <p className="mt-1 text-sm text-blue-700 dark:text-blue-400">
+                    Your 30-day access will expire on {new Date(temporaryAccess.endTime).toLocaleDateString()}. 
+                    To continue using premium features, consider subscribing to one of our plans.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <Link
+                  to="/pricing"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
+                >
+                  View Subscription Plans
+                </Link>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-600">Auto-Renewal</p>
-              <p className="font-semibold">
-                {subscription.cancelAtPeriodEnd ? 'Disabled' : 'Enabled'}
-              </p>
-            </div>
-          </div>
+          )}
 
           {/* Only show cancellation options for active subscriptions */}
-          {subscription.status === 'active' && (
+          {accessType === 'subscription' && subscription && subscription.status === 'active' && (
             <>
               {subscription.cancelAtPeriodEnd ? (
                 <div className="space-y-4">
@@ -369,6 +424,7 @@ export default function Subscription() {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 } 

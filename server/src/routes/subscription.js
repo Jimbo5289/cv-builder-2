@@ -44,6 +44,7 @@ router.get('/premium-status', auth, async (req, res) => {
     if (process.env.NODE_ENV !== 'production' && (process.env.MOCK_SUBSCRIPTION_DATA === 'true')) {
       logger.info('Using mock premium status data in development mode');
       return res.json({
+        hasPremiumAccess: true,
         hasAccess: true,
         accessType: 'subscription',
         subscriptionData: {
@@ -85,6 +86,7 @@ router.get('/premium-status', auth, async (req, res) => {
     // Determine access type and return appropriate data
     if (activeSubscription) {
       return res.json({
+        hasPremiumAccess: true,
         hasAccess: true,
         accessType: 'subscription',
         subscriptionData: activeSubscription,
@@ -92,6 +94,7 @@ router.get('/premium-status', auth, async (req, res) => {
       });
     } else if (temporaryAccess) {
       return res.json({
+        hasPremiumAccess: true,
         hasAccess: true,
         accessType: 'temporary',
         subscriptionData: null,
@@ -99,6 +102,7 @@ router.get('/premium-status', auth, async (req, res) => {
       });
     } else {
       return res.json({
+        hasPremiumAccess: false,
         hasAccess: false,
         accessType: null,
         subscriptionData: null,
