@@ -743,11 +743,157 @@ export const COURSE_RECOMMENDATIONS = {
   ]
 };
 
+// Comprehensive role-to-skills mapping for all 104 dropdown roles
+const ROLE_SKILLS_MAPPING = {
+  // Technology roles
+  'software-developer': ['programming', 'data analysis'],
+  'data-scientist': ['data analysis', 'programming'],
+  'network-engineer': ['it', 'programming'],
+  'product-manager': ['project management', 'leadership'],
+  'cybersecurity-analyst': ['it', 'safety'],
+  'devops-engineer': ['programming', 'it'],
+  'ui-ux-designer': ['communication', 'leadership'],
+  'cloud-architect': ['it', 'programming'],
+
+  // Healthcare roles  
+  'physician': ['medical', 'patient care', 'clinical'],
+  'nurse': ['nursing', 'patient care', 'clinical'],
+  'medical-technician': ['medical', 'healthcare'],
+  'healthcare-admin': ['healthcare', 'leadership'],
+  'pharmacist': ['pharmacy', 'medical'],
+  'physical-therapist': ['healthcare', 'patient care'],
+  'nutritionist': ['healthcare', 'patient care'],
+  'mental-health': ['healthcare', 'patient care'],
+
+  // Finance roles
+  'financial-analyst': ['finance', 'data analysis'],
+  'accountant': ['finance', 'data analysis'],
+  'investment-banker': ['finance', 'leadership'],
+  'financial-advisor': ['finance', 'communication'],
+  'risk-manager': ['finance', 'data analysis'],
+  'insurance-underwriter': ['finance', 'data analysis'],
+  'compliance-officer': ['compliance', 'legal'],
+  'credit-analyst': ['finance', 'data analysis'],
+
+  // Education roles
+  'teacher': ['teaching', 'education'],
+  'professor': ['teaching', 'research'],
+  'education-admin': ['educational leadership', 'education'],
+  'curriculum-developer': ['curriculum development', 'education'],
+  'special-education': ['teaching', 'education'],
+  'education-counselor': ['education', 'communication'],
+  'librarian': ['education', 'research'],
+  'corporate-trainer': ['teaching', 'leadership'],
+
+  // Engineering roles
+  'mechanical-engineer': ['mechanical engineering', 'cad design'],
+  'electrical-engineer': ['electrical engineering', 'professional engineer'],
+  'civil-engineer': ['civil engineering', 'professional engineer'],
+  'chemical-engineer': ['chemical engineering', 'professional engineer'],
+  'aerospace-engineer': ['aerospace engineering', 'professional engineer'],
+  'industrial-engineer': ['mechanical engineering', 'project management'],
+  'manufacturing-manager': ['project management', 'leadership'],
+  'quality-assurance': ['project management', 'safety'],
+
+  // Retail roles
+  'store-manager': ['leadership', 'customer service'],
+  'sales-associate': ['customer service', 'communication'],
+  'retail-buyer': ['finance', 'data analysis'],
+  'merchandiser': ['marketing', 'communication'],
+  'visual-merchandiser': ['communication', 'leadership'],
+  'inventory-manager': ['project management', 'data analysis'],
+  'customer-service': ['customer service', 'communication'],
+  'e-commerce-manager': ['marketing', 'leadership'],
+
+  // Hospitality roles
+  'hotel-manager': ['leadership', 'customer service'],
+  'chef': ['leadership', 'customer service'],
+  'event-planner': ['project management', 'communication'],
+  'restaurant-manager': ['leadership', 'customer service'],
+  'concierge': ['customer service', 'communication'],
+  'tour-guide': ['communication', 'customer service'],
+  'travel-agent': ['customer service', 'communication'],
+  'hospitality-supervisor': ['leadership', 'customer service'],
+
+  // Creative roles
+  'graphic-designer': ['communication', 'leadership'],
+  'photographer': ['communication', 'leadership'],
+  'writer': ['communication', 'research'],
+  'interior-designer': ['communication', 'leadership'],
+  'fashion-designer': ['communication', 'leadership'],
+  'video-producer': ['communication', 'leadership'],
+  'art-director': ['leadership', 'communication'],
+  'animator': ['communication', 'programming'],
+
+  // Legal roles
+  'lawyer': ['law', 'legal'],
+  'paralegal': ['legal', 'communication'],
+  'legal-consultant': ['legal', 'communication'],
+  'legal-secretary': ['legal', 'communication'],
+  'compliance-manager': ['compliance', 'leadership'],
+  'contract-manager': ['legal', 'project management'],
+  'intellectual-property': ['legal', 'research'],
+  'mediator': ['legal', 'communication'],
+
+  // Marketing roles
+  'marketing-manager': ['marketing', 'leadership'],
+  'digital-marketer': ['marketing', 'data analysis'],
+  'content-strategist': ['marketing', 'communication'],
+  'seo-specialist': ['marketing', 'data analysis'],
+  'social-media-manager': ['marketing', 'communication'],
+  'public-relations': ['marketing', 'communication'],
+  'brand-manager': ['marketing', 'leadership'],
+  'market-researcher': ['marketing', 'data analysis'],
+
+  // Construction roles
+  'construction-manager': ['project management', 'leadership'],
+  'architect': ['civil engineering', 'cad design'],
+  'electrician': ['electrical engineering', 'safety'],
+  'plumber': ['safety', 'project management'],
+  'carpenter': ['safety', 'project management'],
+  'site-supervisor': ['leadership', 'safety'],
+  'quantity-surveyor': ['civil engineering', 'data analysis'],
+  'building-inspector': ['civil engineering', 'safety'],
+
+  // Transport roles
+  'logistics-manager': ['project management', 'leadership'],
+  'fleet-manager': ['project management', 'leadership'],
+  'supply-chain': ['data analysis', 'project management'],
+  'warehouse-manager': ['leadership', 'project management'],
+  'transportation-planner': ['project management', 'data analysis'],
+  'freight-coordinator': ['project management', 'communication'],
+  'shipping-manager': ['leadership', 'project management'],
+  'customs-broker': ['compliance', 'communication'],
+
+  // Science roles
+  'researcher': ['research', 'data analysis'],
+  'lab-technician': ['research', 'safety'],
+  'biologist': ['research', 'data analysis'],
+  'chemist': ['research', 'chemical engineering'],
+  'environmental-scientist': ['research', 'data analysis'],
+  'physicist': ['research', 'data analysis'],
+  'geologist': ['research', 'data analysis'],
+  'research-director': ['research', 'leadership']
+};
+
 // Helper function to find recommendations based on keywords and industry context
 export const findCourseRecommendations = (keywords = [], count = 3, industry = null, role = null, cvEducation = null) => {
+  // If role is provided, prioritize role-specific skills
+  if (role && ROLE_SKILLS_MAPPING[role]) {
+    const roleSkills = ROLE_SKILLS_MAPPING[role];
+    const combinedKeywords = [...(keywords || []), ...roleSkills];
+    return findCourseRecommendationsInternal(combinedKeywords, count, industry, role, cvEducation);
+  }
+  
   if (!keywords || keywords.length === 0) {
     return COURSE_RECOMMENDATIONS.general.slice(0, count);
   }
+  
+  return findCourseRecommendationsInternal(keywords, count, industry, role, cvEducation);
+};
+
+// Internal function that handles the core recommendation logic
+function findCourseRecommendationsInternal(keywords = [], count = 3, industry = null, role = null, cvEducation = null) {
 
   let results = [];
   
@@ -984,7 +1130,7 @@ export const findCourseRecommendations = (keywords = [], count = 3, industry = n
   
   // Return just the requested number of courses
   return results.slice(0, count);
-};
+}
 
 // Enhanced function that includes career pathway analysis
 export const findCourseRecommendationsWithPathway = (keywords = [], count = 3, industry = null, role = null, cvEducation = null) => {

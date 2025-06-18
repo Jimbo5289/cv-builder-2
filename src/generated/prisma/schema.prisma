@@ -46,33 +46,34 @@ model Payment {
 }
 
 model Subscription {
-  id                   String   @id
+  id                   String    @id
   userId               String
   status               String
   currentPeriodStart   DateTime
   currentPeriodEnd     DateTime
-  cancelAtPeriodEnd    Boolean  @default(false)
-  createdAt            DateTime @default(now())
+  cancelAtPeriodEnd    Boolean   @default(false)
+  canceledAt           DateTime?
+  createdAt            DateTime  @default(now())
   updatedAt            DateTime
   stripeCustomerId     String
   stripePriceId        String
   stripeSubscriptionId String
-  User                 User     @relation(fields: [userId], references: [id])
+  User                 User      @relation(fields: [userId], references: [id])
 }
 
 model User {
-  id                  String         @id
-  email               String         @unique
+  id                  String            @id
+  email               String            @unique
   password            String
   name                String
-  customerId          String?        @unique
+  customerId          String?           @unique
   twoFactorSecret     String?
-  twoFactorEnabled    Boolean        @default(false)
-  backupCodes         String[]       @default([])
-  marketingConsent    Boolean        @default(true)
-  createdAt           DateTime       @default(now())
+  twoFactorEnabled    Boolean           @default(false)
+  backupCodes         String[]          @default([])
+  marketingConsent    Boolean           @default(true)
+  createdAt           DateTime          @default(now())
   updatedAt           DateTime
-  failedLoginAttempts Int            @default(0)
+  failedLoginAttempts Int               @default(0)
   lastLogin           DateTime?
   lockedUntil         DateTime?
   resetToken          String?
@@ -83,6 +84,7 @@ model User {
   RefreshTokens       RefreshToken[]
   PageViews           PageView[]
   ErrorLogs           ErrorLog[]
+  temporaryAccess     TemporaryAccess[]
 }
 
 model RefreshToken {
@@ -147,4 +149,15 @@ model MetricsSnapshot {
   timestamp   DateTime @default(now())
 
   @@index([timestamp])
+}
+
+model TemporaryAccess {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String // e.g., "30day-access", "pay-per-cv"
+  startTime DateTime @default(now())
+  endTime   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
 }

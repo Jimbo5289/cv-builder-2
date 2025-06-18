@@ -79,7 +79,7 @@ const testTcpConnection = () => {
 const testPrismaConnection = async () => {
   console.log('2. Testing Prisma database connection...');
   
-  let prismaConfig = {
+  const prismaConfig = {
     datasources: {
       db: {
         url: databaseUrl

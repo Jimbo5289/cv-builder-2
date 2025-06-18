@@ -680,7 +680,7 @@ BE BRUTALLY HONEST about fit. A CV from an incompatible field should score 15-35
     ];
   }
 
-  generateMockAnalysis(industry, role, isGeneric = false) {
+  generateMockAnalysis(industry, role, _isGeneric = false) {
     const industryReqs = industry ? this.getIndustryRequirements(industry) : null;
     
     // Generate more realistic mock scores based on compatibility

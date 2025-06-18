@@ -20,7 +20,7 @@ const findAndKillProcesses = () => {
       }
       
       // Get process IDs
-      let pids = [];
+      const pids = [];
       if (process.platform === 'win32') {
         // Parse CSV output from Windows
         const lines = stdout.split('\n').filter(line => line.trim());

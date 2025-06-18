@@ -159,6 +159,7 @@ exports.Prisma.SubscriptionScalarFieldEnum = {
   currentPeriodStart: 'currentPeriodStart',
   currentPeriodEnd: 'currentPeriodEnd',
   cancelAtPeriodEnd: 'cancelAtPeriodEnd',
+  canceledAt: 'canceledAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   stripeCustomerId: 'stripeCustomerId',
@@ -231,6 +232,16 @@ exports.Prisma.MetricsSnapshotScalarFieldEnum = {
   timestamp: 'timestamp'
 };
 
+exports.Prisma.TemporaryAccessScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -272,7 +283,8 @@ exports.Prisma.ModelName = {
   PageView: 'PageView',
   ErrorLog: 'ErrorLog',
   PerformanceMetric: 'PerformanceMetric',
-  MetricsSnapshot: 'MetricsSnapshot'
+  MetricsSnapshot: 'MetricsSnapshot',
+  TemporaryAccess: 'TemporaryAccess'
 };
 
 /**

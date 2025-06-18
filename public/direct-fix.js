@@ -65,7 +65,7 @@
   const modulePatches = () => {
     try {
       // Try to find the webpack module cache or similar structure
-      for (let globalKey in window) {
+      for (const globalKey in window) {
         if (typeof window[globalKey] === 'object' && window[globalKey] !== null) {
           const obj = window[globalKey];
           
@@ -142,7 +142,7 @@
       if (!React.Component) {
         console.log('[direct-fix] Adding Component to React');
         // Try to find a component class
-        for (let key in React) {
+        for (const key in React) {
           if (typeof React[key] === 'function' && /^[A-Z]/.test(key)) {
             React.Component = React[key];
             break;

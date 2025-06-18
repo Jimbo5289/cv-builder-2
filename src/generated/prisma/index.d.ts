@@ -63,6 +63,11 @@ export type PerformanceMetric = $Result.DefaultSelection<Prisma.$PerformanceMetr
  * 
  */
 export type MetricsSnapshot = $Result.DefaultSelection<Prisma.$MetricsSnapshotPayload>
+/**
+ * Model TemporaryAccess
+ * 
+ */
+export type TemporaryAccess = $Result.DefaultSelection<Prisma.$TemporaryAccessPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -288,6 +293,16 @@ export class PrismaClient<
     * ```
     */
   get metricsSnapshot(): Prisma.MetricsSnapshotDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.temporaryAccess`: Exposes CRUD operations for the **TemporaryAccess** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TemporaryAccesses
+    * const temporaryAccesses = await prisma.temporaryAccess.findMany()
+    * ```
+    */
+  get temporaryAccess(): Prisma.TemporaryAccessDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -737,7 +752,8 @@ export namespace Prisma {
     PageView: 'PageView',
     ErrorLog: 'ErrorLog',
     PerformanceMetric: 'PerformanceMetric',
-    MetricsSnapshot: 'MetricsSnapshot'
+    MetricsSnapshot: 'MetricsSnapshot',
+    TemporaryAccess: 'TemporaryAccess'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -756,7 +772,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "cV" | "cVSection" | "payment" | "subscription" | "user" | "refreshToken" | "pageView" | "errorLog" | "performanceMetric" | "metricsSnapshot"
+      modelProps: "cV" | "cVSection" | "payment" | "subscription" | "user" | "refreshToken" | "pageView" | "errorLog" | "performanceMetric" | "metricsSnapshot" | "temporaryAccess"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1500,6 +1516,80 @@ export namespace Prisma {
           }
         }
       }
+      TemporaryAccess: {
+        payload: Prisma.$TemporaryAccessPayload<ExtArgs>
+        fields: Prisma.TemporaryAccessFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TemporaryAccessFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemporaryAccessPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TemporaryAccessFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemporaryAccessPayload>
+          }
+          findFirst: {
+            args: Prisma.TemporaryAccessFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemporaryAccessPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TemporaryAccessFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemporaryAccessPayload>
+          }
+          findMany: {
+            args: Prisma.TemporaryAccessFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemporaryAccessPayload>[]
+          }
+          create: {
+            args: Prisma.TemporaryAccessCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemporaryAccessPayload>
+          }
+          createMany: {
+            args: Prisma.TemporaryAccessCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TemporaryAccessCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemporaryAccessPayload>[]
+          }
+          delete: {
+            args: Prisma.TemporaryAccessDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemporaryAccessPayload>
+          }
+          update: {
+            args: Prisma.TemporaryAccessUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemporaryAccessPayload>
+          }
+          deleteMany: {
+            args: Prisma.TemporaryAccessDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TemporaryAccessUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TemporaryAccessUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemporaryAccessPayload>[]
+          }
+          upsert: {
+            args: Prisma.TemporaryAccessUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TemporaryAccessPayload>
+          }
+          aggregate: {
+            args: Prisma.TemporaryAccessAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTemporaryAccess>
+          }
+          groupBy: {
+            args: Prisma.TemporaryAccessGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TemporaryAccessGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TemporaryAccessCountArgs<ExtArgs>
+            result: $Utils.Optional<TemporaryAccessCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1594,6 +1684,7 @@ export namespace Prisma {
     errorLog?: ErrorLogOmit
     performanceMetric?: PerformanceMetricOmit
     metricsSnapshot?: MetricsSnapshotOmit
+    temporaryAccess?: TemporaryAccessOmit
   }
 
   /* Types for Logging */
@@ -1725,6 +1816,7 @@ export namespace Prisma {
     RefreshTokens: number
     PageViews: number
     ErrorLogs: number
+    temporaryAccess: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1734,6 +1826,7 @@ export namespace Prisma {
     RefreshTokens?: boolean | UserCountOutputTypeCountRefreshTokensArgs
     PageViews?: boolean | UserCountOutputTypeCountPageViewsArgs
     ErrorLogs?: boolean | UserCountOutputTypeCountErrorLogsArgs
+    temporaryAccess?: boolean | UserCountOutputTypeCountTemporaryAccessArgs
   }
 
   // Custom InputTypes
@@ -1787,6 +1880,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountErrorLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ErrorLogWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountTemporaryAccessArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TemporaryAccessWhereInput
   }
 
 
@@ -5221,6 +5321,7 @@ export namespace Prisma {
     currentPeriodStart: Date | null
     currentPeriodEnd: Date | null
     cancelAtPeriodEnd: boolean | null
+    canceledAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
     stripeCustomerId: string | null
@@ -5235,6 +5336,7 @@ export namespace Prisma {
     currentPeriodStart: Date | null
     currentPeriodEnd: Date | null
     cancelAtPeriodEnd: boolean | null
+    canceledAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
     stripeCustomerId: string | null
@@ -5249,6 +5351,7 @@ export namespace Prisma {
     currentPeriodStart: number
     currentPeriodEnd: number
     cancelAtPeriodEnd: number
+    canceledAt: number
     createdAt: number
     updatedAt: number
     stripeCustomerId: number
@@ -5265,6 +5368,7 @@ export namespace Prisma {
     currentPeriodStart?: true
     currentPeriodEnd?: true
     cancelAtPeriodEnd?: true
+    canceledAt?: true
     createdAt?: true
     updatedAt?: true
     stripeCustomerId?: true
@@ -5279,6 +5383,7 @@ export namespace Prisma {
     currentPeriodStart?: true
     currentPeriodEnd?: true
     cancelAtPeriodEnd?: true
+    canceledAt?: true
     createdAt?: true
     updatedAt?: true
     stripeCustomerId?: true
@@ -5293,6 +5398,7 @@ export namespace Prisma {
     currentPeriodStart?: true
     currentPeriodEnd?: true
     cancelAtPeriodEnd?: true
+    canceledAt?: true
     createdAt?: true
     updatedAt?: true
     stripeCustomerId?: true
@@ -5380,6 +5486,7 @@ export namespace Prisma {
     currentPeriodStart: Date
     currentPeriodEnd: Date
     cancelAtPeriodEnd: boolean
+    canceledAt: Date | null
     createdAt: Date
     updatedAt: Date
     stripeCustomerId: string
@@ -5411,6 +5518,7 @@ export namespace Prisma {
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     cancelAtPeriodEnd?: boolean
+    canceledAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stripeCustomerId?: boolean
@@ -5426,6 +5534,7 @@ export namespace Prisma {
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     cancelAtPeriodEnd?: boolean
+    canceledAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stripeCustomerId?: boolean
@@ -5441,6 +5550,7 @@ export namespace Prisma {
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     cancelAtPeriodEnd?: boolean
+    canceledAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stripeCustomerId?: boolean
@@ -5456,6 +5566,7 @@ export namespace Prisma {
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     cancelAtPeriodEnd?: boolean
+    canceledAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     stripeCustomerId?: boolean
@@ -5463,7 +5574,7 @@ export namespace Prisma {
     stripeSubscriptionId?: boolean
   }
 
-  export type SubscriptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "status" | "currentPeriodStart" | "currentPeriodEnd" | "cancelAtPeriodEnd" | "createdAt" | "updatedAt" | "stripeCustomerId" | "stripePriceId" | "stripeSubscriptionId", ExtArgs["result"]["subscription"]>
+  export type SubscriptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "status" | "currentPeriodStart" | "currentPeriodEnd" | "cancelAtPeriodEnd" | "canceledAt" | "createdAt" | "updatedAt" | "stripeCustomerId" | "stripePriceId" | "stripeSubscriptionId", ExtArgs["result"]["subscription"]>
   export type SubscriptionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     User?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -5486,6 +5597,7 @@ export namespace Prisma {
       currentPeriodStart: Date
       currentPeriodEnd: Date
       cancelAtPeriodEnd: boolean
+      canceledAt: Date | null
       createdAt: Date
       updatedAt: Date
       stripeCustomerId: string
@@ -5921,6 +6033,7 @@ export namespace Prisma {
     readonly currentPeriodStart: FieldRef<"Subscription", 'DateTime'>
     readonly currentPeriodEnd: FieldRef<"Subscription", 'DateTime'>
     readonly cancelAtPeriodEnd: FieldRef<"Subscription", 'Boolean'>
+    readonly canceledAt: FieldRef<"Subscription", 'DateTime'>
     readonly createdAt: FieldRef<"Subscription", 'DateTime'>
     readonly updatedAt: FieldRef<"Subscription", 'DateTime'>
     readonly stripeCustomerId: FieldRef<"Subscription", 'String'>
@@ -6628,6 +6741,7 @@ export namespace Prisma {
     RefreshTokens?: boolean | User$RefreshTokensArgs<ExtArgs>
     PageViews?: boolean | User$PageViewsArgs<ExtArgs>
     ErrorLogs?: boolean | User$ErrorLogsArgs<ExtArgs>
+    temporaryAccess?: boolean | User$temporaryAccessArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -6696,6 +6810,7 @@ export namespace Prisma {
     RefreshTokens?: boolean | User$RefreshTokensArgs<ExtArgs>
     PageViews?: boolean | User$PageViewsArgs<ExtArgs>
     ErrorLogs?: boolean | User$ErrorLogsArgs<ExtArgs>
+    temporaryAccess?: boolean | User$temporaryAccessArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -6710,6 +6825,7 @@ export namespace Prisma {
       RefreshTokens: Prisma.$RefreshTokenPayload<ExtArgs>[]
       PageViews: Prisma.$PageViewPayload<ExtArgs>[]
       ErrorLogs: Prisma.$ErrorLogPayload<ExtArgs>[]
+      temporaryAccess: Prisma.$TemporaryAccessPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -7128,6 +7244,7 @@ export namespace Prisma {
     RefreshTokens<T extends User$RefreshTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$RefreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     PageViews<T extends User$PageViewsArgs<ExtArgs> = {}>(args?: Subset<T, User$PageViewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PageViewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     ErrorLogs<T extends User$ErrorLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$ErrorLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ErrorLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    temporaryAccess<T extends User$temporaryAccessArgs<ExtArgs> = {}>(args?: Subset<T, User$temporaryAccessArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemporaryAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7702,6 +7819,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ErrorLogScalarFieldEnum | ErrorLogScalarFieldEnum[]
+  }
+
+  /**
+   * User.temporaryAccess
+   */
+  export type User$temporaryAccessArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemporaryAccess
+     */
+    select?: TemporaryAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemporaryAccess
+     */
+    omit?: TemporaryAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemporaryAccessInclude<ExtArgs> | null
+    where?: TemporaryAccessWhereInput
+    orderBy?: TemporaryAccessOrderByWithRelationInput | TemporaryAccessOrderByWithRelationInput[]
+    cursor?: TemporaryAccessWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TemporaryAccessScalarFieldEnum | TemporaryAccessScalarFieldEnum[]
   }
 
   /**
@@ -13056,6 +13197,1090 @@ export namespace Prisma {
 
 
   /**
+   * Model TemporaryAccess
+   */
+
+  export type AggregateTemporaryAccess = {
+    _count: TemporaryAccessCountAggregateOutputType | null
+    _min: TemporaryAccessMinAggregateOutputType | null
+    _max: TemporaryAccessMaxAggregateOutputType | null
+  }
+
+  export type TemporaryAccessMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    type: string | null
+    startTime: Date | null
+    endTime: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TemporaryAccessMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    type: string | null
+    startTime: Date | null
+    endTime: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TemporaryAccessCountAggregateOutputType = {
+    id: number
+    userId: number
+    type: number
+    startTime: number
+    endTime: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type TemporaryAccessMinAggregateInputType = {
+    id?: true
+    userId?: true
+    type?: true
+    startTime?: true
+    endTime?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TemporaryAccessMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    type?: true
+    startTime?: true
+    endTime?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TemporaryAccessCountAggregateInputType = {
+    id?: true
+    userId?: true
+    type?: true
+    startTime?: true
+    endTime?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type TemporaryAccessAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TemporaryAccess to aggregate.
+     */
+    where?: TemporaryAccessWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TemporaryAccesses to fetch.
+     */
+    orderBy?: TemporaryAccessOrderByWithRelationInput | TemporaryAccessOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TemporaryAccessWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TemporaryAccesses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TemporaryAccesses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TemporaryAccesses
+    **/
+    _count?: true | TemporaryAccessCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TemporaryAccessMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TemporaryAccessMaxAggregateInputType
+  }
+
+  export type GetTemporaryAccessAggregateType<T extends TemporaryAccessAggregateArgs> = {
+        [P in keyof T & keyof AggregateTemporaryAccess]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTemporaryAccess[P]>
+      : GetScalarType<T[P], AggregateTemporaryAccess[P]>
+  }
+
+
+
+
+  export type TemporaryAccessGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TemporaryAccessWhereInput
+    orderBy?: TemporaryAccessOrderByWithAggregationInput | TemporaryAccessOrderByWithAggregationInput[]
+    by: TemporaryAccessScalarFieldEnum[] | TemporaryAccessScalarFieldEnum
+    having?: TemporaryAccessScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TemporaryAccessCountAggregateInputType | true
+    _min?: TemporaryAccessMinAggregateInputType
+    _max?: TemporaryAccessMaxAggregateInputType
+  }
+
+  export type TemporaryAccessGroupByOutputType = {
+    id: string
+    userId: string
+    type: string
+    startTime: Date
+    endTime: Date
+    createdAt: Date
+    updatedAt: Date
+    _count: TemporaryAccessCountAggregateOutputType | null
+    _min: TemporaryAccessMinAggregateOutputType | null
+    _max: TemporaryAccessMaxAggregateOutputType | null
+  }
+
+  type GetTemporaryAccessGroupByPayload<T extends TemporaryAccessGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TemporaryAccessGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TemporaryAccessGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TemporaryAccessGroupByOutputType[P]>
+            : GetScalarType<T[P], TemporaryAccessGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TemporaryAccessSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["temporaryAccess"]>
+
+  export type TemporaryAccessSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["temporaryAccess"]>
+
+  export type TemporaryAccessSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["temporaryAccess"]>
+
+  export type TemporaryAccessSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    type?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type TemporaryAccessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "type" | "startTime" | "endTime" | "createdAt" | "updatedAt", ExtArgs["result"]["temporaryAccess"]>
+  export type TemporaryAccessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type TemporaryAccessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type TemporaryAccessIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $TemporaryAccessPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TemporaryAccess"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      type: string
+      startTime: Date
+      endTime: Date
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["temporaryAccess"]>
+    composites: {}
+  }
+
+  type TemporaryAccessGetPayload<S extends boolean | null | undefined | TemporaryAccessDefaultArgs> = $Result.GetResult<Prisma.$TemporaryAccessPayload, S>
+
+  type TemporaryAccessCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TemporaryAccessFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TemporaryAccessCountAggregateInputType | true
+    }
+
+  export interface TemporaryAccessDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TemporaryAccess'], meta: { name: 'TemporaryAccess' } }
+    /**
+     * Find zero or one TemporaryAccess that matches the filter.
+     * @param {TemporaryAccessFindUniqueArgs} args - Arguments to find a TemporaryAccess
+     * @example
+     * // Get one TemporaryAccess
+     * const temporaryAccess = await prisma.temporaryAccess.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TemporaryAccessFindUniqueArgs>(args: SelectSubset<T, TemporaryAccessFindUniqueArgs<ExtArgs>>): Prisma__TemporaryAccessClient<$Result.GetResult<Prisma.$TemporaryAccessPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TemporaryAccess that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TemporaryAccessFindUniqueOrThrowArgs} args - Arguments to find a TemporaryAccess
+     * @example
+     * // Get one TemporaryAccess
+     * const temporaryAccess = await prisma.temporaryAccess.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TemporaryAccessFindUniqueOrThrowArgs>(args: SelectSubset<T, TemporaryAccessFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TemporaryAccessClient<$Result.GetResult<Prisma.$TemporaryAccessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TemporaryAccess that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TemporaryAccessFindFirstArgs} args - Arguments to find a TemporaryAccess
+     * @example
+     * // Get one TemporaryAccess
+     * const temporaryAccess = await prisma.temporaryAccess.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TemporaryAccessFindFirstArgs>(args?: SelectSubset<T, TemporaryAccessFindFirstArgs<ExtArgs>>): Prisma__TemporaryAccessClient<$Result.GetResult<Prisma.$TemporaryAccessPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TemporaryAccess that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TemporaryAccessFindFirstOrThrowArgs} args - Arguments to find a TemporaryAccess
+     * @example
+     * // Get one TemporaryAccess
+     * const temporaryAccess = await prisma.temporaryAccess.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TemporaryAccessFindFirstOrThrowArgs>(args?: SelectSubset<T, TemporaryAccessFindFirstOrThrowArgs<ExtArgs>>): Prisma__TemporaryAccessClient<$Result.GetResult<Prisma.$TemporaryAccessPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TemporaryAccesses that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TemporaryAccessFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TemporaryAccesses
+     * const temporaryAccesses = await prisma.temporaryAccess.findMany()
+     * 
+     * // Get first 10 TemporaryAccesses
+     * const temporaryAccesses = await prisma.temporaryAccess.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const temporaryAccessWithIdOnly = await prisma.temporaryAccess.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TemporaryAccessFindManyArgs>(args?: SelectSubset<T, TemporaryAccessFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemporaryAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TemporaryAccess.
+     * @param {TemporaryAccessCreateArgs} args - Arguments to create a TemporaryAccess.
+     * @example
+     * // Create one TemporaryAccess
+     * const TemporaryAccess = await prisma.temporaryAccess.create({
+     *   data: {
+     *     // ... data to create a TemporaryAccess
+     *   }
+     * })
+     * 
+     */
+    create<T extends TemporaryAccessCreateArgs>(args: SelectSubset<T, TemporaryAccessCreateArgs<ExtArgs>>): Prisma__TemporaryAccessClient<$Result.GetResult<Prisma.$TemporaryAccessPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TemporaryAccesses.
+     * @param {TemporaryAccessCreateManyArgs} args - Arguments to create many TemporaryAccesses.
+     * @example
+     * // Create many TemporaryAccesses
+     * const temporaryAccess = await prisma.temporaryAccess.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TemporaryAccessCreateManyArgs>(args?: SelectSubset<T, TemporaryAccessCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TemporaryAccesses and returns the data saved in the database.
+     * @param {TemporaryAccessCreateManyAndReturnArgs} args - Arguments to create many TemporaryAccesses.
+     * @example
+     * // Create many TemporaryAccesses
+     * const temporaryAccess = await prisma.temporaryAccess.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TemporaryAccesses and only return the `id`
+     * const temporaryAccessWithIdOnly = await prisma.temporaryAccess.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TemporaryAccessCreateManyAndReturnArgs>(args?: SelectSubset<T, TemporaryAccessCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemporaryAccessPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TemporaryAccess.
+     * @param {TemporaryAccessDeleteArgs} args - Arguments to delete one TemporaryAccess.
+     * @example
+     * // Delete one TemporaryAccess
+     * const TemporaryAccess = await prisma.temporaryAccess.delete({
+     *   where: {
+     *     // ... filter to delete one TemporaryAccess
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TemporaryAccessDeleteArgs>(args: SelectSubset<T, TemporaryAccessDeleteArgs<ExtArgs>>): Prisma__TemporaryAccessClient<$Result.GetResult<Prisma.$TemporaryAccessPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TemporaryAccess.
+     * @param {TemporaryAccessUpdateArgs} args - Arguments to update one TemporaryAccess.
+     * @example
+     * // Update one TemporaryAccess
+     * const temporaryAccess = await prisma.temporaryAccess.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TemporaryAccessUpdateArgs>(args: SelectSubset<T, TemporaryAccessUpdateArgs<ExtArgs>>): Prisma__TemporaryAccessClient<$Result.GetResult<Prisma.$TemporaryAccessPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TemporaryAccesses.
+     * @param {TemporaryAccessDeleteManyArgs} args - Arguments to filter TemporaryAccesses to delete.
+     * @example
+     * // Delete a few TemporaryAccesses
+     * const { count } = await prisma.temporaryAccess.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TemporaryAccessDeleteManyArgs>(args?: SelectSubset<T, TemporaryAccessDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TemporaryAccesses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TemporaryAccessUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TemporaryAccesses
+     * const temporaryAccess = await prisma.temporaryAccess.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TemporaryAccessUpdateManyArgs>(args: SelectSubset<T, TemporaryAccessUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TemporaryAccesses and returns the data updated in the database.
+     * @param {TemporaryAccessUpdateManyAndReturnArgs} args - Arguments to update many TemporaryAccesses.
+     * @example
+     * // Update many TemporaryAccesses
+     * const temporaryAccess = await prisma.temporaryAccess.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TemporaryAccesses and only return the `id`
+     * const temporaryAccessWithIdOnly = await prisma.temporaryAccess.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TemporaryAccessUpdateManyAndReturnArgs>(args: SelectSubset<T, TemporaryAccessUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TemporaryAccessPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TemporaryAccess.
+     * @param {TemporaryAccessUpsertArgs} args - Arguments to update or create a TemporaryAccess.
+     * @example
+     * // Update or create a TemporaryAccess
+     * const temporaryAccess = await prisma.temporaryAccess.upsert({
+     *   create: {
+     *     // ... data to create a TemporaryAccess
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TemporaryAccess we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TemporaryAccessUpsertArgs>(args: SelectSubset<T, TemporaryAccessUpsertArgs<ExtArgs>>): Prisma__TemporaryAccessClient<$Result.GetResult<Prisma.$TemporaryAccessPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TemporaryAccesses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TemporaryAccessCountArgs} args - Arguments to filter TemporaryAccesses to count.
+     * @example
+     * // Count the number of TemporaryAccesses
+     * const count = await prisma.temporaryAccess.count({
+     *   where: {
+     *     // ... the filter for the TemporaryAccesses we want to count
+     *   }
+     * })
+    **/
+    count<T extends TemporaryAccessCountArgs>(
+      args?: Subset<T, TemporaryAccessCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TemporaryAccessCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TemporaryAccess.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TemporaryAccessAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TemporaryAccessAggregateArgs>(args: Subset<T, TemporaryAccessAggregateArgs>): Prisma.PrismaPromise<GetTemporaryAccessAggregateType<T>>
+
+    /**
+     * Group by TemporaryAccess.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TemporaryAccessGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TemporaryAccessGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TemporaryAccessGroupByArgs['orderBy'] }
+        : { orderBy?: TemporaryAccessGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TemporaryAccessGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTemporaryAccessGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TemporaryAccess model
+   */
+  readonly fields: TemporaryAccessFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TemporaryAccess.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TemporaryAccessClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TemporaryAccess model
+   */
+  interface TemporaryAccessFieldRefs {
+    readonly id: FieldRef<"TemporaryAccess", 'String'>
+    readonly userId: FieldRef<"TemporaryAccess", 'String'>
+    readonly type: FieldRef<"TemporaryAccess", 'String'>
+    readonly startTime: FieldRef<"TemporaryAccess", 'DateTime'>
+    readonly endTime: FieldRef<"TemporaryAccess", 'DateTime'>
+    readonly createdAt: FieldRef<"TemporaryAccess", 'DateTime'>
+    readonly updatedAt: FieldRef<"TemporaryAccess", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TemporaryAccess findUnique
+   */
+  export type TemporaryAccessFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemporaryAccess
+     */
+    select?: TemporaryAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemporaryAccess
+     */
+    omit?: TemporaryAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemporaryAccessInclude<ExtArgs> | null
+    /**
+     * Filter, which TemporaryAccess to fetch.
+     */
+    where: TemporaryAccessWhereUniqueInput
+  }
+
+  /**
+   * TemporaryAccess findUniqueOrThrow
+   */
+  export type TemporaryAccessFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemporaryAccess
+     */
+    select?: TemporaryAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemporaryAccess
+     */
+    omit?: TemporaryAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemporaryAccessInclude<ExtArgs> | null
+    /**
+     * Filter, which TemporaryAccess to fetch.
+     */
+    where: TemporaryAccessWhereUniqueInput
+  }
+
+  /**
+   * TemporaryAccess findFirst
+   */
+  export type TemporaryAccessFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemporaryAccess
+     */
+    select?: TemporaryAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemporaryAccess
+     */
+    omit?: TemporaryAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemporaryAccessInclude<ExtArgs> | null
+    /**
+     * Filter, which TemporaryAccess to fetch.
+     */
+    where?: TemporaryAccessWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TemporaryAccesses to fetch.
+     */
+    orderBy?: TemporaryAccessOrderByWithRelationInput | TemporaryAccessOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TemporaryAccesses.
+     */
+    cursor?: TemporaryAccessWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TemporaryAccesses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TemporaryAccesses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TemporaryAccesses.
+     */
+    distinct?: TemporaryAccessScalarFieldEnum | TemporaryAccessScalarFieldEnum[]
+  }
+
+  /**
+   * TemporaryAccess findFirstOrThrow
+   */
+  export type TemporaryAccessFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemporaryAccess
+     */
+    select?: TemporaryAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemporaryAccess
+     */
+    omit?: TemporaryAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemporaryAccessInclude<ExtArgs> | null
+    /**
+     * Filter, which TemporaryAccess to fetch.
+     */
+    where?: TemporaryAccessWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TemporaryAccesses to fetch.
+     */
+    orderBy?: TemporaryAccessOrderByWithRelationInput | TemporaryAccessOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TemporaryAccesses.
+     */
+    cursor?: TemporaryAccessWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TemporaryAccesses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TemporaryAccesses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TemporaryAccesses.
+     */
+    distinct?: TemporaryAccessScalarFieldEnum | TemporaryAccessScalarFieldEnum[]
+  }
+
+  /**
+   * TemporaryAccess findMany
+   */
+  export type TemporaryAccessFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemporaryAccess
+     */
+    select?: TemporaryAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemporaryAccess
+     */
+    omit?: TemporaryAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemporaryAccessInclude<ExtArgs> | null
+    /**
+     * Filter, which TemporaryAccesses to fetch.
+     */
+    where?: TemporaryAccessWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TemporaryAccesses to fetch.
+     */
+    orderBy?: TemporaryAccessOrderByWithRelationInput | TemporaryAccessOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TemporaryAccesses.
+     */
+    cursor?: TemporaryAccessWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TemporaryAccesses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TemporaryAccesses.
+     */
+    skip?: number
+    distinct?: TemporaryAccessScalarFieldEnum | TemporaryAccessScalarFieldEnum[]
+  }
+
+  /**
+   * TemporaryAccess create
+   */
+  export type TemporaryAccessCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemporaryAccess
+     */
+    select?: TemporaryAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemporaryAccess
+     */
+    omit?: TemporaryAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemporaryAccessInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TemporaryAccess.
+     */
+    data: XOR<TemporaryAccessCreateInput, TemporaryAccessUncheckedCreateInput>
+  }
+
+  /**
+   * TemporaryAccess createMany
+   */
+  export type TemporaryAccessCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TemporaryAccesses.
+     */
+    data: TemporaryAccessCreateManyInput | TemporaryAccessCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TemporaryAccess createManyAndReturn
+   */
+  export type TemporaryAccessCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemporaryAccess
+     */
+    select?: TemporaryAccessSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemporaryAccess
+     */
+    omit?: TemporaryAccessOmit<ExtArgs> | null
+    /**
+     * The data used to create many TemporaryAccesses.
+     */
+    data: TemporaryAccessCreateManyInput | TemporaryAccessCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemporaryAccessIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TemporaryAccess update
+   */
+  export type TemporaryAccessUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemporaryAccess
+     */
+    select?: TemporaryAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemporaryAccess
+     */
+    omit?: TemporaryAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemporaryAccessInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TemporaryAccess.
+     */
+    data: XOR<TemporaryAccessUpdateInput, TemporaryAccessUncheckedUpdateInput>
+    /**
+     * Choose, which TemporaryAccess to update.
+     */
+    where: TemporaryAccessWhereUniqueInput
+  }
+
+  /**
+   * TemporaryAccess updateMany
+   */
+  export type TemporaryAccessUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TemporaryAccesses.
+     */
+    data: XOR<TemporaryAccessUpdateManyMutationInput, TemporaryAccessUncheckedUpdateManyInput>
+    /**
+     * Filter which TemporaryAccesses to update
+     */
+    where?: TemporaryAccessWhereInput
+    /**
+     * Limit how many TemporaryAccesses to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TemporaryAccess updateManyAndReturn
+   */
+  export type TemporaryAccessUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemporaryAccess
+     */
+    select?: TemporaryAccessSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemporaryAccess
+     */
+    omit?: TemporaryAccessOmit<ExtArgs> | null
+    /**
+     * The data used to update TemporaryAccesses.
+     */
+    data: XOR<TemporaryAccessUpdateManyMutationInput, TemporaryAccessUncheckedUpdateManyInput>
+    /**
+     * Filter which TemporaryAccesses to update
+     */
+    where?: TemporaryAccessWhereInput
+    /**
+     * Limit how many TemporaryAccesses to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemporaryAccessIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TemporaryAccess upsert
+   */
+  export type TemporaryAccessUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemporaryAccess
+     */
+    select?: TemporaryAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemporaryAccess
+     */
+    omit?: TemporaryAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemporaryAccessInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TemporaryAccess to update in case it exists.
+     */
+    where: TemporaryAccessWhereUniqueInput
+    /**
+     * In case the TemporaryAccess found by the `where` argument doesn't exist, create a new TemporaryAccess with this data.
+     */
+    create: XOR<TemporaryAccessCreateInput, TemporaryAccessUncheckedCreateInput>
+    /**
+     * In case the TemporaryAccess was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TemporaryAccessUpdateInput, TemporaryAccessUncheckedUpdateInput>
+  }
+
+  /**
+   * TemporaryAccess delete
+   */
+  export type TemporaryAccessDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemporaryAccess
+     */
+    select?: TemporaryAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemporaryAccess
+     */
+    omit?: TemporaryAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemporaryAccessInclude<ExtArgs> | null
+    /**
+     * Filter which TemporaryAccess to delete.
+     */
+    where: TemporaryAccessWhereUniqueInput
+  }
+
+  /**
+   * TemporaryAccess deleteMany
+   */
+  export type TemporaryAccessDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TemporaryAccesses to delete
+     */
+    where?: TemporaryAccessWhereInput
+    /**
+     * Limit how many TemporaryAccesses to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TemporaryAccess without action
+   */
+  export type TemporaryAccessDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TemporaryAccess
+     */
+    select?: TemporaryAccessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TemporaryAccess
+     */
+    omit?: TemporaryAccessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TemporaryAccessInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -13117,6 +14342,7 @@ export namespace Prisma {
     currentPeriodStart: 'currentPeriodStart',
     currentPeriodEnd: 'currentPeriodEnd',
     cancelAtPeriodEnd: 'cancelAtPeriodEnd',
+    canceledAt: 'canceledAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     stripeCustomerId: 'stripeCustomerId',
@@ -13208,6 +14434,19 @@ export namespace Prisma {
   };
 
   export type MetricsSnapshotScalarFieldEnum = (typeof MetricsSnapshotScalarFieldEnum)[keyof typeof MetricsSnapshotScalarFieldEnum]
+
+
+  export const TemporaryAccessScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    type: 'type',
+    startTime: 'startTime',
+    endTime: 'endTime',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type TemporaryAccessScalarFieldEnum = (typeof TemporaryAccessScalarFieldEnum)[keyof typeof TemporaryAccessScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -13567,6 +14806,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFilter<"Subscription"> | Date | string
     currentPeriodEnd?: DateTimeFilter<"Subscription"> | Date | string
     cancelAtPeriodEnd?: BoolFilter<"Subscription"> | boolean
+    canceledAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
     createdAt?: DateTimeFilter<"Subscription"> | Date | string
     updatedAt?: DateTimeFilter<"Subscription"> | Date | string
     stripeCustomerId?: StringFilter<"Subscription"> | string
@@ -13582,6 +14822,7 @@ export namespace Prisma {
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     cancelAtPeriodEnd?: SortOrder
+    canceledAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     stripeCustomerId?: SortOrder
@@ -13600,6 +14841,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFilter<"Subscription"> | Date | string
     currentPeriodEnd?: DateTimeFilter<"Subscription"> | Date | string
     cancelAtPeriodEnd?: BoolFilter<"Subscription"> | boolean
+    canceledAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
     createdAt?: DateTimeFilter<"Subscription"> | Date | string
     updatedAt?: DateTimeFilter<"Subscription"> | Date | string
     stripeCustomerId?: StringFilter<"Subscription"> | string
@@ -13615,6 +14857,7 @@ export namespace Prisma {
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     cancelAtPeriodEnd?: SortOrder
+    canceledAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     stripeCustomerId?: SortOrder
@@ -13635,6 +14878,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeWithAggregatesFilter<"Subscription"> | Date | string
     currentPeriodEnd?: DateTimeWithAggregatesFilter<"Subscription"> | Date | string
     cancelAtPeriodEnd?: BoolWithAggregatesFilter<"Subscription"> | boolean
+    canceledAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Subscription"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Subscription"> | Date | string
     stripeCustomerId?: StringWithAggregatesFilter<"Subscription"> | string
@@ -13668,6 +14912,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenListRelationFilter
     PageViews?: PageViewListRelationFilter
     ErrorLogs?: ErrorLogListRelationFilter
+    temporaryAccess?: TemporaryAccessListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -13693,6 +14938,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenOrderByRelationAggregateInput
     PageViews?: PageViewOrderByRelationAggregateInput
     ErrorLogs?: ErrorLogOrderByRelationAggregateInput
+    temporaryAccess?: TemporaryAccessOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -13721,6 +14967,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenListRelationFilter
     PageViews?: PageViewListRelationFilter
     ErrorLogs?: ErrorLogListRelationFilter
+    temporaryAccess?: TemporaryAccessListRelationFilter
   }, "id" | "email" | "customerId">
 
   export type UserOrderByWithAggregationInput = {
@@ -14072,6 +15319,71 @@ export namespace Prisma {
     timestamp?: DateTimeWithAggregatesFilter<"MetricsSnapshot"> | Date | string
   }
 
+  export type TemporaryAccessWhereInput = {
+    AND?: TemporaryAccessWhereInput | TemporaryAccessWhereInput[]
+    OR?: TemporaryAccessWhereInput[]
+    NOT?: TemporaryAccessWhereInput | TemporaryAccessWhereInput[]
+    id?: StringFilter<"TemporaryAccess"> | string
+    userId?: StringFilter<"TemporaryAccess"> | string
+    type?: StringFilter<"TemporaryAccess"> | string
+    startTime?: DateTimeFilter<"TemporaryAccess"> | Date | string
+    endTime?: DateTimeFilter<"TemporaryAccess"> | Date | string
+    createdAt?: DateTimeFilter<"TemporaryAccess"> | Date | string
+    updatedAt?: DateTimeFilter<"TemporaryAccess"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type TemporaryAccessOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type TemporaryAccessWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: TemporaryAccessWhereInput | TemporaryAccessWhereInput[]
+    OR?: TemporaryAccessWhereInput[]
+    NOT?: TemporaryAccessWhereInput | TemporaryAccessWhereInput[]
+    userId?: StringFilter<"TemporaryAccess"> | string
+    type?: StringFilter<"TemporaryAccess"> | string
+    startTime?: DateTimeFilter<"TemporaryAccess"> | Date | string
+    endTime?: DateTimeFilter<"TemporaryAccess"> | Date | string
+    createdAt?: DateTimeFilter<"TemporaryAccess"> | Date | string
+    updatedAt?: DateTimeFilter<"TemporaryAccess"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type TemporaryAccessOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: TemporaryAccessCountOrderByAggregateInput
+    _max?: TemporaryAccessMaxOrderByAggregateInput
+    _min?: TemporaryAccessMinOrderByAggregateInput
+  }
+
+  export type TemporaryAccessScalarWhereWithAggregatesInput = {
+    AND?: TemporaryAccessScalarWhereWithAggregatesInput | TemporaryAccessScalarWhereWithAggregatesInput[]
+    OR?: TemporaryAccessScalarWhereWithAggregatesInput[]
+    NOT?: TemporaryAccessScalarWhereWithAggregatesInput | TemporaryAccessScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TemporaryAccess"> | string
+    userId?: StringWithAggregatesFilter<"TemporaryAccess"> | string
+    type?: StringWithAggregatesFilter<"TemporaryAccess"> | string
+    startTime?: DateTimeWithAggregatesFilter<"TemporaryAccess"> | Date | string
+    endTime?: DateTimeWithAggregatesFilter<"TemporaryAccess"> | Date | string
+    createdAt?: DateTimeWithAggregatesFilter<"TemporaryAccess"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"TemporaryAccess"> | Date | string
+  }
+
   export type CVCreateInput = {
     id: string
     title: string
@@ -14303,6 +15615,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     cancelAtPeriodEnd?: boolean
+    canceledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt: Date | string
     stripeCustomerId: string
@@ -14318,6 +15631,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     cancelAtPeriodEnd?: boolean
+    canceledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt: Date | string
     stripeCustomerId: string
@@ -14331,6 +15645,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeCustomerId?: StringFieldUpdateOperationsInput | string
@@ -14346,6 +15661,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeCustomerId?: StringFieldUpdateOperationsInput | string
@@ -14360,6 +15676,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     cancelAtPeriodEnd?: boolean
+    canceledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt: Date | string
     stripeCustomerId: string
@@ -14373,6 +15690,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeCustomerId?: StringFieldUpdateOperationsInput | string
@@ -14387,6 +15705,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeCustomerId?: StringFieldUpdateOperationsInput | string
@@ -14417,6 +15736,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     PageViews?: PageViewCreateNestedManyWithoutUserInput
     ErrorLogs?: ErrorLogCreateNestedManyWithoutUserInput
+    temporaryAccess?: TemporaryAccessCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -14442,6 +15762,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     PageViews?: PageViewUncheckedCreateNestedManyWithoutUserInput
     ErrorLogs?: ErrorLogUncheckedCreateNestedManyWithoutUserInput
+    temporaryAccess?: TemporaryAccessUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -14467,6 +15788,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     PageViews?: PageViewUpdateManyWithoutUserNestedInput
     ErrorLogs?: ErrorLogUpdateManyWithoutUserNestedInput
+    temporaryAccess?: TemporaryAccessUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -14492,6 +15814,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     PageViews?: PageViewUncheckedUpdateManyWithoutUserNestedInput
     ErrorLogs?: ErrorLogUncheckedUpdateManyWithoutUserNestedInput
+    temporaryAccess?: TemporaryAccessUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -14870,6 +16193,75 @@ export namespace Prisma {
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type TemporaryAccessCreateInput = {
+    id?: string
+    type: string
+    startTime?: Date | string
+    endTime: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutTemporaryAccessInput
+  }
+
+  export type TemporaryAccessUncheckedCreateInput = {
+    id?: string
+    userId: string
+    type: string
+    startTime?: Date | string
+    endTime: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TemporaryAccessUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutTemporaryAccessNestedInput
+  }
+
+  export type TemporaryAccessUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TemporaryAccessCreateManyInput = {
+    id?: string
+    userId: string
+    type: string
+    startTime?: Date | string
+    endTime: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TemporaryAccessUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TemporaryAccessUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -15199,6 +16591,7 @@ export namespace Prisma {
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     cancelAtPeriodEnd?: SortOrder
+    canceledAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     stripeCustomerId?: SortOrder
@@ -15213,6 +16606,7 @@ export namespace Prisma {
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     cancelAtPeriodEnd?: SortOrder
+    canceledAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     stripeCustomerId?: SortOrder
@@ -15227,6 +16621,7 @@ export namespace Prisma {
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     cancelAtPeriodEnd?: SortOrder
+    canceledAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     stripeCustomerId?: SortOrder
@@ -15293,6 +16688,12 @@ export namespace Prisma {
     none?: ErrorLogWhereInput
   }
 
+  export type TemporaryAccessListRelationFilter = {
+    every?: TemporaryAccessWhereInput
+    some?: TemporaryAccessWhereInput
+    none?: TemporaryAccessWhereInput
+  }
+
   export type CVOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -15314,6 +16715,10 @@ export namespace Prisma {
   }
 
   export type ErrorLogOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TemporaryAccessOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -15647,6 +17052,36 @@ export namespace Prisma {
     _max?: NestedJsonFilter<$PrismaModel>
   }
 
+  export type TemporaryAccessCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TemporaryAccessMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TemporaryAccessMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    type?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type UserCreateNestedOneWithoutCVInput = {
     create?: XOR<UserCreateWithoutCVInput, UserUncheckedCreateWithoutCVInput>
     connectOrCreate?: UserCreateOrConnectWithoutCVInput
@@ -15831,6 +17266,13 @@ export namespace Prisma {
     connect?: ErrorLogWhereUniqueInput | ErrorLogWhereUniqueInput[]
   }
 
+  export type TemporaryAccessCreateNestedManyWithoutUserInput = {
+    create?: XOR<TemporaryAccessCreateWithoutUserInput, TemporaryAccessUncheckedCreateWithoutUserInput> | TemporaryAccessCreateWithoutUserInput[] | TemporaryAccessUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TemporaryAccessCreateOrConnectWithoutUserInput | TemporaryAccessCreateOrConnectWithoutUserInput[]
+    createMany?: TemporaryAccessCreateManyUserInputEnvelope
+    connect?: TemporaryAccessWhereUniqueInput | TemporaryAccessWhereUniqueInput[]
+  }
+
   export type CVUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<CVCreateWithoutUserInput, CVUncheckedCreateWithoutUserInput> | CVCreateWithoutUserInput[] | CVUncheckedCreateWithoutUserInput[]
     connectOrCreate?: CVCreateOrConnectWithoutUserInput | CVCreateOrConnectWithoutUserInput[]
@@ -15871,6 +17313,13 @@ export namespace Prisma {
     connectOrCreate?: ErrorLogCreateOrConnectWithoutUserInput | ErrorLogCreateOrConnectWithoutUserInput[]
     createMany?: ErrorLogCreateManyUserInputEnvelope
     connect?: ErrorLogWhereUniqueInput | ErrorLogWhereUniqueInput[]
+  }
+
+  export type TemporaryAccessUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<TemporaryAccessCreateWithoutUserInput, TemporaryAccessUncheckedCreateWithoutUserInput> | TemporaryAccessCreateWithoutUserInput[] | TemporaryAccessUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TemporaryAccessCreateOrConnectWithoutUserInput | TemporaryAccessCreateOrConnectWithoutUserInput[]
+    createMany?: TemporaryAccessCreateManyUserInputEnvelope
+    connect?: TemporaryAccessWhereUniqueInput | TemporaryAccessWhereUniqueInput[]
   }
 
   export type NullableStringFieldUpdateOperationsInput = {
@@ -15966,6 +17415,20 @@ export namespace Prisma {
     deleteMany?: ErrorLogScalarWhereInput | ErrorLogScalarWhereInput[]
   }
 
+  export type TemporaryAccessUpdateManyWithoutUserNestedInput = {
+    create?: XOR<TemporaryAccessCreateWithoutUserInput, TemporaryAccessUncheckedCreateWithoutUserInput> | TemporaryAccessCreateWithoutUserInput[] | TemporaryAccessUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TemporaryAccessCreateOrConnectWithoutUserInput | TemporaryAccessCreateOrConnectWithoutUserInput[]
+    upsert?: TemporaryAccessUpsertWithWhereUniqueWithoutUserInput | TemporaryAccessUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: TemporaryAccessCreateManyUserInputEnvelope
+    set?: TemporaryAccessWhereUniqueInput | TemporaryAccessWhereUniqueInput[]
+    disconnect?: TemporaryAccessWhereUniqueInput | TemporaryAccessWhereUniqueInput[]
+    delete?: TemporaryAccessWhereUniqueInput | TemporaryAccessWhereUniqueInput[]
+    connect?: TemporaryAccessWhereUniqueInput | TemporaryAccessWhereUniqueInput[]
+    update?: TemporaryAccessUpdateWithWhereUniqueWithoutUserInput | TemporaryAccessUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: TemporaryAccessUpdateManyWithWhereWithoutUserInput | TemporaryAccessUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: TemporaryAccessScalarWhereInput | TemporaryAccessScalarWhereInput[]
+  }
+
   export type CVUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<CVCreateWithoutUserInput, CVUncheckedCreateWithoutUserInput> | CVCreateWithoutUserInput[] | CVUncheckedCreateWithoutUserInput[]
     connectOrCreate?: CVCreateOrConnectWithoutUserInput | CVCreateOrConnectWithoutUserInput[]
@@ -16050,6 +17513,20 @@ export namespace Prisma {
     deleteMany?: ErrorLogScalarWhereInput | ErrorLogScalarWhereInput[]
   }
 
+  export type TemporaryAccessUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<TemporaryAccessCreateWithoutUserInput, TemporaryAccessUncheckedCreateWithoutUserInput> | TemporaryAccessCreateWithoutUserInput[] | TemporaryAccessUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: TemporaryAccessCreateOrConnectWithoutUserInput | TemporaryAccessCreateOrConnectWithoutUserInput[]
+    upsert?: TemporaryAccessUpsertWithWhereUniqueWithoutUserInput | TemporaryAccessUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: TemporaryAccessCreateManyUserInputEnvelope
+    set?: TemporaryAccessWhereUniqueInput | TemporaryAccessWhereUniqueInput[]
+    disconnect?: TemporaryAccessWhereUniqueInput | TemporaryAccessWhereUniqueInput[]
+    delete?: TemporaryAccessWhereUniqueInput | TemporaryAccessWhereUniqueInput[]
+    connect?: TemporaryAccessWhereUniqueInput | TemporaryAccessWhereUniqueInput[]
+    update?: TemporaryAccessUpdateWithWhereUniqueWithoutUserInput | TemporaryAccessUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: TemporaryAccessUpdateManyWithWhereWithoutUserInput | TemporaryAccessUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: TemporaryAccessScalarWhereInput | TemporaryAccessScalarWhereInput[]
+  }
+
   export type UserCreateNestedOneWithoutRefreshTokensInput = {
     create?: XOR<UserCreateWithoutRefreshTokensInput, UserUncheckedCreateWithoutRefreshTokensInput>
     connectOrCreate?: UserCreateOrConnectWithoutRefreshTokensInput
@@ -16094,6 +17571,20 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutErrorLogsInput, UserUpdateWithoutErrorLogsInput>, UserUncheckedUpdateWithoutErrorLogsInput>
+  }
+
+  export type UserCreateNestedOneWithoutTemporaryAccessInput = {
+    create?: XOR<UserCreateWithoutTemporaryAccessInput, UserUncheckedCreateWithoutTemporaryAccessInput>
+    connectOrCreate?: UserCreateOrConnectWithoutTemporaryAccessInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutTemporaryAccessNestedInput = {
+    create?: XOR<UserCreateWithoutTemporaryAccessInput, UserUncheckedCreateWithoutTemporaryAccessInput>
+    connectOrCreate?: UserCreateOrConnectWithoutTemporaryAccessInput
+    upsert?: UserUpsertWithoutTemporaryAccessInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutTemporaryAccessInput, UserUpdateWithoutTemporaryAccessInput>, UserUncheckedUpdateWithoutTemporaryAccessInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -16381,6 +17872,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     PageViews?: PageViewCreateNestedManyWithoutUserInput
     ErrorLogs?: ErrorLogCreateNestedManyWithoutUserInput
+    temporaryAccess?: TemporaryAccessCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCVInput = {
@@ -16405,6 +17897,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     PageViews?: PageViewUncheckedCreateNestedManyWithoutUserInput
     ErrorLogs?: ErrorLogUncheckedCreateNestedManyWithoutUserInput
+    temporaryAccess?: TemporaryAccessUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCVInput = {
@@ -16473,6 +17966,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     PageViews?: PageViewUpdateManyWithoutUserNestedInput
     ErrorLogs?: ErrorLogUpdateManyWithoutUserNestedInput
+    temporaryAccess?: TemporaryAccessUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCVInput = {
@@ -16497,6 +17991,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     PageViews?: PageViewUncheckedUpdateManyWithoutUserNestedInput
     ErrorLogs?: ErrorLogUncheckedUpdateManyWithoutUserNestedInput
+    temporaryAccess?: TemporaryAccessUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CVSectionUpsertWithWhereUniqueWithoutCVInput = {
@@ -16614,6 +18109,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     PageViews?: PageViewCreateNestedManyWithoutUserInput
     ErrorLogs?: ErrorLogCreateNestedManyWithoutUserInput
+    temporaryAccess?: TemporaryAccessCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPaymentInput = {
@@ -16638,6 +18134,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     PageViews?: PageViewUncheckedCreateNestedManyWithoutUserInput
     ErrorLogs?: ErrorLogUncheckedCreateNestedManyWithoutUserInput
+    temporaryAccess?: TemporaryAccessUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPaymentInput = {
@@ -16678,6 +18175,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     PageViews?: PageViewUpdateManyWithoutUserNestedInput
     ErrorLogs?: ErrorLogUpdateManyWithoutUserNestedInput
+    temporaryAccess?: TemporaryAccessUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentInput = {
@@ -16702,6 +18200,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     PageViews?: PageViewUncheckedUpdateManyWithoutUserNestedInput
     ErrorLogs?: ErrorLogUncheckedUpdateManyWithoutUserNestedInput
+    temporaryAccess?: TemporaryAccessUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutSubscriptionInput = {
@@ -16726,6 +18225,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     PageViews?: PageViewCreateNestedManyWithoutUserInput
     ErrorLogs?: ErrorLogCreateNestedManyWithoutUserInput
+    temporaryAccess?: TemporaryAccessCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSubscriptionInput = {
@@ -16750,6 +18250,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     PageViews?: PageViewUncheckedCreateNestedManyWithoutUserInput
     ErrorLogs?: ErrorLogUncheckedCreateNestedManyWithoutUserInput
+    temporaryAccess?: TemporaryAccessUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSubscriptionInput = {
@@ -16790,6 +18291,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     PageViews?: PageViewUpdateManyWithoutUserNestedInput
     ErrorLogs?: ErrorLogUpdateManyWithoutUserNestedInput
+    temporaryAccess?: TemporaryAccessUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSubscriptionInput = {
@@ -16814,6 +18316,7 @@ export namespace Prisma {
     RefreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     PageViews?: PageViewUncheckedUpdateManyWithoutUserNestedInput
     ErrorLogs?: ErrorLogUncheckedUpdateManyWithoutUserNestedInput
+    temporaryAccess?: TemporaryAccessUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CVCreateWithoutUserInput = {
@@ -16884,6 +18387,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     cancelAtPeriodEnd?: boolean
+    canceledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt: Date | string
     stripeCustomerId: string
@@ -16897,6 +18401,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     cancelAtPeriodEnd?: boolean
+    canceledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt: Date | string
     stripeCustomerId: string
@@ -16996,6 +18501,34 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type TemporaryAccessCreateWithoutUserInput = {
+    id?: string
+    type: string
+    startTime?: Date | string
+    endTime: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TemporaryAccessUncheckedCreateWithoutUserInput = {
+    id?: string
+    type: string
+    startTime?: Date | string
+    endTime: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TemporaryAccessCreateOrConnectWithoutUserInput = {
+    where: TemporaryAccessWhereUniqueInput
+    create: XOR<TemporaryAccessCreateWithoutUserInput, TemporaryAccessUncheckedCreateWithoutUserInput>
+  }
+
+  export type TemporaryAccessCreateManyUserInputEnvelope = {
+    data: TemporaryAccessCreateManyUserInput | TemporaryAccessCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type CVUpsertWithWhereUniqueWithoutUserInput = {
     where: CVWhereUniqueInput
     update: XOR<CVUpdateWithoutUserInput, CVUncheckedUpdateWithoutUserInput>
@@ -17082,6 +18615,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFilter<"Subscription"> | Date | string
     currentPeriodEnd?: DateTimeFilter<"Subscription"> | Date | string
     cancelAtPeriodEnd?: BoolFilter<"Subscription"> | boolean
+    canceledAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
     createdAt?: DateTimeFilter<"Subscription"> | Date | string
     updatedAt?: DateTimeFilter<"Subscription"> | Date | string
     stripeCustomerId?: StringFilter<"Subscription"> | string
@@ -17175,6 +18709,35 @@ export namespace Prisma {
     method?: StringNullableFilter<"ErrorLog"> | string | null
   }
 
+  export type TemporaryAccessUpsertWithWhereUniqueWithoutUserInput = {
+    where: TemporaryAccessWhereUniqueInput
+    update: XOR<TemporaryAccessUpdateWithoutUserInput, TemporaryAccessUncheckedUpdateWithoutUserInput>
+    create: XOR<TemporaryAccessCreateWithoutUserInput, TemporaryAccessUncheckedCreateWithoutUserInput>
+  }
+
+  export type TemporaryAccessUpdateWithWhereUniqueWithoutUserInput = {
+    where: TemporaryAccessWhereUniqueInput
+    data: XOR<TemporaryAccessUpdateWithoutUserInput, TemporaryAccessUncheckedUpdateWithoutUserInput>
+  }
+
+  export type TemporaryAccessUpdateManyWithWhereWithoutUserInput = {
+    where: TemporaryAccessScalarWhereInput
+    data: XOR<TemporaryAccessUpdateManyMutationInput, TemporaryAccessUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type TemporaryAccessScalarWhereInput = {
+    AND?: TemporaryAccessScalarWhereInput | TemporaryAccessScalarWhereInput[]
+    OR?: TemporaryAccessScalarWhereInput[]
+    NOT?: TemporaryAccessScalarWhereInput | TemporaryAccessScalarWhereInput[]
+    id?: StringFilter<"TemporaryAccess"> | string
+    userId?: StringFilter<"TemporaryAccess"> | string
+    type?: StringFilter<"TemporaryAccess"> | string
+    startTime?: DateTimeFilter<"TemporaryAccess"> | Date | string
+    endTime?: DateTimeFilter<"TemporaryAccess"> | Date | string
+    createdAt?: DateTimeFilter<"TemporaryAccess"> | Date | string
+    updatedAt?: DateTimeFilter<"TemporaryAccess"> | Date | string
+  }
+
   export type UserCreateWithoutRefreshTokensInput = {
     id: string
     email: string
@@ -17197,6 +18760,7 @@ export namespace Prisma {
     Subscription?: SubscriptionCreateNestedManyWithoutUserInput
     PageViews?: PageViewCreateNestedManyWithoutUserInput
     ErrorLogs?: ErrorLogCreateNestedManyWithoutUserInput
+    temporaryAccess?: TemporaryAccessCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRefreshTokensInput = {
@@ -17221,6 +18785,7 @@ export namespace Prisma {
     Subscription?: SubscriptionUncheckedCreateNestedManyWithoutUserInput
     PageViews?: PageViewUncheckedCreateNestedManyWithoutUserInput
     ErrorLogs?: ErrorLogUncheckedCreateNestedManyWithoutUserInput
+    temporaryAccess?: TemporaryAccessUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRefreshTokensInput = {
@@ -17261,6 +18826,7 @@ export namespace Prisma {
     Subscription?: SubscriptionUpdateManyWithoutUserNestedInput
     PageViews?: PageViewUpdateManyWithoutUserNestedInput
     ErrorLogs?: ErrorLogUpdateManyWithoutUserNestedInput
+    temporaryAccess?: TemporaryAccessUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRefreshTokensInput = {
@@ -17285,6 +18851,7 @@ export namespace Prisma {
     Subscription?: SubscriptionUncheckedUpdateManyWithoutUserNestedInput
     PageViews?: PageViewUncheckedUpdateManyWithoutUserNestedInput
     ErrorLogs?: ErrorLogUncheckedUpdateManyWithoutUserNestedInput
+    temporaryAccess?: TemporaryAccessUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutPageViewsInput = {
@@ -17309,6 +18876,7 @@ export namespace Prisma {
     Subscription?: SubscriptionCreateNestedManyWithoutUserInput
     RefreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     ErrorLogs?: ErrorLogCreateNestedManyWithoutUserInput
+    temporaryAccess?: TemporaryAccessCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPageViewsInput = {
@@ -17333,6 +18901,7 @@ export namespace Prisma {
     Subscription?: SubscriptionUncheckedCreateNestedManyWithoutUserInput
     RefreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     ErrorLogs?: ErrorLogUncheckedCreateNestedManyWithoutUserInput
+    temporaryAccess?: TemporaryAccessUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPageViewsInput = {
@@ -17373,6 +18942,7 @@ export namespace Prisma {
     Subscription?: SubscriptionUpdateManyWithoutUserNestedInput
     RefreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     ErrorLogs?: ErrorLogUpdateManyWithoutUserNestedInput
+    temporaryAccess?: TemporaryAccessUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPageViewsInput = {
@@ -17397,6 +18967,7 @@ export namespace Prisma {
     Subscription?: SubscriptionUncheckedUpdateManyWithoutUserNestedInput
     RefreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     ErrorLogs?: ErrorLogUncheckedUpdateManyWithoutUserNestedInput
+    temporaryAccess?: TemporaryAccessUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutErrorLogsInput = {
@@ -17421,6 +18992,7 @@ export namespace Prisma {
     Subscription?: SubscriptionCreateNestedManyWithoutUserInput
     RefreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     PageViews?: PageViewCreateNestedManyWithoutUserInput
+    temporaryAccess?: TemporaryAccessCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutErrorLogsInput = {
@@ -17445,6 +19017,7 @@ export namespace Prisma {
     Subscription?: SubscriptionUncheckedCreateNestedManyWithoutUserInput
     RefreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     PageViews?: PageViewUncheckedCreateNestedManyWithoutUserInput
+    temporaryAccess?: TemporaryAccessUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutErrorLogsInput = {
@@ -17485,6 +19058,7 @@ export namespace Prisma {
     Subscription?: SubscriptionUpdateManyWithoutUserNestedInput
     RefreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     PageViews?: PageViewUpdateManyWithoutUserNestedInput
+    temporaryAccess?: TemporaryAccessUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutErrorLogsInput = {
@@ -17509,6 +19083,123 @@ export namespace Prisma {
     Subscription?: SubscriptionUncheckedUpdateManyWithoutUserNestedInput
     RefreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     PageViews?: PageViewUncheckedUpdateManyWithoutUserNestedInput
+    temporaryAccess?: TemporaryAccessUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutTemporaryAccessInput = {
+    id: string
+    email: string
+    password: string
+    name: string
+    customerId?: string | null
+    twoFactorSecret?: string | null
+    twoFactorEnabled?: boolean
+    backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
+    createdAt?: Date | string
+    updatedAt: Date | string
+    failedLoginAttempts?: number
+    lastLogin?: Date | string | null
+    lockedUntil?: Date | string | null
+    resetToken?: string | null
+    resetTokenExpiry?: Date | string | null
+    CV?: CVCreateNestedManyWithoutUserInput
+    Payment?: PaymentCreateNestedManyWithoutUserInput
+    Subscription?: SubscriptionCreateNestedManyWithoutUserInput
+    RefreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
+    PageViews?: PageViewCreateNestedManyWithoutUserInput
+    ErrorLogs?: ErrorLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutTemporaryAccessInput = {
+    id: string
+    email: string
+    password: string
+    name: string
+    customerId?: string | null
+    twoFactorSecret?: string | null
+    twoFactorEnabled?: boolean
+    backupCodes?: UserCreatebackupCodesInput | string[]
+    marketingConsent?: boolean
+    createdAt?: Date | string
+    updatedAt: Date | string
+    failedLoginAttempts?: number
+    lastLogin?: Date | string | null
+    lockedUntil?: Date | string | null
+    resetToken?: string | null
+    resetTokenExpiry?: Date | string | null
+    CV?: CVUncheckedCreateNestedManyWithoutUserInput
+    Payment?: PaymentUncheckedCreateNestedManyWithoutUserInput
+    Subscription?: SubscriptionUncheckedCreateNestedManyWithoutUserInput
+    RefreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+    PageViews?: PageViewUncheckedCreateNestedManyWithoutUserInput
+    ErrorLogs?: ErrorLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutTemporaryAccessInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutTemporaryAccessInput, UserUncheckedCreateWithoutTemporaryAccessInput>
+  }
+
+  export type UserUpsertWithoutTemporaryAccessInput = {
+    update: XOR<UserUpdateWithoutTemporaryAccessInput, UserUncheckedUpdateWithoutTemporaryAccessInput>
+    create: XOR<UserCreateWithoutTemporaryAccessInput, UserUncheckedCreateWithoutTemporaryAccessInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutTemporaryAccessInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutTemporaryAccessInput, UserUncheckedUpdateWithoutTemporaryAccessInput>
+  }
+
+  export type UserUpdateWithoutTemporaryAccessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
+    backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    failedLoginAttempts?: IntFieldUpdateOperationsInput | number
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resetToken?: NullableStringFieldUpdateOperationsInput | string | null
+    resetTokenExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    CV?: CVUpdateManyWithoutUserNestedInput
+    Payment?: PaymentUpdateManyWithoutUserNestedInput
+    Subscription?: SubscriptionUpdateManyWithoutUserNestedInput
+    RefreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
+    PageViews?: PageViewUpdateManyWithoutUserNestedInput
+    ErrorLogs?: ErrorLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutTemporaryAccessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    twoFactorSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
+    backupCodes?: UserUpdatebackupCodesInput | string[]
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    failedLoginAttempts?: IntFieldUpdateOperationsInput | number
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lockedUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resetToken?: NullableStringFieldUpdateOperationsInput | string | null
+    resetTokenExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    CV?: CVUncheckedUpdateManyWithoutUserNestedInput
+    Payment?: PaymentUncheckedUpdateManyWithoutUserNestedInput
+    Subscription?: SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    RefreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+    PageViews?: PageViewUncheckedUpdateManyWithoutUserNestedInput
+    ErrorLogs?: ErrorLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CVSectionCreateManyCVInput = {
@@ -17573,6 +19264,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     cancelAtPeriodEnd?: boolean
+    canceledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt: Date | string
     stripeCustomerId: string
@@ -17604,6 +19296,15 @@ export namespace Prisma {
     timestamp?: Date | string
     url?: string | null
     method?: string | null
+  }
+
+  export type TemporaryAccessCreateManyUserInput = {
+    id?: string
+    type: string
+    startTime?: Date | string
+    endTime: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type CVUpdateWithoutUserInput = {
@@ -17674,6 +19375,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeCustomerId?: StringFieldUpdateOperationsInput | string
@@ -17687,6 +19389,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeCustomerId?: StringFieldUpdateOperationsInput | string
@@ -17700,6 +19403,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeCustomerId?: StringFieldUpdateOperationsInput | string
@@ -17783,6 +19487,33 @@ export namespace Prisma {
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     url?: NullableStringFieldUpdateOperationsInput | string | null
     method?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type TemporaryAccessUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TemporaryAccessUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TemporaryAccessUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

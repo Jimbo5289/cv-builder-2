@@ -66,7 +66,7 @@ function killAllProcesses() {
  */
 function checkDependencies() {
   log('📦 Checking required dependencies...', colors.blue);
-  let missingDeps = [];
+  const missingDeps = [];
 
   for (const dep of config.requiredDeps) {
     try {

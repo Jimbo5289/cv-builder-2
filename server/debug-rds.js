@@ -44,7 +44,7 @@ if (!fs.existsSync(logDir)) {
 }
 
 const logFile = path.join(logDir, 'rds-debug.log');
-let logStream = fs.createWriteStream(logFile, { flags: 'a' });
+const logStream = fs.createWriteStream(logFile, { flags: 'a' });
 
 // Helper to log both to console and file
 function log(message) {

@@ -24,7 +24,7 @@ if (!fs.existsSync(workflowPath)) {
 }
 
 // Read the workflow file
-let workflowContent = fs.readFileSync(workflowPath, 'utf8');
+const workflowContent = fs.readFileSync(workflowPath, 'utf8');
 
 // Parse YAML content
 let workflow;
