@@ -24,6 +24,7 @@
     "docs": "node src/docs/serve-docs.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.54.0",
     "@aws-sdk/client-ec2": "^3.536.0",
     "@prisma/client": "^5.22.0",
     "@sentry/cli": "^2.43.1",

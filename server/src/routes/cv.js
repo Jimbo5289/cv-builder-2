@@ -56,6 +56,7 @@ const { v4: _uuidv4 } = require('uuid');
 const database = require('../config/database');
 const { logger } = require('../config/logger');
 const { auth: authMiddleware, validateCVOwnership } = require('../middleware/auth');
+const aiAnalysisService = require('../services/aiAnalysisService');
 
 // Function to normalize phone number format
 const normalizePhoneNumber = (phone) => {
@@ -3129,68 +3130,28 @@ async function processRoleAnalysis(req, res) {
       _keySkillGaps = ['leadership', 'project management', 'communication'];
     }
     
-    // Generate a consistent score using the CV text and industry/role as context
+    // Extract CV text for analysis
     const cvText = await extractTextFromFile(req.files.cv[0]);
     
-    // Normalize the industry and role text for consistency
-    const contextText = normalizeText(industry + ' ' + role);
-    
-    // Generate score using our consistent algorithm
-    const baseScore = generateConsistentScore(cvText, contextText);
+    // Use AI analysis service for role-based analysis
+    const analysisResults = await aiAnalysisService.analyzeCV(
+      cvText, 
+      industry, 
+      role, 
+      isGenericAnalysis
+    );
     
     // Log for debugging
-    logger.info('Generated score for role analysis', {
+    logger.info('AI Analysis completed', {
       cvTextLength: cvText.length,
-      contextText: contextText,
-      baseScore: baseScore
+      industry: industry || 'generic',
+      role: role || 'generic',
+      score: analysisResults.score,
+      aiEnabled: aiAnalysisService.isOpenAIEnabled || aiAnalysisService.isAnthropicEnabled
     });
     
-    // Generate mock analysis results with industry and role context if available
-    const mockResults = {
-      score: baseScore,
-      formatScore: Math.max(65, baseScore - 5),
-      contentScore: Math.min(95, baseScore + 5),
-      strengths: [
-        isGenericAnalysis ? "Clear professional summary" : `Good representation of ${role} skills`,
-        isGenericAnalysis ? "Good experience section structure" : `Matches ${industry} industry expectations`,
-        "Appropriate CV length",
-        "Clear contact information"
-      ].slice(0, 3 + (baseScore % 3)),
-      recommendations: [
-        isGenericAnalysis ? "Add more quantifiable achievements" : `Include more ${industry}-specific terminology`,
-        isGenericAnalysis ? "Improve skill presentation" : `Highlight achievements relevant to ${role} positions`,
-        "Add more quantifiable results",
-        "Ensure consistent formatting throughout"
-      ].slice(0, 3 + (baseScore % 3)),
-      // Add key skill gaps for course recommendations
-      _keySkillGaps: _keySkillGaps,
-      missingKeywords: [
-        isGenericAnalysis ? "quantifiable results" : `${role} experience`,
-        isGenericAnalysis ? "leadership" : `${industry} knowledge`,
-        "project management",
-        "teamwork",
-        "problem-solving",
-        "communication skills"
-      ].slice(0, 4 + (baseScore % 3)),
-      improvements: [
-        isGenericAnalysis 
-          ? "Focus on adding specific, measurable achievements to your experience section. Quantify your impact where possible."
-          : `Focus on highlighting specific achievements that demonstrate your ${role} skills and ${industry} experience.`,
-        "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
-        isGenericAnalysis
-          ? "Consider reordering sections to place the most relevant information first. Your most impressive qualifications should be immediately visible."
-          : `Consider reordering sections to emphasize experience most relevant to ${industry} ${role} positions.`,
-        isGenericAnalysis
-          ? "Research job descriptions for your target roles and incorporate those keywords."
-          : `Research ${role} job descriptions in the ${industry} sector and incorporate those keywords.`
-      ]
-    };
-    
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Return the mock results
-    return res.json(mockResults);
+    // Return the AI analysis results
+    return res.json(analysisResults);
   } catch (error) {
     logger.error('Error analyzing CV by role:', error);
     return res.status(500).json({ error: 'Failed to analyze CV', message: error.message });
