@@ -362,60 +362,32 @@ const CvAnalyzeByRole = () => {
             <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
               {/* File Upload Area */}
               <div 
-                className={`border-2 border-dashed rounded-lg p-8 text-center ${
-                  isDragging ? 'border-[#E78F81] bg-[#E78F81]/10' : 'border-gray-300 dark:border-gray-700'
+                className={`border-2 border-dashed rounded-lg p-10 flex flex-col items-center justify-center cursor-pointer ${
+                  isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500'
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                onClick={() => document.getElementById('file-upload').click()}
               >
-                {file ? (
-                  <div className="flex flex-col items-center">
-                    <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900">
-                      <svg className="h-8 w-8 text-green-600 dark:text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <p className="text-gray-900 dark:text-white font-medium mb-1">
-                      {file.name}
-                    </p>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
-                      {(file.size / 1024).toFixed(2)} KB
-                    </p>
-                    <button
-                      onClick={() => setFile(null)}
-                      className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] dark:focus:ring-offset-gray-900"
-                    >
-                      Change File
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center">
-                    <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H8m36-12h-4m4 0H20" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <p className="mt-4 text-gray-900 dark:text-white font-medium">
-                      Drag and drop your CV file here
-                    </p>
-                    <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm">
-                      or{' '}
-                      <label htmlFor="file-upload" className="text-[#E78F81] hover:text-[#d36e62] font-medium cursor-pointer">
-                        browse
-                      </label>{' '}
-                      to select a file
-                    </p>
-                    <input
-                      id="file-upload"
-                      type="file"
-                      className="hidden"
-                      onChange={handleFileInput}
-                      accept=".pdf,.docx"
-                    />
-                    <p className="mt-1 text-gray-500 dark:text-gray-400 text-xs">
-                      PDF or DOCX up to 5MB
-                    </p>
-                  </div>
-                )}
+                <input
+                  id="file-upload"
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.docx"
+                  onChange={handleFileInput}
+                />
+                
+                <svg className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                
+                <p className="text-lg font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  {file ? file.name : 'Drag and drop your CV here'}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'or click to browse (PDF or DOCX, max 5MB)'}
+                </p>
               </div>
               
               {/* Job Role Selection */}
