@@ -7,7 +7,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://cv-builder-server-prod.onrender.com/api/$1"
+      "destination": "https://cv-builder-backend-zjax.onrender.com/api/$1"
     },
     {
       "source": "/(.*)",

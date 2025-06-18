@@ -4,7 +4,7 @@ import axios from 'axios';
 // For production, this should be your Render backend URL
 const API_BASE_URL = import.meta.env.VITE_API_URL || 
                      (import.meta.env.PROD ? 
-                      'https://cv-builder-server-prod.onrender.com' : 
+                      'https://cv-builder-backend-zjax.onrender.com' : 
                       'http://localhost:3005');
 
 // Log the API URL for debugging
