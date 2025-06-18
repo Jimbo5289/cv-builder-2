@@ -7,6 +7,8 @@
     "start": "node src/index.js",
     "dev": "npx nodemon src/index.js",
     "test": "jest",
+    "render:test-rds": "node test-rds-render.js",
+    "update-render-ips": "node scripts/update-render-ips.js",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org=${SENTRY_ORG} --project=cv-builder-server ./dist && sentry-cli sourcemaps upload --org=${SENTRY_ORG} --project=cv-builder-server ./dist"
   },
   "dependencies": {
