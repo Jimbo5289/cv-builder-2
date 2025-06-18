@@ -137,48 +137,35 @@ const CvAnalyzeByRole = () => {
 
   // Analyze the uploaded CV
   const analyzeCV = useCallback(async () => {
-    console.log('🚀 analyzeCV FUNCTION CALLED!', {
-      timestamp: new Date().toISOString(),
-      file: !!file,
-      fileName: file?.name,
-      fileSize: file?.size,
-      useGenericScope,
-      selectedIndustry,
-      selectedRole,
-      isAuthenticated,
-      isConnected,
-      apiUrl: !!apiUrl,
-      isDev: import.meta.env.DEV
-    });
-
+    // Prevent concurrent analyses
+    if (isAnalyzing) {
+      console.log('Analysis already in progress, ignoring click');
+      return;
+    }
+    
+    // Basic validation
     if (!file) {
-      console.log('❌ EARLY EXIT: No file uploaded');
       setError('Please upload a CV file first');
       return;
     }
     
     // Check industry/role selection if not in generic mode
     if (!useGenericScope && (!selectedIndustry || !selectedRole)) {
-      console.log('❌ EARLY EXIT: Missing industry/role for role-specific analysis');
       setError('Please select both industry and role');
       return;
     }
     
     // Check authentication first - but bypass in development mode
     if (!isAuthenticated && !import.meta.env.DEV) {
-      console.log('❌ EARLY EXIT: Authentication required');
       navigate('/login', { state: { from: location } });
       return;
     }
 
     // Check if server is connected
     if (!isConnected || !apiUrl) {
-      console.log('❌ EARLY EXIT: Server not connected');
       setError('Server connection error. Please check your connection and try again.');
       return;
     }
-
-    console.log('✅ VALIDATION PASSED - Starting analysis...');
     setIsAnalyzing(true);
     setError('');
     setAnalysisResults(null);
@@ -216,7 +203,6 @@ const CvAnalyzeByRole = () => {
       
       // Use the endpoint with special handling for Safari
       const apiEndpoint = `${apiUrl}/api/cv/analyze-by-role`;
-      console.log(`Sending CV to ${apiEndpoint} from ${isSafari ? 'Safari' : 'non-Safari'} browser`);
       
       // Safari sometimes has issues with complex fetch requests, use a more basic approach
       if (isSafari) {
@@ -239,7 +225,6 @@ const CvAnalyzeByRole = () => {
         
         if (response.ok) {
           const data = await response.json();
-          console.log('Analysis results:', data);
           setProgressStep(3); // Update to Results step
           setAnalysisResults(data);
           
@@ -267,7 +252,6 @@ const CvAnalyzeByRole = () => {
         
         if (response.ok) {
           const data = await response.json();
-          console.log('Analysis results:', data);
           setProgressStep(3); // Update to Results step
           setAnalysisResults(data);
           
@@ -288,7 +272,15 @@ const CvAnalyzeByRole = () => {
       }
     } catch (error) {
       console.error('Error during analysis:', error);
-      setError('Failed to analyze CV. Please try again later.');
+      
+      // Check if it's a navigation error or API error
+      if (error.name === 'AbortError' || error.message.includes('Navigation')) {
+        setError('Analysis was interrupted. Please try again.');
+      } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        setError('Network error. Please check your connection and try again.');
+      } else {
+        setError('Failed to analyze CV. Please try again later.');
+      }
     } finally {
       setIsAnalyzing(false);
     }
@@ -477,18 +469,7 @@ const CvAnalyzeByRole = () => {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => {
-                    console.log('🔥 BUTTON CLICKED!', {
-                      isAnalyzing,
-                      hasFile: !!file,
-                      fileName: file?.name,
-                      useGenericScope,
-                      selectedIndustry,
-                      selectedRole,
-                      isAuthenticated,
-                      isConnected,
-                      apiUrl,
-                      buttonDisabled: isAnalyzing || !file || (!useGenericScope && (!selectedIndustry || !selectedRole))
-                    });
+                    console.log('Analysis button clicked');
                     analyzeCV();
                   }}
                   disabled={isAnalyzing || !file || (!useGenericScope && (!selectedIndustry || !selectedRole))}
