@@ -1,24 +1,42 @@
 const OpenAI = require('openai');
+const Anthropic = require('@anthropic-ai/sdk');
 const logger = require('../utils/logger');
 
 class AIAnalysisService {
   constructor() {
     this.openai = null;
-    this.isEnabled = false;
+    this.anthropic = null;
+    this.isOpenAIEnabled = false;
+    this.isAnthropicEnabled = false;
     
+    // Initialize OpenAI
     if (process.env.OPENAI_API_KEY && process.env.USE_AI_ANALYSIS === 'true') {
       try {
         this.openai = new OpenAI({
           apiKey: process.env.OPENAI_API_KEY
         });
-        this.isEnabled = true;
-        logger.info('AI Analysis Service initialized with OpenAI');
+        this.isOpenAIEnabled = true;
+        logger.info('OpenAI initialized for CV analysis');
       } catch (error) {
-        logger.error('Failed to initialize OpenAI for AI Analysis:', error);
-        this.isEnabled = false;
+        logger.error('Failed to initialize OpenAI:', error);
       }
-    } else {
-      logger.warn('AI Analysis disabled - missing OpenAI API key or USE_AI_ANALYSIS flag');
+    }
+
+    // Initialize Anthropic (Claude)
+    if (process.env.ANTHROPIC_API_KEY && process.env.USE_AI_ANALYSIS === 'true') {
+      try {
+        this.anthropic = new Anthropic({
+          apiKey: process.env.ANTHROPIC_API_KEY
+        });
+        this.isAnthropicEnabled = true;
+        logger.info('Anthropic Claude initialized for CV analysis');
+      } catch (error) {
+        logger.error('Failed to initialize Anthropic:', error);
+      }
+    }
+
+    if (!this.isOpenAIEnabled && !this.isAnthropicEnabled) {
+      logger.warn('No AI services available - using enhanced mock analysis');
     }
   }
 
@@ -138,8 +156,8 @@ class AIAnalysisService {
 
   // Main analysis method
   async analyzeCV(cvText, industry = null, role = null, isGeneric = false) {
-    if (!this.isEnabled) {
-      logger.warn('AI Analysis not enabled, falling back to mock data');
+    if (!this.isOpenAIEnabled && !this.isAnthropicEnabled) {
+      logger.warn('No AI services available - using enhanced mock analysis');
       return this.generateMockAnalysis(industry, role, isGeneric);
     }
 
@@ -147,39 +165,334 @@ class AIAnalysisService {
       const industryReqs = industry ? this.getIndustryRequirements(industry) : null;
       const roleReqs = role ? this.getRoleRequirements(role, industry) : null;
 
-      // Create analysis prompt based on whether it's generic or role-specific
-      const prompt = this.createAnalysisPrompt(cvText, industry, role, industryReqs, roleReqs, isGeneric);
+      // Pre-analysis: Quick field detection and compatibility check
+      const compatibilityCheck = this.performCompatibilityCheck(cvText, industry, industryReqs);
+      
+      // Run multiple AI analyses in parallel for cross-validation
+      const analyses = await this.runMultiModelAnalysis(cvText, industry, role, industryReqs, roleReqs, isGeneric);
+      
+      // Combine results using consensus engine
+      const finalResult = this.createConsensusAnalysis(analyses, compatibilityCheck, industry, role);
 
-      const completion = await this.openai.chat.completions.create({
-        model: "gpt-4o-mini", // Using the cost-effective model
-        messages: [
-          {
-            role: "system",
-            content: "You are an expert CV/resume analyzer and career counselor. Provide detailed, actionable feedback with specific scores and recommendations. Always return valid JSON."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        max_tokens: 2000,
-        temperature: 0.3 // Lower temperature for more consistent results
-      });
-
-      const aiResponse = completion.choices[0].message.content;
-      const analysisResult = this.parseAIResponse(aiResponse, industry, role);
-
-      logger.info('AI Analysis completed successfully', {
+      logger.info('Multi-model AI Analysis completed successfully', {
         industry: industry || 'generic',
         role: role || 'generic',
-        score: analysisResult.score
+        score: finalResult.score,
+        confidence: finalResult.confidence,
+        modelsUsed: analyses.length
       });
 
-      return analysisResult;
+      return finalResult;
 
     } catch (error) {
-      logger.error('AI Analysis failed, falling back to mock:', error);
+      logger.error('Multi-model AI Analysis failed, falling back to enhanced mock:', error);
       return this.generateMockAnalysis(industry, role, isGeneric);
+    }
+  }
+
+  // Compatibility pre-check using keyword analysis
+  performCompatibilityCheck(cvText, industry, industryReqs) {
+    if (!industry || !industryReqs) {
+      return { compatibility: 'medium', keywordScore: 50, detectedField: 'unknown' };
+    }
+
+    const cvLower = cvText.toLowerCase();
+    
+    // Check for industry keywords
+    const industryKeywords = industryReqs.keywords || [];
+    const foundKeywords = industryKeywords.filter(keyword => 
+      cvLower.includes(keyword.toLowerCase())
+    );
+    
+    // Detect likely current field
+    const detectedField = this.detectCurrentField(cvText);
+    
+    // Calculate keyword match percentage
+    const keywordScore = Math.round((foundKeywords.length / industryKeywords.length) * 100);
+    
+    // Determine compatibility
+    let compatibility = 'medium';
+    if (industryReqs.incompatibleFields && industryReqs.incompatibleFields.includes(detectedField)) {
+      compatibility = 'low';
+    } else if (industryReqs.transferableFrom && industryReqs.transferableFrom.includes(detectedField)) {
+      compatibility = 'high';
+    } else if (keywordScore > 60) {
+      compatibility = 'high';
+    } else if (keywordScore < 20) {
+      compatibility = 'low';
+    }
+
+    return {
+      compatibility,
+      keywordScore,
+      detectedField,
+      foundKeywords: foundKeywords.slice(0, 5)
+    };
+  }
+
+  // Detect current professional field from CV
+  detectCurrentField(cvText) {
+    const fieldKeywords = {
+      'emergency_services': ['fire', 'rescue', 'ambulance', 'paramedic', 'emt', 'emergency response', 'firefighter'],
+      'healthcare': ['nurse', 'doctor', 'medical', 'patient care', 'clinical', 'hospital'],
+      'technology': ['software', 'programming', 'developer', 'code', 'technical', 'IT'],
+      'education': ['teacher', 'teaching', 'education', 'classroom', 'student', 'curriculum'],
+      'finance': ['accounting', 'financial', 'banking', 'audit', 'investment'],
+      'marketing': ['marketing', 'advertising', 'brand', 'campaign', 'social media'],
+      'design': ['design', 'creative', 'visual', 'graphic', 'UI/UX', 'artistic'],
+      'sales': ['sales', 'customer', 'client', 'revenue', 'negotiation']
+    };
+
+    const cvLower = cvText.toLowerCase();
+    let maxScore = 0;
+    let detectedField = 'unknown';
+
+    for (const [field, keywords] of Object.entries(fieldKeywords)) {
+      const matches = keywords.filter(keyword => cvLower.includes(keyword)).length;
+      const score = (matches / keywords.length) * 100;
+      
+      if (score > maxScore) {
+        maxScore = score;
+        detectedField = field;
+      }
+    }
+
+    return maxScore > 30 ? detectedField : 'unknown';
+  }
+
+  // Run multiple AI models in parallel
+  async runMultiModelAnalysis(cvText, industry, role, industryReqs, roleReqs, isGeneric) {
+    const analyses = [];
+    const promises = [];
+
+    // Create analysis prompt
+    const prompt = this.createAnalysisPrompt(cvText, industry, role, industryReqs, roleReqs, isGeneric);
+
+    // Run Claude 3.5 Sonnet (primary analyst)
+    if (this.isAnthropicEnabled) {
+      promises.push(
+        this.runClaudeAnalysis(prompt, industry, role, 'claude-3-5-sonnet-20241022')
+          .then(result => ({ source: 'claude-3.5-sonnet', priority: 1, ...result }))
+          .catch(error => {
+            logger.error('Claude 3.5 Sonnet analysis failed:', error);
+            return null;
+          })
+      );
+    }
+
+    // Run GPT-4o (secondary analyst)
+    if (this.isOpenAIEnabled) {
+      promises.push(
+        this.runOpenAIAnalysis(prompt, industry, role, 'gpt-4o-mini')
+          .then(result => ({ source: 'gpt-4o-mini', priority: 2, ...result }))
+          .catch(error => {
+            logger.error('GPT-4o analysis failed:', error);
+            return null;
+          })
+      );
+    }
+
+    // Wait for all analyses to complete
+    const results = await Promise.all(promises);
+    
+    // Filter out failed analyses
+    results.forEach(result => {
+      if (result) analyses.push(result);
+    });
+
+    // Ensure we have at least one analysis
+    if (analyses.length === 0) {
+      throw new Error('All AI analyses failed');
+    }
+
+    return analyses;
+  }
+
+  // Claude analysis implementation
+  async runClaudeAnalysis(prompt, industry, role, model = 'claude-3-5-sonnet-20241022') {
+    const message = await this.anthropic.messages.create({
+      model: model,
+      max_tokens: 2000,
+      temperature: 0.3,
+      messages: [
+        {
+          role: 'user',
+          content: prompt
+        }
+      ]
+    });
+
+    const response = message.content[0].text;
+    return this.parseAIResponse(response, industry, role);
+  }
+
+  // OpenAI analysis implementation
+  async runOpenAIAnalysis(prompt, industry, role, model = 'gpt-4o-mini') {
+    const completion = await this.openai.chat.completions.create({
+      model: model,
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an expert CV/resume analyzer and career counselor. Provide detailed, actionable feedback with specific scores and recommendations. Always return valid JSON.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      max_tokens: 2000,
+      temperature: 0.3
+    });
+
+    const response = completion.choices[0].message.content;
+    return this.parseAIResponse(response, industry, role);
+  }
+
+  // Consensus engine to combine multiple AI analyses
+  createConsensusAnalysis(analyses, compatibilityCheck, industry, role) {
+    if (analyses.length === 1) {
+      // Single analysis - add compatibility validation
+      const result = analyses[0];
+      return this.validateWithCompatibility(result, compatibilityCheck, industry, role);
+    }
+
+    // Multiple analyses - create consensus
+    const scores = {
+      score: this.calculateConsensusScore(analyses.map(a => a.score)),
+      formatScore: this.calculateConsensusScore(analyses.map(a => a.formatScore)),
+      contentScore: this.calculateConsensusScore(analyses.map(a => a.contentScore)),
+      jobFitScore: this.calculateConsensusScore(analyses.map(a => a.jobFitScore))
+    };
+
+    // Combine strengths and recommendations
+    const allStrengths = analyses.flatMap(a => a.strengths || []);
+    const allRecommendations = analyses.flatMap(a => a.recommendations || []);
+    const allMissingKeywords = analyses.flatMap(a => a.missingKeywords || []);
+
+    // Calculate confidence based on agreement between models
+    const confidence = this.calculateConfidence(analyses);
+
+    const consensusResult = {
+      ...scores,
+      strengths: this.deduplicateArray(allStrengths).slice(0, 5),
+      recommendations: this.deduplicateArray(allRecommendations).slice(0, 5),
+      missingKeywords: this.deduplicateArray(allMissingKeywords).slice(0, 8),
+      improvements: this.combineImprovements(analyses),
+      keySkillGaps: this.combineSkillGaps(analyses),
+      experienceLevel: this.determineConsensusExperienceLevel(analyses),
+      competitiveAdvantages: this.combineCompetitiveAdvantages(analyses),
+      relevanceAnalysis: this.createConsensusRelevanceAnalysis(analyses, compatibilityCheck),
+      careerTransitionAdvice: this.createConsensusTransitionAdvice(analyses, compatibilityCheck),
+      timeToCompetitive: this.determineConsensusTimeframe(analyses, compatibilityCheck),
+      fieldCompatibility: compatibilityCheck.compatibility,
+      confidence: confidence,
+      analysisQuality: confidence > 80 ? 'high' : confidence > 60 ? 'medium' : 'low',
+      modelsUsed: analyses.map(a => a.source)
+    };
+
+    return this.validateWithCompatibility(consensusResult, compatibilityCheck, industry, role);
+  }
+
+  // Validate AI results against hard compatibility rules
+  validateWithCompatibility(result, compatibilityCheck, industry, role) {
+    const industryReqs = this.getIndustryRequirements(industry);
+    
+    // Apply hard limits based on compatibility
+    if (compatibilityCheck.compatibility === 'low') {
+      result.score = Math.min(result.score, 35);
+      result.jobFitScore = Math.min(result.jobFitScore, 30);
+      result.timeToCompetitive = '3-5 years';
+    } else if (compatibilityCheck.compatibility === 'high' && compatibilityCheck.keywordScore > 60) {
+      result.score = Math.max(result.score, 70);
+    }
+
+    // Ensure minimum keyword presence for high scores
+    if (result.score > 70 && compatibilityCheck.keywordScore < 30) {
+      result.score = Math.max(45, Math.min(result.score, 65));
+      result.jobFitScore = Math.max(40, Math.min(result.jobFitScore, 60));
+    }
+
+    return result;
+  }
+
+  calculateConsensusScore(scores) {
+    if (scores.length === 0) return 50;
+    
+    // Remove outliers if we have 3+ scores
+    if (scores.length >= 3) {
+      scores.sort((a, b) => a - b);
+      scores = scores.slice(1, -1); // Remove lowest and highest
+    }
+    
+    return Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length);
+  }
+
+  calculateConfidence(analyses) {
+    if (analyses.length === 1) return 75; // Single model confidence
+    
+    // Calculate agreement between models
+    const scores = analyses.map(a => a.score);
+    const maxDiff = Math.max(...scores) - Math.min(...scores);
+    
+    // High confidence if models agree closely
+    if (maxDiff <= 10) return 95;
+    if (maxDiff <= 20) return 85;
+    if (maxDiff <= 30) return 75;
+    return 60;
+  }
+
+  deduplicateArray(arr) {
+    return [...new Set(arr.map(item => item.toLowerCase()))];
+  }
+
+  combineImprovements(analyses) {
+    const allImprovements = analyses.flatMap(a => a.improvements || []);
+    return this.deduplicateArray(allImprovements).slice(0, 4);
+  }
+
+  combineSkillGaps(analyses) {
+    const allGaps = analyses.flatMap(a => a.keySkillGaps || []);
+    return this.deduplicateArray(allGaps).slice(0, 6);
+  }
+
+  determineConsensusExperienceLevel(analyses) {
+    const levels = analyses.map(a => a.experienceLevel || 'entry');
+    const levelCounts = levels.reduce((acc, level) => {
+      acc[level] = (acc[level] || 0) + 1;
+      return acc;
+    }, {});
+    
+    return Object.keys(levelCounts).reduce((a, b) => 
+      levelCounts[a] > levelCounts[b] ? a : b
+    );
+  }
+
+  combineCompetitiveAdvantages(analyses) {
+    const allAdvantages = analyses.flatMap(a => a.competitiveAdvantages || []);
+    return this.deduplicateArray(allAdvantages).slice(0, 4);
+  }
+
+  createConsensusRelevanceAnalysis(analyses, compatibilityCheck) {
+    const analysis = analyses[0]?.relevanceAnalysis || '';
+    return `${analysis} (Compatibility: ${compatibilityCheck.compatibility}, Keyword Match: ${compatibilityCheck.keywordScore}%)`;
+  }
+
+  createConsensusTransitionAdvice(analyses, compatibilityCheck) {
+    if (compatibilityCheck.compatibility === 'low') {
+      return 'Significant career change required. Consider formal education, bootcamps, or extensive retraining programs. Start with entry-level positions to gain industry experience.';
+    } else if (compatibilityCheck.compatibility === 'medium') {
+      return 'Focus on transferable skills while gaining industry-specific experience through courses, projects, or internships.';
+    } else {
+      return 'Leverage existing relevant experience. Focus on highlighting transferable skills and staying current with industry trends.';
+    }
+  }
+
+  determineConsensusTimeframe(analyses, compatibilityCheck) {
+    switch (compatibilityCheck.compatibility) {
+      case 'high': return '3-6 months';
+      case 'medium': return '1-2 years';
+      case 'low': return '3-5 years';
+      default: return '1-2 years';
     }
   }
 
