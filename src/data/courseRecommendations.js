@@ -255,6 +255,90 @@ export const COURSE_RECOMMENDATIONS = {
       level: 'Intermediate'
     }
   ],
+
+  // Additional Healthcare Specialties
+  'pharmacy': [
+    { 
+      title: 'Introduction to Pharmaceutical Sciences',
+      provider: 'Alison',
+      url: 'https://alison.com/course/introduction-pharmaceutical-sciences',
+      level: 'Beginner'
+    },
+    { 
+      title: 'Clinical Pharmacy and Drug Therapy',
+      provider: 'Alison',
+      url: 'https://alison.com/course/clinical-pharmacy-drug-therapy',
+      level: 'Advanced'
+    },
+    { 
+      title: 'Pharmaceutical Calculations and Dosage',
+      provider: 'Alison',
+      url: 'https://alison.com/course/pharmaceutical-calculations-dosage',
+      level: 'Intermediate'
+    }
+  ],
+  'veterinary': [
+    { 
+      title: 'Introduction to Veterinary Medicine',
+      provider: 'Alison',
+      url: 'https://alison.com/course/introduction-veterinary-medicine',
+      level: 'Beginner'
+    },
+    { 
+      title: 'Animal Anatomy and Physiology',
+      provider: 'Alison',
+      url: 'https://alison.com/course/animal-anatomy-physiology',
+      level: 'Intermediate'
+    },
+    { 
+      title: 'Veterinary Practice Management',
+      provider: 'Alison',
+      url: 'https://alison.com/course/veterinary-practice-management',
+      level: 'Advanced'
+    }
+  ],
+
+  // Legal and Professional Services
+  'legal': [
+    { 
+      title: 'Introduction to Legal Studies',
+      provider: 'Alison',
+      url: 'https://alison.com/course/introduction-legal-studies',
+      level: 'Beginner'
+    },
+    { 
+      title: 'Legal Research and Writing',
+      provider: 'Alison',
+      url: 'https://alison.com/course/legal-research-writing',
+      level: 'Intermediate'
+    },
+    { 
+      title: 'Contract Law and Business Legal Issues',
+      provider: 'Alison',
+      url: 'https://alison.com/course/contract-law-business-legal',
+      level: 'Advanced'
+    }
+  ],
+  'law': [
+    { 
+      title: 'Constitutional Law Fundamentals',
+      provider: 'Alison',
+      url: 'https://alison.com/course/constitutional-law-fundamentals',
+      level: 'Intermediate'
+    },
+    { 
+      title: 'Criminal Law and Procedure',
+      provider: 'Alison',
+      url: 'https://alison.com/course/criminal-law-procedure',
+      level: 'Advanced'
+    },
+    { 
+      title: 'Civil Litigation and Trial Practice',
+      provider: 'Alison',
+      url: 'https://alison.com/course/civil-litigation-trial-practice',
+      level: 'Advanced'
+    }
+  ],
   
   // Education and Academic specific courses
   'education': [
@@ -346,6 +430,170 @@ export const COURSE_RECOMMENDATIONS = {
       title: 'Digital Learning Environments',
       provider: 'Alison',
       url: 'https://alison.com/course/digital-learning-environments',
+      level: 'Advanced'
+    }
+  ],
+
+  // Engineering-specific courses
+  'aerospace engineering': [
+    { 
+      title: 'Introduction to Aerospace Engineering',
+      provider: 'Alison',
+      url: 'https://alison.com/course/introduction-to-aerospace-engineering',
+      level: 'Beginner'
+    },
+    { 
+      title: 'Aircraft Design and Manufacturing',
+      provider: 'Alison',
+      url: 'https://alison.com/course/aircraft-design-manufacturing',
+      level: 'Advanced'
+    },
+    { 
+      title: 'Aerospace Materials and Structures',
+      provider: 'Alison',
+      url: 'https://alison.com/course/aerospace-materials-structures',
+      level: 'Intermediate'
+    }
+  ],
+  'civil engineering': [
+    { 
+      title: 'Fundamentals of Civil Engineering',
+      provider: 'Alison',
+      url: 'https://alison.com/course/fundamentals-civil-engineering',
+      level: 'Beginner'
+    },
+    { 
+      title: 'Structural Analysis and Design',
+      provider: 'Alison',
+      url: 'https://alison.com/course/structural-analysis-design',
+      level: 'Advanced'
+    },
+    { 
+      title: 'Construction Project Management',
+      provider: 'Alison',
+      url: 'https://alison.com/course/construction-project-management',
+      level: 'Intermediate'
+    }
+  ],
+  'mechanical engineering': [
+    { 
+      title: 'Mechanical Engineering Fundamentals',
+      provider: 'Alison',
+      url: 'https://alison.com/course/mechanical-engineering-fundamentals',
+      level: 'Beginner'
+    },
+    { 
+      title: 'CAD Design and Manufacturing',
+      provider: 'Alison',
+      url: 'https://alison.com/course/cad-design-manufacturing',
+      level: 'Intermediate'
+    },
+    { 
+      title: 'Thermodynamics and Heat Transfer',
+      provider: 'Alison',
+      url: 'https://alison.com/course/thermodynamics-heat-transfer',
+      level: 'Advanced'
+    }
+  ],
+  'electrical engineering': [
+    { 
+      title: 'Electrical Engineering Basics',
+      provider: 'Alison',
+      url: 'https://alison.com/course/electrical-engineering-basics',
+      level: 'Beginner'
+    },
+    { 
+      title: 'Power Systems and Electronics',
+      provider: 'Alison',
+      url: 'https://alison.com/course/power-systems-electronics',
+      level: 'Advanced'
+    },
+    { 
+      title: 'Control Systems Engineering',
+      provider: 'Alison',
+      url: 'https://alison.com/course/control-systems-engineering',
+      level: 'Intermediate'
+    }
+  ],
+  'chemical engineering': [
+    { 
+      title: 'Chemical Engineering Principles',
+      provider: 'Alison',
+      url: 'https://alison.com/course/chemical-engineering-principles',
+      level: 'Beginner'
+    },
+    { 
+      title: 'Process Design and Optimization',
+      provider: 'Alison',
+      url: 'https://alison.com/course/process-design-optimization',
+      level: 'Advanced'
+    },
+    { 
+      title: 'Chemical Safety and Environmental Engineering',
+      provider: 'Alison',
+      url: 'https://alison.com/course/chemical-safety-environmental',
+      level: 'Intermediate'
+    }
+  ],
+  'biomedical engineering': [
+    { 
+      title: 'Introduction to Biomedical Engineering',
+      provider: 'Alison',
+      url: 'https://alison.com/course/introduction-biomedical-engineering',
+      level: 'Beginner'
+    },
+    { 
+      title: 'Medical Device Design and Development',
+      provider: 'Alison',
+      url: 'https://alison.com/course/medical-device-design-development',
+      level: 'Advanced'
+    },
+    { 
+      title: 'Biomaterials and Tissue Engineering',
+      provider: 'Alison',
+      url: 'https://alison.com/course/biomaterials-tissue-engineering',
+      level: 'Intermediate'
+    }
+  ],
+
+  // Professional Engineering Certifications
+  'professional engineer': [
+    { 
+      title: 'FE Exam Preparation - Fundamentals of Engineering',
+      provider: 'Alison',
+      url: 'https://alison.com/course/fe-exam-preparation',
+      level: 'Intermediate'
+    },
+    { 
+      title: 'PE Exam Preparation - Professional Engineer License',
+      provider: 'Alison',
+      url: 'https://alison.com/course/pe-exam-preparation',
+      level: 'Advanced'
+    },
+    { 
+      title: 'Engineering Ethics and Professional Practice',
+      provider: 'Alison',
+      url: 'https://alison.com/course/engineering-ethics-professional-practice',
+      level: 'Intermediate'
+    }
+  ],
+  'cad design': [
+    { 
+      title: 'AutoCAD for Engineering Design',
+      provider: 'Alison',
+      url: 'https://alison.com/course/autocad-engineering-design',
+      level: 'Beginner'
+    },
+    { 
+      title: 'SolidWorks 3D Modeling and Design',
+      provider: 'Alison',
+      url: 'https://alison.com/course/solidworks-3d-modeling-design',
+      level: 'Intermediate'
+    },
+    { 
+      title: 'Advanced CAD and Product Development',
+      provider: 'Alison',
+      url: 'https://alison.com/course/advanced-cad-product-development',
       level: 'Advanced'
     }
   ],
@@ -508,26 +756,36 @@ export const findCourseRecommendations = (keywords = [], count = 3, industry = n
   
   // Define industry-specific course priorities
   const industryCoursePriorities = {
-    'healthcare': ['nursing', 'patient care', 'medical', 'clinical', 'cpr', 'first aid', 'emergency response', 'hipaa', 'medical records', 'patient safety', 'healthcare'],
+    'healthcare': ['nursing', 'patient care', 'medical', 'clinical', 'pharmacy', 'veterinary', 'cpr', 'first aid', 'emergency response', 'hipaa', 'medical records', 'patient safety', 'healthcare'],
     'technology': ['programming', 'data analysis', 'it'],
     'finance': ['finance', 'data analysis'],
     'marketing': ['marketing', 'communication'],
     'education': ['education', 'teaching', 'curriculum development', 'research', 'assessment', 'student engagement', 'educational technology', 'educational leadership', 'educational project management'],
     'design': ['communication'],
-    'engineering': ['safety', 'data analysis'],
+    'engineering': ['aerospace engineering', 'civil engineering', 'mechanical engineering', 'electrical engineering', 'chemical engineering', 'biomedical engineering', 'professional engineer', 'cad design', 'project management', 'safety'],
+    'aerospace': ['aerospace engineering', 'mechanical engineering', 'professional engineer', 'cad design', 'project management'],
+    'civil': ['civil engineering', 'project management', 'safety', 'professional engineer'],
+    'mechanical': ['mechanical engineering', 'cad design', 'professional engineer', 'project management'],
+    'legal': ['legal', 'law', 'communication'],
+    'pharmaceutical': ['pharmacy', 'medical', 'healthcare'],
+    'veterinary': ['veterinary', 'healthcare', 'medical'],
     'sales': ['communication', 'customer service'],
     'emergency_services': ['emergency response', 'first aid', 'cpr', 'safety']
   };
   
   // Define courses to exclude for specific industries
   const industryExclusions = {
-    'healthcare': ['it', 'programming', 'project management', 'marketing', 'finance'],
-    'emergency_services': ['it', 'programming', 'marketing', 'finance', 'education'],
-    'finance': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'education'],
-    'technology': ['healthcare', 'nursing', 'medical', 'clinical', 'education'],
-    'education': ['it', 'programming', 'healthcare', 'nursing', 'medical', 'clinical', 'project management', 'marketing', 'finance'],
-    'marketing': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'education'],
-    'design': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'education']
+    'healthcare': ['it', 'programming', 'engineering', 'aerospace engineering', 'civil engineering', 'mechanical engineering', 'marketing', 'finance'],
+    'emergency_services': ['it', 'programming', 'marketing', 'finance', 'education', 'engineering'],
+    'finance': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'education', 'engineering'],
+    'technology': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'civil engineering', 'aerospace engineering'],
+    'education': ['it', 'programming', 'healthcare', 'nursing', 'medical', 'clinical', 'engineering', 'aerospace engineering', 'civil engineering', 'marketing', 'finance'],
+    'marketing': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'education', 'engineering'],
+    'design': ['healthcare', 'nursing', 'medical', 'clinical', 'engineering', 'aerospace engineering', 'civil engineering'],
+    'engineering': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'marketing'],
+    'aerospace': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'marketing', 'finance'],
+    'civil': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'marketing', 'it', 'programming'],
+    'mechanical': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'marketing']
   };
   
   const priorityCategories = industry ? industryCoursePriorities[industry] || [] : [];
@@ -621,6 +879,48 @@ export const findCourseRecommendations = (keywords = [], count = 3, industry = n
         'assessment': ['assessment'],
         'technology': ['educational technology'],
         'learning': ['education', 'educational psychology and learning']
+      },
+      'engineering': {
+        'aerospace': ['aerospace engineering', 'mechanical engineering'],
+        'aircraft': ['aerospace engineering'],
+        'space': ['aerospace engineering'],
+        'civil': ['civil engineering'],
+        'structural': ['civil engineering'],
+        'construction': ['civil engineering', 'project management'],
+        'mechanical': ['mechanical engineering'],
+        'design': ['cad design', 'mechanical engineering'],
+        'manufacturing': ['mechanical engineering'],
+        'electrical': ['electrical engineering'],
+        'power': ['electrical engineering'],
+        'chemical': ['chemical engineering'],
+        'process': ['chemical engineering'],
+        'biomedical': ['biomedical engineering'],
+        'medical device': ['biomedical engineering'],
+        'cad': ['cad design'],
+        'autocad': ['cad design'],
+        'solidworks': ['cad design'],
+        'fe exam': ['professional engineer'],
+        'pe license': ['professional engineer'],
+        'project': ['project management']
+      },
+      'healthcare': {
+        'pharmacy': ['pharmacy'],
+        'pharmaceutical': ['pharmacy'],
+        'drug': ['pharmacy'],
+        'veterinary': ['veterinary'],
+        'animal': ['veterinary'],
+        'medical': ['medical', 'healthcare'],
+        'clinical': ['clinical'],
+        'patient': ['patient care']
+      },
+      'legal': {
+        'law': ['law', 'legal'],
+        'legal': ['legal'],
+        'court': ['law'],
+        'litigation': ['law'],
+        'contract': ['legal'],
+        'attorney': ['law'],
+        'lawyer': ['law']
       },
       'general': {
         'analysis': ['data analysis'],

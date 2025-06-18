@@ -213,6 +213,147 @@ export const CAREER_PATHWAYS = {
     ]
   },
 
+  // Engineering Roles
+  'aerospace_engineer': {
+    title: 'Aerospace Engineer Career Pathway',
+    description: 'Specialized engineering career in aircraft, spacecraft, and aerospace systems design',
+    stages: [
+      {
+        level: 'Education',
+        requirements: ['Bachelor\'s degree in Aerospace Engineering or related field', 'Strong mathematics and physics background', 'CAD software proficiency'],
+        duration: '4 years',
+        description: 'Foundation in aerodynamics, propulsion, materials, and spacecraft systems'
+      },
+      {
+        level: 'Entry-Level Engineer',
+        requirements: ['Engineering degree', 'FE exam (Fundamentals of Engineering)', 'Internship experience'],
+        duration: '1-3 years',
+        description: 'Junior engineer role with supervision and mentorship'
+      },
+      {
+        level: 'Professional Engineer',
+        requirements: ['4+ years experience', 'PE license (Professional Engineer)', 'Project experience'],
+        duration: '4-8 years',
+        description: 'Independent engineering practice and project leadership'
+      },
+      {
+        level: 'Senior Engineer',
+        requirements: ['Master\'s degree (preferred)', 'Specialized certifications', 'Leadership experience'],
+        duration: '8-12 years',
+        description: 'Complex system design and team leadership'
+      },
+      {
+        level: 'Principal Engineer/Lead',
+        requirements: ['Advanced degree or equivalent experience', 'Industry expertise', 'Cross-functional leadership'],
+        duration: '12-20 years',
+        description: 'Technical leadership and strategic planning'
+      },
+      {
+        level: 'Chief Engineer/Director',
+        requirements: ['Executive experience', 'Business acumen', 'Organizational leadership'],
+        duration: '20+ years',
+        description: 'Engineering strategy and organizational management'
+      }
+    ],
+    qualifications: [
+      'Bachelor\'s degree in Aerospace Engineering',
+      'Master\'s degree in specialized area (recommended)',
+      'Professional Engineer (PE) license',
+      'FE exam certification',
+      'Industry-specific certifications (NASA, FAA, etc.)',
+      'Security clearance (for defense work)'
+    ],
+    certifications: ['PE License', 'FE Certification', 'CATIA/SolidWorks', 'Project Management', 'Six Sigma']
+  },
+
+  'civil_engineer': {
+    title: 'Civil Engineer Career Pathway',
+    description: 'Engineering career focused on infrastructure, construction, and public works',
+    stages: [
+      {
+        level: 'Education',
+        requirements: ['Bachelor\'s degree in Civil Engineering', 'ABET accreditation preferred', 'Mathematics and science foundation'],
+        duration: '4 years',
+        description: 'Structural analysis, hydraulics, geotechnical, and transportation engineering'
+      },
+      {
+        level: 'Engineer-in-Training (EIT)',
+        requirements: ['Engineering degree', 'FE exam passed', 'Entry-level position'],
+        duration: '1-4 years',
+        description: 'Supervised engineering work and professional development'
+      },
+      {
+        level: 'Professional Engineer (PE)',
+        requirements: ['4+ years experience', 'PE exam passed', 'Professional references'],
+        duration: '4-10 years',
+        description: 'Independent practice and design authority'
+      },
+      {
+        level: 'Senior Civil Engineer',
+        requirements: ['Project management experience', 'Specialized expertise', 'Client management'],
+        duration: '10-15 years',
+        description: 'Complex project leadership and technical oversight'
+      },
+      {
+        level: 'Principal Engineer/Manager',
+        requirements: ['Business development', 'Team leadership', 'Strategic planning'],
+        duration: '15+ years',
+        description: 'Practice leadership and organizational growth'
+      }
+    ],
+    qualifications: [
+      'Bachelor\'s degree in Civil Engineering (ABET accredited)',
+      'Professional Engineer (PE) license',
+      'Fundamentals of Engineering (FE) certification',
+      'Specialized certifications (structural, environmental, etc.)',
+      'Project management certification (PMP preferred)'
+    ]
+  },
+
+  'mechanical_engineer': {
+    title: 'Mechanical Engineer Career Pathway',
+    description: 'Engineering career in mechanical systems, manufacturing, and product design',
+    stages: [
+      {
+        level: 'Education',
+        requirements: ['Bachelor\'s degree in Mechanical Engineering', 'Thermodynamics and mechanics coursework', 'CAD proficiency'],
+        duration: '4 years',
+        description: 'Mechanical systems design, manufacturing, and analysis'
+      },
+      {
+        level: 'Associate Engineer',
+        requirements: ['Engineering degree', 'FE exam', 'Manufacturing experience'],
+        duration: '1-3 years',
+        description: 'Product development and manufacturing support'
+      },
+      {
+        level: 'Mechanical Engineer',
+        requirements: ['Professional experience', 'Design software expertise', 'Project involvement'],
+        duration: '3-7 years',
+        description: 'Independent design and analysis work'
+      },
+      {
+        level: 'Senior Engineer',
+        requirements: ['PE license (preferred)', 'Leadership experience', 'Specialized knowledge'],
+        duration: '7-12 years',
+        description: 'Technical leadership and mentoring'
+      },
+      {
+        level: 'Engineering Manager',
+        requirements: ['Management training', 'Business understanding', 'Team leadership'],
+        duration: '12+ years',
+        description: 'Engineering team management and strategy'
+      }
+    ],
+    qualifications: [
+      'Bachelor\'s degree in Mechanical Engineering',
+      'Professional Engineer (PE) license (industry dependent)',
+      'CAD software certifications (SolidWorks, AutoCAD, etc.)',
+      'Manufacturing and quality certifications',
+      'Project management training'
+    ]
+  },
+
   // Technology Roles
   'software_engineer': {
     title: 'Software Engineer Career Pathway',
@@ -261,6 +402,158 @@ export const CAREER_PATHWAYS = {
       'Cloud platform certifications',
       'Agile/Scrum certifications',
       'Technical leadership courses'
+    ]
+  },
+
+  // Additional Healthcare Roles
+  'pharmacist': {
+    title: 'Pharmacist Career Pathway',
+    description: 'Professional pharmacy career requiring extensive pharmaceutical education',
+    stages: [
+      {
+        level: 'Pre-Pharmacy',
+        requirements: ['Bachelor\'s degree with science prerequisites', 'PCAT exam', 'Pharmacy experience'],
+        duration: '2-4 years',
+        description: 'Undergraduate education with pharmacy school preparation'
+      },
+      {
+        level: 'Pharmacy School',
+        requirements: ['Doctor of Pharmacy (PharmD) degree', 'Clinical rotations', 'NAPLEX exam'],
+        duration: '4 years',
+        description: 'Comprehensive pharmaceutical education and clinical training'
+      },
+      {
+        level: 'Pharmacy Resident (Optional)',
+        requirements: ['PharmD degree', 'Residency match', 'Specialized training'],
+        duration: '1-2 years',
+        description: 'Advanced clinical training in specialized areas'
+      },
+      {
+        level: 'Licensed Pharmacist',
+        requirements: ['PharmD degree', 'State licensure', 'Continuing education'],
+        duration: 'Career',
+        description: 'Independent pharmacy practice and patient care'
+      },
+      {
+        level: 'Clinical Specialist',
+        requirements: ['Board certification', 'Specialized experience', 'Advanced training'],
+        duration: '5+ years',
+        description: 'Specialized clinical pharmacy practice'
+      },
+      {
+        level: 'Pharmacy Manager/Director',
+        requirements: ['Management experience', 'Business training', 'Leadership skills'],
+        duration: '10+ years',
+        description: 'Pharmacy operations and staff management'
+      }
+    ],
+    qualifications: [
+      'Doctor of Pharmacy (PharmD) degree',
+      'State pharmacy license',
+      'Board certifications (specialty dependent)',
+      'Continuing education requirements',
+      'Management training (for leadership roles)'
+    ]
+  },
+
+  'veterinarian': {
+    title: 'Veterinarian Career Pathway',
+    description: 'Veterinary medicine career with animal healthcare focus',
+    stages: [
+      {
+        level: 'Pre-Veterinary',
+        requirements: ['Bachelor\'s degree with science prerequisites', 'GRE/VMCAS', 'Animal experience'],
+        duration: '4 years',
+        description: 'Undergraduate education with veterinary school preparation'
+      },
+      {
+        level: 'Veterinary School',
+        requirements: ['Doctor of Veterinary Medicine (DVM)', 'Clinical rotations', 'NAVLE exam'],
+        duration: '4 years',
+        description: 'Comprehensive veterinary education and clinical training'
+      },
+      {
+        level: 'Veterinary Intern (Optional)',
+        requirements: ['DVM degree', 'Internship match', 'Clinical experience'],
+        duration: '1 year',
+        description: 'Intensive clinical training and experience'
+      },
+      {
+        level: 'Licensed Veterinarian',
+        requirements: ['DVM degree', 'State licensure', 'Continuing education'],
+        duration: 'Career',
+        description: 'Independent veterinary practice and animal care'
+      },
+      {
+        level: 'Board-Certified Specialist',
+        requirements: ['Residency completion', 'Board examination', 'Specialized expertise'],
+        duration: '3+ years post-DVM',
+        description: 'Specialized veterinary practice in specific field'
+      },
+      {
+        level: 'Practice Owner/Manager',
+        requirements: ['Business training', 'Management experience', 'Financial planning'],
+        duration: '8+ years',
+        description: 'Veterinary practice ownership and management'
+      }
+    ],
+    qualifications: [
+      'Doctor of Veterinary Medicine (DVM) degree',
+      'State veterinary license',
+      'Board certifications (specialty dependent)',
+      'Continuing education requirements',
+      'Business management training (for ownership)'
+    ]
+  },
+
+  // Legal Profession
+  'lawyer': {
+    title: 'Lawyer Career Pathway',
+    description: 'Legal profession requiring law degree and bar admission',
+    stages: [
+      {
+        level: 'Undergraduate',
+        requirements: ['Bachelor\'s degree (any field)', 'Strong GPA', 'LSAT preparation'],
+        duration: '4 years',
+        description: 'Undergraduate education and law school preparation'
+      },
+      {
+        level: 'Law School',
+        requirements: ['Juris Doctor (JD) degree', 'Law clinic experience', 'Bar exam preparation'],
+        duration: '3 years',
+        description: 'Legal education and practical training'
+      },
+      {
+        level: 'Associate Attorney',
+        requirements: ['JD degree', 'Bar admission', 'Law firm experience'],
+        duration: '1-8 years',
+        description: 'Junior attorney role with supervision and mentorship'
+      },
+      {
+        level: 'Senior Associate',
+        requirements: ['Specialization development', 'Client management', 'Business development'],
+        duration: '6-10 years',
+        description: 'Advanced legal practice and client responsibility'
+      },
+      {
+        level: 'Partner/Principal',
+        requirements: ['Book of business', 'Leadership skills', 'Firm contribution'],
+        duration: '10+ years',
+        description: 'Firm ownership and strategic leadership'
+      },
+      {
+        level: 'Senior Partner/Managing Partner',
+        requirements: ['Extensive experience', 'Firm management', 'Industry recognition'],
+        duration: '15+ years',
+        description: 'Firm leadership and strategic direction'
+      }
+    ],
+    qualifications: [
+      'Bachelor\'s degree (any field)',
+      'Juris Doctor (JD) degree',
+      'Bar admission in practice jurisdiction',
+      'Continuing legal education (CLE)',
+      'Specialization certifications (optional)'
     ]
   },
 
