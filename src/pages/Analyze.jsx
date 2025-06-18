@@ -933,6 +933,12 @@ const Analyze = () => {
                 title="Recommended Courses Based on Missing Keywords"
               />
             )}
+            
+            {/* Next Steps Guidance */}
+            <CvAnalysisNextSteps 
+              analysisResults={analysisResults}
+              analysisType="job-specific" 
+            />
           </div>
         )}
       </div>

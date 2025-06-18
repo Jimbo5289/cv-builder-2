@@ -611,6 +611,7 @@ const CvAnalyzeByRole = () => {
             
             {/* Next Steps Guidance */}
             <CvAnalysisNextSteps 
+              analysisResults={analysisResults}
               analysisType={useGenericScope ? "general" : "role-specific"}
               role={selectedRole}
               industry={selectedIndustry}

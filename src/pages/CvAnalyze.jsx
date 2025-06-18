@@ -499,7 +499,10 @@ const CvAnalyze = () => {
             )}
             
             {/* Next Steps Guidance */}
-            <CvAnalysisNextSteps />
+            <CvAnalysisNextSteps 
+              analysisResults={analysisResults}
+              analysisType="general" 
+            />
           </div>
         )}
       </div>
