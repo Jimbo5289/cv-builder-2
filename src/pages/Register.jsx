@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import CloudflareTurnstile from '../components/CloudflareTurnstile';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ export default function Register() {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState(null);
   const navigate = useNavigate();
   const { register } = useAuth();
 
@@ -76,6 +78,15 @@ export default function Register() {
       return;
     }
 
+    // Check Turnstile verification in production
+    if (import.meta.env.PROD && !turnstileToken) {
+      setErrors(prev => ({
+        ...prev,
+        submit: 'Please complete the security verification'
+      }));
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -85,7 +96,8 @@ export default function Register() {
         lastName: formData.name.split(' ').slice(1).join(' '), // Extract last name
         email: formData.email,
         password: formData.password,
-        phone: formData.phone
+        phone: formData.phone,
+        turnstileToken: turnstileToken // Include Turnstile verification token
       };
       
       // Call the register function from AuthContext
@@ -278,10 +290,54 @@ export default function Register() {
             </div>
           </div>
 
+          {/* Cloudflare Turnstile Security Verification */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Security Verification
+            </label>
+            <CloudflareTurnstile
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+              onVerify={(token) => {
+                setTurnstileToken(token);
+                // Clear any previous verification errors
+                if (errors.submit?.includes('security verification')) {
+                  setErrors(prev => ({
+                    ...prev,
+                    submit: ''
+                  }));
+                }
+              }}
+              onError={(error) => {
+                console.error('Turnstile error:', error);
+                setTurnstileToken(null);
+                setErrors(prev => ({
+                  ...prev,
+                  submit: 'Security verification failed. Please try again.'
+                }));
+              }}
+              onExpire={() => {
+                setTurnstileToken(null);
+                setErrors(prev => ({
+                  ...prev,
+                  submit: 'Security verification expired. Please complete it again.'
+                }));
+              }}
+              theme="auto"
+              size="normal"
+              className="flex justify-center"
+              disabled={import.meta.env.DEV && import.meta.env.VITE_DEV_MODE === 'true'}
+            />
+            {import.meta.env.DEV && (
+              <p className="text-xs text-gray-500 text-center">
+                Security verification is disabled in development mode
+              </p>
+            )}
+          </div>
+
           <div>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || (import.meta.env.PROD && !turnstileToken)}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#E78F81] hover:bg-[#d36e62] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] disabled:opacity-50"
             >
               {isLoading ? 'Creating account...' : 'Create account'}

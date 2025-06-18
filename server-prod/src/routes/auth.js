@@ -11,6 +11,7 @@ const { authLimiter } = require('../middleware/security');
 const { z } = require('zod');
 const { sendPasswordResetEmail } = require('../services/emailService');
 const { logger } = require('../config/logger');
+const { requireTurnstileVerification } = require('../utils/turnstile');
 const database = require('../config/database');
 
 // Password validation regex
@@ -69,7 +70,7 @@ const validateRegistrationInput = (req, res, next) => {
 };
 
 // Register user
-router.post('/register', async (req, res) => {
+router.post('/register', requireTurnstileVerification(), async (req, res) => {
   try {
     const validatedData = registerSchema.parse(req.body);
     const { email, password, name } = validatedData;

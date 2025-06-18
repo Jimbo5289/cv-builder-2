@@ -14,6 +14,7 @@ const { z } = require('zod');
 const { sendPasswordResetEmail } = require('../services/emailService');
 const { addUserToMailingList } = require('../services/mailchimpService');
 const { logger } = require('../config/logger');
+const { requireTurnstileVerification } = require('../utils/turnstile');
 // eslint-disable-next-line no-unused-vars
 const database = require('../config/database');
 
@@ -117,7 +118,7 @@ router.get('/test-cors', (req, res) => {
 });
 
 // Register user
-router.post('/register', async (req, res) => {
+router.post('/register', requireTurnstileVerification(), async (req, res) => {
   addCorsHeaders(req, res);
   try {
     const validatedData = registerSchema.parse(req.body);
