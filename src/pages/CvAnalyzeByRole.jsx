@@ -137,29 +137,48 @@ const CvAnalyzeByRole = () => {
 
   // Analyze the uploaded CV
   const analyzeCV = useCallback(async () => {
+    console.log('🚀 analyzeCV FUNCTION CALLED!', {
+      timestamp: new Date().toISOString(),
+      file: !!file,
+      fileName: file?.name,
+      fileSize: file?.size,
+      useGenericScope,
+      selectedIndustry,
+      selectedRole,
+      isAuthenticated,
+      isConnected,
+      apiUrl: !!apiUrl,
+      isDev: import.meta.env.DEV
+    });
+
     if (!file) {
+      console.log('❌ EARLY EXIT: No file uploaded');
       setError('Please upload a CV file first');
       return;
     }
     
     // Check industry/role selection if not in generic mode
     if (!useGenericScope && (!selectedIndustry || !selectedRole)) {
+      console.log('❌ EARLY EXIT: Missing industry/role for role-specific analysis');
       setError('Please select both industry and role');
       return;
     }
     
     // Check authentication first - but bypass in development mode
     if (!isAuthenticated && !import.meta.env.DEV) {
+      console.log('❌ EARLY EXIT: Authentication required');
       navigate('/login', { state: { from: location } });
       return;
     }
 
     // Check if server is connected
     if (!isConnected || !apiUrl) {
+      console.log('❌ EARLY EXIT: Server not connected');
       setError('Server connection error. Please check your connection and try again.');
       return;
     }
 
+    console.log('✅ VALIDATION PASSED - Starting analysis...');
     setIsAnalyzing(true);
     setError('');
     setAnalysisResults(null);
@@ -457,7 +476,21 @@ const CvAnalyzeByRole = () => {
               {/* Analyze Button */}
               <div className="mt-6 flex justify-end">
                 <button
-                  onClick={analyzeCV}
+                  onClick={() => {
+                    console.log('🔥 BUTTON CLICKED!', {
+                      isAnalyzing,
+                      hasFile: !!file,
+                      fileName: file?.name,
+                      useGenericScope,
+                      selectedIndustry,
+                      selectedRole,
+                      isAuthenticated,
+                      isConnected,
+                      apiUrl,
+                      buttonDisabled: isAnalyzing || !file || (!useGenericScope && (!selectedIndustry || !selectedRole))
+                    });
+                    analyzeCV();
+                  }}
                   disabled={isAnalyzing || !file || (!useGenericScope && (!selectedIndustry || !selectedRole))}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#E78F81] hover:bg-[#d36e62] dark:bg-[#e07c6e] dark:hover:bg-[#c75d50] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
