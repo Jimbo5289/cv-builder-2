@@ -34,7 +34,7 @@ function Footer() {
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Company information section */}
           <div>
-            <h3 className="text-lg md:text-xl font-bold mb-4">CV Builder</h3>
+            <h3 className="text-lg md:text-xl font-bold mb-4">MyCVBuilder</h3>
             <p className="text-sm md:text-base text-gray-300">
               Create professional CVs that help you stand out in the job market.
             </p>
