@@ -5,23 +5,35 @@ export const COURSE_RECOMMENDATIONS = {
   // Technical skills (IT/Technology industry only)
   'programming': [
     { 
-      title: 'Introduction to Python Programming',
+      title: 'Python for Beginners',
       provider: 'Alison',
-      url: 'https://alison.com/course/introduction-to-python-programming',
+      url: 'https://alison.com/course/python-for-beginners',
       level: 'Beginner'
     },
     { 
-      title: 'JavaScript Fundamentals',
-      provider: 'Alison',
-      url: 'https://alison.com/course/javascript-fundamentals', 
+      title: 'Programming for Everybody (Getting Started with Python)',
+      provider: 'University of Michigan (Coursera)',
+      url: 'https://www.coursera.org/learn/python', 
+      level: 'Beginner'
+    },
+    { 
+      title: 'CS50\'s Introduction to Programming with Python',
+      provider: 'Harvard (edX)',
+      url: 'https://www.edx.org/learn/python/harvard-university-cs50-s-introduction-to-programming-with-python', 
       level: 'Intermediate'
     }
   ],
   'data analysis': [
     { 
-      title: 'Data Analysis with Excel',
-      provider: 'Alison',
-      url: 'https://alison.com/course/data-analysis-with-excel', 
+      title: 'Data Analysis with Python',
+      provider: 'IBM (Coursera)',
+      url: 'https://www.coursera.org/learn/data-analysis-with-python', 
+      level: 'Intermediate'
+    },
+    { 
+      title: 'Python for Data Science, AI & Development',
+      provider: 'IBM (Coursera)',
+      url: 'https://www.coursera.org/learn/python-for-applied-data-science-ai', 
       level: 'Beginner'
     },
     { 
@@ -35,15 +47,21 @@ export const COURSE_RECOMMENDATIONS = {
   // Generic project management (business/corporate only)
   'project management': [
     { 
-      title: 'Project Management Fundamentals',
+      title: 'Google Project Management Professional Certificate',
+      provider: 'Google (Coursera)',
+      url: 'https://www.coursera.org/professional-certificates/google-project-management',
+      level: 'Beginner'
+    },
+    { 
+      title: 'Introduction to Project Management',
       provider: 'Alison',
-      url: 'https://alison.com/course/project-management-fundamentals',
+      url: 'https://alison.com/course/introduction-to-project-management',
       level: 'Beginner'
     },
     { 
       title: 'Agile Project Management',
-      provider: 'Alison',
-      url: 'https://alison.com/course/agile-project-management',
+      provider: 'University of Virginia (Coursera)',
+      url: 'https://www.coursera.org/learn/agile-project-management',
       level: 'Intermediate'
     }
   ],
@@ -67,15 +85,35 @@ export const COURSE_RECOMMENDATIONS = {
   // Soft skills
   'communication': [
     { 
-      title: 'Effective Communication Skills',
+      title: 'Marketing Through the Internet and Social Media',
       provider: 'Alison',
-      url: 'https://alison.com/course/effective-communication-skills',
+      url: 'https://alison.com/course/marketing-through-the-internet-and-social-media',
       level: 'Beginner'
     },
     { 
-      title: 'Advanced Communication Techniques',
+      title: 'Diploma in Social Media Strategy',
       provider: 'Alison',
-      url: 'https://alison.com/course/advanced-communication-techniques',
+      url: 'https://alison.com/course/diploma-in-social-media-strategy',
+      level: 'Intermediate'
+    }
+  ],
+  'digital marketing': [
+    { 
+      title: 'Google Digital Marketing & E-commerce Professional Certificate',
+      provider: 'Google (Coursera)',
+      url: 'https://www.coursera.org/professional-certificates/google-digital-marketing-ecommerce',
+      level: 'Beginner'
+    },
+    { 
+      title: 'Foundations of Digital Marketing and E-commerce',
+      provider: 'Google (Coursera)',
+      url: 'https://www.coursera.org/learn/foundations-of-digital-marketing-and-e-commerce',
+      level: 'Beginner'
+    },
+    { 
+      title: 'Diploma in Social Media Strategy',
+      provider: 'Alison',
+      url: 'https://alison.com/course/diploma-in-social-media-strategy',
       level: 'Intermediate'
     }
   ],
@@ -1565,6 +1603,67 @@ export const COURSE_RECOMMENDATIONS = {
   'agricultural-equipment-operator': ['agriculture-farming', 'safety'],
   'landscaper': ['landscaping-horticulture', 'customer service'],
   'environmental-consultant': ['agriculture-farming', 'research'],
+
+  'web development': [
+    { 
+      title: 'HTML, CSS, and Javascript for Web Developers',
+      provider: 'Johns Hopkins University (Coursera)',
+      url: 'https://www.coursera.org/learn/html-css-javascript-for-web-developers', 
+      level: 'Beginner'
+    },
+    { 
+      title: 'Web Development Fundamentals',
+      provider: 'Alison',
+      url: 'https://alison.com/course/web-development-fundamentals', 
+      level: 'Beginner'
+    },
+    { 
+      title: 'Introduction to Web Development',
+      provider: 'University of California, Davis (Coursera)',
+      url: 'https://www.coursera.org/learn/web-development', 
+      level: 'Beginner'
+    }
+  ],
+  'digital marketing': [
+    { 
+      title: 'Google Digital Marketing & E-commerce Professional Certificate',
+      provider: 'Google (Coursera)',
+      url: 'https://www.coursera.org/professional-certificates/google-digital-marketing-ecommerce', 
+      level: 'Beginner'
+    },
+    { 
+      title: 'Foundations of Digital Marketing and E-commerce',
+      provider: 'Google (Coursera)',
+      url: 'https://www.coursera.org/learn/foundations-of-digital-marketing-and-e-commerce', 
+      level: 'Beginner'
+    },
+    { 
+      title: 'Introduction to Digital Marketing',
+      provider: 'University of California, Irvine (Coursera)',
+      url: 'https://www.coursera.org/learn/introduction-digital-marketing', 
+      level: 'Beginner'
+    }
+  ],
+  'project management': [
+    { 
+      title: 'Google Project Management Professional Certificate',
+      provider: 'Google (Coursera)',
+      url: 'https://www.coursera.org/professional-certificates/google-project-management', 
+      level: 'Beginner'
+    },
+    { 
+      title: 'Introduction to Project Management',
+      provider: 'Alison',
+      url: 'https://alison.com/course/introduction-to-project-management', 
+      level: 'Beginner'
+    },
+    { 
+      title: 'Agile Project Management',
+      provider: 'University of Virginia (Coursera)',
+      url: 'https://www.coursera.org/learn/agile-project-management', 
+      level: 'Intermediate'
+    }
+  ],
 };
 
 // Comprehensive role-to-skills mapping for all 104 dropdown roles
@@ -1667,6 +1766,131 @@ const ROLE_SKILLS_MAPPING = {
   'shipping-manager': ['transport-logistics', 'leadership'],
   'customs-broker': ['transport-logistics', 'compliance'],
   
+  // New transport roles
+  'truck-driver': ['transport-logistics', 'safety'],
+  'delivery-driver': ['transport-logistics', 'customer service'],
+  'warehouse-worker': ['transport-logistics', 'safety'],
+  'forklift-operator': ['transport-logistics', 'safety'],
+  'dispatcher': ['transport-logistics', 'communication'],
+  'courier': ['transport-logistics', 'customer service'],
+  'inventory-clerk': ['transport-logistics', 'data analysis'],
+  'shipping-clerk': ['transport-logistics', 'communication'],
+
+  // Beauty industry roles
+  'salon-owner': ['beauty-services', 'leadership'],
+  'hairstylist': ['beauty-services', 'customer service'],
+  'beauty-therapist': ['beauty-services', 'customer service'],
+  'makeup-artist': ['beauty-services', 'communication'],
+  'nail-technician': ['beauty-services', 'customer service'],
+  'esthetician': ['beauty-services', 'customer service'],
+  'massage-therapist': ['beauty-services', 'healthcare'],
+  'barber': ['beauty-services', 'customer service'],
+  'cosmetologist': ['beauty-services', 'customer service'],
+  'beauty-consultant': ['beauty-services', 'communication'],
+  'spa-manager': ['beauty-services', 'leadership'],
+  'beauty-trainer': ['beauty-services', 'teaching'],
+
+  // Security industry roles
+  'security-manager': ['security-services', 'leadership'],
+  'security-guard': ['security-services', 'safety'],
+  'private-investigator': ['security-services', 'legal'],
+  'security-consultant': ['security-services', 'communication'],
+  'loss-prevention-manager': ['security-services', 'leadership'],
+  'surveillance-operator': ['security-services', 'safety'],
+  'armed-security': ['security-services', 'safety'],
+  'event-security': ['security-services', 'customer service'],
+  'corporate-security': ['security-services', 'leadership'],
+  'emergency-response': ['security-services', 'emergency response'],
+
+  // Agriculture industry roles
+  'farm-manager': ['agriculture-farming', 'leadership'],
+  'agricultural-scientist': ['agriculture-farming', 'research'],
+  'livestock-manager': ['agriculture-farming', 'leadership'],
+  'crop-specialist': ['agriculture-farming', 'research'],
+  'agricultural-inspector': ['agriculture-farming', 'compliance'],
+  'farm-worker': ['agriculture-farming', 'safety'],
+  'greenhouse-manager': ['agriculture-farming', 'leadership'],
+  'veterinary-technician': ['agriculture-farming', 'healthcare'],
+  'food-safety-inspector': ['agriculture-farming', 'compliance'],
+  'agricultural-equipment-operator': ['agriculture-farming', 'safety'],
+  'landscaper': ['landscaping-horticulture', 'customer service'],
+  'environmental-consultant': ['agriculture-farming', 'research'],
+
+  // Legal roles
+  'lawyer': ['law', 'legal'],
+  'paralegal': ['legal', 'communication'],
+  'legal-consultant': ['legal', 'communication'],
+  'legal-secretary': ['legal', 'communication'],
+  'compliance-manager': ['compliance', 'leadership'],
+  'contract-manager': ['legal', 'project management'],
+  'intellectual-property': ['legal', 'research'],
+  'mediator': ['legal', 'communication'],
+
+  // Marketing roles
+  'marketing-manager': ['marketing', 'leadership'],
+  'digital-marketer': ['marketing', 'data analysis'],
+  'content-strategist': ['marketing', 'communication'],
+  'seo-specialist': ['marketing', 'data analysis'],
+  'social-media-manager': ['marketing', 'communication'],
+  'public-relations': ['marketing', 'communication'],
+  'brand-manager': ['marketing', 'leadership'],
+  'market-researcher': ['marketing', 'data analysis'],
+
+  // Construction roles - Original management roles
+  'construction-manager': ['construction-safety', 'project management', 'leadership'],
+  'architect': ['civil engineering', 'cad design'],
+  'site-supervisor': ['construction-safety', 'leadership'],
+  'quantity-surveyor': ['civil engineering', 'data analysis'],
+  'building-inspector': ['construction-safety', 'civil engineering'],
+
+  // Construction trades - New vocational pathways
+  'carpenter': ['carpentry', 'construction-safety'],
+  'electrician': ['electrical-trades', 'construction-safety'],
+  'plumber': ['plumbing-trades', 'construction-safety'],
+  'construction-worker': ['construction-safety', 'project management'],
+  'hvac-technician': ['hvac-trades', 'construction-safety'],
+  'welder': ['welding-trades', 'construction-safety'],
+  'heavy-equipment-operator': ['heavy-equipment', 'construction-safety'],
+  'mason': ['masonry-trades', 'construction-safety'],
+
+  // Transport roles
+  'logistics-manager': ['project management', 'leadership'],
+  'fleet-manager': ['project management', 'leadership'],
+  'supply-chain': ['data analysis', 'project management'],
+  'warehouse-manager': ['leadership', 'project management'],
+  'transportation-planner': ['project management', 'data analysis'],
+  'freight-coordinator': ['project management', 'communication'],
+  'shipping-manager': ['leadership', 'project management'],
+  'customs-broker': ['compliance', 'communication'],
+
+  // Science roles
+  'researcher': ['research', 'data analysis'],
+  'lab-technician': ['research', 'safety'],
+  'biologist': ['research', 'data analysis'],
+  'chemist': ['research', 'chemical engineering'],
+  'environmental-scientist': ['research', 'data analysis'],
+  'physicist': ['research', 'data analysis'],
+  'geologist': ['research', 'data analysis'],
+  'research-director': ['research', 'leadership'],
+
+  // New retail roles
+  'cashier': ['retail-management', 'customer service'],
+  'stock-clerk': ['retail-management', 'project management'],
+  'retail-supervisor': ['retail-management', 'leadership'],
+  'department-manager': ['retail-management', 'leadership'],
+  'loss-prevention': ['security-services', 'retail-management'],
+  'personal-shopper': ['retail-management', 'customer service'],
+
+  // New hospitality roles
+  'server': ['hospitality-service', 'customer service'],
+  'bartender': ['hospitality-service', 'customer service'],
+  'front-desk-clerk': ['hospitality-service', 'customer service'],
+  'housekeeper': ['hospitality-service', 'customer service'],
+  'kitchen-staff': ['hospitality-service', 'customer service'],
+  'hotel-receptionist': ['hospitality-service', 'customer service'],
+  'catering-assistant': ['hospitality-service', 'customer service'],
+  'banquet-server': ['hospitality-service', 'customer service'],
+
   // New transport roles
   'truck-driver': ['transport-logistics', 'safety'],
   'delivery-driver': ['transport-logistics', 'customer service'],
