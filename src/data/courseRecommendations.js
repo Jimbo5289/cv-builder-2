@@ -1,3 +1,5 @@
+import { getCareerPathway, analyzeEducationLevel } from './careerPathways.js';
+
 // Course recommendations based on identified skills gaps
 export const COURSE_RECOMMENDATIONS = {
   // Technical skills (IT/Technology industry only)
@@ -494,7 +496,7 @@ export const COURSE_RECOMMENDATIONS = {
 };
 
 // Helper function to find recommendations based on keywords and industry context
-export const findCourseRecommendations = (keywords = [], count = 3, industry = null, role = null) => {
+export const findCourseRecommendations = (keywords = [], count = 3, industry = null, role = null, cvEducation = null) => {
   if (!keywords || keywords.length === 0) {
     return COURSE_RECOMMENDATIONS.general.slice(0, count);
   }
@@ -682,4 +684,21 @@ export const findCourseRecommendations = (keywords = [], count = 3, industry = n
   
   // Return just the requested number of courses
   return results.slice(0, count);
+};
+
+// Enhanced function that includes career pathway analysis
+export const findCourseRecommendationsWithPathway = (keywords = [], count = 3, industry = null, role = null, cvEducation = null) => {
+  // Get course recommendations
+  const courseRecommendations = findCourseRecommendations(keywords, count, industry, role, cvEducation);
+  
+  // Get career pathway analysis if education data is provided
+  let careerPathway = null;
+  if (role && cvEducation) {
+    careerPathway = getCareerPathway(role, cvEducation, industry);
+  }
+  
+  return {
+    courses: courseRecommendations,
+    careerPathway: careerPathway
+  };
 }; 

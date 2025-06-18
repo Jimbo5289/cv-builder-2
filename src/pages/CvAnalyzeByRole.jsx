@@ -10,7 +10,8 @@ import CvAnalysisNextSteps from '../components/CvAnalysisNextSteps';
 import AnalysisProgressTracker from '../components/AnalysisProgressTracker';
 import CourseRecommendations from '../components/CourseRecommendations';
 import CVPreviewResult from '../components/CVPreviewResult';
-import { findCourseRecommendations } from '../data/courseRecommendations';
+import CareerPathway from '../components/CareerPathway';
+import { findCourseRecommendationsWithPathway } from '../data/courseRecommendations';
 import SubscriptionModal from '../components/SubscriptionModal';
 
 // CvAnalyzeByRole component handles CV analysis based on selected industry and role
@@ -25,6 +26,7 @@ const CvAnalyzeByRole = () => {
   const [selectedRole, setSelectedRole] = useState(''); // Selected role for analysis
   const [useGenericScope, setUseGenericScope] = useState(true); // Whether to use generic analysis scope
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false); // State for subscription modal visibility
+  const [careerPathwayData, setCareerPathwayData] = useState(null); // Career pathway analysis
 
   // Add progress step state
   const [progressStep, setProgressStep] = useState(1); // Current step in analysis progress
@@ -69,6 +71,7 @@ const CvAnalyzeByRole = () => {
   const validateAndSetFile = (file) => {
     setError('');
     setAnalysisResults(null);
+    setCareerPathwayData(null);
     
     if (!file) return;
 
@@ -220,6 +223,18 @@ const CvAnalyzeByRole = () => {
           console.log('Analysis results:', data);
           setProgressStep(3); // Update to Results step
           setAnalysisResults(data);
+          
+          // Generate career pathway if we have role and education data
+          if (!useGenericScope && selectedRole && data.extractedInfo?.education) {
+            const pathwayResults = findCourseRecommendationsWithPathway(
+              data.missingKeywords || data.keySkillGaps || data._keySkillGaps || [], 
+              4,
+              selectedIndustry,
+              selectedRole,
+              data.extractedInfo.education
+            );
+            setCareerPathwayData(pathwayResults.careerPathway);
+          }
         } else {
           await handleResponseError(response);
         }
@@ -236,6 +251,18 @@ const CvAnalyzeByRole = () => {
           console.log('Analysis results:', data);
           setProgressStep(3); // Update to Results step
           setAnalysisResults(data);
+          
+          // Generate career pathway if we have role and education data
+          if (!useGenericScope && selectedRole && data.extractedInfo?.education) {
+            const pathwayResults = findCourseRecommendationsWithPathway(
+              data.missingKeywords || data.keySkillGaps || data._keySkillGaps || [], 
+              4,
+              selectedIndustry,
+              selectedRole,
+              data.extractedInfo.education
+            );
+            setCareerPathwayData(pathwayResults.careerPathway);
+          }
         } else {
           await handleResponseError(response);
         }
@@ -481,6 +508,7 @@ const CvAnalyzeByRole = () => {
                 <button 
                   onClick={() => {
                     setAnalysisResults(null);
+                    setCareerPathwayData(null);
                     setProgressStep(1);
                   }}
                   className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-sm"
@@ -576,16 +604,28 @@ const CvAnalyzeByRole = () => {
               // Generate course recommendations from missingKeywords or keySkillGaps if recommendedCourses is not available
               (analysisResults.missingKeywords || analysisResults.keySkillGaps || analysisResults._keySkillGaps) && (
                 <CourseRecommendations 
-                  courses={findCourseRecommendations(
+                  courses={findCourseRecommendationsWithPathway(
                     analysisResults.missingKeywords || analysisResults.keySkillGaps || analysisResults._keySkillGaps, 
-                    4
-                  )}
+                    4,
+                    selectedIndustry,
+                    selectedRole,
+                    analysisResults.extractedInfo?.education
+                  ).courses}
                   title={useGenericScope 
                     ? "Recommended Courses to Improve Your CV" 
                     : `Recommended Courses for ${selectedRole} in ${selectedIndustry}`
                   }
                 />
               )
+            )}
+            
+            {/* Career Pathway Analysis - Only for role-specific analysis */}
+            {!useGenericScope && careerPathwayData && (
+              <CareerPathway 
+                careerPathway={careerPathwayData}
+                role={selectedRole}
+                industry={selectedIndustry}
+              />
             )}
             
             {/* Preview and download/save CV component - Only for paid users */}
