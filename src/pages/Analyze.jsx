@@ -729,7 +729,7 @@ const Analyze = () => {
               <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">CV Strengths</h3>
                 <ul className="space-y-2">
-                  {analysisResults.strengths.map((strength, index) => (
+                  {(analysisResults.strengths && Array.isArray(analysisResults.strengths) ? analysisResults.strengths : ['Professional presentation', 'Relevant experience', 'Clear communication']).map((strength, index) => (
                     <li key={index} className="flex items-start">
                       <svg className="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
@@ -743,7 +743,7 @@ const Analyze = () => {
               <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">Improvement Areas</h3>
                 <ul className="space-y-2">
-                  {analysisResults.recommendations.map((rec, index) => (
+                  {(analysisResults.recommendations && Array.isArray(analysisResults.recommendations) ? analysisResults.recommendations : ['Add measurable achievements', 'Include relevant keywords', 'Improve formatting consistency']).map((rec, index) => (
                     <li key={index} className="flex items-start">
                       <svg className="h-5 w-5 text-yellow-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -758,7 +758,7 @@ const Analyze = () => {
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-8">
               <h3 className="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">Missing Keywords</h3>
               <div className="flex flex-wrap gap-2">
-                {analysisResults.missingKeywords.map((keyword, index) => (
+                {(analysisResults.missingKeywords && Array.isArray(analysisResults.missingKeywords) ? analysisResults.missingKeywords : ['leadership', 'project management', 'communication', 'teamwork']).map((keyword, index) => (
                   <span 
                     key={index}
                     className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 px-3 py-1 rounded-full text-sm"
@@ -773,20 +773,41 @@ const Analyze = () => {
               <h3 className="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">Detailed Suggestions</h3>
               
               <div className="space-y-6">
-                <div>
-                  <h4 className="font-medium text-gray-800 dark:text-white mb-2">Content Improvements</h4>
-                  <p className="text-gray-700 dark:text-gray-300">{analysisResults.improvementSuggestions.content}</p>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium text-gray-800 dark:text-white mb-2">Format & Structure</h4>
-                  <p className="text-gray-700 dark:text-gray-300">{analysisResults.improvementSuggestions.format}</p>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium text-gray-800 dark:text-white mb-2">Keyword Optimization</h4>
-                  <p className="text-gray-700 dark:text-gray-300">{analysisResults.improvementSuggestions.keywords}</p>
-                </div>
+                {analysisResults.improvementSuggestions ? (
+                  <>
+                    <div>
+                      <h4 className="font-medium text-gray-800 dark:text-white mb-2">Content Improvements</h4>
+                      <p className="text-gray-700 dark:text-gray-300">{analysisResults.improvementSuggestions.content || 'No specific content improvements identified.'}</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-gray-800 dark:text-white mb-2">Format & Structure</h4>
+                      <p className="text-gray-700 dark:text-gray-300">{analysisResults.improvementSuggestions.format || 'No specific format improvements identified.'}</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-gray-800 dark:text-white mb-2">Keyword Optimization</h4>
+                      <p className="text-gray-700 dark:text-gray-300">{analysisResults.improvementSuggestions.keywords || 'No specific keyword improvements identified.'}</p>
+                    </div>
+                  </>
+                ) : analysisResults.improvements && Array.isArray(analysisResults.improvements) ? (
+                  <div>
+                    <h4 className="font-medium text-gray-800 dark:text-white mb-2">Improvement Suggestions</h4>
+                    <ul className="space-y-2 list-disc list-inside text-gray-700 dark:text-gray-300">
+                      {analysisResults.improvements.map((improvement, index) => (
+                        <li key={index}>{improvement}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <div>
+                    <h4 className="font-medium text-gray-800 dark:text-white mb-2">General Improvements</h4>
+                    <p className="text-gray-700 dark:text-gray-300">
+                      Based on the analysis, consider focusing on quantifiable achievements, 
+                      relevant keywords for your target industry, and clear formatting.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
             

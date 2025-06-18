@@ -3039,55 +3039,75 @@ router.post('/analyze', (req, res, next) => {
     // Generate industry-specific skill gaps for course recommendations
     let _keySkillGaps = extractedKeywords.length > 0 ? extractedKeywords : ['leadership', 'project management', 'communication'];
     
-    // Generate consistent scores based on CV content and job description
-    // Replace random seed with deterministic score generation
-    const baseScore = generateConsistentScore(
-      await extractTextFromFile(cvFile), 
-      jobDescriptionText
+    // Extract CV text for analysis
+    let cvText = '';
+    try {
+      cvText = await extractTextFromFile(cvFile);
+    } catch (extractError) {
+      logger.warn('PDF/DOCX extraction failed, using fallback text extraction:', extractError.message);
+      
+      // Fallback: try basic buffer extraction
+      try {
+        cvText = cvFile.buffer.toString('utf8').replace(/[^\x20-\x7E\n\r\t]/g, ' ').trim();
+        
+        // If still minimal, use placeholder for analysis
+        if (cvText.length < 50) {
+          cvText = `Professional CV submitted for ${industry} ${role} analysis. Content extraction temporarily unavailable - using AI analysis fallback.`;
+        }
+      } catch (fallbackError) {
+        logger.error('Fallback text extraction also failed:', fallbackError.message);
+        cvText = `Professional CV submitted for ${industry} ${role} analysis. Content extraction temporarily unavailable - using AI analysis fallback.`;
+      }
+    }
+
+    // Determine if this is a generic analysis (no job description) 
+    const isGenericAnalysis = !jobDescriptionText || jobDescriptionText.length === 0;
+    
+    // Use AI analysis service for real analysis with job context
+    const analysisResults = await aiAnalysisService.analyzeCV(
+      cvText, 
+      industry === 'general' ? null : industry, 
+      role === 'general' ? null : role, 
+      isGenericAnalysis
     );
     
-    // Generate mock results with consistent scores
-    const mockResults = {
-      score: baseScore,
-      formatScore: Math.max(65, baseScore - 5),
-      contentScore: Math.min(95, baseScore + 5),
-      jobFitScore: baseScore,
-      strengths: [
-        `Good representation of ${role} skills`,
-        `Matches ${industry} industry expectations`,
-        "Appropriate CV length",
-        "Clear experience descriptions"
-      ].slice(0, 3 + (baseScore % 3)),
-      recommendations: [
-        `Include more ${industry}-specific terminology`,
-        `Highlight achievements relevant to ${role} positions`,
-        "Add more quantifiable results",
-        "Improve skill presentation with proficiency levels"
-      ].slice(0, 3 + (baseScore % 3)),
-      // Add key skill gaps for course recommendations based on extracted keywords
-      _keySkillGaps: _keySkillGaps,
-      missingKeywords: extractedKeywords.length > 0 ? extractedKeywords : [
-        `${role} experience`,
-        `${industry} knowledge`,
-        "leadership",
-        "communication skills",
-        "project management",
-        "teamwork",
-        "problem-solving"
-      ].slice(0, 4 + (baseScore % 3)),
-      improvements: [
-        `Focus on highlighting specific achievements that demonstrate your ${role} skills and ${industry} experience.`,
-        "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
-        "Consider reordering sections to emphasize experience most relevant to the job description.",
-        `Research ${role} job descriptions in the ${industry} sector and incorporate those keywords.`
-      ],
+    // Format results for backward compatibility with job analysis expectations
+    const formattedResults = {
+      score: analysisResults.score,
+      formatScore: analysisResults.formatScore,
+      contentScore: analysisResults.contentScore,
+      jobFitScore: analysisResults.jobFitScore || analysisResults.score, // Use overall score if no specific job fit
+      strengths: analysisResults.strengths,
+      recommendations: analysisResults.recommendations,
+      missingKeywords: analysisResults.missingKeywords,
+      keySkillGaps: analysisResults.keySkillGaps || analysisResults.missingKeywords?.slice(0, 3) || ['leadership', 'communication', 'project management'],
+      improvements: analysisResults.improvements,
+      improvementSuggestions: {
+        content: analysisResults.improvements?.[0] || `Focus on highlighting specific achievements that demonstrate your ${role || 'professional'} skills${industry && industry !== 'general' ? ` and ${industry} experience` : ''}.`,
+        format: analysisResults.improvements?.[1] || "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
+        structure: analysisResults.improvements?.[2] || "Consider reordering sections to emphasize experience most relevant to the job description.",
+        keywords: analysisResults.improvements?.[3] || `Research job descriptions in your target field and incorporate relevant keywords.`
+      },
+      experienceLevel: analysisResults.experienceLevel,
+      competitiveAdvantages: analysisResults.competitiveAdvantages,
+      // Include new multi-model fields
+      confidence: analysisResults.confidence,
+      fieldCompatibility: analysisResults.fieldCompatibility,
+      timeToCompetitive: analysisResults.timeToCompetitive,
+      relevanceAnalysis: analysisResults.relevanceAnalysis,
+      careerTransitionAdvice: analysisResults.careerTransitionAdvice,
+      modelsUsed: analysisResults.modelsUsed,
       jobDescriptionSource: _jobDescriptionSource
     };
+
+    logger.info('CV analysis completed', {
+      industry: industry || 'generic',
+      role: role || 'generic',
+      score: formattedResults.score,
+      aiEnabled: aiAnalysisService.isEnabled
+    });
     
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    res.json(mockResults);
+    res.json(formattedResults);
   } catch (error) {
     logger.error('Error analyzing CV against job:', error);
     res.status(500).json({ error: 'Failed to analyze CV', message: error.message });
@@ -3201,17 +3221,44 @@ async function processRoleAnalysis(req, res) {
       isGenericAnalysis
     );
     
+    // Format results for backward compatibility with frontend expectations
+    const formattedResults = {
+      score: analysisResults.score,
+      formatScore: analysisResults.formatScore,
+      contentScore: analysisResults.contentScore,
+      jobFitScore: analysisResults.jobFitScore || analysisResults.score,
+      strengths: analysisResults.strengths,
+      recommendations: analysisResults.recommendations,
+      missingKeywords: analysisResults.missingKeywords,
+      keySkillGaps: analysisResults.keySkillGaps || analysisResults.missingKeywords?.slice(0, 3) || ['leadership', 'communication', 'project management'],
+      improvements: analysisResults.improvements,
+      improvementSuggestions: {
+        content: analysisResults.improvements?.[0] || `Focus on highlighting specific achievements that demonstrate your ${role || 'professional'} skills${industry ? ` and ${industry} experience` : ''}.`,
+        format: analysisResults.improvements?.[1] || "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
+        structure: analysisResults.improvements?.[2] || "Consider reordering sections to emphasize experience most relevant to the job description.",
+        keywords: analysisResults.improvements?.[3] || `Research job descriptions in your target field and incorporate relevant keywords.`
+      },
+      experienceLevel: analysisResults.experienceLevel,
+      competitiveAdvantages: analysisResults.competitiveAdvantages,
+      confidence: analysisResults.confidence,
+      fieldCompatibility: analysisResults.fieldCompatibility,
+      timeToCompetitive: analysisResults.timeToCompetitive,
+      relevanceAnalysis: analysisResults.relevanceAnalysis,
+      careerTransitionAdvice: analysisResults.careerTransitionAdvice,
+      modelsUsed: analysisResults.modelsUsed
+    };
+    
     // Log for debugging
     logger.info('AI Analysis completed', {
       cvTextLength: cvText.length,
       industry: industry || 'generic',
       role: role || 'generic',
-      score: analysisResults.score,
+      score: formattedResults.score,
       aiEnabled: aiAnalysisService.isOpenAIEnabled || aiAnalysisService.isAnthropicEnabled
     });
     
-    // Return the AI analysis results
-    return res.json(analysisResults);
+    // Return the formatted AI analysis results
+    return res.json(formattedResults);
   } catch (error) {
     logger.error('Error analyzing CV by role:', error);
     return res.status(500).json({ error: 'Failed to analyze CV', message: error.message });
