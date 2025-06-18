@@ -1435,6 +1435,362 @@ export const CAREER_PATHWAYS = {
       'MBA (preferred for senior roles)',
       'Industry-specific certifications'
     ]
+  },
+
+  // Construction Industry Pathways
+  'carpenter': {
+    title: 'Carpenter Career Pathway',
+    description: 'Woodworking and construction carpentry career from apprentice to management',
+    stages: [
+      {
+        level: 'Education/Apprenticeship',
+        requirements: ['Construction apprenticeship program', 'Basic woodworking skills', 'Safety training'],
+        duration: '2-4 years',
+        description: 'Apprenticeship training with experienced carpenter'
+      },
+      {
+        level: 'Journeyman Carpenter',
+        requirements: ['Completed apprenticeship', 'Trade certification', 'Tool proficiency'],
+        duration: '2-5 years',
+        description: 'Independent carpentry work on various projects'
+      },
+      {
+        level: 'Skilled Carpenter/Specialist',
+        requirements: ['Specialized training (framing, finishing, etc.)', 'Advanced techniques', 'Quality craftsmanship'],
+        duration: '5-8 years',
+        description: 'Specialized carpentry and complex project work'
+      },
+      {
+        level: 'Lead Carpenter/Foreman',
+        requirements: ['Leadership training', 'Project coordination', 'Team supervision'],
+        duration: '8-12 years',
+        description: 'Team leadership and project oversight'
+      },
+      {
+        level: 'Construction Supervisor/Manager',
+        requirements: ['Management certification', 'Business skills', 'Contract knowledge'],
+        duration: '12+ years',
+        description: 'Construction project management and business operations'
+      }
+    ],
+    qualifications: [
+      'Construction apprenticeship completion',
+      'Trade certification/license',
+      'OSHA safety certifications',
+      'First aid/CPR certification',
+      'Construction management training'
+    ]
+  },
+
+  'electrician': {
+    title: 'Electrician Career Pathway',
+    description: 'Electrical trade career from apprentice to electrical contractor',
+    stages: [
+      {
+        level: 'Education/Apprenticeship',
+        requirements: ['Electrical apprenticeship program', 'Basic electrical theory', 'Code knowledge'],
+        duration: '4 years',
+        description: 'Formal electrical training and supervised work experience'
+      },
+      {
+        level: 'Journeyman Electrician',
+        requirements: ['Apprenticeship completion', 'Journeyman license', 'Code compliance'],
+        duration: '2-4 years',
+        description: 'Independent electrical work under master electrician'
+      },
+      {
+        level: 'Master Electrician',
+        requirements: ['Additional experience', 'Master electrician exam', 'Advanced electrical knowledge'],
+        duration: '4-6 years',
+        description: 'Complex electrical systems and supervision authority'
+      },
+      {
+        level: 'Electrical Supervisor/Foreman',
+        requirements: ['Leadership skills', 'Project management', 'Team coordination'],
+        duration: '6-10 years',
+        description: 'Electrical crew leadership and project oversight'
+      },
+      {
+        level: 'Electrical Contractor/Manager',
+        requirements: ['Contractor license', 'Business management', 'Bidding and estimating'],
+        duration: '10+ years',
+        description: 'Electrical contracting business and operations management'
+      }
+    ],
+    qualifications: [
+      'Electrical apprenticeship (4 years)',
+      'Journeyman electrician license',
+      'Master electrician license',
+      'Electrical contractor license',
+      'OSHA electrical safety certifications',
+      'Continuing education requirements'
+    ]
+  },
+
+  'plumber': {
+    title: 'Plumber Career Pathway',
+    description: 'Plumbing trade career from apprentice to mechanical contractor',
+    stages: [
+      {
+        level: 'Education/Apprenticeship',
+        requirements: ['Plumbing apprenticeship program', 'Pipe fitting basics', 'Code knowledge'],
+        duration: '4-5 years',
+        description: 'Plumbing fundamentals and hands-on training'
+      },
+      {
+        level: 'Journeyman Plumber',
+        requirements: ['Apprenticeship completion', 'Journeyman license', 'System installation'],
+        duration: '2-4 years',
+        description: 'Independent plumbing work and system maintenance'
+      },
+      {
+        level: 'Master Plumber',
+        requirements: ['Advanced experience', 'Master plumber exam', 'Complex systems knowledge'],
+        duration: '4-6 years',
+        description: 'Advanced plumbing systems and supervision'
+      },
+      {
+        level: 'Plumbing Supervisor/Foreman',
+        requirements: ['Team leadership', 'Project coordination', 'Quality control'],
+        duration: '6-10 years',
+        description: 'Plumbing crew management and project oversight'
+      },
+      {
+        level: 'Plumbing Contractor/Manager',
+        requirements: ['Contractor license', 'Business operations', 'Customer relations'],
+        duration: '10+ years',
+        description: 'Plumbing contracting business and operations'
+      }
+    ],
+    qualifications: [
+      'Plumbing apprenticeship (4-5 years)',
+      'Journeyman plumber license',
+      'Master plumber license',
+      'Plumbing contractor license',
+      'Backflow prevention certification',
+      'Gas line certification (where applicable)'
+    ]
+  },
+
+  'construction-worker': {
+    title: 'General Construction Worker Career Pathway',
+    description: 'General construction career from laborer to construction management',
+    stages: [
+      {
+        level: 'Construction Laborer',
+        requirements: ['Physical fitness', 'Basic safety training', 'Willingness to learn'],
+        duration: '6 months - 2 years',
+        description: 'Entry-level construction work and skill development'
+      },
+      {
+        level: 'Skilled Construction Worker',
+        requirements: ['Specialized training', 'Equipment operation', 'Trade skills'],
+        duration: '2-4 years',
+        description: 'Specialized construction skills and equipment operation'
+      },
+      {
+        level: 'Construction Specialist/Craftsman',
+        requirements: ['Trade certification', 'Advanced skills', 'Quality workmanship'],
+        duration: '4-7 years',
+        description: 'Specialized construction trades and expert-level work'
+      },
+      {
+        level: 'Construction Foreman/Lead',
+        requirements: ['Leadership training', 'Safety management', 'Crew supervision'],
+        duration: '7-10 years',
+        description: 'Construction crew leadership and site supervision'
+      },
+      {
+        level: 'Construction Superintendent/Manager',
+        requirements: ['Project management', 'Contract knowledge', 'Business skills'],
+        duration: '10+ years',
+        description: 'Construction project management and operations'
+      }
+    ],
+    qualifications: [
+      'Construction safety certifications (OSHA 10/30)',
+      'Equipment operation licenses',
+      'First aid/CPR certification',
+      'Trade-specific certifications',
+      'Construction management training',
+      'Project management certification'
+    ]
+  },
+
+  'hvac-technician': {
+    title: 'HVAC Technician Career Pathway',
+    description: 'Heating, ventilation, and air conditioning career pathway',
+    stages: [
+      {
+        level: 'Education/Training',
+        requirements: ['HVAC training program', 'EPA certification', 'Basic mechanical knowledge'],
+        duration: '6 months - 2 years',
+        description: 'HVAC fundamentals and certification preparation'
+      },
+      {
+        level: 'HVAC Apprentice/Helper',
+        requirements: ['Entry-level certification', 'On-the-job training', 'Tool familiarity'],
+        duration: '1-2 years',
+        description: 'Supervised HVAC installation and maintenance'
+      },
+      {
+        level: 'HVAC Technician',
+        requirements: ['Journeyman certification', 'System troubleshooting', 'Customer service'],
+        duration: '2-5 years',
+        description: 'Independent HVAC service and repair work'
+      },
+      {
+        level: 'Senior HVAC Technician',
+        requirements: ['Advanced certifications', 'Complex systems', 'Mentoring ability'],
+        duration: '5-8 years',
+        description: 'Complex HVAC systems and technician training'
+      },
+      {
+        level: 'HVAC Supervisor/Contractor',
+        requirements: ['Contractor license', 'Business management', 'Team leadership'],
+        duration: '8+ years',
+        description: 'HVAC business operations and team management'
+      }
+    ],
+    qualifications: [
+      'EPA Section 608 certification',
+      'HVAC Excellence certifications',
+      'State HVAC license',
+      'Electrical basics certification',
+      'Customer service training'
+    ]
+  },
+
+  'welder': {
+    title: 'Welder Career Pathway',
+    description: 'Welding trade career from basic welder to welding engineer',
+    stages: [
+      {
+        level: 'Education/Training',
+        requirements: ['Welding program', 'Basic welding processes', 'Safety training'],
+        duration: '6 months - 1 year',
+        description: 'Welding fundamentals and process training'
+      },
+      {
+        level: 'Entry-Level Welder',
+        requirements: ['Basic welding certification', 'Process proficiency', 'Quality standards'],
+        duration: '1-2 years',
+        description: 'Basic welding operations and skill development'
+      },
+      {
+        level: 'Certified Welder',
+        requirements: ['Multiple process certifications', 'Code compliance', 'Quality welding'],
+        duration: '2-5 years',
+        description: 'Advanced welding processes and specialized applications'
+      },
+      {
+        level: 'Welding Supervisor/Inspector',
+        requirements: ['CWI certification', 'Quality control', 'Team leadership'],
+        duration: '5-8 years',
+        description: 'Welding quality control and team supervision'
+      },
+      {
+        level: 'Welding Engineer/Manager',
+        requirements: ['Engineering knowledge', 'Process development', 'Project management'],
+        duration: '8+ years',
+        description: 'Welding engineering and operations management'
+      }
+    ],
+    qualifications: [
+      'AWS welding certifications',
+      'CWI (Certified Welding Inspector)',
+      'ASME/API certifications',
+      'Safety certifications',
+      'Quality control training'
+    ]
+  },
+
+  'heavy-equipment-operator': {
+    title: 'Heavy Equipment Operator Career Pathway',
+    description: 'Heavy machinery operation career in construction and industrial settings',
+    stages: [
+      {
+        level: 'Equipment Operator Training',
+        requirements: ['Equipment training program', 'CDL license', 'Safety certification'],
+        duration: '3-6 months',
+        description: 'Heavy equipment operation fundamentals'
+      },
+      {
+        level: 'Equipment Operator',
+        requirements: ['Equipment certifications', 'Safe operation record', 'Maintenance knowledge'],
+        duration: '1-3 years',
+        description: 'Professional equipment operation and basic maintenance'
+      },
+      {
+        level: 'Senior Equipment Operator',
+        requirements: ['Multiple equipment types', 'Advanced operations', 'Training others'],
+        duration: '3-6 years',
+        description: 'Complex operations and operator mentoring'
+      },
+      {
+        level: 'Equipment Supervisor/Foreman',
+        requirements: ['Leadership training', 'Fleet management', 'Safety oversight'],
+        duration: '6-10 years',
+        description: 'Equipment fleet supervision and safety management'
+      },
+      {
+        level: 'Equipment Manager/Coordinator',
+        requirements: ['Fleet management', 'Maintenance planning', 'Operations coordination'],
+        duration: '10+ years',
+        description: 'Equipment operations management and fleet planning'
+      }
+    ],
+    qualifications: [
+      'CDL (Commercial Driver\'s License)',
+      'Equipment-specific certifications',
+      'OSHA safety training',
+      'Equipment maintenance training',
+      'Fleet management certification'
+    ]
+  },
+
+  'mason': {
+    title: 'Mason Career Pathway',
+    description: 'Masonry and stonework career from apprentice to masonry contractor',
+    stages: [
+      {
+        level: 'Masonry Apprenticeship',
+        requirements: ['Apprenticeship program', 'Basic masonry skills', 'Material knowledge'],
+        duration: '3-4 years',
+        description: 'Masonry fundamentals and hands-on training'
+      },
+      {
+        level: 'Journeyman Mason',
+        requirements: ['Apprenticeship completion', 'Masonry certification', 'Tool proficiency'],
+        duration: '2-4 years',
+        description: 'Independent masonry work and project completion'
+      },
+      {
+        level: 'Skilled Mason/Specialist',
+        requirements: ['Specialized techniques', 'Restoration skills', 'Artistic ability'],
+        duration: '4-7 years',
+        description: 'Specialized masonry and restoration work'
+      },
+      {
+        level: 'Mason Foreman/Supervisor',
+        requirements: ['Team leadership', 'Project coordination', 'Quality oversight'],
+        duration: '7-10 years',
+        description: 'Masonry crew leadership and project management'
+      },
+      {
+        level: 'Masonry Contractor/Manager',
+        requirements: ['Contractor license', 'Business management', 'Estimating skills'],
+        duration: '10+ years',
+        description: 'Masonry contracting business and operations'
+      }
+    ],
+    qualifications: [
+      'Masonry apprenticeship completion',
+      'Masonry trade certification',
+      'OSHA safety certifications',
+      'Restoration technique training',
+      'Business management training'
+    ]
   }
 };
 
@@ -1624,6 +1980,49 @@ function getGenericPathway(industry, role) {
         'Professional registration',
         'Clinical certifications',
         'Continuing professional development'
+      ]
+    },
+    'construction': {
+      title: `${role} Career Pathway`,
+      description: 'Construction trade career path with hands-on skills and safety focus',
+      stages: [
+        {
+          level: 'Education/Training',
+          requirements: ['Trade program or apprenticeship', 'Safety certification', 'Basic tools knowledge'],
+          duration: '6 months - 4 years',
+          description: 'Trade-specific training and apprenticeship program'
+        },
+        {
+          level: 'Entry-Level Worker',
+          requirements: ['Completed training', 'Safety certifications', 'Basic competency'],
+          duration: '1-2 years',
+          description: 'Supervised work and skill development'
+        },
+        {
+          level: 'Skilled Tradesperson',
+          requirements: ['Journeyman certification', 'Advanced skills', 'Quality workmanship'],
+          duration: '3-6 years',
+          description: 'Independent skilled work and specialization'
+        },
+        {
+          level: 'Lead/Supervisor',
+          requirements: ['Leadership training', 'Team management', 'Advanced certifications'],
+          duration: '6-10 years',
+          description: 'Team leadership and project coordination'
+        },
+        {
+          level: 'Contractor/Manager',
+          requirements: ['Business license', 'Management skills', 'Project oversight'],
+          duration: '10+ years',
+          description: 'Business operations and construction management'
+        }
+      ],
+      qualifications: [
+        'Trade-specific certification or apprenticeship',
+        'OSHA safety certifications',
+        'State licensing (where required)',
+        'Continuing education requirements',
+        'Business management training'
       ]
     },
     'technology': {

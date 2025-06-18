@@ -740,6 +740,270 @@ export const COURSE_RECOMMENDATIONS = {
       url: 'https://alison.com/course/career-development-skills-for-success', 
       level: 'Beginner'
     }
+  ],
+
+  'construction-safety': [
+    {
+      title: 'OSHA 10-Hour Construction Safety Training',
+      provider: 'OSHA Training Institute',
+      url: 'https://www.alison.com/course/osha-10-hour-construction-safety-training',
+      description: 'Mandatory safety training for construction workers'
+    },
+    {
+      title: 'OSHA 30-Hour Construction Safety Training',
+      provider: 'OSHA Training Institute', 
+      url: 'https://www.alison.com/course/osha-30-hour-construction-safety-training',
+      description: 'Advanced construction safety for supervisors and managers'
+    },
+    {
+      title: 'Fall Protection and Safety',
+      provider: 'Construction Safety Association',
+      url: 'https://www.alison.com/course/fall-protection-safety',
+      description: 'Essential fall protection training for construction workers'
+    },
+    {
+      title: 'Scaffolding Safety Training',
+      provider: 'Construction Safety Council',
+      url: 'https://www.alison.com/course/scaffolding-safety-training',
+      description: 'Safe scaffolding practices and regulations'
+    },
+    {
+      title: 'Confined Space Safety',
+      provider: 'Safety Training Institute',
+      url: 'https://www.alison.com/course/confined-space-safety',
+      description: 'Safety procedures for working in confined spaces'
+    }
+  ],
+
+  'carpentry': [
+    {
+      title: 'Carpentry Fundamentals',
+      provider: 'Construction Training Academy',
+      url: 'https://www.alison.com/course/carpentry-fundamentals',
+      description: 'Basic carpentry skills and woodworking techniques'
+    },
+    {
+      title: 'Advanced Framing Techniques',
+      provider: 'Building Trades Institute',
+      url: 'https://www.alison.com/course/advanced-framing-techniques',
+      description: 'Advanced structural framing and construction methods'
+    },
+    {
+      title: 'Finish Carpentry and Millwork',
+      provider: 'Woodworking Institute',
+      url: 'https://www.alison.com/course/finish-carpentry-millwork',
+      description: 'Precision finishing and custom millwork techniques'
+    },
+    {
+      title: 'Construction Blueprint Reading',
+      provider: 'Technical Training Center',
+      url: 'https://www.alison.com/course/construction-blueprint-reading',
+      description: 'Understanding construction drawings and specifications'
+    },
+    {
+      title: 'Construction Project Management',
+      provider: 'Project Management Institute',
+      url: 'https://www.alison.com/course/construction-project-management',
+      description: 'Project management specifically for construction projects'
+    }
+  ],
+
+  'electrical-trades': [
+    {
+      title: 'Electrical Fundamentals',
+      provider: 'Electrical Training Institute',
+      url: 'https://www.alison.com/course/electrical-fundamentals',
+      description: 'Basic electrical theory and safety principles'
+    },
+    {
+      title: 'National Electrical Code (NEC) Training',
+      provider: 'NFPA Training',
+      url: 'https://www.alison.com/course/national-electrical-code-training',
+      description: 'Understanding and applying the National Electrical Code'
+    },
+    {
+      title: 'Motor Control and Industrial Wiring',
+      provider: 'Industrial Training Institute',
+      url: 'https://www.alison.com/course/motor-control-industrial-wiring',
+      description: 'Industrial electrical systems and motor controls'
+    },
+    {
+      title: 'Electrical Safety and NFPA 70E',
+      provider: 'Electrical Safety Foundation',
+      url: 'https://www.alison.com/course/electrical-safety-nfpa-70e',
+      description: 'Electrical safety standards and arc flash protection'
+    },
+    {
+      title: 'Renewable Energy Systems',
+      provider: 'Solar Energy International',
+      url: 'https://www.alison.com/course/renewable-energy-systems',
+      description: 'Solar and renewable energy system installation'
+    }
+  ],
+
+  'plumbing-trades': [
+    {
+      title: 'Plumbing Fundamentals',
+      provider: 'Plumbing Training Institute',
+      url: 'https://www.alison.com/course/plumbing-fundamentals',
+      description: 'Basic plumbing principles and pipe fitting'
+    },
+    {
+      title: 'Plumbing Code and Regulations',
+      provider: 'International Code Council',
+      url: 'https://www.alison.com/course/plumbing-code-regulations',
+      description: 'Understanding plumbing codes and compliance'
+    },
+    {
+      title: 'Advanced Pipe Installation',
+      provider: 'Mechanical Contractors Association',
+      url: 'https://www.alison.com/course/advanced-pipe-installation',
+      description: 'Complex piping systems and installation techniques'
+    },
+    {
+      title: 'Backflow Prevention',
+      provider: 'Water Quality Association',
+      url: 'https://www.alison.com/course/backflow-prevention',
+      description: 'Backflow prevention systems and testing'
+    },
+    {
+      title: 'Green Plumbing Systems',
+      provider: 'Sustainable Building Institute',
+      url: 'https://www.alison.com/course/green-plumbing-systems',
+      description: 'Water-efficient and sustainable plumbing technologies'
+    }
+  ],
+
+  'hvac-trades': [
+    {
+      title: 'HVAC Fundamentals',
+      provider: 'HVAC Training Institute',
+      url: 'https://www.alison.com/course/hvac-fundamentals',
+      description: 'Heating, ventilation, and air conditioning basics'
+    },
+    {
+      title: 'EPA 608 Certification Prep',
+      provider: 'Environmental Protection Agency',
+      url: 'https://www.alison.com/course/epa-608-certification-prep',
+      description: 'Refrigerant handling and environmental compliance'
+    },
+    {
+      title: 'Commercial HVAC Systems',
+      provider: 'Commercial HVAC Institute',
+      url: 'https://www.alison.com/course/commercial-hvac-systems',
+      description: 'Large-scale HVAC systems and controls'
+    },
+    {
+      title: 'Energy Efficiency and Building Performance',
+      provider: 'Building Performance Institute',
+      url: 'https://www.alison.com/course/energy-efficiency-building-performance',
+      description: 'Energy-efficient HVAC design and optimization'
+    },
+    {
+      title: 'HVAC Troubleshooting and Diagnostics',
+      provider: 'Technical Training Center',
+      url: 'https://www.alison.com/course/hvac-troubleshooting-diagnostics',
+      description: 'Advanced HVAC system troubleshooting techniques'
+    }
+  ],
+
+  'welding-trades': [
+    {
+      title: 'Welding Fundamentals',
+      provider: 'American Welding Society',
+      url: 'https://www.alison.com/course/welding-fundamentals',
+      description: 'Basic welding processes and safety'
+    },
+    {
+      title: 'AWS Certified Welder Training',
+      provider: 'American Welding Society',
+      url: 'https://www.alison.com/course/aws-certified-welder-training',
+      description: 'Professional welding certification preparation'
+    },
+    {
+      title: 'Advanced TIG and MIG Welding',
+      provider: 'Welding Technology Institute',
+      url: 'https://www.alison.com/course/advanced-tig-mig-welding',
+      description: 'Advanced welding techniques and processes'
+    },
+    {
+      title: 'Welding Inspection and Quality Control',
+      provider: 'Certified Welding Inspector Training',
+      url: 'https://www.alison.com/course/welding-inspection-quality-control',
+      description: 'Welding quality assurance and inspection'
+    },
+    {
+      title: 'Pipe Welding and Fabrication',
+      provider: 'Pipeline Welding Institute',
+      url: 'https://www.alison.com/course/pipe-welding-fabrication',
+      description: 'Specialized pipe welding for industrial applications'
+    }
+  ],
+
+  'heavy-equipment': [
+    {
+      title: 'Heavy Equipment Operation Fundamentals',
+      provider: 'Equipment Training Institute',
+      url: 'https://www.alison.com/course/heavy-equipment-operation-fundamentals',
+      description: 'Basic operation of construction equipment'
+    },
+    {
+      title: 'Excavator Operation and Safety',
+      provider: 'Construction Equipment Training',
+      url: 'https://www.alison.com/course/excavator-operation-safety',
+      description: 'Safe and efficient excavator operation'
+    },
+    {
+      title: 'Commercial Driver\'s License (CDL) Training',
+      provider: 'CDL Training Institute',
+      url: 'https://www.alison.com/course/commercial-drivers-license-training',
+      description: 'Commercial driving license for heavy equipment operators'
+    },
+    {
+      title: 'Equipment Maintenance and Troubleshooting',
+      provider: 'Equipment Maintenance Institute',
+      url: 'https://www.alison.com/course/equipment-maintenance-troubleshooting',
+      description: 'Preventive maintenance and basic repairs'
+    },
+    {
+      title: 'Crane Operation and Rigging',
+      provider: 'Crane Operator Institute',
+      url: 'https://www.alison.com/course/crane-operation-rigging',
+      description: 'Safe crane operation and load rigging techniques'
+    }
+  ],
+
+  'masonry-trades': [
+    {
+      title: 'Masonry Fundamentals',
+      provider: 'Masonry Institute',
+      url: 'https://www.alison.com/course/masonry-fundamentals',
+      description: 'Basic masonry techniques and materials'
+    },
+    {
+      title: 'Brick and Block Construction',
+      provider: 'Brick Industry Association',
+      url: 'https://www.alison.com/course/brick-block-construction',
+      description: 'Professional bricklaying and block construction'
+    },
+    {
+      title: 'Stone Cutting and Installation',
+      provider: 'Stone Contractors Association',
+      url: 'https://www.alison.com/course/stone-cutting-installation',
+      description: 'Natural stone cutting, shaping, and installation'
+    },
+    {
+      title: 'Historical Restoration Techniques',
+      provider: 'Preservation Training Institute',
+      url: 'https://www.alison.com/course/historical-restoration-techniques',
+      description: 'Specialized restoration of historical masonry'
+    },
+    {
+      title: 'Decorative Concrete and Finishes',
+      provider: 'Concrete Institute',
+      url: 'https://www.alison.com/course/decorative-concrete-finishes',
+      description: 'Artistic concrete work and specialty finishes'
+    }
   ]
 };
 
@@ -845,15 +1109,22 @@ const ROLE_SKILLS_MAPPING = {
   'brand-manager': ['marketing', 'leadership'],
   'market-researcher': ['marketing', 'data analysis'],
 
-  // Construction roles
-  'construction-manager': ['project management', 'leadership'],
+  // Construction roles - Original management roles
+  'construction-manager': ['construction-safety', 'project management', 'leadership'],
   'architect': ['civil engineering', 'cad design'],
-  'electrician': ['electrical engineering', 'safety'],
-  'plumber': ['safety', 'project management'],
-  'carpenter': ['safety', 'project management'],
-  'site-supervisor': ['leadership', 'safety'],
+  'site-supervisor': ['construction-safety', 'leadership'],
   'quantity-surveyor': ['civil engineering', 'data analysis'],
-  'building-inspector': ['civil engineering', 'safety'],
+  'building-inspector': ['construction-safety', 'civil engineering'],
+
+  // Construction trades - New vocational pathways
+  'carpenter': ['carpentry', 'construction-safety'],
+  'electrician': ['electrical-trades', 'construction-safety'],
+  'plumber': ['plumbing-trades', 'construction-safety'],
+  'construction-worker': ['construction-safety', 'project management'],
+  'hvac-technician': ['hvac-trades', 'construction-safety'],
+  'welder': ['welding-trades', 'construction-safety'],
+  'heavy-equipment-operator': ['heavy-equipment', 'construction-safety'],
+  'mason': ['masonry-trades', 'construction-safety'],
 
   // Transport roles
   'logistics-manager': ['project management', 'leadership'],
@@ -912,6 +1183,7 @@ function findCourseRecommendationsInternal(keywords = [], count = 3, industry = 
     'aerospace': ['aerospace engineering', 'mechanical engineering', 'professional engineer', 'cad design', 'project management'],
     'civil': ['civil engineering', 'project management', 'safety', 'professional engineer'],
     'mechanical': ['mechanical engineering', 'cad design', 'professional engineer', 'project management'],
+    'construction': ['construction-safety', 'carpentry', 'electrical-trades', 'plumbing-trades', 'hvac-trades', 'welding-trades', 'heavy-equipment', 'masonry-trades', 'project management'],
     'legal': ['legal', 'law', 'communication'],
     'pharmaceutical': ['pharmacy', 'medical', 'healthcare'],
     'veterinary': ['veterinary', 'healthcare', 'medical'],
@@ -921,17 +1193,18 @@ function findCourseRecommendationsInternal(keywords = [], count = 3, industry = 
   
   // Define courses to exclude for specific industries
   const industryExclusions = {
-    'healthcare': ['it', 'programming', 'engineering', 'aerospace engineering', 'civil engineering', 'mechanical engineering', 'marketing', 'finance'],
-    'emergency_services': ['it', 'programming', 'marketing', 'finance', 'education', 'engineering'],
-    'finance': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'education', 'engineering'],
-    'technology': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'civil engineering', 'aerospace engineering'],
-    'education': ['it', 'programming', 'healthcare', 'nursing', 'medical', 'clinical', 'engineering', 'aerospace engineering', 'civil engineering', 'marketing', 'finance'],
-    'marketing': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'education', 'engineering'],
-    'design': ['healthcare', 'nursing', 'medical', 'clinical', 'engineering', 'aerospace engineering', 'civil engineering'],
-    'engineering': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'marketing'],
-    'aerospace': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'marketing', 'finance'],
+    'healthcare': ['it', 'programming', 'engineering', 'aerospace engineering', 'civil engineering', 'mechanical engineering', 'marketing', 'finance', 'construction-safety', 'carpentry', 'electrical-trades', 'plumbing-trades'],
+    'emergency_services': ['it', 'programming', 'marketing', 'finance', 'education', 'engineering', 'construction-safety', 'carpentry'],
+    'finance': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'education', 'engineering', 'construction-safety', 'carpentry', 'electrical-trades'],
+    'technology': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'civil engineering', 'aerospace engineering', 'construction-safety', 'carpentry', 'plumbing-trades'],
+    'education': ['it', 'programming', 'healthcare', 'nursing', 'medical', 'clinical', 'engineering', 'aerospace engineering', 'civil engineering', 'marketing', 'finance', 'construction-safety', 'carpentry', 'electrical-trades'],
+    'marketing': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'education', 'engineering', 'construction-safety', 'carpentry', 'electrical-trades'],
+    'design': ['healthcare', 'nursing', 'medical', 'clinical', 'engineering', 'aerospace engineering', 'civil engineering', 'construction-safety', 'carpentry', 'electrical-trades'],
+    'engineering': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'marketing', 'construction-safety', 'carpentry', 'plumbing-trades'],
+    'aerospace': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'marketing', 'finance', 'construction-safety', 'carpentry', 'electrical-trades'],
     'civil': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'marketing', 'it', 'programming'],
-    'mechanical': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'marketing']
+    'mechanical': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'marketing'],
+    'construction': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'marketing', 'finance', 'education']
   };
   
   const priorityCategories = industry ? industryCoursePriorities[industry] || [] : [];
@@ -1047,6 +1320,37 @@ function findCourseRecommendationsInternal(keywords = [], count = 3, industry = 
         'solidworks': ['cad design'],
         'fe exam': ['professional engineer'],
         'pe license': ['professional engineer'],
+        'project': ['project management']
+      },
+      'construction': {
+        'safety': ['construction-safety'],
+        'osha': ['construction-safety'],
+        'fall protection': ['construction-safety'],
+        'scaffold': ['construction-safety'],
+        'carpenter': ['carpentry'],
+        'wood': ['carpentry'],
+        'framing': ['carpentry'],
+        'electric': ['electrical-trades'],
+        'electrical': ['electrical-trades'],
+        'wiring': ['electrical-trades'],
+        'plumb': ['plumbing-trades'],
+        'pipe': ['plumbing-trades'],
+        'hvac': ['hvac-trades'],
+        'heating': ['hvac-trades'],
+        'cooling': ['hvac-trades'],
+        'ventilation': ['hvac-trades'],
+        'weld': ['welding-trades'],
+        'fabrication': ['welding-trades'],
+        'equipment': ['heavy-equipment'],
+        'operator': ['heavy-equipment'],
+        'excavator': ['heavy-equipment'],
+        'crane': ['heavy-equipment'],
+        'mason': ['masonry-trades'],
+        'brick': ['masonry-trades'],
+        'stone': ['masonry-trades'],
+        'concrete': ['masonry-trades'],
+        'construction': ['construction-safety', 'project management'],
+        'building': ['construction-safety', 'project management'],
         'project': ['project management']
       },
       'healthcare': {

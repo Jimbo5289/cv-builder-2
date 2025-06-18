@@ -132,12 +132,19 @@ export const ROLES_BY_INDUSTRY = {
   construction: [
     { value: 'construction-manager', label: 'Construction Manager' },
     { value: 'architect', label: 'Architect' },
-    { value: 'electrician', label: 'Electrician' },
-    { value: 'plumber', label: 'Plumber' },
-    { value: 'carpenter', label: 'Carpenter' },
     { value: 'site-supervisor', label: 'Site Supervisor' },
     { value: 'quantity-surveyor', label: 'Quantity Surveyor' },
-    { value: 'building-inspector', label: 'Building Inspector' }
+    { value: 'building-inspector', label: 'Building Inspector' },
+    
+    // Skilled Trades
+    { value: 'carpenter', label: 'Carpenter' },
+    { value: 'electrician', label: 'Electrician' },
+    { value: 'plumber', label: 'Plumber' },
+    { value: 'hvac-technician', label: 'HVAC Technician' },
+    { value: 'welder', label: 'Welder' },
+    { value: 'mason', label: 'Mason/Bricklayer' },
+    { value: 'heavy-equipment-operator', label: 'Heavy Equipment Operator' },
+    { value: 'construction-worker', label: 'Construction Worker/Laborer' }
   ],
   
   transport: [
