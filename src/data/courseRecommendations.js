@@ -1004,7 +1004,567 @@ export const COURSE_RECOMMENDATIONS = {
       url: 'https://www.alison.com/course/decorative-concrete-finishes',
       description: 'Artistic concrete work and specialty finishes'
     }
-  ]
+  ],
+
+  'retail-management': [
+    {
+      title: 'Retail Management Fundamentals',
+      provider: 'Retail Management Institute',
+      url: 'https://www.alison.com/course/retail-management-fundamentals',
+      description: 'Essential retail operations and customer service management'
+    },
+    {
+      title: 'Point of Sale (POS) Systems Training',
+      provider: 'Retail Technology Institute',
+      url: 'https://www.alison.com/course/pos-systems-training',
+      description: 'Modern POS systems and payment processing'
+    },
+    {
+      title: 'Inventory Management for Retail',
+      provider: 'Supply Chain Academy',
+      url: 'https://www.alison.com/course/inventory-management-retail',
+      description: 'Stock control and inventory optimization'
+    },
+    {
+      title: 'Visual Merchandising and Store Layout',
+      provider: 'Merchandising Institute',
+      url: 'https://www.alison.com/course/visual-merchandising-store-layout',
+      description: 'Product display and store design principles'
+    },
+    {
+      title: 'Retail Sales Techniques',
+      provider: 'Sales Training Academy',
+      url: 'https://www.alison.com/course/retail-sales-techniques',
+      description: 'Effective selling strategies and customer engagement'
+    }
+  ],
+
+  'beauty-services': [
+    {
+      title: 'Cosmetology Fundamentals',
+      provider: 'Beauty Education Institute',
+      url: 'https://www.alison.com/course/cosmetology-fundamentals',
+      description: 'Hair, skin, and nail care basics'
+    },
+    {
+      title: 'Advanced Hair Cutting and Styling',
+      provider: 'Professional Beauty Academy',
+      url: 'https://www.alison.com/course/advanced-hair-cutting-styling',
+      description: 'Professional hair cutting and styling techniques'
+    },
+    {
+      title: 'Makeup Artistry Certification',
+      provider: 'Makeup Academy',
+      url: 'https://www.alison.com/course/makeup-artistry-certification',
+      description: 'Professional makeup application and artistry'
+    },
+    {
+      title: 'Nail Technology and Art',
+      provider: 'Nail Technology Institute',
+      url: 'https://www.alison.com/course/nail-technology-art',
+      description: 'Manicure, pedicure, and nail art techniques'
+    },
+    {
+      title: 'Spa and Wellness Services',
+      provider: 'Wellness Professional Academy',
+      url: 'https://www.alison.com/course/spa-wellness-services',
+      description: 'Holistic beauty and wellness treatments'
+    }
+  ],
+
+  'hospitality-service': [
+    {
+      title: 'Hotel Operations Management',
+      provider: 'Hospitality Management Institute',
+      url: 'https://www.alison.com/course/hotel-operations-management',
+      description: 'Front office, housekeeping, and guest services'
+    },
+    {
+      title: 'Food Service and Restaurant Management',
+      provider: 'Culinary Management Academy',
+      url: 'https://www.alison.com/course/food-service-restaurant-management',
+      description: 'Restaurant operations and food service management'
+    },
+    {
+      title: 'Culinary Arts and Kitchen Management',
+      provider: 'Culinary Institute',
+      url: 'https://www.alison.com/course/culinary-arts-kitchen-management',
+      description: 'Professional cooking and kitchen operations'
+    },
+    {
+      title: 'Event Planning and Coordination',
+      provider: 'Event Management Academy',
+      url: 'https://www.alison.com/course/event-planning-coordination',
+      description: 'Event planning, coordination, and execution'
+    },
+    {
+      title: 'Tourism and Travel Services',
+      provider: 'Tourism Professional Institute',
+      url: 'https://www.alison.com/course/tourism-travel-services',
+      description: 'Travel planning and tourism industry operations'
+    }
+  ],
+
+  'transport-logistics': [
+    {
+      title: 'Commercial Driver\'s License (CDL) Training',
+      provider: 'Professional Drivers Institute',
+      url: 'https://www.alison.com/course/commercial-drivers-license-training',
+      description: 'CDL training and commercial driving certification'
+    },
+    {
+      title: 'Warehouse Operations and Management',
+      provider: 'Logistics Academy',
+      url: 'https://www.alison.com/course/warehouse-operations-management',
+      description: 'Warehouse management and inventory control'
+    },
+    {
+      title: 'Supply Chain Management',
+      provider: 'Supply Chain Institute',
+      url: 'https://www.alison.com/course/supply-chain-management',
+      description: 'End-to-end supply chain optimization'
+    },
+    {
+      title: 'Transportation Safety and Compliance',
+      provider: 'Transportation Safety Council',
+      url: 'https://www.alison.com/course/transportation-safety-compliance',
+      description: 'DOT regulations and transportation safety'
+    },
+    {
+      title: 'Fleet Management and Optimization',
+      provider: 'Fleet Management Institute',
+      url: 'https://www.alison.com/course/fleet-management-optimization',
+      description: 'Vehicle fleet operations and cost optimization'
+    }
+  ],
+
+  'security-services': [
+    {
+      title: 'Security Guard Fundamentals',
+      provider: 'Security Training Institute',
+      url: 'https://www.alison.com/course/security-guard-fundamentals',
+      description: 'Basic security operations and procedures'
+    },
+    {
+      title: 'Security Technology and Surveillance',
+      provider: 'Security Technology Academy',
+      url: 'https://www.alison.com/course/security-technology-surveillance',
+      description: 'Security systems and surveillance technology'
+    },
+    {
+      title: 'Emergency Response and Crisis Management',
+      provider: 'Emergency Response Institute',
+      url: 'https://www.alison.com/course/emergency-response-crisis-management',
+      description: 'Emergency procedures and crisis response'
+    },
+    {
+      title: 'Risk Assessment and Security Planning',
+      provider: 'Risk Management Academy',
+      url: 'https://www.alison.com/course/risk-assessment-security-planning',
+      description: 'Security risk analysis and planning'
+    },
+    {
+      title: 'Private Investigation Techniques',
+      provider: 'Investigation Training Center',
+      url: 'https://www.alison.com/course/private-investigation-techniques',
+      description: 'Investigation methods and evidence gathering'
+    }
+  ],
+
+  'agriculture-farming': [
+    {
+      title: 'Sustainable Agriculture Practices',
+      provider: 'Agricultural Institute',
+      url: 'https://www.alison.com/course/sustainable-agriculture-practices',
+      description: 'Environmentally sustainable farming methods'
+    },
+    {
+      title: 'Crop Production and Management',
+      provider: 'Crop Science Academy',
+      url: 'https://www.alison.com/course/crop-production-management',
+      description: 'Crop planning, planting, and harvest management'
+    },
+    {
+      title: 'Livestock Management',
+      provider: 'Animal Science Institute',
+      url: 'https://www.alison.com/course/livestock-management',
+      description: 'Animal husbandry and livestock care'
+    },
+    {
+      title: 'Agricultural Equipment Operation',
+      provider: 'Farm Equipment Training Center',
+      url: 'https://www.alison.com/course/agricultural-equipment-operation',
+      description: 'Farm machinery operation and maintenance'
+    },
+    {
+      title: 'Farm Business Management',
+      provider: 'Agricultural Business Institute',
+      url: 'https://www.alison.com/course/farm-business-management',
+      description: 'Agricultural business planning and financial management'
+    }
+  ],
+
+  'landscaping-horticulture': [
+    {
+      title: 'Landscape Design Fundamentals',
+      provider: 'Landscape Design Institute',
+      url: 'https://www.alison.com/course/landscape-design-fundamentals',
+      description: 'Basic landscape design principles and planning'
+    },
+    {
+      title: 'Plant Identification and Care',
+      provider: 'Horticulture Academy',
+      url: 'https://www.alison.com/course/plant-identification-care',
+      description: 'Plant species identification and care techniques'
+    },
+    {
+      title: 'Turf Management and Lawn Care',
+      provider: 'Turf Management Institute',
+      url: 'https://www.alison.com/course/turf-management-lawn-care',
+      description: 'Professional lawn care and turf maintenance'
+    },
+    {
+      title: 'Irrigation Systems Design',
+      provider: 'Irrigation Technology Center',
+      url: 'https://www.alison.com/course/irrigation-systems-design',
+      description: 'Water management and irrigation system installation'
+    },
+    {
+      title: 'Landscape Business Management',
+      provider: 'Green Industry Institute',
+      url: 'https://www.alison.com/course/landscape-business-management',
+      description: 'Landscaping business operations and customer relations'
+    }
+  ],
+
+  'retail-management': [
+    {
+      title: 'Retail Management Fundamentals',
+      provider: 'Retail Management Institute',
+      url: 'https://www.alison.com/course/retail-management-fundamentals',
+      description: 'Essential retail operations and customer service management'
+    },
+    {
+      title: 'Point of Sale (POS) Systems Training',
+      provider: 'Retail Technology Institute',
+      url: 'https://www.alison.com/course/pos-systems-training',
+      description: 'Modern POS systems and payment processing'
+    },
+    {
+      title: 'Inventory Management for Retail',
+      provider: 'Supply Chain Academy',
+      url: 'https://www.alison.com/course/inventory-management-retail',
+      description: 'Stock control and inventory optimization'
+    },
+    {
+      title: 'Visual Merchandising and Store Layout',
+      provider: 'Merchandising Institute',
+      url: 'https://www.alison.com/course/visual-merchandising-store-layout',
+      description: 'Product display and store design principles'
+    },
+    {
+      title: 'Retail Sales Techniques',
+      provider: 'Sales Training Academy',
+      url: 'https://www.alison.com/course/retail-sales-techniques',
+      description: 'Effective selling strategies and customer engagement'
+    }
+  ],
+
+  'beauty-services': [
+    {
+      title: 'Cosmetology Fundamentals',
+      provider: 'Beauty Education Institute',
+      url: 'https://www.alison.com/course/cosmetology-fundamentals',
+      description: 'Hair, skin, and nail care basics'
+    },
+    {
+      title: 'Advanced Hair Cutting and Styling',
+      provider: 'Professional Beauty Academy',
+      url: 'https://www.alison.com/course/advanced-hair-cutting-styling',
+      description: 'Professional hair cutting and styling techniques'
+    },
+    {
+      title: 'Makeup Artistry Certification',
+      provider: 'Makeup Academy',
+      url: 'https://www.alison.com/course/makeup-artistry-certification',
+      description: 'Professional makeup application and artistry'
+    },
+    {
+      title: 'Nail Technology and Art',
+      provider: 'Nail Technology Institute',
+      url: 'https://www.alison.com/course/nail-technology-art',
+      description: 'Manicure, pedicure, and nail art techniques'
+    },
+    {
+      title: 'Spa and Wellness Services',
+      provider: 'Wellness Professional Academy',
+      url: 'https://www.alison.com/course/spa-wellness-services',
+      description: 'Holistic beauty and wellness treatments'
+    }
+  ],
+
+  'hospitality-service': [
+    {
+      title: 'Hotel Operations Management',
+      provider: 'Hospitality Management Institute',
+      url: 'https://www.alison.com/course/hotel-operations-management',
+      description: 'Front office, housekeeping, and guest services'
+    },
+    {
+      title: 'Food Service and Restaurant Management',
+      provider: 'Culinary Management Academy',
+      url: 'https://www.alison.com/course/food-service-restaurant-management',
+      description: 'Restaurant operations and food service management'
+    },
+    {
+      title: 'Culinary Arts and Kitchen Management',
+      provider: 'Culinary Institute',
+      url: 'https://www.alison.com/course/culinary-arts-kitchen-management',
+      description: 'Professional cooking and kitchen operations'
+    },
+    {
+      title: 'Event Planning and Coordination',
+      provider: 'Event Management Academy',
+      url: 'https://www.alison.com/course/event-planning-coordination',
+      description: 'Event planning, coordination, and execution'
+    },
+    {
+      title: 'Tourism and Travel Services',
+      provider: 'Tourism Professional Institute',
+      url: 'https://www.alison.com/course/tourism-travel-services',
+      description: 'Travel planning and tourism industry operations'
+    }
+  ],
+
+  'transport-logistics': [
+    {
+      title: 'Commercial Driver\'s License (CDL) Training',
+      provider: 'Professional Drivers Institute',
+      url: 'https://www.alison.com/course/commercial-drivers-license-training',
+      description: 'CDL training and commercial driving certification'
+    },
+    {
+      title: 'Warehouse Operations and Management',
+      provider: 'Logistics Academy',
+      url: 'https://www.alison.com/course/warehouse-operations-management',
+      description: 'Warehouse management and inventory control'
+    },
+    {
+      title: 'Supply Chain Management',
+      provider: 'Supply Chain Institute',
+      url: 'https://www.alison.com/course/supply-chain-management',
+      description: 'End-to-end supply chain optimization'
+    },
+    {
+      title: 'Transportation Safety and Compliance',
+      provider: 'Transportation Safety Council',
+      url: 'https://www.alison.com/course/transportation-safety-compliance',
+      description: 'DOT regulations and transportation safety'
+    },
+    {
+      title: 'Fleet Management and Optimization',
+      provider: 'Fleet Management Institute',
+      url: 'https://www.alison.com/course/fleet-management-optimization',
+      description: 'Vehicle fleet operations and cost optimization'
+    }
+  ],
+
+  'security-services': [
+    {
+      title: 'Security Guard Fundamentals',
+      provider: 'Security Training Institute',
+      url: 'https://www.alison.com/course/security-guard-fundamentals',
+      description: 'Basic security operations and procedures'
+    },
+    {
+      title: 'Security Technology and Surveillance',
+      provider: 'Security Technology Academy',
+      url: 'https://www.alison.com/course/security-technology-surveillance',
+      description: 'Security systems and surveillance technology'
+    },
+    {
+      title: 'Emergency Response and Crisis Management',
+      provider: 'Emergency Response Institute',
+      url: 'https://www.alison.com/course/emergency-response-crisis-management',
+      description: 'Emergency procedures and crisis response'
+    },
+    {
+      title: 'Risk Assessment and Security Planning',
+      provider: 'Risk Management Academy',
+      url: 'https://www.alison.com/course/risk-assessment-security-planning',
+      description: 'Security risk analysis and planning'
+    },
+    {
+      title: 'Private Investigation Techniques',
+      provider: 'Investigation Training Center',
+      url: 'https://www.alison.com/course/private-investigation-techniques',
+      description: 'Investigation methods and evidence gathering'
+    }
+  ],
+
+  'agriculture-farming': [
+    {
+      title: 'Sustainable Agriculture Practices',
+      provider: 'Agricultural Institute',
+      url: 'https://www.alison.com/course/sustainable-agriculture-practices',
+      description: 'Environmentally sustainable farming methods'
+    },
+    {
+      title: 'Crop Production and Management',
+      provider: 'Crop Science Academy',
+      url: 'https://www.alison.com/course/crop-production-management',
+      description: 'Crop planning, planting, and harvest management'
+    },
+    {
+      title: 'Livestock Management',
+      provider: 'Animal Science Institute',
+      url: 'https://www.alison.com/course/livestock-management',
+      description: 'Animal husbandry and livestock care'
+    },
+    {
+      title: 'Agricultural Equipment Operation',
+      provider: 'Farm Equipment Training Center',
+      url: 'https://www.alison.com/course/agricultural-equipment-operation',
+      description: 'Farm machinery operation and maintenance'
+    },
+    {
+      title: 'Farm Business Management',
+      provider: 'Agricultural Business Institute',
+      url: 'https://www.alison.com/course/farm-business-management',
+      description: 'Agricultural business planning and financial management'
+    }
+  ],
+
+  'landscaping-horticulture': [
+    {
+      title: 'Landscape Design Fundamentals',
+      provider: 'Landscape Design Institute',
+      url: 'https://www.alison.com/course/landscape-design-fundamentals',
+      description: 'Basic landscape design principles and planning'
+    },
+    {
+      title: 'Plant Identification and Care',
+      provider: 'Horticulture Academy',
+      url: 'https://www.alison.com/course/plant-identification-care',
+      description: 'Plant species identification and care techniques'
+    },
+    {
+      title: 'Turf Management and Lawn Care',
+      provider: 'Turf Management Institute',
+      url: 'https://www.alison.com/course/turf-management-lawn-care',
+      description: 'Professional lawn care and turf maintenance'
+    },
+    {
+      title: 'Irrigation Systems Design',
+      provider: 'Irrigation Technology Center',
+      url: 'https://www.alison.com/course/irrigation-systems-design',
+      description: 'Water management and irrigation system installation'
+    },
+    {
+      title: 'Landscape Business Management',
+      provider: 'Green Industry Institute',
+      url: 'https://www.alison.com/course/landscape-business-management',
+      description: 'Landscaping business operations and customer relations'
+    }
+  ],
+
+  // Retail roles
+  'store-manager': ['retail-management', 'leadership'],
+  'sales-associate': ['retail-management', 'customer service'],
+  'retail-buyer': ['retail-management', 'data analysis'],
+  'merchandiser': ['retail-management', 'marketing'],
+  'visual-merchandiser': ['retail-management', 'communication'],
+  'inventory-manager': ['retail-management', 'data analysis'],
+  'customer-service': ['customer service', 'communication'],
+  'e-commerce-manager': ['retail-management', 'marketing'],
+  
+  // New retail roles
+  'cashier': ['retail-management', 'customer service'],
+  'stock-clerk': ['retail-management', 'project management'],
+  'retail-supervisor': ['retail-management', 'leadership'],
+  'department-manager': ['retail-management', 'leadership'],
+  'loss-prevention': ['security-services', 'retail-management'],
+  'personal-shopper': ['retail-management', 'customer service'],
+
+  // Hospitality roles
+  'hotel-manager': ['hospitality-service', 'leadership'],
+  'chef': ['hospitality-service', 'leadership'],
+  'event-planner': ['hospitality-service', 'project management'],
+  'restaurant-manager': ['hospitality-service', 'leadership'],
+  'concierge': ['hospitality-service', 'customer service'],
+  'tour-guide': ['hospitality-service', 'communication'],
+  'travel-agent': ['hospitality-service', 'customer service'],
+  'hospitality-supervisor': ['hospitality-service', 'leadership'],
+  
+  // New hospitality roles
+  'server': ['hospitality-service', 'customer service'],
+  'bartender': ['hospitality-service', 'customer service'],
+  'front-desk-clerk': ['hospitality-service', 'customer service'],
+  'housekeeper': ['hospitality-service', 'customer service'],
+  'kitchen-staff': ['hospitality-service', 'customer service'],
+  'hotel-receptionist': ['hospitality-service', 'customer service'],
+  'catering-assistant': ['hospitality-service', 'customer service'],
+  'banquet-server': ['hospitality-service', 'customer service'],
+
+  // Transport roles
+  'logistics-manager': ['transport-logistics', 'leadership'],
+  'fleet-manager': ['transport-logistics', 'leadership'],
+  'supply-chain': ['transport-logistics', 'data analysis'],
+  'warehouse-manager': ['transport-logistics', 'leadership'],
+  'transportation-planner': ['transport-logistics', 'project management'],
+  'freight-coordinator': ['transport-logistics', 'communication'],
+  'shipping-manager': ['transport-logistics', 'leadership'],
+  'customs-broker': ['transport-logistics', 'compliance'],
+  
+  // New transport roles
+  'truck-driver': ['transport-logistics', 'safety'],
+  'delivery-driver': ['transport-logistics', 'customer service'],
+  'warehouse-worker': ['transport-logistics', 'safety'],
+  'forklift-operator': ['transport-logistics', 'safety'],
+  'dispatcher': ['transport-logistics', 'communication'],
+  'courier': ['transport-logistics', 'customer service'],
+  'inventory-clerk': ['transport-logistics', 'data analysis'],
+  'shipping-clerk': ['transport-logistics', 'communication'],
+
+  // Beauty industry roles
+  'salon-owner': ['beauty-services', 'leadership'],
+  'hairstylist': ['beauty-services', 'customer service'],
+  'beauty-therapist': ['beauty-services', 'customer service'],
+  'makeup-artist': ['beauty-services', 'communication'],
+  'nail-technician': ['beauty-services', 'customer service'],
+  'esthetician': ['beauty-services', 'customer service'],
+  'massage-therapist': ['beauty-services', 'healthcare'],
+  'barber': ['beauty-services', 'customer service'],
+  'cosmetologist': ['beauty-services', 'customer service'],
+  'beauty-consultant': ['beauty-services', 'communication'],
+  'spa-manager': ['beauty-services', 'leadership'],
+  'beauty-trainer': ['beauty-services', 'teaching'],
+
+  // Security industry roles
+  'security-manager': ['security-services', 'leadership'],
+  'security-guard': ['security-services', 'safety'],
+  'private-investigator': ['security-services', 'legal'],
+  'security-consultant': ['security-services', 'communication'],
+  'loss-prevention-manager': ['security-services', 'leadership'],
+  'surveillance-operator': ['security-services', 'safety'],
+  'armed-security': ['security-services', 'safety'],
+  'event-security': ['security-services', 'customer service'],
+  'corporate-security': ['security-services', 'leadership'],
+  'emergency-response': ['security-services', 'emergency response'],
+
+  // Agriculture industry roles
+  'farm-manager': ['agriculture-farming', 'leadership'],
+  'agricultural-scientist': ['agriculture-farming', 'research'],
+  'livestock-manager': ['agriculture-farming', 'leadership'],
+  'crop-specialist': ['agriculture-farming', 'research'],
+  'agricultural-inspector': ['agriculture-farming', 'compliance'],
+  'farm-worker': ['agriculture-farming', 'safety'],
+  'greenhouse-manager': ['agriculture-farming', 'leadership'],
+  'veterinary-technician': ['agriculture-farming', 'healthcare'],
+  'food-safety-inspector': ['agriculture-farming', 'compliance'],
+  'agricultural-equipment-operator': ['agriculture-farming', 'safety'],
+  'landscaper': ['landscaping-horticulture', 'customer service'],
+  'environmental-consultant': ['agriculture-farming', 'research'],
 };
 
 // Comprehensive role-to-skills mapping for all 104 dropdown roles
@@ -1060,34 +1620,102 @@ const ROLE_SKILLS_MAPPING = {
   'quality-assurance': ['project management', 'safety'],
 
   // Retail roles
-  'store-manager': ['leadership', 'customer service'],
-  'sales-associate': ['customer service', 'communication'],
-  'retail-buyer': ['finance', 'data analysis'],
-  'merchandiser': ['marketing', 'communication'],
-  'visual-merchandiser': ['communication', 'leadership'],
-  'inventory-manager': ['project management', 'data analysis'],
+  'store-manager': ['retail-management', 'leadership'],
+  'sales-associate': ['retail-management', 'customer service'],
+  'retail-buyer': ['retail-management', 'data analysis'],
+  'merchandiser': ['retail-management', 'marketing'],
+  'visual-merchandiser': ['retail-management', 'communication'],
+  'inventory-manager': ['retail-management', 'data analysis'],
   'customer-service': ['customer service', 'communication'],
-  'e-commerce-manager': ['marketing', 'leadership'],
+  'e-commerce-manager': ['retail-management', 'marketing'],
+  
+  // New retail roles
+  'cashier': ['retail-management', 'customer service'],
+  'stock-clerk': ['retail-management', 'project management'],
+  'retail-supervisor': ['retail-management', 'leadership'],
+  'department-manager': ['retail-management', 'leadership'],
+  'loss-prevention': ['security-services', 'retail-management'],
+  'personal-shopper': ['retail-management', 'customer service'],
 
   // Hospitality roles
-  'hotel-manager': ['leadership', 'customer service'],
-  'chef': ['leadership', 'customer service'],
-  'event-planner': ['project management', 'communication'],
-  'restaurant-manager': ['leadership', 'customer service'],
-  'concierge': ['customer service', 'communication'],
-  'tour-guide': ['communication', 'customer service'],
-  'travel-agent': ['customer service', 'communication'],
-  'hospitality-supervisor': ['leadership', 'customer service'],
+  'hotel-manager': ['hospitality-service', 'leadership'],
+  'chef': ['hospitality-service', 'leadership'],
+  'event-planner': ['hospitality-service', 'project management'],
+  'restaurant-manager': ['hospitality-service', 'leadership'],
+  'concierge': ['hospitality-service', 'customer service'],
+  'tour-guide': ['hospitality-service', 'communication'],
+  'travel-agent': ['hospitality-service', 'customer service'],
+  'hospitality-supervisor': ['hospitality-service', 'leadership'],
+  
+  // New hospitality roles
+  'server': ['hospitality-service', 'customer service'],
+  'bartender': ['hospitality-service', 'customer service'],
+  'front-desk-clerk': ['hospitality-service', 'customer service'],
+  'housekeeper': ['hospitality-service', 'customer service'],
+  'kitchen-staff': ['hospitality-service', 'customer service'],
+  'hotel-receptionist': ['hospitality-service', 'customer service'],
+  'catering-assistant': ['hospitality-service', 'customer service'],
+  'banquet-server': ['hospitality-service', 'customer service'],
 
-  // Creative roles
-  'graphic-designer': ['communication', 'leadership'],
-  'photographer': ['communication', 'leadership'],
-  'writer': ['communication', 'research'],
-  'interior-designer': ['communication', 'leadership'],
-  'fashion-designer': ['communication', 'leadership'],
-  'video-producer': ['communication', 'leadership'],
-  'art-director': ['leadership', 'communication'],
-  'animator': ['communication', 'programming'],
+  // Transport roles
+  'logistics-manager': ['transport-logistics', 'leadership'],
+  'fleet-manager': ['transport-logistics', 'leadership'],
+  'supply-chain': ['transport-logistics', 'data analysis'],
+  'warehouse-manager': ['transport-logistics', 'leadership'],
+  'transportation-planner': ['transport-logistics', 'project management'],
+  'freight-coordinator': ['transport-logistics', 'communication'],
+  'shipping-manager': ['transport-logistics', 'leadership'],
+  'customs-broker': ['transport-logistics', 'compliance'],
+  
+  // New transport roles
+  'truck-driver': ['transport-logistics', 'safety'],
+  'delivery-driver': ['transport-logistics', 'customer service'],
+  'warehouse-worker': ['transport-logistics', 'safety'],
+  'forklift-operator': ['transport-logistics', 'safety'],
+  'dispatcher': ['transport-logistics', 'communication'],
+  'courier': ['transport-logistics', 'customer service'],
+  'inventory-clerk': ['transport-logistics', 'data analysis'],
+  'shipping-clerk': ['transport-logistics', 'communication'],
+
+  // Beauty industry roles
+  'salon-owner': ['beauty-services', 'leadership'],
+  'hairstylist': ['beauty-services', 'customer service'],
+  'beauty-therapist': ['beauty-services', 'customer service'],
+  'makeup-artist': ['beauty-services', 'communication'],
+  'nail-technician': ['beauty-services', 'customer service'],
+  'esthetician': ['beauty-services', 'customer service'],
+  'massage-therapist': ['beauty-services', 'healthcare'],
+  'barber': ['beauty-services', 'customer service'],
+  'cosmetologist': ['beauty-services', 'customer service'],
+  'beauty-consultant': ['beauty-services', 'communication'],
+  'spa-manager': ['beauty-services', 'leadership'],
+  'beauty-trainer': ['beauty-services', 'teaching'],
+
+  // Security industry roles
+  'security-manager': ['security-services', 'leadership'],
+  'security-guard': ['security-services', 'safety'],
+  'private-investigator': ['security-services', 'legal'],
+  'security-consultant': ['security-services', 'communication'],
+  'loss-prevention-manager': ['security-services', 'leadership'],
+  'surveillance-operator': ['security-services', 'safety'],
+  'armed-security': ['security-services', 'safety'],
+  'event-security': ['security-services', 'customer service'],
+  'corporate-security': ['security-services', 'leadership'],
+  'emergency-response': ['security-services', 'emergency response'],
+
+  // Agriculture industry roles
+  'farm-manager': ['agriculture-farming', 'leadership'],
+  'agricultural-scientist': ['agriculture-farming', 'research'],
+  'livestock-manager': ['agriculture-farming', 'leadership'],
+  'crop-specialist': ['agriculture-farming', 'research'],
+  'agricultural-inspector': ['agriculture-farming', 'compliance'],
+  'farm-worker': ['agriculture-farming', 'safety'],
+  'greenhouse-manager': ['agriculture-farming', 'leadership'],
+  'veterinary-technician': ['agriculture-farming', 'healthcare'],
+  'food-safety-inspector': ['agriculture-farming', 'compliance'],
+  'agricultural-equipment-operator': ['agriculture-farming', 'safety'],
+  'landscaper': ['landscaping-horticulture', 'customer service'],
+  'environmental-consultant': ['agriculture-farming', 'research'],
 
   // Legal roles
   'lawyer': ['law', 'legal'],
@@ -1144,7 +1772,75 @@ const ROLE_SKILLS_MAPPING = {
   'environmental-scientist': ['research', 'data analysis'],
   'physicist': ['research', 'data analysis'],
   'geologist': ['research', 'data analysis'],
-  'research-director': ['research', 'leadership']
+  'research-director': ['research', 'leadership'],
+
+  // New retail roles
+  'cashier': ['retail-management', 'customer service'],
+  'stock-clerk': ['retail-management', 'project management'],
+  'retail-supervisor': ['retail-management', 'leadership'],
+  'department-manager': ['retail-management', 'leadership'],
+  'loss-prevention': ['security-services', 'retail-management'],
+  'personal-shopper': ['retail-management', 'customer service'],
+
+  // New hospitality roles
+  'server': ['hospitality-service', 'customer service'],
+  'bartender': ['hospitality-service', 'customer service'],
+  'front-desk-clerk': ['hospitality-service', 'customer service'],
+  'housekeeper': ['hospitality-service', 'customer service'],
+  'kitchen-staff': ['hospitality-service', 'customer service'],
+  'hotel-receptionist': ['hospitality-service', 'customer service'],
+  'catering-assistant': ['hospitality-service', 'customer service'],
+  'banquet-server': ['hospitality-service', 'customer service'],
+
+  // New transport roles
+  'truck-driver': ['transport-logistics', 'safety'],
+  'delivery-driver': ['transport-logistics', 'customer service'],
+  'warehouse-worker': ['transport-logistics', 'safety'],
+  'forklift-operator': ['transport-logistics', 'safety'],
+  'dispatcher': ['transport-logistics', 'communication'],
+  'courier': ['transport-logistics', 'customer service'],
+  'inventory-clerk': ['transport-logistics', 'data analysis'],
+  'shipping-clerk': ['transport-logistics', 'communication'],
+
+  // Beauty industry roles
+  'salon-owner': ['beauty-services', 'leadership'],
+  'hairstylist': ['beauty-services', 'customer service'],
+  'beauty-therapist': ['beauty-services', 'customer service'],
+  'makeup-artist': ['beauty-services', 'communication'],
+  'nail-technician': ['beauty-services', 'customer service'],
+  'esthetician': ['beauty-services', 'customer service'],
+  'massage-therapist': ['beauty-services', 'healthcare'],
+  'barber': ['beauty-services', 'customer service'],
+  'cosmetologist': ['beauty-services', 'customer service'],
+  'beauty-consultant': ['beauty-services', 'communication'],
+  'spa-manager': ['beauty-services', 'leadership'],
+  'beauty-trainer': ['beauty-services', 'teaching'],
+
+  // Security industry roles
+  'security-manager': ['security-services', 'leadership'],
+  'security-guard': ['security-services', 'safety'],
+  'private-investigator': ['security-services', 'legal'],
+  'security-consultant': ['security-services', 'communication'],
+  'loss-prevention-manager': ['security-services', 'leadership'],
+  'surveillance-operator': ['security-services', 'safety'],
+  'armed-security': ['security-services', 'safety'],
+  'event-security': ['security-services', 'customer service'],
+  'corporate-security': ['security-services', 'leadership'],
+  'emergency-response': ['security-services', 'emergency response'],
+
+  // Agriculture industry roles
+  'farm-manager': ['agriculture-farming', 'leadership'],
+  'agricultural-scientist': ['agriculture-farming', 'research'],
+  'livestock-manager': ['agriculture-farming', 'leadership'],
+  'crop-specialist': ['agriculture-farming', 'research'],
+  'agricultural-inspector': ['agriculture-farming', 'compliance'],
+  'farm-worker': ['agriculture-farming', 'safety'],
+  'greenhouse-manager': ['agriculture-farming', 'leadership'],
+  'veterinary-technician': ['agriculture-farming', 'healthcare'],
+  'food-safety-inspector': ['agriculture-farming', 'compliance'],
+  'agricultural-equipment-operator': ['agriculture-farming', 'safety'],
+  'landscaper': ['landscaping-horticulture', 'customer service'],
+  'environmental-consultant': ['agriculture-farming', 'research']
 };
 
 // Helper function to find recommendations based on keywords and industry context
@@ -1184,6 +1880,12 @@ function findCourseRecommendationsInternal(keywords = [], count = 3, industry = 
     'civil': ['civil engineering', 'project management', 'safety', 'professional engineer'],
     'mechanical': ['mechanical engineering', 'cad design', 'professional engineer', 'project management'],
     'construction': ['construction-safety', 'carpentry', 'electrical-trades', 'plumbing-trades', 'hvac-trades', 'welding-trades', 'heavy-equipment', 'masonry-trades', 'project management'],
+    'retail': ['retail-management', 'customer service', 'communication', 'leadership'],
+    'hospitality': ['hospitality-service', 'customer service', 'communication', 'leadership'],
+    'transport': ['transport-logistics', 'safety', 'communication', 'leadership'],
+    'beauty': ['beauty-services', 'customer service', 'communication', 'healthcare'],
+    'security': ['security-services', 'safety', 'emergency response', 'leadership'],
+    'agriculture': ['agriculture-farming', 'landscaping-horticulture', 'safety', 'research'],
     'legal': ['legal', 'law', 'communication'],
     'pharmaceutical': ['pharmacy', 'medical', 'healthcare'],
     'veterinary': ['veterinary', 'healthcare', 'medical'],
@@ -1193,7 +1895,7 @@ function findCourseRecommendationsInternal(keywords = [], count = 3, industry = 
   
   // Define courses to exclude for specific industries
   const industryExclusions = {
-    'healthcare': ['it', 'programming', 'engineering', 'aerospace engineering', 'civil engineering', 'mechanical engineering', 'marketing', 'finance', 'construction-safety', 'carpentry', 'electrical-trades', 'plumbing-trades'],
+    'healthcare': ['it', 'programming', 'engineering', 'aerospace engineering', 'civil engineering', 'mechanical engineering', 'marketing', 'finance', 'construction-safety', 'carpentry', 'electrical-trades'],
     'emergency_services': ['it', 'programming', 'marketing', 'finance', 'education', 'engineering', 'construction-safety', 'carpentry'],
     'finance': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'education', 'engineering', 'construction-safety', 'carpentry', 'electrical-trades'],
     'technology': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'civil engineering', 'aerospace engineering', 'construction-safety', 'carpentry', 'plumbing-trades'],
@@ -1204,7 +1906,13 @@ function findCourseRecommendationsInternal(keywords = [], count = 3, industry = 
     'aerospace': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'marketing', 'finance', 'construction-safety', 'carpentry', 'electrical-trades'],
     'civil': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'marketing', 'it', 'programming'],
     'mechanical': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'marketing'],
-    'construction': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'marketing', 'finance', 'education']
+    'construction': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'marketing', 'finance', 'education'],
+    'retail': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'engineering', 'construction-safety', 'agriculture-farming'],
+    'hospitality': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'engineering', 'construction-safety', 'finance'],
+    'transport': ['healthcare', 'nursing', 'medical', 'clinical', 'marketing', 'education', 'beauty-services'],
+    'beauty': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'engineering', 'construction-safety', 'marketing', 'finance', 'agriculture-farming'],
+    'security': ['healthcare', 'nursing', 'medical', 'clinical', 'marketing', 'education', 'beauty-services', 'agriculture-farming'],
+    'agriculture': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'marketing', 'finance', 'beauty-services']
   };
   
   const priorityCategories = industry ? industryCoursePriorities[industry] || [] : [];

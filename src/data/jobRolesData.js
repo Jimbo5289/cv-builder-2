@@ -14,7 +14,10 @@ export const INDUSTRIES = [
   { value: 'marketing', label: 'Marketing & PR' },
   { value: 'construction', label: 'Construction & Trades' },
   { value: 'transport', label: 'Transport & Logistics' },
-  { value: 'science', label: 'Science & Research' }
+  { value: 'science', label: 'Science & Research' },
+  { value: 'beauty', label: 'Beauty & Personal Care' },
+  { value: 'security', label: 'Security & Public Safety' },
+  { value: 'agriculture', label: 'Agriculture & Environment' }
 ];
 
 // Roles by industry
@@ -82,7 +85,15 @@ export const ROLES_BY_INDUSTRY = {
     { value: 'visual-merchandiser', label: 'Visual Merchandiser' },
     { value: 'inventory-manager', label: 'Inventory Manager' },
     { value: 'customer-service', label: 'Customer Service Representative' },
-    { value: 'e-commerce-manager', label: 'E-commerce Manager' }
+    { value: 'e-commerce-manager', label: 'E-commerce Manager' },
+    
+    // Entry-level retail positions
+    { value: 'cashier', label: 'Cashier' },
+    { value: 'stock-clerk', label: 'Stock Clerk/Associate' },
+    { value: 'retail-supervisor', label: 'Retail Supervisor' },
+    { value: 'department-manager', label: 'Department Manager' },
+    { value: 'loss-prevention', label: 'Loss Prevention Specialist' },
+    { value: 'personal-shopper', label: 'Personal Shopper/Stylist' }
   ],
   
   hospitality: [
@@ -93,7 +104,17 @@ export const ROLES_BY_INDUSTRY = {
     { value: 'concierge', label: 'Concierge' },
     { value: 'tour-guide', label: 'Tour Guide' },
     { value: 'travel-agent', label: 'Travel Agent' },
-    { value: 'hospitality-supervisor', label: 'Hospitality Supervisor' }
+    { value: 'hospitality-supervisor', label: 'Hospitality Supervisor' },
+    
+    // Entry-level hospitality positions
+    { value: 'server', label: 'Server/Waiter' },
+    { value: 'bartender', label: 'Bartender' },
+    { value: 'front-desk-clerk', label: 'Front Desk Clerk' },
+    { value: 'housekeeper', label: 'Housekeeper' },
+    { value: 'kitchen-staff', label: 'Kitchen Staff/Prep Cook' },
+    { value: 'hotel-receptionist', label: 'Hotel Receptionist' },
+    { value: 'catering-assistant', label: 'Catering Assistant' },
+    { value: 'banquet-server', label: 'Banquet Server' }
   ],
   
   creative: [
@@ -155,7 +176,17 @@ export const ROLES_BY_INDUSTRY = {
     { value: 'transportation-planner', label: 'Transportation Planner' },
     { value: 'freight-coordinator', label: 'Freight Coordinator' },
     { value: 'shipping-manager', label: 'Shipping/Receiving Manager' },
-    { value: 'customs-broker', label: 'Customs Broker' }
+    { value: 'customs-broker', label: 'Customs Broker' },
+    
+    // Entry-level transport positions
+    { value: 'truck-driver', label: 'Truck Driver' },
+    { value: 'delivery-driver', label: 'Delivery Driver' },
+    { value: 'warehouse-worker', label: 'Warehouse Worker' },
+    { value: 'forklift-operator', label: 'Forklift Operator' },
+    { value: 'dispatcher', label: 'Dispatcher' },
+    { value: 'courier', label: 'Courier/Messenger' },
+    { value: 'inventory-clerk', label: 'Inventory Clerk' },
+    { value: 'shipping-clerk', label: 'Shipping/Receiving Clerk' }
   ],
   
   science: [
@@ -167,6 +198,49 @@ export const ROLES_BY_INDUSTRY = {
     { value: 'physicist', label: 'Physicist' },
     { value: 'geologist', label: 'Geologist' },
     { value: 'research-director', label: 'Research Director' }
+  ],
+
+  beauty: [
+    { value: 'salon-owner', label: 'Salon Owner/Manager' },
+    { value: 'hairstylist', label: 'Hairstylist/Hair Stylist' },
+    { value: 'beauty-therapist', label: 'Beauty Therapist' },
+    { value: 'makeup-artist', label: 'Makeup Artist' },
+    { value: 'nail-technician', label: 'Nail Technician' },
+    { value: 'esthetician', label: 'Esthetician/Skincare Specialist' },
+    { value: 'massage-therapist', label: 'Massage Therapist' },
+    { value: 'barber', label: 'Barber' },
+    { value: 'cosmetologist', label: 'Cosmetologist' },
+    { value: 'beauty-consultant', label: 'Beauty Consultant' },
+    { value: 'spa-manager', label: 'Spa Manager' },
+    { value: 'beauty-trainer', label: 'Beauty Trainer/Educator' }
+  ],
+
+  security: [
+    { value: 'security-manager', label: 'Security Manager' },
+    { value: 'security-guard', label: 'Security Guard' },
+    { value: 'private-investigator', label: 'Private Investigator' },
+    { value: 'security-consultant', label: 'Security Consultant' },
+    { value: 'loss-prevention-manager', label: 'Loss Prevention Manager' },
+    { value: 'surveillance-operator', label: 'Surveillance Operator' },
+    { value: 'armed-security', label: 'Armed Security Officer' },
+    { value: 'event-security', label: 'Event Security' },
+    { value: 'corporate-security', label: 'Corporate Security' },
+    { value: 'emergency-response', label: 'Emergency Response Coordinator' }
+  ],
+
+  agriculture: [
+    { value: 'farm-manager', label: 'Farm Manager' },
+    { value: 'agricultural-scientist', label: 'Agricultural Scientist' },
+    { value: 'livestock-manager', label: 'Livestock Manager' },
+    { value: 'crop-specialist', label: 'Crop Specialist' },
+    { value: 'agricultural-inspector', label: 'Agricultural Inspector' },
+    { value: 'farm-worker', label: 'Farm Worker' },
+    { value: 'greenhouse-manager', label: 'Greenhouse Manager' },
+    { value: 'veterinary-technician', label: 'Veterinary Technician' },
+    { value: 'food-safety-inspector', label: 'Food Safety Inspector' },
+    { value: 'agricultural-equipment-operator', label: 'Agricultural Equipment Operator' },
+    { value: 'landscaper', label: 'Landscaper/Groundskeeper' },
+    { value: 'environmental-consultant', label: 'Environmental Consultant' }
   ]
 };
 

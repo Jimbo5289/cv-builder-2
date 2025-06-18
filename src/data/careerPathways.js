@@ -1791,6 +1791,628 @@ export const CAREER_PATHWAYS = {
       'Restoration technique training',
       'Business management training'
     ]
+  },
+
+  // Retail Industry Pathways
+  'cashier': {
+    title: 'Retail Cashier Career Pathway',
+    description: 'Customer service and retail operations career from cashier to store management',
+    stages: [
+      {
+        level: 'Entry-Level Cashier',
+        requirements: ['High school diploma', 'Customer service skills', 'Basic math skills'],
+        duration: '0-1 year',
+        description: 'Point-of-sale operations and customer transactions'
+      },
+      {
+        level: 'Senior Cashier/Customer Service',
+        requirements: ['Experience with POS systems', 'Product knowledge', 'Problem-solving skills'],
+        duration: '1-2 years',
+        description: 'Advanced customer service and training new cashiers'
+      },
+      {
+        level: 'Retail Supervisor',
+        requirements: ['Leadership skills', 'Inventory knowledge', 'Team management'],
+        duration: '2-4 years',
+        description: 'Department supervision and staff coordination'
+      },
+      {
+        level: 'Department Manager',
+        requirements: ['Management training', 'Sales targets', 'Merchandising skills'],
+        duration: '4-7 years',
+        description: 'Department operations and sales management'
+      },
+      {
+        level: 'Store Manager',
+        requirements: ['Business management', 'P&L responsibility', 'Multi-department oversight'],
+        duration: '7+ years',
+        description: 'Store operations, staff management, and business results'
+      }
+    ],
+    qualifications: [
+      'High school diploma or equivalent',
+      'Retail management certification',
+      'Customer service training',
+      'POS system certifications',
+      'Management development programs'
+    ]
+  },
+
+  'sales-associate': {
+    title: 'Sales Associate Career Pathway',
+    description: 'Sales and customer service career progression in retail environment',
+    stages: [
+      {
+        level: 'Sales Associate',
+        requirements: ['Product knowledge', 'Customer service skills', 'Sales techniques'],
+        duration: '0-2 years',
+        description: 'Direct customer sales and product assistance'
+      },
+      {
+        level: 'Senior Sales Associate',
+        requirements: ['Advanced product expertise', 'Sales targets achievement', 'Mentoring skills'],
+        duration: '2-3 years',
+        description: 'Complex sales and training junior associates'
+      },
+      {
+        level: 'Sales Specialist/Lead',
+        requirements: ['Specialized product knowledge', 'Customer relationship management', 'Team coordination'],
+        duration: '3-5 years',
+        description: 'Specialty sales and team leadership'
+      },
+      {
+        level: 'Sales Manager',
+        requirements: ['Management training', 'Budget responsibility', 'Performance management'],
+        duration: '5-8 years',
+        description: 'Sales team management and performance optimization'
+      },
+      {
+        level: 'Regional Sales Manager',
+        requirements: ['Multi-location management', 'Strategic planning', 'Business development'],
+        duration: '8+ years',
+        description: 'Regional sales strategy and operations oversight'
+      }
+    ],
+    qualifications: [
+      'High school diploma minimum',
+      'Sales training certifications',
+      'Customer relationship management training',
+      'Management development courses',
+      'Industry-specific product certifications'
+    ]
+  },
+
+  'stock-clerk': {
+    title: 'Stock/Inventory Specialist Career Pathway',
+    description: 'Inventory management and logistics career progression',
+    stages: [
+      {
+        level: 'Stock Clerk',
+        requirements: ['Physical fitness', 'Organizational skills', 'Basic computer skills'],
+        duration: '0-1 year',
+        description: 'Receiving, stocking, and organizing merchandise'
+      },
+      {
+        level: 'Inventory Associate',
+        requirements: ['Inventory systems knowledge', 'Accuracy skills', 'Time management'],
+        duration: '1-3 years',
+        description: 'Inventory tracking and cycle counting'
+      },
+      {
+        level: 'Inventory Specialist',
+        requirements: ['Data analysis skills', 'Forecasting knowledge', 'Process improvement'],
+        duration: '3-5 years',
+        description: 'Inventory optimization and analysis'
+      },
+      {
+        level: 'Inventory Supervisor',
+        requirements: ['Team leadership', 'Budget management', 'Vendor relations'],
+        duration: '5-7 years',
+        description: 'Inventory team management and supplier coordination'
+      },
+      {
+        level: 'Inventory Manager',
+        requirements: ['Strategic planning', 'Cross-functional collaboration', 'Systems integration'],
+        duration: '7+ years',
+        description: 'Inventory strategy and warehouse operations'
+      }
+    ],
+    qualifications: [
+      'High school diploma',
+      'Warehouse management certifications',
+      'Inventory management software training',
+      'Supply chain management courses',
+      'Leadership development programs'
+    ]
+  },
+
+  // Beauty Industry Pathways
+  'hairstylist': {
+    title: 'Hairstylist Career Pathway',
+    description: 'Hair styling and salon career progression from apprentice to salon owner',
+    stages: [
+      {
+        level: 'Cosmetology Student',
+        requirements: ['Cosmetology school enrollment', 'Basic hair techniques', 'State board preparation'],
+        duration: '9-18 months',
+        description: 'Formal cosmetology education and training'
+      },
+      {
+        level: 'Junior Stylist',
+        requirements: ['Cosmetology license', 'Apprenticeship completion', 'Basic cutting skills'],
+        duration: '1-2 years',
+        description: 'Entry-level styling under supervision'
+      },
+      {
+        level: 'Stylist',
+        requirements: ['Client base development', 'Advanced techniques', 'Product knowledge'],
+        duration: '2-5 years',
+        description: 'Independent styling and client management'
+      },
+      {
+        level: 'Senior Stylist',
+        requirements: ['Specialized training', 'Mentoring skills', 'Advanced certifications'],
+        duration: '5-8 years',
+        description: 'Complex techniques and junior stylist training'
+      },
+      {
+        level: 'Salon Manager/Owner',
+        requirements: ['Business management', 'Staff leadership', 'Financial planning'],
+        duration: '8+ years',
+        description: 'Salon operations and business ownership'
+      }
+    ],
+    qualifications: [
+      'State cosmetology license',
+      'Continuing education requirements',
+      'Advanced technique certifications',
+      'Business management training',
+      'Health and safety certifications'
+    ]
+  },
+
+  'nail-technician': {
+    title: 'Nail Technician Career Pathway',
+    description: 'Nail care and beauty services career progression',
+    stages: [
+      {
+        level: 'Nail Technology Student',
+        requirements: ['Nail technology program', 'Sanitation knowledge', 'Basic nail techniques'],
+        duration: '3-9 months',
+        description: 'Nail technology education and certification'
+      },
+      {
+        level: 'Licensed Nail Technician',
+        requirements: ['State license', 'Basic manicure/pedicure skills', 'Customer service'],
+        duration: '1-2 years',
+        description: 'Basic nail services and client care'
+      },
+      {
+        level: 'Experienced Nail Technician',
+        requirements: ['Advanced techniques', 'Nail art skills', 'Product expertise'],
+        duration: '2-4 years',
+        description: 'Specialized nail services and artistic techniques'
+      },
+      {
+        level: 'Senior Nail Technician/Specialist',
+        requirements: ['Master-level skills', 'Training ability', 'Business development'],
+        duration: '4-6 years',
+        description: 'Advanced nail artistry and education'
+      },
+      {
+        level: 'Nail Salon Owner/Manager',
+        requirements: ['Business ownership', 'Staff management', 'Salon operations'],
+        duration: '6+ years',
+        description: 'Salon business ownership and management'
+      }
+    ],
+    qualifications: [
+      'State nail technician license',
+      'Continuing education credits',
+      'Advanced nail art certifications',
+      'Sanitation and safety training',
+      'Business management courses'
+    ]
+  },
+
+  'massage-therapist': {
+    title: 'Massage Therapist Career Pathway',
+    description: 'Therapeutic massage and wellness career progression',
+    stages: [
+      {
+        level: 'Massage Therapy Student',
+        requirements: ['Massage therapy program', 'Anatomy knowledge', 'Hands-on training'],
+        duration: '6-12 months',
+        description: 'Massage therapy education and technique development'
+      },
+      {
+        level: 'Licensed Massage Therapist',
+        requirements: ['State license', 'Basic massage techniques', 'Client communication'],
+        duration: '1-3 years',
+        description: 'Therapeutic massage services and client care'
+      },
+      {
+        level: 'Specialized Massage Therapist',
+        requirements: ['Advanced certifications', 'Specialty techniques', 'Treatment planning'],
+        duration: '3-5 years',
+        description: 'Specialized therapeutic modalities'
+      },
+      {
+        level: 'Senior Massage Therapist',
+        requirements: ['Master-level skills', 'Teaching ability', 'Practice development'],
+        duration: '5-8 years',
+        description: 'Advanced practice and education roles'
+      },
+      {
+        level: 'Spa Manager/Practice Owner',
+        requirements: ['Business management', 'Staff supervision', 'Spa operations'],
+        duration: '8+ years',
+        description: 'Spa/wellness center management and ownership'
+      }
+    ],
+    qualifications: [
+      'State massage therapy license',
+      'Continuing education requirements',
+      'Specialty certification (sports, medical, etc.)',
+      'CPR/First Aid certification',
+      'Business management training'
+    ]
+  },
+
+  // Hospitality Industry Pathways
+  'server': {
+    title: 'Server/Restaurant Service Career Pathway',
+    description: 'Restaurant service career from server to restaurant management',
+    stages: [
+      {
+        level: 'Server/Waiter',
+        requirements: ['Customer service skills', 'Menu knowledge', 'Multitasking ability'],
+        duration: '0-2 years',
+        description: 'Table service and customer interaction'
+      },
+      {
+        level: 'Senior Server/Trainer',
+        requirements: ['Advanced service skills', 'Wine knowledge', 'Training ability'],
+        duration: '2-4 years',
+        description: 'Premium service and server training'
+      },
+      {
+        level: 'Shift Supervisor',
+        requirements: ['Leadership skills', 'POS knowledge', 'Team coordination'],
+        duration: '3-5 years',
+        description: 'Shift management and staff supervision'
+      },
+      {
+        level: 'Assistant Manager',
+        requirements: ['Management training', 'Inventory knowledge', 'Customer relations'],
+        duration: '5-7 years',
+        description: 'Restaurant operations and staff management'
+      },
+      {
+        level: 'Restaurant Manager',
+        requirements: ['Business management', 'P&L responsibility', 'Operations oversight'],
+        duration: '7+ years',
+        description: 'Full restaurant operations and business management'
+      }
+    ],
+    qualifications: [
+      'Food safety certification',
+      'Alcohol service certification',
+      'Restaurant management training',
+      'Customer service certifications',
+      'Business management courses'
+    ]
+  },
+
+  'chef': {
+    title: 'Culinary Arts Career Pathway',
+    description: 'Culinary career from prep cook to executive chef',
+    stages: [
+      {
+        level: 'Prep Cook/Kitchen Assistant',
+        requirements: ['Basic knife skills', 'Food safety knowledge', 'Kitchen procedures'],
+        duration: '0-1 year',
+        description: 'Food preparation and kitchen support'
+      },
+      {
+        level: 'Line Cook',
+        requirements: ['Cooking techniques', 'Station management', 'Recipe execution'],
+        duration: '1-3 years',
+        description: 'Cooking station responsibility and food preparation'
+      },
+      {
+        level: 'Cook/Chef de Partie',
+        requirements: ['Advanced techniques', 'Leadership skills', 'Quality control'],
+        duration: '3-5 years',
+        description: 'Kitchen section leadership and specialized cooking'
+      },
+      {
+        level: 'Sous Chef',
+        requirements: ['Menu development', 'Staff management', 'Cost control'],
+        duration: '5-8 years',
+        description: 'Kitchen operations and chef support'
+      },
+      {
+        level: 'Executive Chef',
+        requirements: ['Culinary expertise', 'Business management', 'Creative leadership'],
+        duration: '8+ years',
+        description: 'Kitchen leadership and culinary operations'
+      }
+    ],
+    qualifications: [
+      'Culinary arts degree/certification',
+      'Food safety manager certification',
+      'ServSafe certification',
+      'Culinary specialty certifications',
+      'Business management training'
+    ]
+  },
+
+  'front-desk-clerk': {
+    title: 'Hotel Front Desk Career Pathway',
+    description: 'Hotel operations career from front desk to hotel management',
+    stages: [
+      {
+        level: 'Front Desk Clerk',
+        requirements: ['Customer service skills', 'Computer proficiency', 'Communication skills'],
+        duration: '0-2 years',
+        description: 'Guest check-in/out and customer service'
+      },
+      {
+        level: 'Front Desk Supervisor',
+        requirements: ['Leadership skills', 'Problem-solving', 'Shift management'],
+        duration: '2-4 years',
+        description: 'Front desk operations and staff supervision'
+      },
+      {
+        level: 'Front Office Manager',
+        requirements: ['Management training', 'Revenue management', 'Guest relations'],
+        duration: '4-6 years',
+        description: 'Front office operations and guest services'
+      },
+      {
+        level: 'Assistant Hotel Manager',
+        requirements: ['Hotel operations knowledge', 'Department coordination', 'Business skills'],
+        duration: '6-8 years',
+        description: 'Multi-department management and operations'
+      },
+      {
+        level: 'Hotel Manager',
+        requirements: ['Business management', 'P&L responsibility', 'Strategic planning'],
+        duration: '8+ years',
+        description: 'Hotel operations and business management'
+      }
+    ],
+    qualifications: [
+      'Hotel management degree/certification',
+      'Hospitality management training',
+      'Customer service certifications',
+      'Revenue management training',
+      'Business management courses'
+    ]
+  },
+
+  // Transport/Logistics Pathways
+  'truck-driver': {
+    title: 'Professional Truck Driver Career Pathway',
+    description: 'Commercial driving career from local driver to fleet management',
+    stages: [
+      {
+        level: 'CDL Training',
+        requirements: ['CDL permit', 'Driving school', 'Safety training'],
+        duration: '3-8 weeks',
+        description: 'Commercial driving license training and certification'
+      },
+      {
+        level: 'Entry-Level Driver',
+        requirements: ['CDL license', 'Clean driving record', 'DOT physical'],
+        duration: '1-2 years',
+        description: 'Local or regional driving with supervision'
+      },
+      {
+        level: 'Experienced Driver',
+        requirements: ['Safe driving record', 'Route knowledge', 'Customer service'],
+        duration: '2-5 years',
+        description: 'Independent driving and customer delivery'
+      },
+      {
+        level: 'Senior Driver/Trainer',
+        requirements: ['Advanced certifications', 'Training skills', 'Mentor ability'],
+        duration: '5-8 years',
+        description: 'Driver training and safety leadership'
+      },
+      {
+        level: 'Fleet Supervisor/Manager',
+        requirements: ['Management training', 'Fleet operations', 'Safety oversight'],
+        duration: '8+ years',
+        description: 'Fleet management and operations supervision'
+      }
+    ],
+    qualifications: [
+      'Commercial Driver\'s License (CDL)',
+      'DOT medical certification',
+      'Hazmat endorsement (optional)',
+      'Safety training certifications',
+      'Fleet management training'
+    ]
+  },
+
+  'warehouse-worker': {
+    title: 'Warehouse Operations Career Pathway',
+    description: 'Warehouse career from worker to operations management',
+    stages: [
+      {
+        level: 'Warehouse Worker',
+        requirements: ['Physical fitness', 'Basic computer skills', 'Safety training'],
+        duration: '0-1 year',
+        description: 'Picking, packing, and shipping operations'
+      },
+      {
+        level: 'Equipment Operator',
+        requirements: ['Forklift certification', 'Equipment training', 'Safety compliance'],
+        duration: '1-3 years',
+        description: 'Material handling equipment operation'
+      },
+      {
+        level: 'Warehouse Lead/Supervisor',
+        requirements: ['Leadership skills', 'Process knowledge', 'Team management'],
+        duration: '3-5 years',
+        description: 'Team supervision and process improvement'
+      },
+      {
+        level: 'Warehouse Manager',
+        requirements: ['Management training', 'Inventory systems', 'Budget responsibility'],
+        duration: '5-8 years',
+        description: 'Warehouse operations and staff management'
+      },
+      {
+        level: 'Operations Manager',
+        requirements: ['Strategic planning', 'Multi-facility oversight', 'Business acumen'],
+        duration: '8+ years',
+        description: 'Distribution operations and strategic planning'
+      }
+    ],
+    qualifications: [
+      'Forklift operator certification',
+      'Warehouse management system training',
+      'Safety and OSHA certifications',
+      'Inventory management training',
+      'Leadership development programs'
+    ]
+  },
+
+  // Security Industry Pathways
+  'security-guard': {
+    title: 'Security Professional Career Pathway',
+    description: 'Security career from guard to security management',
+    stages: [
+      {
+        level: 'Security Guard',
+        requirements: ['Security license', 'Background check', 'Basic training'],
+        duration: '0-2 years',
+        description: 'Property protection and access control'
+      },
+      {
+        level: 'Senior Security Officer',
+        requirements: ['Advanced training', 'Incident response', 'Report writing'],
+        duration: '2-4 years',
+        description: 'Complex security duties and training others'
+      },
+      {
+        level: 'Security Supervisor',
+        requirements: ['Leadership training', 'Shift management', 'Emergency procedures'],
+        duration: '4-6 years',
+        description: 'Security team supervision and operations'
+      },
+      {
+        level: 'Security Manager',
+        requirements: ['Management certification', 'Risk assessment', 'Policy development'],
+        duration: '6-10 years',
+        description: 'Security program management and planning'
+      },
+      {
+        level: 'Security Director',
+        requirements: ['Strategic planning', 'Multi-site oversight', 'Executive skills'],
+        duration: '10+ years',
+        description: 'Corporate security strategy and leadership'
+      }
+    ],
+    qualifications: [
+      'State security license',
+      'Security training certifications',
+      'CPR/First Aid certification',
+      'Emergency response training',
+      'Management development courses'
+    ]
+  },
+
+  // Agriculture Industry Pathways
+  'farm-worker': {
+    title: 'Agricultural Worker Career Pathway',
+    description: 'Agricultural career from farm worker to farm management',
+    stages: [
+      {
+        level: 'Farm Worker',
+        requirements: ['Physical fitness', 'Basic agricultural knowledge', 'Equipment familiarity'],
+        duration: '0-2 years',
+        description: 'Field work, harvesting, and basic farm operations'
+      },
+      {
+        level: 'Skilled Farm Worker',
+        requirements: ['Equipment operation', 'Crop knowledge', 'Safety training'],
+        duration: '2-4 years',
+        description: 'Specialized agricultural tasks and equipment operation'
+      },
+      {
+        level: 'Farm Supervisor',
+        requirements: ['Leadership skills', 'Production planning', 'Team management'],
+        duration: '4-7 years',
+        description: 'Field operations supervision and worker coordination'
+      },
+      {
+        level: 'Assistant Farm Manager',
+        requirements: ['Agricultural education', 'Business skills', 'Technology use'],
+        duration: '7-10 years',
+        description: 'Farm operations management and planning'
+      },
+      {
+        level: 'Farm Manager/Owner',
+        requirements: ['Business management', 'Financial planning', 'Agricultural expertise'],
+        duration: '10+ years',
+        description: 'Farm business ownership and strategic management'
+      }
+    ],
+    qualifications: [
+      'Agricultural education/certification',
+      'Equipment operator licenses',
+      'Pesticide applicator license',
+      'Farm safety certifications',
+      'Agricultural business management training'
+    ]
+  },
+
+  'landscaper': {
+    title: 'Landscaping/Groundskeeping Career Pathway',
+    description: 'Landscaping career from groundskeeper to landscape business owner',
+    stages: [
+      {
+        level: 'Groundskeeper/Laborer',
+        requirements: ['Physical fitness', 'Basic plant knowledge', 'Equipment use'],
+        duration: '0-1 year',
+        description: 'Basic lawn care and landscape maintenance'
+      },
+      {
+        level: 'Landscape Technician',
+        requirements: ['Plant identification', 'Equipment operation', 'Design basics'],
+        duration: '1-3 years',
+        description: 'Landscape installation and maintenance'
+      },
+      {
+        level: 'Landscape Specialist',
+        requirements: ['Horticultural knowledge', 'Design skills', 'Customer interaction'],
+        duration: '3-5 years',
+        description: 'Specialized landscaping and design work'
+      },
+      {
+        level: 'Crew Leader/Supervisor',
+        requirements: ['Leadership skills', 'Project management', 'Quality control'],
+        duration: '5-7 years',
+        description: 'Crew supervision and project oversight'
+      },
+      {
+        level: 'Landscape Contractor/Owner',
+        requirements: ['Business license', 'Business management', 'Customer development'],
+        duration: '7+ years',
+        description: 'Landscaping business ownership and management'
+      }
+    ],
+    qualifications: [
+      'Landscaping/horticulture education',
+      'Pesticide applicator license',
+      'Equipment operator certifications',
+      'Landscape design training',
+      'Business management courses'
+    ]
   }
 };
 
@@ -2023,6 +2645,264 @@ function getGenericPathway(industry, role) {
         'State licensing (where required)',
         'Continuing education requirements',
         'Business management training'
+      ]
+    },
+    'retail': {
+      title: `${role} Career Pathway`,
+      description: 'Retail career path from customer service to store management',
+      stages: [
+        {
+          level: 'Entry-Level Associate',
+          requirements: ['Customer service skills', 'Basic retail knowledge', 'POS system training'],
+          duration: '0-1 year',
+          description: 'Sales, cashier, or stock associate role'
+        },
+        {
+          level: 'Experienced Associate',
+          requirements: ['Product knowledge', 'Sales targets', 'Problem-solving skills'],
+          duration: '1-3 years',
+          description: 'Senior associate with specialized skills'
+        },
+        {
+          level: 'Team Lead/Supervisor',
+          requirements: ['Leadership skills', 'Training ability', 'Shift management'],
+          duration: '3-5 years',
+          description: 'Team supervision and operational support'
+        },
+        {
+          level: 'Department Manager',
+          requirements: ['Management training', 'Budget responsibility', 'Performance management'],
+          duration: '5-8 years',
+          description: 'Department operations and staff management'
+        },
+        {
+          level: 'Store Manager/District Manager',
+          requirements: ['Business management', 'P&L responsibility', 'Multi-location oversight'],
+          duration: '8+ years',
+          description: 'Store operations and business results'
+        }
+      ],
+      qualifications: [
+        'Retail management certification',
+        'Customer service training',
+        'POS system certifications',
+        'Management development programs',
+        'Business management courses'
+      ]
+    },
+    'hospitality': {
+      title: `${role} Career Pathway`,
+      description: 'Hospitality career path from service to management',
+      stages: [
+        {
+          level: 'Entry-Level Service',
+          requirements: ['Customer service skills', 'Basic hospitality knowledge', 'Food safety certification'],
+          duration: '0-2 years',
+          description: 'Server, front desk, or housekeeping role'
+        },
+        {
+          level: 'Experienced Service Professional',
+          requirements: ['Advanced service skills', 'Specialty knowledge', 'Problem-solving'],
+          duration: '2-4 years',
+          description: 'Senior service role with specialized expertise'
+        },
+        {
+          level: 'Supervisor/Lead',
+          requirements: ['Leadership skills', 'Shift management', 'Team coordination'],
+          duration: '4-6 years',
+          description: 'Team supervision and operational oversight'
+        },
+        {
+          level: 'Department Manager',
+          requirements: ['Management training', 'Budget responsibility', 'Guest relations'],
+          duration: '6-8 years',
+          description: 'Department operations and staff management'
+        },
+        {
+          level: 'General Manager/Owner',
+          requirements: ['Business management', 'P&L responsibility', 'Strategic planning'],
+          duration: '8+ years',
+          description: 'Hotel/restaurant operations and business management'
+        }
+      ],
+      qualifications: [
+        'Hospitality management certification',
+        'Food safety manager certification',
+        'Customer service training',
+        'Management development programs',
+        'Business management courses'
+      ]
+    },
+    'transport': {
+      title: `${role} Career Pathway`,
+      description: 'Transportation and logistics career progression',
+      stages: [
+        {
+          level: 'Entry-Level Operator',
+          requirements: ['CDL license or warehouse certification', 'Safety training', 'Basic skills'],
+          duration: '0-2 years',
+          description: 'Driver, warehouse worker, or entry-level logistics role'
+        },
+        {
+          level: 'Experienced Operator',
+          requirements: ['Advanced certifications', 'Safety record', 'Equipment proficiency'],
+          duration: '2-5 years',
+          description: 'Skilled operator with specialized experience'
+        },
+        {
+          level: 'Team Lead/Supervisor',
+          requirements: ['Leadership skills', 'Process knowledge', 'Safety oversight'],
+          duration: '5-7 years',
+          description: 'Team supervision and operational coordination'
+        },
+        {
+          level: 'Operations Manager',
+          requirements: ['Management training', 'Logistics systems', 'Budget responsibility'],
+          duration: '7-10 years',
+          description: 'Operations management and strategic planning'
+        },
+        {
+          level: 'Fleet Manager/Director',
+          requirements: ['Strategic planning', 'Multi-facility oversight', 'Business development'],
+          duration: '10+ years',
+          description: 'Fleet operations and business strategy'
+        }
+      ],
+      qualifications: [
+        'Commercial driver\'s license (CDL)',
+        'Transportation safety certifications',
+        'Logistics management training',
+        'Management development programs',
+        'Business management courses'
+      ]
+    },
+    'beauty': {
+      title: `${role} Career Pathway`,
+      description: 'Beauty and personal care career progression',
+      stages: [
+        {
+          level: 'Student/Apprentice',
+          requirements: ['Beauty school enrollment', 'State licensing preparation', 'Basic techniques'],
+          duration: '6-18 months',
+          description: 'Beauty education and certification training'
+        },
+        {
+          level: 'Licensed Professional',
+          requirements: ['State license', 'Basic service skills', 'Customer service'],
+          duration: '1-3 years',
+          description: 'Entry-level beauty services under supervision'
+        },
+        {
+          level: 'Experienced Professional',
+          requirements: ['Advanced techniques', 'Client base development', 'Specialty training'],
+          duration: '3-6 years',
+          description: 'Independent practice with specialized skills'
+        },
+        {
+          level: 'Senior Professional/Educator',
+          requirements: ['Master-level skills', 'Teaching ability', 'Advanced certifications'],
+          duration: '6-10 years',
+          description: 'Advanced practice and education roles'
+        },
+        {
+          level: 'Salon Owner/Manager',
+          requirements: ['Business management', 'Staff supervision', 'Financial planning'],
+          duration: '10+ years',
+          description: 'Salon/spa business ownership and management'
+        }
+      ],
+      qualifications: [
+        'State beauty license (cosmetology, nail tech, etc.)',
+        'Continuing education requirements',
+        'Advanced technique certifications',
+        'Business management training',
+        'Health and safety certifications'
+      ]
+    },
+    'security': {
+      title: `${role} Career Pathway`,
+      description: 'Security and protection services career progression',
+      stages: [
+        {
+          level: 'Entry-Level Security',
+          requirements: ['Security license', 'Background check', 'Basic training'],
+          duration: '0-2 years',
+          description: 'Basic security guard or protection services'
+        },
+        {
+          level: 'Experienced Security Officer',
+          requirements: ['Advanced training', 'Incident response', 'Specialized skills'],
+          duration: '2-5 years',
+          description: 'Complex security duties and emergency response'
+        },
+        {
+          level: 'Security Supervisor',
+          requirements: ['Leadership training', 'Shift management', 'Team coordination'],
+          duration: '5-8 years',
+          description: 'Security team supervision and operations'
+        },
+        {
+          level: 'Security Manager',
+          requirements: ['Management certification', 'Risk assessment', 'Policy development'],
+          duration: '8-12 years',
+          description: 'Security program management and planning'
+        },
+        {
+          level: 'Security Director/Consultant',
+          requirements: ['Strategic planning', 'Executive skills', 'Business development'],
+          duration: '12+ years',
+          description: 'Corporate security strategy and consulting'
+        }
+      ],
+      qualifications: [
+        'State security license',
+        'Security training certifications',
+        'Emergency response training',
+        'Management development programs',
+        'Risk assessment certifications'
+      ]
+    },
+    'agriculture': {
+      title: `${role} Career Pathway`,
+      description: 'Agricultural and environmental career progression',
+      stages: [
+        {
+          level: 'Entry-Level Worker',
+          requirements: ['Agricultural knowledge', 'Equipment familiarity', 'Safety training'],
+          duration: '0-2 years',
+          description: 'Farm worker, landscaper, or entry-level agricultural role'
+        },
+        {
+          level: 'Skilled Worker/Technician',
+          requirements: ['Equipment operation', 'Specialized knowledge', 'Certification'],
+          duration: '2-5 years',
+          description: 'Skilled agricultural or environmental work'
+        },
+        {
+          level: 'Supervisor/Specialist',
+          requirements: ['Leadership skills', 'Technical expertise', 'Team management'],
+          duration: '5-8 years',
+          description: 'Team supervision and specialized agricultural work'
+        },
+        {
+          level: 'Manager/Consultant',
+          requirements: ['Management training', 'Business skills', 'Industry expertise'],
+          duration: '8-12 years',
+          description: 'Farm management or agricultural consulting'
+        },
+        {
+          level: 'Owner/Director',
+          requirements: ['Business ownership', 'Strategic planning', 'Financial management'],
+          duration: '12+ years',
+          description: 'Farm ownership or agricultural business leadership'
+        }
+      ],
+      qualifications: [
+        'Agricultural education/certification',
+        'Equipment operator licenses',
+        'Pesticide applicator license',
+        'Business management training',
+        'Environmental certifications'
       ]
     },
     'technology': {
