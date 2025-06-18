@@ -27,6 +27,21 @@ const healthRoutes = require('./routes/health');
 const adminRoutes = require('./routes/admin');
 const debugRoutes = require('./routes/debug');
 
+// Suppress non-critical canvas warnings that don't affect server functionality
+const originalConsoleWarn = console.warn;
+console.warn = function(...args) {
+  const message = args[0] || '';
+  // Suppress canvas-related warnings that are not critical for server operation
+  if (typeof message === 'string' && 
+      (message.includes('@napi-rs/canvas') || 
+       message.includes('canvas package') ||
+       message.includes('Failed to load native binding'))) {
+    return; // Suppress these warnings
+  }
+  // For all other warnings, use the original console.warn
+  return originalConsoleWarn.apply(console, args);
+};
+
 // Try to import fix-database, but don't fail if it's not available
 let ensureDevUser;
 try {

@@ -20,6 +20,24 @@ function initializeSentry() {
   }
 
   try {
+    // Get default integrations using the new Sentry v9 API
+    let defaultIntegrations = [];
+    try {
+      // Try the new way first (Sentry v9+)
+      if (typeof Sentry.getDefaultIntegrations === 'function') {
+        defaultIntegrations = Sentry.getDefaultIntegrations();
+      } else if (Array.isArray(Sentry.defaultIntegrations)) {
+        // Fallback for older versions
+        defaultIntegrations = Sentry.defaultIntegrations;
+      } else {
+        // Last resort - empty array (Sentry will use its own defaults)
+        defaultIntegrations = [];
+      }
+    } catch (integrationsError) {
+      console.warn('Could not get Sentry default integrations, using empty array');
+      defaultIntegrations = [];
+    }
+
     const options = {
       dsn: process.env.SENTRY_DSN,
       environment: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || 'development',
@@ -28,11 +46,8 @@ function initializeSentry() {
       // We recommend adjusting this value in production
       tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 1.0,
       
-      // Remove profiling and tracing integrations that are causing issues
-      integrations: [
-        // Use built-in integrations only
-        ...Sentry.defaultIntegrations,
-      ],
+      // Use integrations safely
+      integrations: defaultIntegrations,
       
       // Enable HTTP context in breadcrumbs
       sendDefaultPii: true,
