@@ -22,6 +22,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import routes from './routes';
 import RouterOptimizer from './components/RouterOptimizer';
+import AuthGuard from './components/AuthGuard';
 import { validateCurrentRoute } from './utils/redirectToHome';
 
 /**
@@ -75,11 +76,24 @@ const NotFound = () => (
  * @returns {JSX.Element} Either the protected component or a redirect to login
  */
 const ProtectedRoute = ({ element, requiresAuth }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
+  const location = useLocation();
   
   if (loading) return <LoadingComponent />;
   
-  return isAuthenticated ? element : <Navigate to="/login" replace />;
+  // Check if we have a token in localStorage even if auth state isn't loaded yet
+  // This prevents redirecting to login on page refresh when user should stay logged in
+  const hasToken = localStorage.getItem('token');
+  const hasUser = localStorage.getItem('user');
+  
+  // If we have both token and user data in localStorage, consider user authenticated
+  // This prevents the redirect-to-login issue on page refresh
+  if (hasToken && hasUser && !isAuthenticated && !loading) {
+    console.log('User has valid localStorage data, preventing redirect to login');
+    return <LoadingComponent />;
+  }
+  
+  return isAuthenticated ? element : <Navigate to="/login" state={{ from: location }} replace />;
 };
 
 const AppRoutes = () => {
@@ -130,10 +144,9 @@ const AppRoutes = () => {
               path={path} 
               element={
                 requiresAuth ? (
-                  <ProtectedRoute 
-                    element={<Component />} 
-                    requiresAuth={requiresAuth}
-                  />
+                  <AuthGuard requireAuth={requiresAuth}>
+                    <Component />
+                  </AuthGuard>
                 ) : (
                   <Component />
                 )

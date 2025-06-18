@@ -295,6 +295,63 @@ function AuthProvider({ children }) {
         }
       }
 
+      // Check if user data exists in localStorage first for faster initial load
+      const userStr = localStorage.getItem('user');
+      const cachedUser = safeJsonParse(userStr);
+      
+      if (cachedUser && token) {
+        // Set authenticated state immediately with cached user data
+        setState(prev => ({
+          ...prev,
+          user: cachedUser,
+          loading: false,
+          isAuthenticated: true,
+          error: null
+        }));
+        
+        // Then verify with server in background (don't block UI)
+        // This prevents the redirect-to-login issue on refresh
+        setTimeout(async () => {
+          try {
+            const response = await fetch(`${serverUrl}/api/auth/me`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              }
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data && data.user) {
+                localStorage.setItem('user', JSON.stringify(data.user));
+                setState(prev => ({
+                  ...prev,
+                  user: data.user
+                }));
+              }
+            } else if (response.status === 401) {
+              // Only clear auth if server explicitly says unauthorized
+              console.log('Background auth check failed - clearing authentication');
+              localStorage.removeItem('token');
+              localStorage.removeItem('refreshToken');
+              localStorage.removeItem('user');
+              setState({
+                user: null,
+                loading: false,
+                isAuthenticated: false,
+                error: 'Session expired. Please log in again.'
+              });
+            }
+          } catch (error) {
+            console.log('Background auth check failed (network error):', error.message);
+            // Don't clear auth on network errors - user might be offline
+          }
+        }, 100);
+        
+        return;
+      }
+
       // Production authentication check with automatic retry on failure
       try {
         const response = await fetch(`${serverUrl}/api/auth/me`, {

@@ -1,0 +1,5 @@
+# Redirect API routes to the backend server
+/api/* https://cv-builder-server-prod.onrender.com/api/:splat 200
+
+# Handle client-side routing - fallback to index.html for all other routes
+/* /index.html 200 

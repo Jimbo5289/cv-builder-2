@@ -1,9 +1,13 @@
 # Enable rewrite engine
 RewriteEngine On
 
-# Redirect all requests to index.html except for existing files and directories
+# Handle API routes - proxy to backend server
+RewriteRule ^api/(.*)$ https://cv-builder-server-prod.onrender.com/api/$1 [P,L]
+
+# Handle client-side routing - redirect all other requests to index.html except for existing files and directories
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api/
 RewriteRule ^ index.html [QSA,L]
 
 # Set security headers

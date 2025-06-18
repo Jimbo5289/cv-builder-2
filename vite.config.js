@@ -42,7 +42,17 @@ export default defineConfig(({ mode }) => {
         host: 'localhost',
         clientPort: 5173,
       },
-      // Fallback to serve index.html for any non-file requests
+      // Fallback to serve index.html for any non-file requests (SPA routing)
+      historyApiFallback: {
+        index: '/index.html',
+        disableDotRule: true,
+        rewrites: [
+          // Don't apply the fallback to API routes
+          { from: /^\/api\/.*$/, to: function(context) {
+            return context.parsedUrl.pathname;
+          }}
+        ]
+      },
       middlewareMode: false,
     },
     resolve: {
