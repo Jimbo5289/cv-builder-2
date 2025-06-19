@@ -78,23 +78,8 @@ export default function Register() {
     setIsLoading(true);
     setErrors({});
 
-    // Validate required fields
-    const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    if (!formData.password) newErrors.password = 'Password is required';
-    if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    // Password validation
-    if (formData.password && !isPasswordValid(formData.password)) {
-      newErrors.password = 'Password does not meet requirements';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    // Use the existing validateForm function
+    if (!validateForm()) {
       setIsLoading(false);
       return;
     }
