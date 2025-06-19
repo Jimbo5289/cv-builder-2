@@ -136,24 +136,23 @@ export default function Register() {
   const handleTurnstileError = (error) => {
     console.error('Turnstile verification failed:', error);
     setTurnstileToken(null);
+    
+    // Prevent infinite retry loops by setting failed state immediately
     setTurnstileFailed(true);
-    // Only show error if it's a persistent issue, not temporary loading
-    if (error && !error.includes('temporarily')) {
-      setErrors(prev => ({
-        ...prev,
-        turnstile: 'Security verification failed. Please refresh the page and try again.'
-      }));
-    }
+    
+    // Clear any existing errors and don't show confusing messages
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.turnstile;
+      return newErrors;
+    });
   };
 
   const handleTurnstileExpire = () => {
     console.log('Turnstile verification expired');
     setTurnstileToken(null);
     setTurnstileFailed(false);
-    setErrors(prev => ({
-      ...prev,
-      turnstile: 'Security verification expired. Please complete it again.'
-    }));
+    // Don't show error message for expiration - let it retry
   };
 
   // Add a timeout to enable the button if Turnstile doesn't load
@@ -163,7 +162,7 @@ export default function Register() {
         console.log('Turnstile timeout - enabling fallback');
         setTurnstileFailed(true);
       }
-    }, 10000); // 10 second timeout
+    }, 15000); // Increased to 15 seconds
 
     return () => clearTimeout(timer);
   }, [turnstileToken, turnstileLoaded]);
@@ -341,15 +340,19 @@ export default function Register() {
               Security Verification
             </label>
             <div className="flex justify-center">
-              <CloudflareTurnstile
-                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
-                onVerify={handleTurnstileVerify}
-                onError={handleTurnstileError}
-                onExpire={handleTurnstileExpire}
-                theme="light"
-                size="normal"
-                appearance="always"
-              />
+              <div id="turnstile-container">
+                <CloudflareTurnstile
+                  siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                  onVerify={handleTurnstileVerify}
+                  onError={handleTurnstileError}
+                  onExpire={handleTurnstileExpire}
+                  theme="light"
+                  size="normal"
+                  refreshExpired="auto"
+                  retry="auto"
+                  retryInterval={8000}
+                />
+              </div>
             </div>
             {errors.turnstile && (
               <p className="mt-2 text-sm text-red-600 text-center">{errors.turnstile}</p>
