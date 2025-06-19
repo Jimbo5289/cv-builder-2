@@ -74,14 +74,16 @@ const addUserToMailingList = async (user, doubleOptIn = false) => {
       }
     }
     
-    // Add marketing permissions and tags
+    // Add tags for segmentation
     memberData.tags = ['cv-builder-user'];
-    memberData.marketing_permissions = [
-      {
-        marketing_permission_id: 'email',
-        enabled: true
-      }
-    ];
+    
+    // Remove marketing permissions - they're causing API errors
+    // memberData.marketing_permissions = [
+    //   {
+    //     marketing_permission_id: 'email',
+    //     enabled: true
+    //   }
+    // ];
     
     // Make request to Mailchimp API
     const response = await axios.post(url, memberData, {
