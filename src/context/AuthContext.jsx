@@ -14,6 +14,7 @@ const AuthContext = createContext({
   logout: () => {},
   refreshUser: () => {},
   updateUserInfo: () => {},
+  changePassword: () => {},
   getAuthHeader: () => ({})
 });
 
@@ -1177,6 +1178,45 @@ function AuthProvider({ children }) {
     }
   }
 
+  async function changePassword(currentPassword, newPassword) {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Authentication required');
+        throw new Error('Authentication required');
+      }
+
+      console.log('Changing password...');
+      
+      const response = await fetch(`${serverUrl}/api/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          ...getAuthHeader(),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to change password');
+      }
+
+      const data = await response.json();
+      console.log('Password changed successfully');
+      toast.success('Password changed successfully!');
+      
+      return { success: true, message: data.message };
+    } catch (error) {
+      console.error('Change password error:', error);
+      toast.error(error.message || 'Failed to change password');
+      return { success: false, message: error.message || 'Failed to change password' };
+    }
+  }
+
   // Set auth token in API request headers
   function setAuthHeader(token) {
     if (token) {
@@ -1212,6 +1252,7 @@ function AuthProvider({ children }) {
       logout,
       refreshUser,
       updateUserInfo,
+      changePassword,
       getAuthHeader
     }}>
       {children}

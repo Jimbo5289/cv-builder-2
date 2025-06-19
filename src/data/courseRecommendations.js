@@ -3571,7 +3571,7 @@ function findCourseRecommendationsInternal(keywords = [], count = 3, industry = 
     const industrySpecificMapping = {
       'healthcare': {
         'management': ['leadership'],
-        'lead': ['leadership'], 
+      'lead': ['leadership'],
         'manager': ['leadership'],
         'safety': ['patient safety'],
         'compliance': ['hipaa'],
@@ -3582,9 +3582,9 @@ function findCourseRecommendationsInternal(keywords = [], count = 3, industry = 
         'records': ['medical records']
       },
       'technology': {
-        'analysis': ['data analysis'],
-        'coding': ['programming'],
-        'software': ['programming'],
+      'analysis': ['data analysis'],
+      'coding': ['programming'],
+      'software': ['programming'],
         'security': ['it'],
         'cyber': ['it']
       },

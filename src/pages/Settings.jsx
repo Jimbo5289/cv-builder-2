@@ -7,7 +7,7 @@ import { FiSun, FiMoon, FiAlertCircle, FiCheck } from 'react-icons/fi';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('security');
-  const { user, getAuthHeader, updateUserInfo } = useAuth();
+  const { user, getAuthHeader, updateUserInfo, changePassword } = useAuth();
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -203,20 +203,23 @@ export default function Settings() {
     }
     
     try {
-      // Here you would integrate with your password update API
-      // For now, we'll simulate a successful update
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Call the actual changePassword function from AuthContext
+      const result = await changePassword(passwordData.currentPassword, passwordData.newPassword);
       
-      // Reset form and show success message
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
-      setPasswordSuccess(true);
+      if (result.success) {
+        // Reset form and show success message
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+        setPasswordSuccess(true);
+      } else {
+        throw new Error(result.message || 'Failed to update password');
+      }
     } catch (error) {
       setPasswordErrors({
-        general: 'Failed to update password. Please try again.'
+        general: error.message || 'Failed to update password. Please try again.'
       });
     } finally {
       setIsSubmitting(false);
