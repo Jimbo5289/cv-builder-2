@@ -16,18 +16,6 @@ const { logger } = require('../config/logger');
  */
 async function verifyTurnstileToken(token, remoteip = null) {
   try {
-    // Temporary bypass for production setup
-    if (token === 'bypass-for-production-setup') {
-      console.log('TEMPORARY: Bypassing Turnstile verification for production setup');
-      return { success: true, bypass: true };
-    }
-
-    // Skip verification if no token provided and skip flag is set
-    if (!token && process.env.SKIP_TURNSTILE_FOR_DOMAIN_TRANSITION === 'true') {
-      console.log('Skipping Turnstile verification due to domain transition flag');
-      return { success: true, bypass: true };
-    }
-
     if (!token) {
       console.log('No Turnstile token provided');
       return { success: false, error: 'No verification token provided' };

@@ -84,14 +84,22 @@ export default function Register() {
       return;
     }
 
+    // Check if Turnstile verification is completed
+    if (!turnstileToken) {
+      setErrors({ 
+        turnstile: 'Please complete the security verification to continue.' 
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const registrationData = {
         name: formData.name.trim(),
         email: formData.email.trim(),
         password: formData.password,
         phone: formData.phone?.trim() || null,
-        // Skip Turnstile verification temporarily
-        turnstileToken: 'bypass-for-production-setup'
+        turnstileToken: turnstileToken
       };
 
       console.log('Submitting registration:', { ...registrationData, password: '[REDACTED]' });
@@ -118,6 +126,36 @@ export default function Register() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleTurnstileVerify = (token) => {
+    console.log('Turnstile verification completed:', token);
+    setTurnstileToken(token);
+    // Clear any turnstile errors
+    if (errors.turnstile) {
+      setErrors(prev => ({
+        ...prev,
+        turnstile: ''
+      }));
+    }
+  };
+
+  const handleTurnstileError = (error) => {
+    console.error('Turnstile verification failed:', error);
+    setTurnstileToken(null);
+    setErrors(prev => ({
+      ...prev,
+      turnstile: error || 'Security verification failed. Please try again.'
+    }));
+  };
+
+  const handleTurnstileExpire = () => {
+    console.log('Turnstile verification expired');
+    setTurnstileToken(null);
+    setErrors(prev => ({
+      ...prev,
+      turnstile: 'Security verification expired. Please try again.'
+    }));
   };
 
   return (
@@ -292,27 +330,37 @@ export default function Register() {
             <label htmlFor="turnstile" className="block text-sm font-medium text-gray-700 mb-2">
               Security Verification
             </label>
-            <div className="flex items-center justify-center p-4 border border-gray-200 rounded-lg bg-gray-50">
-              <div className="text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <svg className="h-5 w-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-sm font-medium text-gray-700">Security Verified</span>
-                </div>
-                <p className="text-xs text-gray-500">Protected by Cloudflare</p>
-              </div>
-            </div>
+            <CloudflareTurnstile
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+              onVerify={handleTurnstileVerify}
+              onError={handleTurnstileError}
+              onExpire={handleTurnstileExpire}
+              theme="auto"
+              size="normal"
+              className="flex justify-center"
+            />
+            {errors.turnstile && (
+              <p className="mt-2 text-sm text-red-600">{errors.turnstile}</p>
+            )}
           </div>
 
           <div>
             <button
               type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#E78F81] hover:bg-[#d36e62] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] disabled:opacity-50"
+              disabled={isLoading || !turnstileToken}
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] ${
+                isLoading || !turnstileToken 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-[#E78F81] hover:bg-[#d36e62]'
+              }`}
             >
               {isLoading ? 'Creating account...' : 'Create account'}
             </button>
+            {!turnstileToken && (
+              <p className="mt-2 text-xs text-gray-500 text-center">
+                Please complete security verification above to enable account creation
+              </p>
+            )}
           </div>
         </form>
 
