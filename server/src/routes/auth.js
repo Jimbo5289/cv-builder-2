@@ -955,4 +955,49 @@ router.put('/users/profile', auth, async (req, res) => {
   }
 });
 
+// Debug endpoint to check if user exists (temporary for troubleshooting)
+router.get('/debug/user-exists/:email', async (req, res) => {
+  addCorsHeaders(req, res);
+  try {
+    const email = req.params.email;
+    
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        isActive: true,
+        createdAt: true,
+        failedLoginAttempts: true,
+        lockedUntil: true
+      }
+    });
+
+    if (!user) {
+      return res.json({ 
+        exists: false, 
+        message: 'User not found in database' 
+      });
+    }
+
+    res.json({
+      exists: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        failedLoginAttempts: user.failedLoginAttempts,
+        isLocked: user.lockedUntil && user.lockedUntil > new Date()
+      }
+    });
+  } catch (error) {
+    logger.error('Debug user check error:', { error: error.message });
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Request password reset
 module.exports = router;
