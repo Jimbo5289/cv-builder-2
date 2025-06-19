@@ -61,42 +61,56 @@ const CloudflareTurnstile = ({
       return;
     }
 
-    try {
-      const id = window.turnstile.render(turnstileRef.current, {
-        sitekey: siteKey,
-        theme: theme,
-        size: size,
-        callback: (token) => {
-          setIsVerifying(false);
-          if (onVerify) onVerify(token);
-        },
-        'error-callback': (error) => {
-          setIsVerifying(false);
-          let errorMessage = 'Security verification failed. Please try again.';
-          
-          // Handle specific error cases
-          if (error === 'expired') {
-            errorMessage = 'Security verification expired. Please try again.';
-          } else if (error === 'timeout') {
-            errorMessage = 'Security verification timed out. Please try again.';
-          }
-          
-          if (onError) onError(errorMessage);
-        },
-        'expired-callback': () => {
-          setIsVerifying(false);
-          if (onExpire) onExpire();
-        },
-        'before-interactive-callback': () => {
-          setIsVerifying(true);
+    // Add small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      try {
+        // Validate that window.turnstile exists and has render method
+        if (!window.turnstile || typeof window.turnstile.render !== 'function') {
+          if (onError) onError('Security verification service failed to initialize. Please refresh the page.');
+          return;
         }
-      });
-      
-      setWidgetId(id);
-    } catch (error) {
-      setIsVerifying(false);
-      if (onError) onError('Unable to load security verification. Please refresh the page and try again.');
-    }
+
+        const id = window.turnstile.render(turnstileRef.current, {
+          sitekey: siteKey,
+          theme: theme,
+          size: size,
+          callback: (token) => {
+            setIsVerifying(false);
+            if (onVerify) onVerify(token);
+          },
+          'error-callback': (error) => {
+            setIsVerifying(false);
+            let errorMessage = 'Security verification failed. Please try again.';
+            
+            // Handle specific error cases
+            if (error === 'expired') {
+              errorMessage = 'Security verification expired. Please try again.';
+            } else if (error === 'timeout') {
+              errorMessage = 'Security verification timed out. Please try again.';
+            } else if (error === 'invalid-input-secret') {
+              errorMessage = 'Security verification configuration error. Please contact support.';
+            }
+            
+            if (onError) onError(errorMessage);
+          },
+          'expired-callback': () => {
+            setIsVerifying(false);
+            if (onExpire) onExpire();
+          },
+          'before-interactive-callback': () => {
+            setIsVerifying(true);
+          }
+        });
+        
+        setWidgetId(id);
+      } catch (error) {
+        setIsVerifying(false);
+        console.error('Turnstile render error:', error);
+        if (onError) onError('Security verification temporarily unavailable. Please try again in a moment.');
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [isLoaded, siteKey, theme, size, onVerify, onError, onExpire, disabled]);
 
   // Reset function to manually reset the widget

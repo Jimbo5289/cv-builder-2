@@ -300,6 +300,7 @@ export default function Register() {
             <CloudflareTurnstile
               siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
               onVerify={(token) => {
+                console.log('Turnstile verification successful');
                 setTurnstileToken(token);
                 // Clear any previous verification errors
                 if (errors.submit?.includes('security verification')) {
@@ -310,6 +311,7 @@ export default function Register() {
                 }
               }}
               onError={(error) => {
+                console.error('Turnstile error:', error);
                 setTurnstileToken(null);
                 setErrors(prev => ({
                   ...prev,
@@ -317,6 +319,7 @@ export default function Register() {
                 }));
               }}
               onExpire={() => {
+                console.log('Turnstile token expired');
                 setTurnstileToken(null);
                 setErrors(prev => ({
                   ...prev,
@@ -339,6 +342,12 @@ export default function Register() {
             <p className="text-xs text-gray-500 text-center">
               Protected by Cloudflare. This helps us prevent automated registrations.
             </p>
+            {/* Debug info - remove in production */}
+            {import.meta.env.DEV && (
+              <div className="text-xs text-gray-400 text-center">
+                Debug: Using site key {import.meta.env.VITE_TURNSTILE_SITE_KEY ? 'from env' : 'fallback'}
+              </div>
+            )}
           </div>
 
           <div>
