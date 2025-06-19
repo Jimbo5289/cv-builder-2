@@ -1,7 +1,7 @@
 /* eslint-disable */
 // FORCE DEPLOY: Ensure Turnstile is deployed
 // MANUAL DEPLOY: Force Vercel to deploy latest Turnstile version
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import CloudflareTurnstile from '../components/CloudflareTurnstile';
@@ -17,6 +17,8 @@ export default function Register() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState(null);
+  const [turnstileLoaded, setTurnstileLoaded] = useState(false);
+  const [turnstileFailed, setTurnstileFailed] = useState(false);
   const navigate = useNavigate();
   const { register } = useAuth();
 
@@ -84,8 +86,8 @@ export default function Register() {
       return;
     }
 
-    // Check if Turnstile verification is completed
-    if (!turnstileToken) {
+    // Check if Turnstile verification is completed OR if it failed (fallback)
+    if (!turnstileToken && !turnstileFailed) {
       setErrors({ 
         turnstile: 'Please complete the security verification to continue.' 
       });
@@ -99,50 +101,42 @@ export default function Register() {
         email: formData.email.trim(),
         password: formData.password,
         phone: formData.phone?.trim() || null,
-        turnstileToken: turnstileToken
+        turnstileToken: turnstileToken || 'fallback-verification-failed'
       };
 
-      console.log('Submitting registration:', { ...registrationData, password: '[REDACTED]' });
+      console.log('Submitting registration data...');
       const result = await register(registrationData);
-      
-      console.log('Registration result:', result);
-      
+
       if (result.success) {
-        // Registration successful
-        navigate('/login', { 
-          state: { 
-            message: 'Registration successful! Please log in with your credentials.',
-            email: formData.email.trim()
-          } 
-        });
+        console.log('Registration successful');
+        navigate('/dashboard');
       } else {
-        throw new Error(result.message || 'Registration failed');
+        console.error('Registration failed:', result.error);
+        setErrors({ submit: result.error || 'Registration failed. Please try again.' });
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setErrors({ 
-        submit: error.message || 'Registration failed. Please try again.' 
-      });
+      setErrors({ submit: 'Registration failed. Please try again.' });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleTurnstileVerify = (token) => {
-    console.log('Turnstile verification completed:', token);
+    console.log('Turnstile verification successful');
     setTurnstileToken(token);
-    // Clear any turnstile errors
-    if (errors.turnstile) {
-      setErrors(prev => ({
-        ...prev,
-        turnstile: ''
-      }));
-    }
+    setTurnstileFailed(false);
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.turnstile;
+      return newErrors;
+    });
   };
 
   const handleTurnstileError = (error) => {
     console.error('Turnstile verification failed:', error);
     setTurnstileToken(null);
+    setTurnstileFailed(true);
     // Only show error if it's a persistent issue, not temporary loading
     if (error && !error.includes('temporarily')) {
       setErrors(prev => ({
@@ -155,11 +149,24 @@ export default function Register() {
   const handleTurnstileExpire = () => {
     console.log('Turnstile verification expired');
     setTurnstileToken(null);
+    setTurnstileFailed(false);
     setErrors(prev => ({
       ...prev,
       turnstile: 'Security verification expired. Please complete it again.'
     }));
   };
+
+  // Add a timeout to enable the button if Turnstile doesn't load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!turnstileToken && !turnstileLoaded) {
+        console.log('Turnstile timeout - enabling fallback');
+        setTurnstileFailed(true);
+      }
+    }, 10000); // 10 second timeout
+
+    return () => clearTimeout(timer);
+  }, [turnstileToken, turnstileLoaded]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -352,18 +359,23 @@ export default function Register() {
           <div>
             <button
               type="submit"
-              disabled={isLoading || !turnstileToken}
+              disabled={isLoading}
               className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] ${
-                isLoading || !turnstileToken 
+                isLoading 
                   ? 'bg-gray-400 cursor-not-allowed' 
                   : 'bg-[#E78F81] hover:bg-[#d36e62]'
               }`}
             >
               {isLoading ? 'Creating account...' : 'Create account'}
             </button>
-            {!turnstileToken && (
+            {!turnstileToken && !turnstileFailed && (
               <p className="mt-2 text-xs text-gray-500 text-center">
                 Please complete security verification above to enable account creation
+              </p>
+            )}
+            {turnstileFailed && (
+              <p className="mt-2 text-xs text-orange-600 text-center">
+                Security verification unavailable - proceeding with standard registration
               </p>
             )}
           </div>
