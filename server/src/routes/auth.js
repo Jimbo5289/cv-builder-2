@@ -118,7 +118,7 @@ router.get('/test-cors', (req, res) => {
 });
 
 // Register user
-router.post('/register', requireTurnstileVerification(), async (req, res) => {
+router.post('/register', requireTurnstileVerification({ skipInDevelopment: false, skipForDomainTransition: true }), async (req, res) => {
   addCorsHeaders(req, res);
   try {
     const validatedData = registerSchema.parse(req.body);

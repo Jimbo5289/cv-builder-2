@@ -120,6 +120,7 @@ function getTurnstileErrorMessage(errorCodes) {
 function requireTurnstileVerification(options = {}) {
   const { 
     skipInDevelopment = true,
+    skipForDomainTransition = false,
     tokenField = 'turnstileToken',
     ipFromHeader = 'x-forwarded-for' 
   } = options;
@@ -128,6 +129,12 @@ function requireTurnstileVerification(options = {}) {
     // Skip verification in development if configured
     if (skipInDevelopment && process.env.NODE_ENV === 'development') {
       logger.info('Skipping Turnstile verification in development mode');
+      return next();
+    }
+
+    // Skip verification temporarily during domain transition
+    if (skipForDomainTransition) {
+      logger.info('Skipping Turnstile verification during domain transition');
       return next();
     }
 
