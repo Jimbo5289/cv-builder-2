@@ -290,54 +290,22 @@ export default function Register() {
             </div>
           </div>
 
-          {/* Cloudflare Turnstile Security Verification */}
+          {/* Cloudflare Turnstile Security Verification - Temporarily Disabled for Domain Transition */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Security Verification
-            </label>
-            <CloudflareTurnstile
-              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
-              onVerify={(token) => {
-                setTurnstileToken(token);
-                // Clear any previous verification errors
-                if (errors.submit?.includes('security verification')) {
-                  setErrors(prev => ({
-                    ...prev,
-                    submit: ''
-                  }));
-                }
-              }}
-              onError={(error) => {
-                console.error('Turnstile error:', error);
-                setTurnstileToken(null);
-                setErrors(prev => ({
-                  ...prev,
-                  submit: 'Security verification failed. Please try again.'
-                }));
-              }}
-              onExpire={() => {
-                setTurnstileToken(null);
-                setErrors(prev => ({
-                  ...prev,
-                  submit: 'Security verification expired. Please complete it again.'
-                }));
-              }}
-              theme="auto"
-              size="normal"
-              className="flex justify-center"
-              disabled={import.meta.env.DEV && import.meta.env.VITE_DEV_MODE === 'true'}
-            />
-            {import.meta.env.DEV && (
-              <p className="text-xs text-gray-500 text-center">
-                Security verification is disabled in development mode
+            <div className="text-center p-4 bg-blue-50 rounded-md border border-blue-200">
+              <p className="text-sm text-blue-700">
+                🔒 Security verification temporarily disabled during domain transition.
               </p>
-            )}
+              <p className="text-xs text-blue-600 mt-1">
+                Enhanced security will be restored shortly.
+              </p>
+            </div>
           </div>
 
           <div>
             <button
               type="submit"
-              disabled={isLoading || (import.meta.env.PROD && !turnstileToken)}
+              disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#E78F81] hover:bg-[#d36e62] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] disabled:opacity-50"
             >
               {isLoading ? 'Creating account...' : 'Create account'}
