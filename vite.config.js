@@ -3,11 +3,12 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 // Custom plugin to inject Google Analytics ID
-const injectGoogleAnalytics = () => {
+const injectGoogleAnalytics = (env) => {
   return {
     name: 'inject-google-analytics',
     transformIndexHtml(html) {
-      const gaId = process.env.VITE_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX';
+      const gaId = env.VITE_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX';
+      console.log('Google Analytics ID being injected:', gaId);
       return html.replace(/GA_MEASUREMENT_ID_PLACEHOLDER/g, gaId);
     }
   };
@@ -32,7 +33,7 @@ export default defineConfig(({ mode }) => {
           configFile: false,
         }
       }),
-      injectGoogleAnalytics()
+      injectGoogleAnalytics(env)
     ],
     server: {
       port: 5173,
