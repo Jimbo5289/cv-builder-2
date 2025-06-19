@@ -117,6 +117,23 @@ router.get('/test-cors', (req, res) => {
   });
 });
 
+// Debug endpoint for Mailchimp configuration
+router.get('/debug/mailchimp', (req, res) => {
+  addCorsHeaders(req, res);
+  
+  const hasApiKey = !!process.env.MAILCHIMP_API_KEY;
+  const hasServerPrefix = !!process.env.MAILCHIMP_SERVER_PREFIX;
+  const hasListId = !!process.env.MAILCHIMP_LIST_ID;
+  
+  res.json({
+    configured: hasApiKey && hasServerPrefix && hasListId,
+    apiKey: hasApiKey ? 'Set' : 'Missing',
+    serverPrefix: hasServerPrefix ? process.env.MAILCHIMP_SERVER_PREFIX : 'Missing',
+    listId: hasListId ? 'Set' : 'Missing',
+    allConfigured: hasApiKey && hasServerPrefix && hasListId
+  });
+});
+
 // Register user
 router.post('/register', async (req, res) => {
   addCorsHeaders(req, res);
@@ -175,7 +192,17 @@ router.post('/register', async (req, res) => {
       );
 
       // Add user to mailing list (non-blocking)
-      addUserToMailingList(user).catch(err => {
+      addUserToMailingList(user).then(result => {
+        logger.info('Mailchimp subscription result:', { 
+          userId: user.id, 
+          email: user.email, 
+          success: result.success,
+          message: result.message,
+          mock: result.mock,
+          alreadySubscribed: result.alreadySubscribed,
+          testEmail: result.testEmail
+        });
+      }).catch(err => {
         logger.warn('Failed to add user to mailing list:', { 
           userId: user.id, 
           email: user.email, 
