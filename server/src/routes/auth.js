@@ -134,6 +134,38 @@ router.get('/debug/mailchimp', (req, res) => {
   });
 });
 
+// Test Mailchimp integration directly
+router.post('/debug/mailchimp-test', async (req, res) => {
+  addCorsHeaders(req, res);
+  
+  try {
+    const { email, name } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+    
+    const testUser = {
+      email: email,
+      name: name || 'Test User'
+    };
+    
+    const result = await addUserToMailingList(testUser);
+    
+    res.json({
+      success: true,
+      mailchimpResult: result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Register user
 router.post('/register', async (req, res) => {
   addCorsHeaders(req, res);
