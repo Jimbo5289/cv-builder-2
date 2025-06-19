@@ -31,13 +31,5 @@
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     }
-  ],
-  "env": {
-    "VITE_TURNSTILE_SITE_KEY": "1x00000000000000000000AA"
-  },
-  "build": {
-    "env": {
-      "VITE_TURNSTILE_SITE_KEY": "1x00000000000000000000AA"
-    }
-  }
+  ]
 }
