@@ -66,47 +66,62 @@ const CloudflareTurnstile = ({
       try {
         // Validate that window.turnstile exists and has render method
         if (!window.turnstile || typeof window.turnstile.render !== 'function') {
+          console.error('Turnstile API not available');
           if (onError) onError('Security verification service failed to initialize. Please refresh the page.');
           return;
         }
 
+        console.log('Rendering Turnstile with site key:', siteKey);
         const id = window.turnstile.render(turnstileRef.current, {
           sitekey: siteKey,
           theme: theme,
           size: size,
           callback: (token) => {
+            console.log('Turnstile verification successful, token:', token.substring(0, 20) + '...');
             setIsVerifying(false);
             if (onVerify) onVerify(token);
           },
           'error-callback': (error) => {
+            console.error('Turnstile error callback:', error);
             setIsVerifying(false);
-            let errorMessage = 'Security verification failed. Please try again.';
             
-            // Handle specific error cases
-            if (error === 'expired') {
-              errorMessage = 'Security verification expired. Please try again.';
-            } else if (error === 'timeout') {
-              errorMessage = 'Security verification timed out. Please try again.';
-            } else if (error === 'invalid-input-secret') {
-              errorMessage = 'Security verification configuration error. Please contact support.';
+            // Only show error messages for real failures, not temporary states
+            if (error && error !== 'challenge-expired' && error !== 'challenge-cancelled') {
+              let errorMessage = 'Security verification failed. Please try again.';
+              
+              // Handle specific error cases
+              if (error === 'expired') {
+                errorMessage = 'Security verification expired. Please try again.';
+              } else if (error === 'timeout') {
+                errorMessage = 'Security verification timed out. Please try again.';
+              } else if (error === 'invalid-input-secret' || error === 'missing-input-secret') {
+                errorMessage = 'Security verification configuration error. Please contact support.';
+              }
+              
+              if (onError) onError(errorMessage);
             }
-            
-            if (onError) onError(errorMessage);
           },
           'expired-callback': () => {
+            console.log('Turnstile token expired');
             setIsVerifying(false);
             if (onExpire) onExpire();
           },
           'before-interactive-callback': () => {
+            console.log('Turnstile interaction started');
             setIsVerifying(true);
           }
         });
         
+        console.log('Turnstile widget rendered with ID:', id);
         setWidgetId(id);
       } catch (error) {
-        setIsVerifying(false);
         console.error('Turnstile render error:', error);
-        if (onError) onError('Security verification temporarily unavailable. Please try again in a moment.');
+        setIsVerifying(false);
+        
+        // Only show error for actual render failures
+        if (error.message && !error.message.includes('already rendered')) {
+          if (onError) onError('Security verification temporarily unavailable. Please try again in a moment.');
+        }
       }
     }, 100);
 

@@ -80,14 +80,18 @@ export default function Register() {
       return;
     }
 
-    // Check Turnstile verification in production
-    if (import.meta.env.PROD && !turnstileToken) {
+    // Check Turnstile verification - always require it when a site key is configured
+    const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
+    if (siteKey && !turnstileToken) {
+      console.log('Turnstile validation failed - no token present');
       setErrors(prev => ({
         ...prev,
         submit: 'Please complete the security verification'
       }));
       return;
     }
+
+    console.log('Submitting registration with Turnstile token:', turnstileToken ? 'Present' : 'Missing');
 
     setIsLoading(true);
 
@@ -302,13 +306,18 @@ export default function Register() {
               onVerify={(token) => {
                 console.log('Turnstile verification successful');
                 setTurnstileToken(token);
-                // Clear any previous verification errors
-                if (errors.submit?.includes('security verification')) {
-                  setErrors(prev => ({
-                    ...prev,
-                    submit: ''
-                  }));
-                }
+                // Clear any previous verification errors immediately
+                setErrors(prev => {
+                  const newErrors = { ...prev };
+                  if (newErrors.submit && (
+                    newErrors.submit.includes('security verification') || 
+                    newErrors.submit.includes('Security verification') ||
+                    newErrors.submit.includes('complete the security')
+                  )) {
+                    delete newErrors.submit;
+                  }
+                  return newErrors;
+                });
               }}
               onError={(error) => {
                 console.error('Turnstile error:', error);
