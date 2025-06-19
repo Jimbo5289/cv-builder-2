@@ -4,7 +4,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import CloudflareTurnstile from '../components/CloudflareTurnstile';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -16,9 +15,6 @@ export default function Register() {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState(null);
-  const [turnstileLoaded, setTurnstileLoaded] = useState(false);
-  const [turnstileFailed, setTurnstileFailed] = useState(false);
   const navigate = useNavigate();
   const { register } = useAuth();
 
@@ -86,22 +82,13 @@ export default function Register() {
       return;
     }
 
-    // Check if Turnstile verification is completed OR if it failed (fallback)
-    if (!turnstileToken && !turnstileFailed) {
-      setErrors({ 
-        turnstile: 'Please complete the security verification to continue.' 
-      });
-      setIsLoading(false);
-      return;
-    }
-
     try {
       const registrationData = {
         name: formData.name.trim(),
         email: formData.email.trim(),
         password: formData.password,
         phone: formData.phone?.trim() || null,
-        turnstileToken: turnstileToken || 'fallback-verification-failed'
+        turnstileToken: 'security-verification-disabled'
       };
 
       console.log('Submitting registration data...');
@@ -121,51 +108,6 @@ export default function Register() {
       setIsLoading(false);
     }
   };
-
-  const handleTurnstileVerify = (token) => {
-    console.log('Turnstile verification successful');
-    setTurnstileToken(token);
-    setTurnstileFailed(false);
-    setErrors(prev => {
-      const newErrors = { ...prev };
-      delete newErrors.turnstile;
-      return newErrors;
-    });
-  };
-
-  const handleTurnstileError = (error) => {
-    console.error('Turnstile verification failed:', error);
-    setTurnstileToken(null);
-    
-    // Prevent infinite retry loops by setting failed state immediately
-    setTurnstileFailed(true);
-    
-    // Clear any existing errors and don't show confusing messages
-    setErrors(prev => {
-      const newErrors = { ...prev };
-      delete newErrors.turnstile;
-      return newErrors;
-    });
-  };
-
-  const handleTurnstileExpire = () => {
-    console.log('Turnstile verification expired');
-    setTurnstileToken(null);
-    setTurnstileFailed(false);
-    // Don't show error message for expiration - let it retry
-  };
-
-  // Add a timeout to enable the button if Turnstile doesn't load
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!turnstileToken && !turnstileLoaded) {
-        console.log('Turnstile timeout - enabling fallback');
-        setTurnstileFailed(true);
-      }
-    }, 15000); // Increased to 15 seconds
-
-    return () => clearTimeout(timer);
-  }, [turnstileToken, turnstileLoaded]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -334,31 +276,6 @@ export default function Register() {
             </div>
           </div>
 
-          {/* Cloudflare Turnstile Security Verification */}
-          <div className="mt-4">
-            <label htmlFor="turnstile" className="block text-sm font-medium text-gray-700 mb-2">
-              Security Verification
-            </label>
-            <div className="flex justify-center">
-              <div id="turnstile-container">
-                <CloudflareTurnstile
-                  siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
-                  onVerify={handleTurnstileVerify}
-                  onError={handleTurnstileError}
-                  onExpire={handleTurnstileExpire}
-                  theme="light"
-                  size="normal"
-                  refreshExpired="auto"
-                  retry="auto"
-                  retryInterval={8000}
-                />
-              </div>
-            </div>
-            {errors.turnstile && (
-              <p className="mt-2 text-sm text-red-600 text-center">{errors.turnstile}</p>
-            )}
-          </div>
-
           <div>
             <button
               type="submit"
@@ -371,16 +288,6 @@ export default function Register() {
             >
               {isLoading ? 'Creating account...' : 'Create account'}
             </button>
-            {!turnstileToken && !turnstileFailed && (
-              <p className="mt-2 text-xs text-gray-500 text-center">
-                Please complete security verification above to enable account creation
-              </p>
-            )}
-            {turnstileFailed && (
-              <p className="mt-2 text-xs text-orange-600 text-center">
-                Security verification unavailable - proceeding with standard registration
-              </p>
-            )}
           </div>
         </form>
 
