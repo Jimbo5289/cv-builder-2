@@ -31,7 +31,7 @@ const registerSchema = z.object({
       'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
     ),
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  phone: z.string().optional()
+  phone: z.string().nullable().optional().transform(val => val === null ? undefined : val)
 });
 
 const loginSchema = z.object({
