@@ -1,5 +1,6 @@
 /* eslint-disable */
 // FORCE DEPLOY: Ensure Turnstile is deployed
+// MANUAL DEPLOY: Force Vercel to deploy latest Turnstile version
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
