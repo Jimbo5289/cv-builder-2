@@ -1,7 +1,7 @@
 {
   "name": "cv-builder-server",
   "version": "1.0.0",
-  "description": "CV Builder Backend Server",
+  "description": "CV Builder backend server with AI analysis - HOTFIX: Turnstile domain transition",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
