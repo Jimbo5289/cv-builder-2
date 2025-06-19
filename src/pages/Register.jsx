@@ -143,10 +143,13 @@ export default function Register() {
   const handleTurnstileError = (error) => {
     console.error('Turnstile verification failed:', error);
     setTurnstileToken(null);
-    setErrors(prev => ({
-      ...prev,
-      turnstile: error || 'Security verification failed. Please try again.'
-    }));
+    // Only show error if it's a persistent issue, not temporary loading
+    if (error && !error.includes('temporarily')) {
+      setErrors(prev => ({
+        ...prev,
+        turnstile: 'Security verification failed. Please refresh the page and try again.'
+      }));
+    }
   };
 
   const handleTurnstileExpire = () => {
@@ -154,7 +157,7 @@ export default function Register() {
     setTurnstileToken(null);
     setErrors(prev => ({
       ...prev,
-      turnstile: 'Security verification expired. Please try again.'
+      turnstile: 'Security verification expired. Please complete it again.'
     }));
   };
 
@@ -330,17 +333,19 @@ export default function Register() {
             <label htmlFor="turnstile" className="block text-sm font-medium text-gray-700 mb-2">
               Security Verification
             </label>
-            <CloudflareTurnstile
-              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
-              onVerify={handleTurnstileVerify}
-              onError={handleTurnstileError}
-              onExpire={handleTurnstileExpire}
-              theme="auto"
-              size="normal"
-              className="flex justify-center"
-            />
+            <div className="flex justify-center">
+              <CloudflareTurnstile
+                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                onVerify={handleTurnstileVerify}
+                onError={handleTurnstileError}
+                onExpire={handleTurnstileExpire}
+                theme="light"
+                size="normal"
+                appearance="always"
+              />
+            </div>
             {errors.turnstile && (
-              <p className="mt-2 text-sm text-red-600">{errors.turnstile}</p>
+              <p className="mt-2 text-sm text-red-600 text-center">{errors.turnstile}</p>
             )}
           </div>
 
