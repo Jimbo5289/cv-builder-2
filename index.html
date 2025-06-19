@@ -9,6 +9,30 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <title>MyCVBuilder.co.uk - Create Professional CVs in Minutes</title>
     
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID_PLACEHOLDER"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      
+      // Configure GA4 with enhanced ecommerce and privacy settings
+      gtag('config', 'GA_MEASUREMENT_ID_PLACEHOLDER', {
+        page_title: document.title,
+        page_location: window.location.href,
+        anonymize_ip: true,
+        allow_google_signals: false,
+        allow_ad_personalization_signals: false,
+        cookie_flags: 'SameSite=Strict;Secure'
+      });
+      
+      // Track page views
+      gtag('event', 'page_view', {
+        page_title: document.title,
+        page_location: window.location.href
+      });
+    </script>
+    
     <!-- Early error handler for initialization issues -->
     <script>
       window.addEventListener('error', function(e) {

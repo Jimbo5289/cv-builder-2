@@ -1,12 +1,65 @@
 import * as Sentry from '@sentry/react';
 
-// Placeholder for Firebase Analytics
+// Google Analytics 4 Configuration
+const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || 'GA_MEASUREMENT_ID_PLACEHOLDER';
+
+// Initialize gtag if not already available
+if (typeof window !== 'undefined' && !window.gtag) {
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){
+    window.dataLayer.push(arguments);
+  };
+}
+
+/**
+ * Track custom events in Google Analytics
+ * @param {string} eventName - Event name
+ * @param {Object} properties - Event properties
+ */
 const trackEvent = (eventName, properties = {}) => {
   console.log('Analytics Event:', eventName, properties);
+  
+  // Send to Google Analytics if available
+  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID !== 'GA_MEASUREMENT_ID_PLACEHOLDER') {
+    window.gtag('event', eventName, {
+      custom_parameter_1: properties.category || 'general',
+      custom_parameter_2: properties.label || '',
+      value: properties.value || 0,
+      ...properties
+    });
+  }
+  
+  // Send to Sentry for debugging
+  Sentry.addBreadcrumb({
+    category: 'analytics',
+    message: `Event: ${eventName}`,
+    level: 'info',
+    data: properties
+  });
 };
 
-const trackPageView = (path) => {
-  console.log('Page View:', path);
+/**
+ * Track page views in Google Analytics
+ * @param {string} path - Page path
+ * @param {string} title - Page title
+ */
+const trackPageView = (path, title = document.title) => {
+  console.log('Page View:', path, title);
+  
+  // Send to Google Analytics if available
+  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID !== 'GA_MEASUREMENT_ID_PLACEHOLDER') {
+    window.gtag('config', GA_MEASUREMENT_ID, {
+      page_path: path,
+      page_title: title,
+      page_location: window.location.href
+    });
+    
+    window.gtag('event', 'page_view', {
+      page_title: title,
+      page_location: window.location.href,
+      page_path: path
+    });
+  }
   
   // Add breadcrumb to Sentry
   Sentry.addBreadcrumb({
@@ -15,14 +68,29 @@ const trackPageView = (path) => {
     level: 'info',
     data: {
       path,
-      title: document.title,
+      title,
       url: window.location.href
     }
   });
 };
 
+/**
+ * Track user actions and interactions
+ * @param {string} action - Action name
+ * @param {Object} properties - Action properties
+ */
 const trackUserAction = (action, properties = {}) => {
   console.log('User Action:', action, properties);
+  
+  // Send to Google Analytics
+  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID !== 'GA_MEASUREMENT_ID_PLACEHOLDER') {
+    window.gtag('event', action, {
+      event_category: 'user_interaction',
+      event_label: properties.label || '',
+      value: properties.value || 0,
+      ...properties
+    });
+  }
   
   // Add breadcrumb to Sentry
   Sentry.addBreadcrumb({
@@ -33,15 +101,44 @@ const trackUserAction = (action, properties = {}) => {
   });
 };
 
+/**
+ * Track errors and exceptions
+ * @param {Error} error - Error object
+ * @param {Object} properties - Additional properties
+ */
 const trackError = (error, properties = {}) => {
+  // Send to Google Analytics
+  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID !== 'GA_MEASUREMENT_ID_PLACEHOLDER') {
+    window.gtag('event', 'exception', {
+      description: error.message,
+      fatal: properties.fatal || false,
+      error_name: error.name,
+      ...properties
+    });
+  }
+  
   // Send to Sentry
   Sentry.captureException(error, {
     extra: properties
   });
 };
 
+/**
+ * Track performance metrics
+ * @param {Object} metric - Performance metric object
+ */
 const trackPerformance = (metric) => {
   console.log('Performance Metric:', metric);
+  
+  // Send to Google Analytics
+  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID !== 'GA_MEASUREMENT_ID_PLACEHOLDER') {
+    window.gtag('event', 'timing_complete', {
+      name: metric.type,
+      value: Math.round(metric.duration),
+      event_category: 'performance',
+      event_label: metric.details?.url || 'unknown'
+    });
+  }
   
   // Add breadcrumb to Sentry
   Sentry.addBreadcrumb({
@@ -60,6 +157,8 @@ const trackPerformance = (metric) => {
  */
 export const trackFormInteraction = (formName, action, properties = {}) => {
   trackEvent('form_interaction', {
+    event_category: 'forms',
+    event_label: formName,
     form_name: formName,
     action,
     ...properties
@@ -67,7 +166,30 @@ export const trackFormInteraction = (formName, action, properties = {}) => {
 };
 
 /**
- * Track API calls
+ * Track conversion events (e.g., registration, subscription)
+ * @param {string} conversionType - Type of conversion
+ * @param {Object} properties - Conversion properties
+ */
+export const trackConversion = (conversionType, properties = {}) => {
+  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID !== 'GA_MEASUREMENT_ID_PLACEHOLDER') {
+    window.gtag('event', 'conversion', {
+      send_to: GA_MEASUREMENT_ID,
+      event_category: 'conversions',
+      event_label: conversionType,
+      value: properties.value || 0,
+      currency: properties.currency || 'GBP',
+      ...properties
+    });
+  }
+  
+  trackEvent('conversion', {
+    conversion_type: conversionType,
+    ...properties
+  });
+};
+
+/**
+ * Track API calls for performance monitoring
  * @param {string} endpoint - The API endpoint
  * @param {string} method - The HTTP method
  * @param {number} duration - The request duration in milliseconds
@@ -76,6 +198,8 @@ export const trackFormInteraction = (formName, action, properties = {}) => {
  */
 export const trackApiCall = (endpoint, method, duration, success, properties = {}) => {
   trackEvent('api_call', {
+    event_category: 'api',
+    event_label: `${method} ${endpoint}`,
     endpoint,
     method,
     duration,
@@ -100,13 +224,14 @@ export const trackApiCall = (endpoint, method, duration, success, properties = {
 };
 
 /**
- * Track user session
+ * Track user session start
  * @param {Object} properties - Session properties
  */
 export const trackSession = (properties = {}) => {
   const sessionId = generateSessionId();
   
-  trackEvent('session', {
+  trackEvent('session_start', {
+    event_category: 'engagement',
     session_id: sessionId,
     start_time: new Date().toISOString(),
     ...properties
@@ -128,6 +253,21 @@ const generateSessionId = () => {
     const r = Math.random() * 16 | 0;
     const v = c === 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
+  });
+};
+
+/**
+ * Track subscription events
+ * @param {string} eventType - Type of subscription event (started, completed, cancelled)
+ * @param {Object} details - Subscription details
+ */
+export const trackSubscription = (eventType, details = {}) => {
+  trackConversion('subscription_' + eventType, {
+    subscription_type: details.type || 'premium',
+    plan: details.plan || 'monthly',
+    value: details.value || 9.99,
+    currency: 'GBP',
+    ...details
   });
 };
 

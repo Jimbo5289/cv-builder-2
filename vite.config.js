@@ -2,6 +2,17 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
+// Custom plugin to inject Google Analytics ID
+const injectGoogleAnalytics = () => {
+  return {
+    name: 'inject-google-analytics',
+    transformIndexHtml(html) {
+      const gaId = process.env.VITE_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX';
+      return html.replace(/GA_MEASUREMENT_ID_PLACEHOLDER/g, gaId);
+    }
+  };
+};
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current directory.
@@ -21,6 +32,7 @@ export default defineConfig(({ mode }) => {
           configFile: false,
         }
       }),
+      injectGoogleAnalytics()
     ],
     server: {
       port: 5173,
@@ -193,7 +205,22 @@ export default defineConfig(({ mode }) => {
       'process.env.NODE_ENV': JSON.stringify(mode),
       'process.env.VITE_DEV_MODE': JSON.stringify(env.VITE_DEV_MODE || 'false'),
       'process.env.VITE_SKIP_AUTH': JSON.stringify(env.VITE_SKIP_AUTH || 'false'),
-      'process.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || '')
-    }
+      'process.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || 'http://localhost:3001'),
+      'process.env.VITE_FRONTEND_URL': JSON.stringify(env.VITE_FRONTEND_URL || 'http://localhost:5173'),
+      'process.env.VITE_GA_MEASUREMENT_ID': JSON.stringify(env.VITE_GA_MEASUREMENT_ID || ''),
+      'process.env.VITE_MOCK_SUBSCRIPTION_DATA': JSON.stringify(env.VITE_MOCK_SUBSCRIPTION_DATA || 'false'),
+      'process.env.VITE_PREMIUM_FEATURES_ENABLED': JSON.stringify(env.VITE_PREMIUM_FEATURES_ENABLED || 'false'),
+      'process.env.VITE_ENABLE_ALL_ROUTES': JSON.stringify(env.VITE_ENABLE_ALL_ROUTES || 'false'),
+      'process.env.VITE_BYPASS_PAYMENT': JSON.stringify(env.VITE_BYPASS_PAYMENT || 'false'),
+      'process.env.VITE_ADMIN_ACCESS': JSON.stringify(env.VITE_ADMIN_ACCESS || 'false'),
+      'process.env.VITE_MOCK_PREMIUM_USER': JSON.stringify(env.VITE_MOCK_PREMIUM_USER || 'false'),
+      'process.env.VITE_ENVIRONMENT': JSON.stringify(env.VITE_ENVIRONMENT || 'development'),
+      'process.env.VITE_STRIPE_PUBLISHABLE_KEY': JSON.stringify(env.VITE_STRIPE_PUBLISHABLE_KEY || ''),
+      'process.env.VITE_TURNSTILE_SITE_KEY': JSON.stringify(env.VITE_TURNSTILE_SITE_KEY || ''),
+      'process.env.VITE_MAILCHIMP_API_KEY': JSON.stringify(env.VITE_MAILCHIMP_API_KEY || ''),
+      'process.env.VITE_MAILCHIMP_LIST_ID': JSON.stringify(env.VITE_MAILCHIMP_LIST_ID || ''),
+      'process.env.VITE_SENTRY_DSN': JSON.stringify(env.VITE_SENTRY_DSN || '')
+    },
+    assetsInclude: ['**/*.md']
   }
 })
