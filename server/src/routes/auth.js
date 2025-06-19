@@ -999,5 +999,139 @@ router.get('/debug/user-exists/:email', async (req, res) => {
   }
 });
 
+// Temporary password reset endpoint for production troubleshooting
+router.post('/temp-reset-password', async (req, res) => {
+  addCorsHeaders(req, res);
+  try {
+    const { email, secretKey } = req.body;
+    
+    // Security check - only allow for specific email with secret
+    if (email !== 'jamesingleton1971@gmail.com' || secretKey !== 'temp-reset-2025') {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+    
+    const bcrypt = require('bcryptjs');
+    const newPassword = 'TempPassword123!';
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    
+    // Update the user password
+    const updatedUser = await prisma.user.update({
+      where: { email },
+      data: { 
+        password: hashedPassword,
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        isActive: true
+      },
+      select: { id: true, email: true, name: true, isActive: true }
+    });
+    
+    logger.info('Temporary password reset completed', { userId: updatedUser.id });
+    
+    res.json({
+      success: true,
+      message: 'Password reset successfully',
+      user: updatedUser,
+      tempPassword: newPassword
+    });
+    
+  } catch (error) {
+    logger.error('Temporary password reset error:', { error: error.message });
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Temporary password fix endpoint (for production troubleshooting)
+router.post('/fix-password', async (req, res) => {
+  addCorsHeaders(req, res);
+  try {
+    const { email, secret } = req.body;
+    
+    // Simple security check
+    if (secret !== 'fix-james-password-2025') {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+    
+    if (email !== 'jamesingleton1971@gmail.com') {
+      return res.status(400).json({ error: 'Invalid email' });
+    }
+    
+    const bcrypt = require('bcryptjs');
+    const newPassword = 'TempPassword123!';
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    
+    // Update the user's password
+    const updatedUser = await prisma.user.update({
+      where: { email },
+      data: { 
+        password: hashedPassword,
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        isActive: true
+      },
+      select: { id: true, email: true, name: true, isActive: true }
+    });
+    
+    logger.info('Password fixed via emergency endpoint', { userId: updatedUser.id });
+    
+    res.json({
+      success: true,
+      message: 'Password updated successfully',
+      user: updatedUser,
+      temporaryPassword: newPassword
+    });
+    
+  } catch (error) {
+    logger.error('Password fix error:', { error: error.message });
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Debug endpoint to check if user exists (temporary for troubleshooting)
+router.get('/debug/user-exists/:email', async (req, res) => {
+  addCorsHeaders(req, res);
+  try {
+    const email = req.params.email;
+    
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        isActive: true,
+        createdAt: true,
+        failedLoginAttempts: true,
+        lockedUntil: true
+      }
+    });
+
+    if (!user) {
+      return res.json({ 
+        exists: false, 
+        message: 'User not found in database' 
+      });
+    }
+
+    res.json({
+      exists: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        failedLoginAttempts: user.failedLoginAttempts,
+        isLocked: user.lockedUntil && user.lockedUntil > new Date()
+      }
+    });
+  } catch (error) {
+    logger.error('Debug user check error:', { error: error.message });
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Request password reset
 module.exports = router;
