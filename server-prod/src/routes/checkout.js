@@ -299,6 +299,7 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
       success_url: `${frontendUrl}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${frontendUrl}/subscription/cancel`,
       customer_email: req.user.email,
+      allow_promotion_codes: true, // Enable native Stripe promotion code field
       metadata: {
         userId: req.user.id,
         planId: finalPriceId,
