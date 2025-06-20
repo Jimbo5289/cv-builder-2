@@ -471,7 +471,8 @@ export default function PricingSection() {
           </div>
         )}
 
-        {/* Coupon Code Section */}
+        {/* Coupon Code Section - Temporarily Disabled for Troubleshooting */}
+        {/* 
         <div className="max-w-md mx-auto mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="text-center mb-4">
@@ -489,14 +490,12 @@ export default function PricingSection() {
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#E78F81] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 
-                {/* Loading indicator */}
                 {couponValidating && (
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#E78F81]"></div>
                   </div>
                 )}
                 
-                {/* Valid indicator */}
                 {couponValid === true && !couponValidating && (
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                     <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -505,7 +504,6 @@ export default function PricingSection() {
                   </div>
                 )}
                 
-                {/* Invalid indicator */}
                 {couponValid === false && !couponValidating && (
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                     <svg className="h-5 w-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -515,7 +513,6 @@ export default function PricingSection() {
                 )}
               </div>
               
-              {/* Coupon feedback */}
               {couponValid === true && couponDetails && (
                 <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
                   <div className="flex items-start">
@@ -547,6 +544,7 @@ export default function PricingSection() {
             </div>
           </div>
         </div>
+        */}
 
         {viewMode === 'grid' ? (
           <div className="space-y-16">
