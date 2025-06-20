@@ -83,9 +83,11 @@ app.use(express.json({
   limit: '10mb',
   verify: (req, res, buf) => {
     const contentType = req.headers['content-type'] || '';
-    // Skip raw body parsing for multipart/form-data and webhook endpoints
-    if (contentType.includes('multipart/form-data') || req.url.includes('/webhook')) {
-      req.rawBody = null;
+    // For Stripe webhooks, preserve the raw buffer for signature verification
+    if (req.url.includes('/webhook')) {
+      req.rawBody = buf; // Keep as Buffer for Stripe signature verification
+    } else if (contentType.includes('multipart/form-data')) {
+      req.rawBody = null; // Skip raw body parsing for multipart/form-data
     } else {
       req.rawBody = buf.toString();
     }
@@ -97,8 +99,10 @@ app.use(express.urlencoded({
   limit: '10mb',
   verify: (req, res, buf) => {
     const contentType = req.headers['content-type'] || '';
-    // Skip raw body parsing for multipart/form-data
-    if (!contentType.includes('multipart/form-data')) {
+    // For Stripe webhooks, preserve the raw buffer for signature verification
+    if (req.url.includes('/webhook')) {
+      req.rawBody = buf; // Keep as Buffer for Stripe signature verification
+    } else if (!contentType.includes('multipart/form-data')) {
       req.rawBody = buf.toString();
     }
   }
