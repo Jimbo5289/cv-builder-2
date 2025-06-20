@@ -26,9 +26,143 @@ try {
   logger.error('Failed to initialize Stripe:', error.message);
 }
 
+// Validate coupon/promotion code
+router.post('/validate-coupon', authMiddleware, asyncHandler(async (req, res) => {
+  const { couponCode } = req.body;
+  
+  logger.info('Coupon validation request received:', {
+    couponCode: couponCode ? '***' : 'empty', // Don't log actual codes for security
+    userId: req.user?.id,
+    hasStripe: !!stripe
+  });
+
+  if (!couponCode || !couponCode.trim()) {
+    return sendError(res, 'Coupon code is required', 400);
+  }
+
+  try {
+    // Check for development mode with mock data enabled
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const useMockData = process.env.MOCK_SUBSCRIPTION_DATA === 'true';
+    
+    // If Stripe is not available or we're in mock mode, return mock validation
+    if (!stripe || (isDevelopment && useMockData)) {
+      logger.info('Using mock coupon validation - Stripe not available or mock mode enabled');
+      
+      // Mock validation - accept specific test codes
+      const mockValidCodes = ['TEST123', 'MOCK50', 'DEMO2025'];
+      const isValidMock = mockValidCodes.includes(couponCode.trim().toUpperCase());
+      
+      if (isValidMock) {
+        return sendSuccess(res, {
+          valid: true,
+          couponId: `mock_coupon_${couponCode.toLowerCase()}`,
+          discount: '50% off',
+          description: 'Mock discount for testing'
+        }, 'Mock coupon validated');
+      } else {
+        return sendError(res, 'Invalid coupon code', 400);
+      }
+    }
+
+    // Production Stripe validation
+    if (!stripe) {
+      logger.error('Stripe service not initialized - missing configuration');
+      return sendError(res, 'Payment service unavailable - configuration error', 503);
+    }
+
+    try {
+      // First, try to find the promotion code
+      const promotionCodes = await stripe.promotionCodes.list({
+        code: couponCode.trim(),
+        limit: 1,
+        active: true
+      });
+
+      if (promotionCodes.data.length === 0) {
+        logger.info('Promotion code not found', { code: 'redacted' });
+        return sendError(res, 'Invalid coupon code', 400);
+      }
+
+      const promotionCode = promotionCodes.data[0];
+      const coupon = promotionCode.coupon;
+
+      // Check if the coupon is valid and not expired
+      if (!coupon.valid) {
+        logger.info('Coupon is not valid', { couponId: coupon.id });
+        return sendError(res, 'This coupon is no longer valid', 400);
+      }
+
+      // Check expiration
+      if (coupon.redeem_by && coupon.redeem_by * 1000 < Date.now()) {
+        logger.info('Coupon has expired', { couponId: coupon.id });
+        return sendError(res, 'This coupon has expired', 400);
+      }
+
+      // Check usage limits
+      if (coupon.max_redemptions && coupon.times_redeemed >= coupon.max_redemptions) {
+        logger.info('Coupon usage limit reached', { couponId: coupon.id });
+        return sendError(res, 'This coupon has reached its usage limit', 400);
+      }
+
+      // Check promotion code specific limits
+      if (promotionCode.max_redemptions && promotionCode.times_redeemed >= promotionCode.max_redemptions) {
+        logger.info('Promotion code usage limit reached', { promotionCodeId: promotionCode.id });
+        return sendError(res, 'This promotion code has been fully redeemed', 400);
+      }
+
+      // Format discount information
+      let discountText = '';
+      if (coupon.percent_off) {
+        discountText = `${coupon.percent_off}% off`;
+      } else if (coupon.amount_off) {
+        const amount = (coupon.amount_off / 100).toFixed(2);
+        discountText = `${coupon.currency.toUpperCase()} ${amount} off`;
+      }
+
+      logger.info('Coupon validation successful', {
+        couponId: coupon.id,
+        promotionCodeId: promotionCode.id,
+        discount: discountText,
+        userId: req.user.id
+      });
+
+      return sendSuccess(res, {
+        valid: true,
+        couponId: coupon.id,
+        promotionCodeId: promotionCode.id,
+        discount: discountText,
+        description: coupon.name || 'Special discount applied',
+        duration: coupon.duration,
+        percentOff: coupon.percent_off,
+        amountOff: coupon.amount_off,
+        currency: coupon.currency
+      }, 'Coupon validated successfully');
+
+    } catch (stripeError) {
+      logger.error('Stripe coupon validation error:', { error: stripeError.message });
+      
+      if (stripeError.code === 'resource_missing') {
+        return sendError(res, 'Invalid coupon code', 400);
+      }
+      
+      return sendError(res, 'Unable to validate coupon. Please try again.', 500);
+    }
+
+  } catch (error) {
+    logger.error('Coupon validation failed', {
+      userId: req.user?.id,
+      error: error.message,
+      stack: error.stack
+    });
+    
+    return sendError(res, 'Unable to validate coupon. Please try again.', 500);
+  }
+}));
+
 // Create a checkout session
 router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => {
-  const { priceId, planInterval, planType, planName, accessDuration } = req.body;
+  const { priceId, planInterval, planType, planName, accessDuration, couponCode } = req.body;
   
   logger.info('Checkout session request received:', {
     priceId,
@@ -36,7 +170,8 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
     planType,
     planName,
     userId: req.user?.id,
-    hasStripe: !!stripe
+    hasStripe: !!stripe,
+    hasCoupon: !!couponCode
   });
 
   // Debug environment variables
@@ -243,10 +378,60 @@ router.post('/create-session', authMiddleware, asyncHandler(async (req, res) => 
         planId: finalPriceId,
         planType: planType || (planInterval ? 'subscription' : 'one-time'),
         planName: planName || '',
-        accessDuration: accessDuration || ''
+        accessDuration: accessDuration || '',
+        couponCode: couponCode || ''
       },
       client_reference_id: req.user.id
     };
+    
+    // Add promotion code if provided and valid
+    if (couponCode && couponCode.trim()) {
+      try {
+        // Validate the promotion code exists and is active
+        const promotionCodes = await stripe.promotionCodes.list({
+          code: couponCode.trim(),
+          limit: 1,
+          active: true
+        });
+
+        if (promotionCodes.data.length > 0) {
+          const promotionCode = promotionCodes.data[0];
+          const coupon = promotionCode.coupon;
+
+          // Check if the coupon is still valid
+          if (coupon.valid && 
+              (!coupon.redeem_by || coupon.redeem_by * 1000 > Date.now()) &&
+              (!coupon.max_redemptions || coupon.times_redeemed < coupon.max_redemptions) &&
+              (!promotionCode.max_redemptions || promotionCode.times_redeemed < promotionCode.max_redemptions)) {
+            
+            sessionConfig.discounts = [{ promotion_code: promotionCode.id }];
+            
+            logger.info('Promotion code applied to checkout session', {
+              promotionCodeId: promotionCode.id,
+              couponId: coupon.id,
+              userId: req.user.id
+            });
+          } else {
+            logger.warn('Promotion code is no longer valid', {
+              promotionCodeId: promotionCode.id,
+              userId: req.user.id
+            });
+            return sendError(res, 'The coupon code is no longer valid or has been fully redeemed', 400);
+          }
+        } else {
+          logger.warn('Promotion code not found', {
+            userId: req.user.id
+          });
+          return sendError(res, 'Invalid coupon code', 400);
+        }
+      } catch (couponError) {
+        logger.error('Error validating promotion code for checkout:', {
+          error: couponError.message,
+          userId: req.user.id
+        });
+        return sendError(res, 'Unable to apply coupon code. Please try again.', 500);
+      }
+    }
     
     const session = await stripe.checkout.sessions.create(sessionConfig);
 
