@@ -40,11 +40,11 @@ export default function Register() {
     }
 
     // Password validation
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#-])[A-Za-z\d@$!%*?&#-]{8,}$/;
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (!passwordRegex.test(formData.password)) {
-      newErrors.password = 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&-)';
+      newErrors.password = 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&#-)';
     }
 
     // Confirm password validation
@@ -299,7 +299,7 @@ export default function Register() {
               <li>Contains at least one uppercase letter</li>
               <li>Contains at least one lowercase letter</li>
               <li>Contains at least one number</li>
-              <li>Contains at least one special character (@$!%*?&)</li>
+              <li>Contains at least one special character (@$!%*?&#-)</li>
             </ul>
           </div>
         </div>

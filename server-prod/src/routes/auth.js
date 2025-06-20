@@ -19,7 +19,7 @@ const { requireTurnstileVerification } = require('../utils/turnstile');
 const database = require('../config/database');
 
 // Password validation regex
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#-])[A-Za-z\d@$!%*?&#-]{8,}$/;
 
 // Input validation schemas
 const registerSchema = z.object({
@@ -27,7 +27,7 @@ const registerSchema = z.object({
   password: z.string()
     .min(8, 'Password must be at least 8 characters')
     .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#-])[A-Za-z\d@$!%*?&#-]{8,}$/,
       'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
     ),
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -48,7 +48,7 @@ const newPasswordSchema = z.object({
   password: z.string()
     .min(8, 'Password must be at least 8 characters')
     .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#-])[A-Za-z\d@$!%*?&#-]{8,}$/,
       'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
     )
 });
@@ -454,7 +454,7 @@ router.post('/change-password', auth, async (req, res) => {
     }
 
     // Validate new password
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#-])[A-Za-z\d@$!%*?&#-]{8,}$/;
     if (!passwordRegex.test(newPassword)) {
       logger.warn('Change password failed: Password does not meet requirements', { userId });
       return res.status(400).json({
