@@ -545,32 +545,62 @@ const Analyze = () => {
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Step 1: Upload Your CV</h2>
               <div 
-                className={`border-2 border-dashed rounded-lg p-10 flex flex-col items-center justify-center cursor-pointer mb-6 ${
-                  isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500'
+                className={`border-2 border-dashed rounded-lg p-8 text-center ${
+                  isDragging ? 'border-[#E78F81] bg-[#E78F81]/10' : 'border-gray-300 dark:border-gray-700'
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                onClick={() => document.getElementById('cv-file').click()}
               >
-                <input
-                  type="file"
-                  id="cv-file"
-                  className="hidden"
-                  accept=".pdf,.docx"
-                  onChange={handleFileInput}
-                />
-                
-                <svg className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                
-                <p className="text-lg font-medium mb-1 text-gray-700 dark:text-gray-200">
-                  {file ? file.name : 'Drag and drop your CV here'}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'or click to browse (PDF or DOCX, max 5MB)'}
-                </p>
+                {file ? (
+                  <div className="flex flex-col items-center">
+                    <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900">
+                      <svg className="h-8 w-8 text-green-600 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-900 dark:text-white font-medium mb-1">
+                      {file.name}
+                    </p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+                      {(file.size / 1024).toFixed(2)} KB
+                    </p>
+                    <button
+                      onClick={() => setFile(null)}
+                      className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] dark:focus:ring-offset-gray-900"
+                    >
+                      Change File
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <p className="mt-4 text-gray-900 dark:text-white font-medium">
+                      Drag and drop your CV file here
+                    </p>
+                    <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm">
+                      or <button 
+                        type="button"
+                        className="text-[#E78F81] hover:text-[#d36e62] font-medium focus:outline-none focus:underline"
+                        onClick={() => document.getElementById('cv-file').click()}
+                      >
+                        browse
+                      </button> to select a file
+                    </p>
+                    <input
+                      type="file"
+                      id="cv-file"
+                      className="hidden"
+                      accept=".pdf,.docx"
+                      onChange={handleFileInput}
+                    />
+                    <p className="mt-1 text-gray-500 dark:text-gray-400 text-xs">
+                      PDF or DOCX up to 5MB
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -581,7 +611,7 @@ const Analyze = () => {
                 <button
                   className={`px-4 py-2 font-medium ${
                     activeTab === 'upload'
-                      ? 'border-b-2 border-blue-500 text-blue-500'
+                      ? 'border-b-2 border-[#E78F81] text-[#E78F81]'
                       : 'text-gray-500 dark:text-gray-400'
                   }`}
                   onClick={() => setActiveTab('upload')}
@@ -591,7 +621,7 @@ const Analyze = () => {
                 <button
                   className={`px-4 py-2 font-medium ${
                     activeTab === 'paste'
-                      ? 'border-b-2 border-blue-500 text-blue-500'
+                      ? 'border-b-2 border-[#E78F81] text-[#E78F81]'
                       : 'text-gray-500 dark:text-gray-400'
                   }`}
                   onClick={() => setActiveTab('paste')}
@@ -602,8 +632,8 @@ const Analyze = () => {
               
               {activeTab === 'upload' ? (
                 <div 
-                  className={`border-2 border-dashed rounded-lg p-10 flex flex-col items-center justify-center cursor-pointer mb-6 ${
-                    isJobDescDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500'
+                  className={`border-2 border-dashed rounded-lg p-8 text-center ${
+                    isJobDescDragging ? 'border-[#E78F81] bg-[#E78F81]/10' : 'border-gray-300 dark:border-gray-700'
                   }`}
                   onDragOver={(e) => {
                     e.preventDefault();
@@ -614,28 +644,56 @@ const Analyze = () => {
                     setIsJobDescDragging(false);
                   }}
                   onDrop={handleJobDescFileDrop}
-                  onClick={() => document.getElementById('job-desc-file').click()}
                 >
-                  <input
-                    type="file"
-                    id="job-desc-file"
-                    className="hidden"
-                    accept=".pdf,.docx,.txt"
-                    onChange={handleJobDescFileSelect}
-                  />
-                  
-                  <svg className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  
-                  <p className="text-lg font-medium mb-1 text-gray-700 dark:text-gray-200">
-                    {jobDescriptionFile ? jobDescriptionFile.name : 'Drag and drop job description here'}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {jobDescriptionFile 
-                      ? `${(jobDescriptionFile.size / 1024 / 1024).toFixed(2)} MB` 
-                      : 'or click to browse (PDF, DOCX, or TXT, max 5MB)'}
-                  </p>
+                  {jobDescriptionFile ? (
+                    <div className="flex flex-col items-center">
+                      <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900">
+                        <svg className="h-8 w-8 text-green-600 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <p className="text-gray-900 dark:text-white font-medium mb-1">
+                        {jobDescriptionFile.name}
+                      </p>
+                      <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+                        {(jobDescriptionFile.size / 1024).toFixed(2)} KB
+                      </p>
+                      <button
+                        onClick={() => setJobDescriptionFile(null)}
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E78F81] dark:focus:ring-offset-gray-900"
+                      >
+                        Change File
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center">
+                      <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      <p className="mt-4 text-gray-900 dark:text-white font-medium">
+                        Drag and drop job description here
+                      </p>
+                      <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm">
+                        or <button 
+                          type="button"
+                          className="text-[#E78F81] hover:text-[#d36e62] font-medium focus:outline-none focus:underline"
+                          onClick={() => document.getElementById('job-desc-file').click()}
+                        >
+                          browse
+                        </button> to select a file
+                      </p>
+                      <input
+                        type="file"
+                        id="job-desc-file"
+                        className="hidden"
+                        accept=".pdf,.docx,.txt"
+                        onChange={handleJobDescFileSelect}
+                      />
+                      <p className="mt-1 text-gray-500 dark:text-gray-400 text-xs">
+                        PDF, DOCX, or TXT up to 5MB
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="mb-6">
@@ -669,7 +727,7 @@ const Analyze = () => {
                 className={`px-8 py-3 rounded-lg font-medium text-white ${
                   isAnalyzing
                     ? 'bg-gray-500 dark:bg-gray-600 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'
+                    : 'bg-[#E78F81] hover:bg-[#d36e62] dark:bg-[#e07c6e] dark:hover:bg-[#c75d50]'
                 }`}
                 onClick={analyzeCV}
                 disabled={isAnalyzing}
