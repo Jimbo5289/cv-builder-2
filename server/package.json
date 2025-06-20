@@ -10,6 +10,7 @@
     "dev:managed": "node start-server.js",
     "test": "jest",
     "migrate": "node prisma/apply-migration.js",
+    "migrate:manual": "node run-migration.js",
     "prisma:deploy": "npx prisma migrate deploy",
     "prisma:generate": "npx prisma generate",
     "render": "node render-setup.js",
