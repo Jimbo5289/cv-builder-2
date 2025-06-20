@@ -115,32 +115,28 @@ async function handleCheckoutSessionCompleted(session) {
       if (user) {
         logger.info(`Found existing user for customer ${customer}: ${user.id}`);
       } else {
-        // Try to find the admin user
-        user = await prisma.user.findFirst({
-          where: { email: 'admin@example.com' }
-        });
-        
-        if (user) {
-          logger.info(`Using admin user for customer ${customer}: ${user.id}`);
-          
-          // Update the admin user with the customer ID
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { customerId: customer }
-          });
-        } else {
-          // Create a new admin user if needed
-          user = await prisma.user.create({
-            data: {
-              id: cuid(),
-              email: 'admin@example.com',
-              name: 'Admin User',
-              customerId: customer,
-              password: '$2b$10$dummyhashedpassword', // Just a placeholder
-              isActive: true
+        // Get customer details from Stripe to find the user by email
+        try {
+          const stripeCustomer = await stripe.customers.retrieve(customer);
+          if (stripeCustomer.email) {
+            user = await prisma.user.findFirst({
+              where: { email: stripeCustomer.email }
+            });
+            
+            if (user) {
+              logger.info(`Found user by email ${stripeCustomer.email}, updating with customer ID ${customer}`);
+              
+              // Update the user with the customer ID
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { customerId: customer }
+              });
+            } else {
+              logger.error(`No user found with email ${stripeCustomer.email} for customer ${customer}`);
             }
-          });
-          logger.info(`Created admin user for customer ${customer}: ${user.id}`);
+          }
+        } catch (stripeError) {
+          logger.error(`Failed to retrieve customer ${customer} from Stripe: ${stripeError.message}`);
         }
       }
     }
@@ -154,16 +150,19 @@ async function handleCheckoutSessionCompleted(session) {
     // Handle subscription checkout
     if (subscription && mode === 'subscription') {
       try {
+        // Get the subscription details from Stripe for accurate period dates
+        const stripeSubscription = await stripe.subscriptions.retrieve(subscription);
+        
         await prisma.subscription.upsert({
           where: { 
             stripeSubscriptionId: subscription
           },
           update: {
             status: 'active',
-            currentPeriodStart: new Date(),
-            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+            currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
+            currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
             stripeCustomerId: customer || '',
-            stripePriceId: session.price?.id || '',
+            stripePriceId: stripeSubscription.items.data[0]?.price?.id || '',
             updatedAt: new Date()
           },
           create: {
@@ -171,17 +170,17 @@ async function handleCheckoutSessionCompleted(session) {
             stripeSubscriptionId: subscription,
             userId: user.id,
             status: 'active',
-            currentPeriodStart: new Date(),
-            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+            currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
+            currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
             stripeCustomerId: customer || '',
-            stripePriceId: session.price?.id || '',
+            stripePriceId: stripeSubscription.items.data[0]?.price?.id || '',
             createdAt: new Date(),
             updatedAt: new Date()
           }
         });
         logger.info(`Subscription created/updated for user ${user.id}: ${subscription}`);
       } catch (dbError) {
-        logger.error(`Database error processing subscription checkout: ${dbError}`);
+        logger.error(`Database error processing subscription checkout: ${dbError.message}`);
         // Continue processing without throwing to ensure webhook completes
       }
     } 
