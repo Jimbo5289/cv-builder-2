@@ -8,6 +8,84 @@ const { sendSuccess, sendError, asyncHandler } = require('../utils/responseHandl
 const router = express.Router();
 const prisma = new PrismaClient();
 
+// Verify a Stripe checkout session
+router.post('/verify-session', authMiddleware, asyncHandler(async (req, res) => {
+  const { sessionId } = req.body;
+  
+  logger.info('Session verification request received:', {
+    sessionId: sessionId ? 'provided' : 'missing',
+    userId: req.user?.id
+  });
+
+  if (!sessionId) {
+    return sendError(res, 'Session ID is required', 400);
+  }
+
+  try {
+    if (!stripe) {
+      logger.error('Stripe service not initialized');
+      return sendError(res, 'Payment service unavailable', 503);
+    }
+
+    // Retrieve the session from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['line_items', 'customer', 'subscription']
+    });
+
+    if (!session) {
+      return sendError(res, 'Session not found', 404);
+    }
+
+    // Verify the session belongs to the current user by email
+    const customerEmail = session.customer_details?.email || session.customer?.email;
+    if (customerEmail !== req.user.email) {
+      logger.warn('Session verification failed - email mismatch', {
+        sessionEmail: customerEmail,
+        userEmail: req.user.email,
+        userId: req.user.id
+      });
+      return sendError(res, 'Session does not belong to current user', 403);
+    }
+
+    logger.info('Session verification successful', {
+      sessionId: session.id,
+      paymentStatus: session.payment_status,
+      mode: session.mode,
+      userId: req.user.id,
+      customerEmail
+    });
+
+    return sendSuccess(res, {
+      session: {
+        id: session.id,
+        mode: session.mode,
+        payment_status: session.payment_status,
+        amount_total: session.amount_total,
+        currency: session.currency,
+        customer_details: session.customer_details,
+        total_details: session.total_details,
+        subscription: session.subscription,
+        success_url: session.success_url,
+        created: session.created
+      }
+    }, 'Session verified successfully');
+
+  } catch (error) {
+    logger.error('Session verification failed', {
+      sessionId,
+      userId: req.user?.id,
+      error: error.message,
+      stack: error.stack
+    });
+
+    if (error.type === 'StripeInvalidRequestError') {
+      return sendError(res, 'Invalid session ID', 400);
+    }
+    
+    return sendError(res, 'Unable to verify session. Please try again.', 500);
+  }
+}));
+
 // Validate coupon/promotion code
 router.post('/validate-coupon', authMiddleware, asyncHandler(async (req, res) => {
   const { couponCode } = req.body;

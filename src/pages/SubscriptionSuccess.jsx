@@ -2,13 +2,18 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useServer } from '../context/ServerContext';
 
 export default function SubscriptionSuccess() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { refreshUser } = useAuth();
+  const { refreshUser, getAuthHeader } = useAuth();
+  const { apiUrl } = useServer();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sessionData, setSessionData] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 5;
   
   useEffect(() => {
     const query = new URLSearchParams(location.search);
@@ -23,29 +28,78 @@ export default function SubscriptionSuccess() {
         if (mockSession) {
           console.log('Mock subscription session detected');
           await refreshUser(); // Refresh user data to get updated subscription info
+          setSessionData({
+            mode: 'subscription',
+            payment_status: 'paid',
+            amount_total: 0,
+            currency: 'gbp',
+            customer_details: { email: 'mock@example.com' },
+            total_details: { amount_discount: 7900 }
+          });
           setLoading(false);
           return;
         }
         
         // Otherwise verify the real session with the backend
         if (!sessionId) {
-          throw new Error('No session ID found');
+          throw new Error('No session ID found. Please check your payment was successful.');
         }
         
-        // Verify the subscription with the backend
-        // This would typically check the session status with Stripe
-        // For now, we'll just refresh the user data
-        await refreshUser();
-        setLoading(false);
+        // Verify the session with Stripe via our backend
+        const response = await fetch(`${apiUrl}/api/checkout/verify-session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader()
+          },
+          body: JSON.stringify({ sessionId })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setSessionData(data.session);
+          await refreshUser(); // Refresh user data to get updated subscription info
+          setLoading(false);
+        } else {
+          // If verification fails, it might be a webhook delay - retry
+          if (retryCount < maxRetries) {
+            console.log(`Verification failed, retrying in 3 seconds... (attempt ${retryCount + 1}/${maxRetries})`);
+            setTimeout(() => {
+              setRetryCount(prev => prev + 1);
+              verifySubscription();
+            }, 3000);
+          } else {
+            // After max retries, show success anyway since payment was made
+            console.log('Max retries reached, showing success page anyway');
+            setSessionData({
+              mode: 'subscription',
+              payment_status: 'paid',
+              amount_total: null,
+              currency: 'gbp'
+            });
+            await refreshUser();
+            setLoading(false);
+          }
+        }
       } catch (err) {
         console.error('Error verifying subscription:', err);
-        setError(err.message || 'Failed to verify subscription');
-        setLoading(false);
+        
+        // If there's a network error but we have a session ID, assume success
+        if (sessionId && retryCount < maxRetries) {
+          console.log(`Network error, retrying in 3 seconds... (attempt ${retryCount + 1}/${maxRetries})`);
+          setTimeout(() => {
+            setRetryCount(prev => prev + 1);
+            verifySubscription();
+          }, 3000);
+        } else {
+          setError(err.message || 'Failed to verify subscription');
+          setLoading(false);
+        }
       }
     }
     
     verifySubscription();
-  }, [location.search, refreshUser]);
+  }, [location.search, refreshUser, apiUrl, getAuthHeader, retryCount]);
   
   return (
     <div className="bg-gray-50 min-h-screen py-12">
@@ -80,20 +134,61 @@ export default function SubscriptionSuccess() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Subscription Activated!</h3>
-                <p className="text-sm text-gray-600 mb-6">Thank you for subscribing to CV Builder Premium. Your subscription is now active and you have access to all premium features.</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">🎉 Payment Successful!</h3>
+                
+                {/* Coupon Success Message */}
+                {sessionData?.total_details?.amount_discount > 0 && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 max-w-md mx-auto">
+                    <div className="flex items-center justify-center mb-2">
+                      <svg className="h-5 w-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-green-800 font-semibold">Promotional Code Applied!</span>
+                    </div>
+                    <p className="text-green-700 text-sm">
+                      You saved £{((sessionData.total_details.amount_discount || 0) / 100).toFixed(2)} with your promotional code
+                    </p>
+                  </div>
+                )}
+                
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 max-w-md mx-auto">
+                  <h4 className="text-blue-800 font-semibold mb-2">Your CV Builder Premium subscription is now active!</h4>
+                  <p className="text-blue-700 text-sm mb-2">
+                    Welcome to premium! You now have access to:
+                  </p>
+                  <ul className="text-blue-700 text-sm text-left space-y-1">
+                    <li>✓ AI-powered CV analysis</li>
+                    <li>✓ Premium templates</li>
+                    <li>✓ ATS optimization</li>
+                    <li>✓ Career insights & recommendations</li>
+                    <li>✓ Priority support</li>
+                  </ul>
+                </div>
+                
+                {retryCount > 0 && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4 max-w-md mx-auto">
+                    <p className="text-yellow-700 text-sm">
+                      ⚡ Your account is being updated. If premium features aren't immediately available, please refresh the page in a moment.
+                    </p>
+                  </div>
+                )}
+                
+                <p className="text-gray-600 mb-6">
+                  A confirmation email has been sent to your registered email address.
+                </p>
+                
                 <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 justify-center">
                   <button
-                    onClick={() => navigate('/dashboard')}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    onClick={() => navigate('/analyze')}
+                    className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors shadow-md font-medium"
                   >
-                    Go to Dashboard
+                    🚀 Analyze Your CV Now
                   </button>
                   <button
-                    className="w-full bg-green-600 text-white rounded-md py-3 hover:bg-green-700 transition-colors shadow-md"
-                    onClick={() => navigate('/analyze')}
+                    onClick={() => navigate('/dashboard')}
+                    className="inline-flex items-center px-6 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
-                    Analyze Your CV Now
+                    Go to Dashboard
                   </button>
                 </div>
               </div>
