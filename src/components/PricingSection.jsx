@@ -26,12 +26,7 @@ export default function PricingSection() {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Coupon state management
-  const [couponCode, setCouponCode] = useState('');
-  const [couponValidating, setCouponValidating] = useState(false);
-  const [couponValid, setCouponValid] = useState(null);
-  const [couponError, setCouponError] = useState('');
-  const [couponDetails, setCouponDetails] = useState(null);
+
   
   // Check if user is upgrading from a premium feature
   const isPremiumUpgrade = location.state?.premium;
@@ -71,68 +66,7 @@ export default function PricingSection() {
     }
   }, [preselect]);
 
-  // Coupon validation function
-  const validateCoupon = async (code) => {
-    if (!code.trim()) {
-      setCouponValid(null);
-      setCouponError('');
-      setCouponDetails(null);
-      return;
-    }
 
-    setCouponValidating(true);
-    setCouponError('');
-
-    try {
-      const response = await fetch(`${apiUrl}/api/checkout/validate-coupon`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ couponCode: code.trim() })
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setCouponValid(true);
-        setCouponDetails(data.data);
-        setCouponError('');
-      } else {
-        setCouponValid(false);
-        setCouponError(data.error || 'Invalid coupon code');
-        setCouponDetails(null);
-      }
-    } catch (error) {
-      console.error('Coupon validation error:', error);
-      setCouponValid(false);
-      setCouponError('Unable to validate coupon. Please try again.');
-      setCouponDetails(null);
-    } finally {
-      setCouponValidating(false);
-    }
-  };
-
-  // Handle coupon code input
-  const handleCouponChange = (e) => {
-    const code = e.target.value;
-    setCouponCode(code);
-    
-    // Clear previous validation state immediately
-    setCouponValid(null);
-    setCouponError('');
-    setCouponDetails(null);
-    
-    // Debounce validation
-    if (code.trim()) {
-      setTimeout(() => {
-        if (couponCode === code) { // Only validate if code hasn't changed
-          validateCoupon(code);
-        }
-      }, 500);
-    }
-  };
 
   const pricingPlans = [
     {
@@ -297,10 +231,7 @@ export default function PricingSection() {
         checkoutData.planInterval = plan.interval === 'month' ? 'monthly' : 'annual';
       }
 
-      // Include coupon code if valid
-      if (couponValid && couponCode.trim()) {
-        checkoutData.couponCode = couponCode.trim();
-      }
+      // Note: Coupon codes are now handled natively by Stripe Checkout
 
       console.log('Sending checkout request with data:', checkoutData);
         
@@ -471,80 +402,7 @@ export default function PricingSection() {
           </div>
         )}
 
-        {/* Coupon Code Section - Temporarily Disabled for Troubleshooting */}
-        {/* 
-        <div className="max-w-md mx-auto mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-            <div className="text-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Have a Coupon Code?</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Enter your promotion code to get special pricing</p>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={couponCode}
-                  onChange={handleCouponChange}
-                  placeholder="Enter coupon code"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#E78F81] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                />
-                
-                {couponValidating && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#E78F81]"></div>
-                  </div>
-                )}
-                
-                {couponValid === true && !couponValidating && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                  </div>
-                )}
-                
-                {couponValid === false && !couponValidating && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <svg className="h-5 w-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                  </div>
-                )}
-              </div>
-              
-              {couponValid === true && couponDetails && (
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
-                  <div className="flex items-start">
-                    <svg className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <div>
-                      <p className="text-sm font-medium text-green-800 dark:text-green-200">
-                        Coupon Applied! 🎉
-                      </p>
-                      <p className="text-xs text-green-700 dark:text-green-300 mt-1">
-                        {couponDetails.description || `Discount: ${couponDetails.discount || 'Special pricing'}`}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {couponError && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-                  <div className="flex items-start">
-                    <svg className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                    <p className="text-sm text-red-700 dark:text-red-300">{couponError}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        */}
+
 
         {viewMode === 'grid' ? (
           <div className="space-y-16">
