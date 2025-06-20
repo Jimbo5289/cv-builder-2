@@ -1,5 +1,7 @@
 # CV Builder
 
+Welcome to **CV Builder** - a modern, AI-powered platform for creating, analyzing, and optimizing professional CVs and resumes. Built with React, Node.js, and powered by advanced AI analysis capabilities.
+
 A modern web application for creating, editing, downloading, and printing professional CVs with customizable templates.
 
 ## Key Features
@@ -185,4 +187,7 @@ MIT
 
 For support or contributions, please contact:
 - GitHub: [https://github.com/Jimbo5289/cv-builder-2](https://github.com/Jimbo5289/cv-builder-2)
-# Deployment Force Thu Jun 19 22:15:35 BST 2025
+
+---
+
+*Last updated: June 2025 - Dependencies verified and GitHub Actions working*
