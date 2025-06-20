@@ -155,16 +155,19 @@ async function handleCheckoutSessionCompleted(session) {
     // Handle subscription checkout
     if (subscription && mode === 'subscription') {
       try {
+        // Get the actual subscription details from Stripe
+        const stripeSubscription = await stripe.subscriptions.retrieve(subscription);
+        
         await prisma.subscription.upsert({
           where: { 
             stripeSubscriptionId: subscription
           },
           update: {
             status: 'active',
-            currentPeriodStart: new Date(),
-            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+            currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
+            currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
             stripeCustomerId: customer || '',
-            stripePriceId: session.price?.id || '',
+            stripePriceId: stripeSubscription.items.data[0]?.price?.id || '',
             updatedAt: new Date()
           },
           create: {
@@ -172,17 +175,17 @@ async function handleCheckoutSessionCompleted(session) {
             stripeSubscriptionId: subscription,
             userId: user.id,
             status: 'active',
-            currentPeriodStart: new Date(),
-            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+            currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
+            currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
             stripeCustomerId: customer || '',
-            stripePriceId: session.price?.id || '',
+            stripePriceId: stripeSubscription.items.data[0]?.price?.id || '',
             createdAt: new Date(),
             updatedAt: new Date()
           }
         });
         logger.info(`Subscription created/updated for user ${user.id}: ${subscription}`);
       } catch (dbError) {
-        logger.error(`Database error processing subscription checkout: ${dbError}`);
+        logger.error(`Database error processing subscription checkout: ${dbError.message}`);
         // Continue processing without throwing to ensure webhook completes
       }
     } 

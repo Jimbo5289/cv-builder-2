@@ -19,6 +19,7 @@ export default function Subscription() {
   const [showCancelOptions, setShowCancelOptions] = useState(false);
   const showUpgradePrompt = location.state?.upgrade;
   const redirectFrom = location.state?.from?.pathname;
+  const showSuccessFromPayment = location.state?.showSuccess;
   const { apiUrl } = useServer();
 
   // Map from path to feature name
@@ -77,6 +78,15 @@ export default function Subscription() {
 
     fetchSubscription();
   }, [user, apiUrl, getAuthHeader]);
+
+  // Show success message when redirected from payment success
+  useEffect(() => {
+    if (showSuccessFromPayment) {
+      setSuccessMessage('🎉 Payment successful! Your premium subscription is now active. Welcome to CV Builder Premium!');
+      // Clear the state to prevent showing the message on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [showSuccessFromPayment]);
 
   const handleCancelSubscription = async (immediate = false) => {
     try {

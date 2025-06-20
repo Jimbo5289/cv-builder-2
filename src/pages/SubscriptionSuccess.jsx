@@ -13,6 +13,7 @@ export default function SubscriptionSuccess() {
   const [error, setError] = useState(null);
   const [sessionData, setSessionData] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [countdown, setCountdown] = useState(10);
   const maxRetries = 5;
   
   useEffect(() => {
@@ -100,6 +101,23 @@ export default function SubscriptionSuccess() {
     
     verifySubscription();
   }, [location.search, refreshUser, apiUrl, getAuthHeader, retryCount]);
+
+  // Auto-redirect countdown timer
+  useEffect(() => {
+    if (!loading && !error && sessionData) {
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            navigate('/subscription', { state: { showSuccess: true } });
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [loading, error, sessionData, navigate]);
   
   return (
     <div className="bg-gray-50 min-h-screen py-12">
@@ -179,6 +197,12 @@ export default function SubscriptionSuccess() {
                 
                 <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 justify-center">
                   <button
+                    onClick={() => navigate('/subscription', { state: { showSuccess: true } })}
+                    className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors shadow-md font-medium"
+                  >
+                    📋 View My Subscription
+                  </button>
+                  <button
                     onClick={() => navigate('/analyze')}
                     className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors shadow-md font-medium"
                   >
@@ -190,6 +214,12 @@ export default function SubscriptionSuccess() {
                   >
                     Go to Dashboard
                   </button>
+                </div>
+                
+                <div className="mt-6 text-center">
+                  <p className="text-sm text-gray-500">
+                    You will be automatically redirected to your subscription page in <span className="font-semibold text-blue-600">{countdown}</span> seconds...
+                  </p>
                 </div>
               </div>
             )}

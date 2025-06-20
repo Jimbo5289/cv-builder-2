@@ -78,7 +78,7 @@ model Subscription {
   updatedAt            DateTime  @updatedAt
   stripeCustomerId     String
   stripePriceId        String
-  stripeSubscriptionId String
+  stripeSubscriptionId String    @unique
   user                 User      @relation(fields: [userId], references: [id])
 }
 

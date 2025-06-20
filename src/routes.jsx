@@ -125,8 +125,8 @@ const routes = [
   { path: '/skills', Component: Skills, protected: true },
   { path: '/references', Component: References, protected: true },
   { path: '/saved', Component: SavedCVs, protected: true },
-  { path: '/subscription-success', Component: SubscriptionSuccess, protected: true },
-  { path: '/subscription-cancel', Component: SubscriptionCancel, protected: true },
+  { path: '/subscription/success', Component: SubscriptionSuccess, protected: true },
+  { path: '/subscription/cancel', Component: SubscriptionCancel, protected: true },
   { path: '/subscription', Component: Subscription, protected: true },
   { path: '/edit/:id', Component: Edit, protected: true },
 ];
