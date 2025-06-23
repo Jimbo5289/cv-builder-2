@@ -591,6 +591,12 @@ router.get('/subscription-status', authMiddleware, asyncHandler(async (req, res)
 router.get('/session-processed/:sessionId', authMiddleware, asyncHandler(async (req, res) => {
   const { sessionId } = req.params;
   
+  logger.info('Checking session processed status', {
+    sessionId,
+    userId: req.user?.id,
+    userEmail: req.user?.email
+  });
+  
   try {
     // Check if we have any subscriptions that were created from this session
     const subscription = await prisma.subscription.findFirst({
@@ -608,7 +614,27 @@ router.get('/session-processed/:sessionId', authMiddleware, asyncHandler(async (
       }
     });
 
+    // Additional debug: Check if subscription exists for this user at all
+    const anySubscriptionForUser = await prisma.subscription.findFirst({
+      where: {
+        userId: req.user.id
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
     const isProcessed = !!(subscription || temporaryAccess);
+    
+    logger.info('Session processed check result', {
+      sessionId,
+      userId: req.user.id,
+      isProcessed,
+      hasSubscription: !!subscription,
+      hasTemporaryAccess: !!temporaryAccess,
+      anySubscriptionExists: !!anySubscriptionForUser,
+      lastSubscriptionSessionId: anySubscriptionForUser?.stripeSessionId
+    });
     
     return sendSuccess(res, { 
       sessionProcessed: isProcessed,
