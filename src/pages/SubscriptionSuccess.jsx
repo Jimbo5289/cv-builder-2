@@ -82,6 +82,17 @@ export default function SubscriptionSuccess() {
     try {
       console.log(`Checking if session ${sessionId} has been processed (attempt ${webhookChecks + 1}/${maxWebhookChecks})`);
       
+      // First ensure we have a valid auth token
+      const authHeader = getAuthHeader();
+      if (!authHeader || !authHeader.Authorization) {
+        console.warn('No valid auth token available, attempting to refresh user session');
+        try {
+          await refreshUser();
+        } catch (refreshError) {
+          console.error('Failed to refresh user session:', refreshError);
+        }
+      }
+
       // Check if this specific session has been processed by the webhook
       const response = await fetch(`${apiUrl}/api/checkout/session-processed/${sessionId}`, {
         method: 'GET',
@@ -93,6 +104,7 @@ export default function SubscriptionSuccess() {
       
       if (response.ok) {
         const data = await response.json();
+        console.log('Session processed response:', data);
         if (data.sessionProcessed) {
           console.log('Session confirmed processed by webhook!');
           setSubscriptionStatus('active');
@@ -104,6 +116,18 @@ export default function SubscriptionSuccess() {
             console.warn('Failed to refresh user after session confirmation:', refreshError);
           }
           return;
+        }
+      } else {
+        console.warn('Session processed check failed:', response.status, response.statusText);
+        
+        // If we get a 401 (unauthorized), try refreshing the user session
+        if (response.status === 401) {
+          console.log('Unauthorized response, attempting to refresh user session');
+          try {
+            await refreshUser();
+          } catch (refreshError) {
+            console.error('Failed to refresh user session after 401:', refreshError);
+          }
         }
       }
       
