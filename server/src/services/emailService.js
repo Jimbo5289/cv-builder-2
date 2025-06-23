@@ -100,7 +100,17 @@ const templates = {
               <p style="margin-bottom: 10px;">
                 📧 A copy of this confirmation has been saved to your account
               </p>
-              <p style="margin: 0;">This is an automated message from CV Builder. If you have any questions, we're here to help!</p>
+              <p style="margin-bottom: 15px;">This is an automated message from MyCVBuilder.co.uk. If you have any questions, we're here to help!</p>
+              
+              <div style="border-top: 1px solid #e5e7eb; padding-top: 15px; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                <p style="margin: 0 0 8px 0;"><strong>MyCVBuilder Ltd</strong> • Company Number: 16521310 • Trading as MyCVBuilder.co.uk</p>
+                <p style="margin: 0 0 8px 0;">Registered Office: 4th Floor, Silverstream House, 45 Fitzroy Street, Fitzrovia, London, W1T 6EB, England</p>
+                <p style="margin: 0 0 8px 0;">📧 <a href="mailto:support@mycvbuilder.co.uk" style="color: #4a90e2;">support@mycvbuilder.co.uk</a> • 🌐 <a href="https://mycvbuilder.co.uk" style="color: #4a90e2;">mycvbuilder.co.uk</a></p>
+                <p style="margin: 0 0 8px 0;">You are receiving this email because you have a subscription with MyCVBuilder.co.uk. 
+                   View our <a href="${FRONTEND_URL}/privacy-policy" style="color: #4a90e2;">Privacy Policy</a> and 
+                   <a href="${FRONTEND_URL}/terms" style="color: #4a90e2;">Terms of Service</a>.</p>
+                <p style="margin: 0;">To unsubscribe from marketing emails, <a href="${FRONTEND_URL}/profile" style="color: #4a90e2;">manage your preferences</a> or contact support.</p>
+              </div>
             </div>
           </div>
         </body>
