@@ -587,4 +587,71 @@ router.get('/plans', asyncHandler(async (req, res) => {
   }
 }));
 
+// Check if a specific Stripe session has been processed by webhook
+router.get('/session-processed/:sessionId', authMiddleware, asyncHandler(async (req, res) => {
+  const { sessionId } = req.params;
+  
+  logger.info('Checking session processed status', {
+    sessionId,
+    userId: req.user?.id,
+    userEmail: req.user?.email
+  });
+  
+  try {
+    // Check if we have any subscriptions that were created from this session
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        userId: req.user.id,
+        stripeSessionId: sessionId
+      }
+    });
+
+    // Also check if we have any temporary access records from this session
+    const temporaryAccess = await prisma.temporaryAccess.findFirst({
+      where: {
+        userId: req.user.id,
+        stripeSessionId: sessionId
+      }
+    });
+
+    // Additional debug: Check if subscription exists for this user at all
+    const anySubscriptionForUser = await prisma.subscription.findFirst({
+      where: {
+        userId: req.user.id
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    const isProcessed = !!(subscription || temporaryAccess);
+    
+    logger.info('Session processed check result', {
+      sessionId,
+      userId: req.user.id,
+      isProcessed,
+      hasSubscription: !!subscription,
+      hasTemporaryAccess: !!temporaryAccess,
+      anySubscriptionExists: !!anySubscriptionForUser,
+      lastSubscriptionSessionId: anySubscriptionForUser?.stripeSessionId
+    });
+    
+    return sendSuccess(res, { 
+      sessionProcessed: isProcessed,
+      hasSubscription: !!subscription,
+      hasTemporaryAccess: !!temporaryAccess,
+      subscription: subscription || null,
+      temporaryAccess: temporaryAccess || null
+    });
+  } catch (error) {
+    logger.error('Checking session processed status failed', {
+      userId: req.user?.id,
+      sessionId,
+      error: error.message,
+    });
+    
+    return sendError(res, 'Failed to check session status', 500);
+  }
+}));
+
 module.exports = router; 

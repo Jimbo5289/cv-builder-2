@@ -163,6 +163,7 @@ async function handleCheckoutSessionCompleted(session) {
             currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
             stripeCustomerId: customer || '',
             stripePriceId: stripeSubscription.items.data[0]?.price?.id || '',
+            stripeSessionId: session.id,
             updatedAt: new Date()
           },
           create: {
@@ -174,6 +175,7 @@ async function handleCheckoutSessionCompleted(session) {
             currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
             stripeCustomerId: customer || '',
             stripePriceId: stripeSubscription.items.data[0]?.price?.id || '',
+            stripeSessionId: session.id,
             createdAt: new Date(),
             updatedAt: new Date()
           }
@@ -200,6 +202,25 @@ async function handleCheckoutSessionCompleted(session) {
             status: 'succeeded'
           }
         });
+        
+        // Check if this is a 30-day access purchase and create TemporaryAccess record
+        if (session.metadata && session.metadata.planType === '30day-access') {
+          const expiryDate = new Date();
+          expiryDate.setDate(expiryDate.getDate() + 30);
+          
+          await prisma.temporaryAccess.create({
+            data: {
+              id: cuid(),
+              userId: user.id,
+              type: '30day-access',
+              startTime: new Date(),
+              endTime: expiryDate,
+              stripeSessionId: session.id
+            }
+          });
+          
+          logger.info(`30-day access created for user ${user.id} (${user.email}), expires: ${expiryDate}`);
+        }
         
         // Send a payment success email
         await emailService.sendPaymentSuccessNotification({
