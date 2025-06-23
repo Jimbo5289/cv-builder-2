@@ -27,41 +27,80 @@ const FRONTEND_URL = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL
 // Email templates
 const templates = {
   subscriptionConfirmation: (user, subscription) => ({
-    subject: 'Subscription Confirmation - CV Builder',
+    subject: '🎉 Welcome to CV Builder Premium! Your subscription is active',
     html: `
       <!DOCTYPE html>
       <html>
         <head>
           <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #4a90e2; color: white; padding: 20px; text-align: center; }
-            .content { padding: 20px; }
-            .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
-            .button { display: inline-block; padding: 10px 20px; background: #4a90e2; color: white; text-decoration: none; border-radius: 5px; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f8fafc; }
+            .container { max-width: 600px; margin: 0 auto; background: white; }
+            .header { background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); color: white; padding: 40px 20px; text-align: center; }
+            .content { padding: 30px; }
+            .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; background-color: #f8fafc; }
+            .button { display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 10px 5px; }
+            .feature-box { background: #f0f9ff; border: 1px solid #e0f2fe; border-radius: 8px; padding: 20px; margin: 15px 0; }
+            .checkmark { color: #10b981; font-weight: bold; margin-right: 8px; }
+            .highlight { background: #fef3c7; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h1>Welcome to CV Builder!</h1>
+              <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
+              <h1 style="margin: 0; font-size: 28px;">Thank You for Your Purchase!</h1>
+              <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.9;">Your CV Builder Premium subscription is now active</p>
             </div>
             <div class="content">
-              <p>Dear ${user.name || 'valued customer'},</p>
-              <p>Thank you for subscribing to CV Builder! Your subscription has been successfully activated.</p>
-              <h2>Subscription Details:</h2>
-              <ul>
-                <li>Plan: ${subscription.planId}</li>
-                <li>Status: ${subscription.status}</li>
-                <li>Next billing date: ${new Date(subscription.currentPeriodEnd).toLocaleDateString()}</li>
-              </ul>
-              <p>If you have any questions, our support team is here to help.</p>
-              <p>
-                <a href="${FRONTEND_URL}/support" class="button">Contact Support</a>
+              <p style="font-size: 18px; margin-bottom: 25px;">Dear ${user.name || 'valued customer'},</p>
+              
+              <p style="font-size: 16px; margin-bottom: 25px;">
+                Welcome to <span class="highlight">CV Builder Premium!</span> You've just unlocked our complete suite of AI-powered career tools designed to help you land your dream job.
               </p>
+
+              <div class="feature-box">
+                <h3 style="color: #1f2937; margin-top: 0; margin-bottom: 15px;">🚀 What's Now Available to You:</h3>
+                <ul style="margin: 0; padding-left: 0; list-style: none;">
+                  <li style="margin-bottom: 8px;"><span class="checkmark">✓</span>AI-powered CV analysis and optimization</li>
+                  <li style="margin-bottom: 8px;"><span class="checkmark">✓</span>Advanced ATS compatibility scoring</li>
+                  <li style="margin-bottom: 8px;"><span class="checkmark">✓</span>Premium professional templates</li>
+                  <li style="margin-bottom: 8px;"><span class="checkmark">✓</span>Industry-specific keyword suggestions</li>
+                  <li style="margin-bottom: 8px;"><span class="checkmark">✓</span>Career pathway insights and recommendations</li>
+                  <li style="margin-bottom: 8px;"><span class="checkmark">✓</span>Priority customer support</li>
+                  <li><span class="checkmark">✓</span>Multiple export formats (PDF, Word)</li>
+                </ul>
+              </div>
+
+              <h3 style="color: #1f2937; margin-bottom: 15px;">📋 Your Subscription Details:</h3>
+              <ul style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                <li style="margin-bottom: 8px;"><strong>Plan:</strong> ${subscription.planId}</li>
+                <li style="margin-bottom: 8px;"><strong>Status:</strong> <span style="color: #10b981; font-weight: 600;">${subscription.status}</span></li>
+                <li><strong>Next billing date:</strong> ${new Date(subscription.currentPeriodEnd).toLocaleDateString()}</li>
+              </ul>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${FRONTEND_URL}/" class="button">🚀 Let's Get Started!</a>
+                <a href="${FRONTEND_URL}/analyze" class="button">🔍 Analyze Your CV</a>
+              </div>
+
+              <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                <p style="margin: 0; color: #166534; font-weight: 600;">💡 Pro Tip:</p>
+                <p style="margin: 10px 0 0 0; color: #166534;">Start by uploading your current CV for analysis. Our AI will provide personalized recommendations to improve your chances of landing interviews!</p>
+              </div>
+
+              <p style="font-size: 16px; margin-bottom: 15px;">
+                Need help getting started? Our priority support team is standing by to assist you with any questions.
+              </p>
+
+                             <div style="text-align: center; margin: 25px 0;">
+                 <a href="${FRONTEND_URL}/contact" class="button">Contact Support</a>
+               </div>
             </div>
             <div class="footer">
-              <p>This is an automated message, please do not reply directly to this email.</p>
+              <p style="margin-bottom: 10px;">
+                📧 A copy of this confirmation has been saved to your account
+              </p>
+              <p style="margin: 0;">This is an automated message from CV Builder. If you have any questions, we're here to help!</p>
             </div>
           </div>
         </body>

@@ -91,65 +91,144 @@ router.post('/', async (req, res) => {
 
 async function handleCheckoutSessionCompleted(session) {
   try {
-    const { customer, subscription, client_reference_id, mode, amount_total, currency } = session;
+    const { customer, subscription, client_reference_id, mode, amount_total, currency, customer_details } = session;
     
-    // Get or create a user based on the customer ID
-    let user;
+    logger.info('Processing checkout session completed', {
+      sessionId: session.id,
+      mode,
+      customer,
+      client_reference_id,
+      customer_email: customer_details?.email,
+      metadata: session.metadata
+    });
     
+    // Get or create a user based on multiple identification methods
+    let user = null;
+    
+    // Method 1: Try to find user by client_reference_id (most reliable)
     if (client_reference_id) {
-      // Try to find an existing user by ID
-      user = await prisma.user.findUnique({
-        where: { id: client_reference_id }
-      });
-      
-      if (user) {
-        logger.info(`Found existing user by client_reference_id: ${user.id}`);
-      }
-    }
-    
-    if (!user && customer) {
-      // Try to find an existing user by customer ID
-      user = await prisma.user.findFirst({
-        where: { customerId: customer }
-      });
-      
-      if (user) {
-        logger.info(`Found existing user for customer ${customer}: ${user.id}`);
-      } else {
-        // Try to find the admin user
-        user = await prisma.user.findFirst({
-          where: { email: 'admin@example.com' }
+      try {
+        user = await prisma.user.findUnique({
+          where: { id: client_reference_id }
         });
         
         if (user) {
-          logger.info(`Using admin user for customer ${customer}: ${user.id}`);
+          logger.info(`Found user by client_reference_id: ${user.id} (${user.email})`);
           
-          // Update the admin user with the customer ID
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { customerId: customer }
-          });
-        } else {
-          // Create a new admin user if needed
-          user = await prisma.user.create({
-            data: {
-              id: cuid(),
-              email: 'admin@example.com',
-              name: 'Admin User',
-              customerId: customer,
-              password: '$2b$10$dummyhashedpassword', // Just a placeholder
-              isActive: true
-            }
-          });
-          logger.info(`Created admin user for customer ${customer}: ${user.id}`);
+          // Update user with customer ID if we have one and it's missing
+          if (customer && !user.customerId) {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { customerId: customer }
+            });
+            logger.info(`Updated user ${user.id} with customer ID: ${customer}`);
+          }
         }
+      } catch (error) {
+        logger.error('Error finding user by client_reference_id:', error);
       }
     }
     
-    // If we still don't have a user, log an error and return
+    // Method 2: Try to find user by Stripe customer ID
+    if (!user && customer) {
+      try {
+        user = await prisma.user.findFirst({
+          where: { customerId: customer }
+        });
+        
+        if (user) {
+          logger.info(`Found user by customer ID: ${user.id} (${user.email})`);
+        }
+      } catch (error) {
+        logger.error('Error finding user by customer ID:', error);
+      }
+    }
+    
+    // Method 3: Try to find user by email from customer details
+    if (!user && customer_details?.email) {
+      try {
+        user = await prisma.user.findUnique({
+          where: { email: customer_details.email }
+        });
+        
+        if (user) {
+          logger.info(`Found user by email: ${user.id} (${user.email})`);
+          
+          // Update user with customer ID if we have one
+          if (customer && !user.customerId) {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { customerId: customer }
+            });
+            logger.info(`Updated user ${user.id} with customer ID: ${customer}`);
+          }
+        }
+      } catch (error) {
+        logger.error('Error finding user by email:', error);
+      }
+    }
+    
+    // Method 4: Try to find user by email from Stripe customer object
+    if (!user && customer) {
+      try {
+        const stripeCustomer = await stripe.customers.retrieve(customer);
+        if (stripeCustomer && stripeCustomer.email) {
+          user = await prisma.user.findUnique({
+            where: { email: stripeCustomer.email }
+          });
+          
+          if (user) {
+            logger.info(`Found user by Stripe customer email: ${user.id} (${user.email})`);
+            
+            // Update user with customer ID
+            if (!user.customerId) {
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { customerId: customer }
+              });
+              logger.info(`Updated user ${user.id} with customer ID: ${customer}`);
+            }
+          }
+        }
+      } catch (error) {
+        logger.error('Error retrieving Stripe customer or finding user by customer email:', error);
+      }
+    }
+    
+    // If we still don't have a user, this is a critical error - DO NOT create subscription
     if (!user) {
-      logger.error(`Could not find or create a user for session ${session.id}`);
-      return;
+      logger.error('CRITICAL: Could not identify user for checkout session', {
+        sessionId: session.id,
+        customer,
+        client_reference_id,
+        customer_email: customer_details?.email,
+        metadata: session.metadata
+      });
+      
+             // Send alert to admins about failed user identification
+       try {
+         await emailService.sendContactFormEmail({
+           name: 'System Alert',
+           email: 'system@mycvbuilder.co.uk',
+           subject: 'URGENT: Failed to identify user for subscription purchase'
+         }, `
+           A subscription purchase could not be processed because we could not identify the user.
+           
+           Session ID: ${session.id}
+           Customer ID: ${customer}
+           Client Reference ID: ${client_reference_id}
+           Customer Email: ${customer_details?.email}
+           Amount: ${amount_total ? (amount_total / 100) : 'unknown'}
+           Currency: ${currency}
+           Mode: ${mode}
+           
+           Please investigate immediately and manually create the subscription for the correct user.
+         `);
+       } catch (emailError) {
+         logger.error('Failed to send admin alert:', emailError);
+       }
+      
+      return; // Exit without creating subscription for wrong user
     }
     
     // Handle subscription checkout
@@ -183,7 +262,23 @@ async function handleCheckoutSessionCompleted(session) {
             updatedAt: new Date()
           }
         });
-        logger.info(`Subscription created/updated for user ${user.id}: ${subscription}`);
+        
+        logger.info(`Subscription successfully created/updated for user ${user.id} (${user.email}): ${subscription}`);
+        
+                 // Send success notification
+         try {
+           await emailService.sendSubscriptionConfirmation({
+             email: user.email,
+             name: user.name
+           }, {
+             planId: session.metadata?.planName || 'Premium Plan',
+             status: 'active',
+             currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000)
+           });
+         } catch (emailError) {
+           logger.error('Failed to send subscription success email:', emailError);
+         }
+        
       } catch (dbError) {
         logger.error(`Database error processing subscription checkout: ${dbError.message}`);
         // Continue processing without throwing to ensure webhook completes
@@ -191,7 +286,7 @@ async function handleCheckoutSessionCompleted(session) {
     } 
     // Handle one-time payment checkout
     else if (mode === 'payment') {
-      logger.info(`One-time payment completed for user ${user.id}`, { metadata: session.metadata });
+      logger.info(`One-time payment completed for user ${user.id} (${user.email})`, { metadata: session.metadata });
       
       try {
         // Record the payment in the database using correct field names
@@ -221,7 +316,7 @@ async function handleCheckoutSessionCompleted(session) {
             }
           });
           
-          logger.info(`30-day access created for user ${user.id}, expires: ${expiryDate}`);
+          logger.info(`30-day access created for user ${user.id} (${user.email}), expires: ${expiryDate}`);
         }
         
         // Send a payment success email
