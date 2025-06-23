@@ -837,4 +837,14 @@ router.post('/migrate-session-tracking', async (req, res) => {
   }
 });
 
+// Test endpoint to verify deployment
+router.get('/deployment-test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Session tracking deployment active',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  });
+});
+
 module.exports = router; 
