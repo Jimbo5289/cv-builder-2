@@ -14,7 +14,7 @@ export default function SubscriptionSuccess() {
   const [sessionData, setSessionData] = useState(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState('processing'); // processing, active, failed
   const [webhookChecks, setWebhookChecks] = useState(0);
-  const maxWebhookChecks = 6; // Check for 30 seconds (6 checks * 5 seconds)
+  const maxWebhookChecks = 4; // Check for 20 seconds (4 checks * 5 seconds)
   
   useEffect(() => {
     const query = new URLSearchParams(location.search);
@@ -114,8 +114,8 @@ export default function SubscriptionSuccess() {
           checkSubscriptionStatus();
         }, 5000); // Check every 5 seconds
       } else {
-        console.log('Max webhook checks reached, session may need manual verification');
-        setSubscriptionStatus('delayed');
+        console.log('Max webhook checks reached, checking user subscription status directly');
+        await checkUserSubscriptionFallback();
       }
       
     } catch (error) {
@@ -127,8 +127,44 @@ export default function SubscriptionSuccess() {
           checkSubscriptionStatus();
         }, 5000);
       } else {
-        setSubscriptionStatus('delayed');
+        await checkUserSubscriptionFallback();
       }
+    }
+  };
+
+  // Fallback method to check user subscription status directly
+  const checkUserSubscriptionFallback = async () => {
+    try {
+      console.log('Checking user subscription status as fallback');
+      
+      // Refresh user data to get latest subscription info
+      await refreshUser();
+      
+      // Check if user now has an active subscription
+      const response = await fetch(`${apiUrl}/api/subscriptions/premium-status`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader()
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.isSubscribed && data.subscription?.status === 'active') {
+          console.log('User has active subscription confirmed via fallback check');
+          setSubscriptionStatus('active');
+          return;
+        }
+      }
+      
+      // If still no active subscription found, mark as delayed
+      console.log('No active subscription found via fallback, marking as delayed');
+      setSubscriptionStatus('delayed');
+      
+    } catch (error) {
+      console.warn('Fallback subscription check failed:', error);
+      setSubscriptionStatus('delayed');
     }
   };
   
@@ -233,13 +269,22 @@ export default function SubscriptionSuccess() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
-                    <div className="ml-3">
+                    <div className="ml-3 flex-1">
                       <h4 className="text-blue-800 font-semibold">Subscription Activating</h4>
                       <p className="text-blue-700 text-sm mt-1">
                         Your subscription is being processed and will be active within a few minutes. 
                         You can start using premium features right away, and if you encounter any issues, 
                         simply refresh your browser.
                       </p>
+                      <button
+                        onClick={() => checkUserSubscriptionFallback()}
+                        className="mt-3 inline-flex items-center px-3 py-2 border border-blue-300 text-sm leading-4 font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Check Status Now
+                      </button>
                     </div>
                   </div>
                 </div>
