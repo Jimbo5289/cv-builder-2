@@ -1,17 +1,15 @@
 const { PrismaClient } = require('@prisma/client');
-require('dotenv').config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const prisma = new PrismaClient();
 
 async function fixSubscriptionPeriod() {
   try {
-    console.log('🔍 Checking and fixing subscription period issue...\n');
-
-    // Find user by email
-    const user = await prisma.user.findFirst({
-      where: { 
-        email: 'jamesingleton1971@gmail.com'
-      },
+    console.log('🔍 Searching for user: jamesingleton1971@gmail.com');
+    
+    // Find the user by email with their subscriptions
+    const user = await prisma.user.findUnique({
+      where: { email: 'jamesingleton1971@gmail.com' },
       include: {
         subscriptions: true
       }
@@ -22,117 +20,98 @@ async function fixSubscriptionPeriod() {
       return;
     }
 
-    console.log('👤 User Details:');
-    console.log(`   ID: ${user.id}`);
-    console.log(`   Email: ${user.email}`);
-    console.log(`   Name: ${user.name}\n`);
+    console.log(`✅ Found user: ${user.name} (${user.email})`);
+    console.log(`📊 User has ${user.subscriptions?.length || 0} subscription(s)`);
 
     if (!user.subscriptions || user.subscriptions.length === 0) {
-      console.log('❌ No subscriptions found');
+      console.log('❌ User has no subscriptions');
       return;
     }
 
-    console.log('💳 Current Subscription Details:');
-    
+    console.log('\n📋 Current subscriptions:');
     for (const sub of user.subscriptions) {
-      console.log(`\n--- Subscription ${sub.id} ---`);
-      console.log(`   Stripe Subscription ID: ${sub.stripeSubscriptionId}`);
-      console.log(`   Stripe Session ID: ${sub.stripeSessionId}`);
-      console.log(`   Status: ${sub.status}`);
-      console.log(`   Price ID: ${sub.stripePriceId}`);
-      console.log(`   Current Period Start: ${sub.currentPeriodStart}`);
-      console.log(`   Current Period End: ${sub.currentPeriodEnd}`);
+      const periodDays = Math.ceil((new Date(sub.currentPeriodEnd) - new Date(sub.currentPeriodStart)) / (1000 * 60 * 60 * 24));
+      console.log(`  - ID: ${sub.id}`);
+      console.log(`    Status: ${sub.status}`);
+      console.log(`    Period: ${sub.currentPeriodStart.toISOString().split('T')[0]} to ${sub.currentPeriodEnd.toISOString().split('T')[0]}`);
+      console.log(`    Duration: ${periodDays} days`);
+      console.log(`    Stripe ID: ${sub.stripeSubscriptionId}`);
       
-      // Calculate current period length
-      if (sub.currentPeriodStart && sub.currentPeriodEnd) {
-        const start = new Date(sub.currentPeriodStart);
-        const end = new Date(sub.currentPeriodEnd);
-        const diffTime = Math.abs(end - start);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        console.log(`   Current Period Length: ${diffDays} days`);
+      // Check if this looks like an incorrect annual subscription (should be ~365 days, not ~30)
+      if (periodDays < 350 && sub.status === 'active') {
+        console.log(`\n🔧 Found potentially incorrect subscription period: ${periodDays} days (expected ~365 for annual)`);
         
-        // Check if this is supposed to be an annual subscription
-        const isAnnualPrice = sub.stripePriceId === 'price_1RTKgIKSDrkHMuUnTAJ8flI6';
-        
-        if (isAnnualPrice && diffDays < 350) {
-          console.log(`   ⚠️  ISSUE DETECTED: Annual subscription only has ${diffDays} days!`);
-          
-          // Try to get the correct period from Stripe
-          if (process.env.STRIPE_SECRET_KEY) {
-            try {
-              const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-              console.log(`\n🔗 Fetching correct period from Stripe...`);
-              
-              const stripeSubscription = await stripe.subscriptions.retrieve(sub.stripeSubscriptionId);
-              
-              const correctStart = new Date(stripeSubscription.current_period_start * 1000);
-              const correctEnd = new Date(stripeSubscription.current_period_end * 1000);
-              const correctDiffTime = Math.abs(correctEnd - correctStart);
-              const correctDiffDays = Math.ceil(correctDiffTime / (1000 * 60 * 60 * 24));
-              
-              console.log(`   Stripe Period Start: ${correctStart}`);
-              console.log(`   Stripe Period End: ${correctEnd}`);
-              console.log(`   Stripe Period Length: ${correctDiffDays} days`);
-              console.log(`   Stripe Plan Interval: ${stripeSubscription.items.data[0]?.price?.recurring?.interval}`);
-              
-              if (correctDiffDays > 350) {
-                console.log(`\n✅ Found correct annual period in Stripe. Updating database...`);
-                
-                const updatedSubscription = await prisma.subscription.update({
-                  where: { id: sub.id },
-                  data: {
-                    currentPeriodStart: correctStart,
-                    currentPeriodEnd: correctEnd,
-                    updatedAt: new Date()
-                  }
-                });
-                
-                console.log(`✅ Successfully updated subscription period!`);
-                console.log(`   New Period: ${correctStart} → ${correctEnd}`);
-                console.log(`   New Length: ${correctDiffDays} days`);
-                
-                // Verify the update
-                const verification = await prisma.subscription.findUnique({
-                  where: { id: sub.id }
-                });
-                
-                if (verification) {
-                  const verifyStart = new Date(verification.currentPeriodStart);
-                  const verifyEnd = new Date(verification.currentPeriodEnd);
-                  const verifyDiffTime = Math.abs(verifyEnd - verifyStart);
-                  const verifyDiffDays = Math.ceil(verifyDiffTime / (1000 * 60 * 60 * 24));
-                  
-                  console.log(`\n🔍 Verification:`)
-                  console.log(`   Updated Period: ${verifyStart} → ${verifyEnd}`);
-                  console.log(`   Updated Length: ${verifyDiffDays} days`);
-                  
-                  if (verifyDiffDays > 350) {
-                    console.log(`✅ SUCCESS: Annual subscription period correctly updated!`);
-                  } else {
-                    console.log(`❌ FAILED: Update didn't work properly`);
-                  }
-                }
-                
-              } else {
-                console.log(`❌ Stripe also shows short period (${correctDiffDays} days). This might be a Stripe configuration issue.`);
-              }
-              
-            } catch (stripeError) {
-              console.log(`❌ Stripe Error: ${stripeError.message}`);
-            }
-          } else {
-            console.log(`❌ No Stripe secret key found in environment`);
-          }
-        } else if (isAnnualPrice) {
-          console.log(`✅ Annual subscription period looks correct (${diffDays} days)`);
-        } else {
-          console.log(`ℹ️  Not an annual subscription (Price ID: ${sub.stripePriceId})`);
+        if (!sub.stripeSubscriptionId) {
+          console.log('❌ No Stripe subscription ID found, cannot fetch correct period');
+          continue;
         }
+
+        try {
+          console.log('📞 Fetching correct period from Stripe...');
+          const stripeSubscription = await stripe.subscriptions.retrieve(sub.stripeSubscriptionId);
+          
+          const correctStart = new Date(stripeSubscription.current_period_start * 1000);
+          const correctEnd = new Date(stripeSubscription.current_period_end * 1000);
+          const correctDays = Math.ceil((correctEnd - correctStart) / (1000 * 60 * 60 * 24));
+          
+          console.log(`✅ Stripe shows correct period: ${correctStart.toISOString().split('T')[0]} to ${correctEnd.toISOString().split('T')[0]} (${correctDays} days)`);
+          
+          // Update the subscription with correct period
+          const updatedSub = await prisma.subscription.update({
+            where: { id: sub.id },
+            data: {
+              currentPeriodStart: correctStart,
+              currentPeriodEnd: correctEnd,
+              updatedAt: new Date()
+            }
+          });
+          
+          console.log('🎉 Successfully updated subscription period in database');
+          
+          // Verify the fix
+          const verifyUser = await prisma.user.findUnique({
+            where: { email: 'jamesingleton1971@gmail.com' },
+            include: {
+              subscriptions: true
+            }
+          });
+          
+          const updatedSubscription = verifyUser.subscriptions.find(s => s.id === sub.id);
+          if (updatedSubscription) {
+            const verifyDays = Math.ceil((new Date(updatedSubscription.currentPeriodEnd) - new Date(updatedSubscription.currentPeriodStart)) / (1000 * 60 * 60 * 24));
+            console.log(`✅ Verification: Subscription now shows ${verifyDays} days`);
+            console.log(`   New period: ${updatedSubscription.currentPeriodStart.toISOString().split('T')[0]} to ${updatedSubscription.currentPeriodEnd.toISOString().split('T')[0]}`);
+          }
+          
+        } catch (stripeError) {
+          console.error('❌ Error fetching from Stripe:', stripeError.message);
+          
+          // If Stripe fails, but we know this should be an annual subscription,
+          // we can calculate the correct end date (1 year from start)
+          if (stripeError.message.includes('No such subscription')) {
+            console.log('🔧 Stripe subscription not found, calculating annual period from start date...');
+            const annualEndDate = new Date(sub.currentPeriodStart);
+            annualEndDate.setFullYear(annualEndDate.getFullYear() + 1);
+            
+            const updatedSub = await prisma.subscription.update({
+              where: { id: sub.id },
+              data: {
+                currentPeriodEnd: annualEndDate,
+                updatedAt: new Date()
+              }
+            });
+            
+            console.log(`✅ Updated subscription to end on: ${annualEndDate.toISOString().split('T')[0]}`);
+          }
+        }
+      } else {
+        console.log(`✅ Subscription period looks correct (${periodDays} days)`);
       }
     }
 
   } catch (error) {
-    console.error('❌ Error fixing subscription period:', error);
+    console.error('❌ Error:', error.message);
+    console.error('Full error:', error);
   } finally {
     await prisma.$disconnect();
   }

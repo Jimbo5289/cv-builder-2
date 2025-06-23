@@ -162,10 +162,15 @@ app.get('/', (req, res) => {
 
 // Status endpoint with auth for testing authentication
 app.get('/status', authMiddleware, (req, res) => {
+  // Find the most recent active subscription
+  const activeSubscription = req.user.subscriptions?.find(sub => 
+    sub.status === 'active' && new Date(sub.currentPeriodEnd) > new Date()
+  );
+  
   res.json({ 
     status: 'authenticated',
     user: req.user,
-    subscriptionStatus: req.user.subscription?.status || 'none',
+    subscriptionStatus: activeSubscription?.status || 'none',
     environment: process.env.NODE_ENV,
     mockSubscriptionData: process.env.MOCK_SUBSCRIPTION_DATA === 'true'
   });

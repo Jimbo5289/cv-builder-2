@@ -475,7 +475,7 @@ router.get('/subscription-status', authMiddleware, asyncHandler(async (req, res)
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
       select: { 
-        subscription: true 
+        subscriptions: true 
       },
     });
 
@@ -483,9 +483,14 @@ router.get('/subscription-status', authMiddleware, asyncHandler(async (req, res)
       return sendError(res, 'User not found', 404);
     }
 
+    // Find the most recent active subscription
+    const activeSubscription = user.subscriptions?.find(sub => 
+      sub.status === 'active' && new Date(sub.currentPeriodEnd) > new Date()
+    );
+
     return sendSuccess(res, { 
-      isSubscribed: !!user.subscription,
-      subscription: user.subscription,
+      isSubscribed: !!activeSubscription,
+      subscription: activeSubscription || null,
     });
   } catch (error) {
     logger.error('Getting subscription status failed', {

@@ -27,7 +27,7 @@ const requirePremiumAccess = (requiredFeatures = []) => {
       const user = await prisma.user.findUnique({
         where: { id: userId },
         include: {
-          subscription: true,
+          subscriptions: true,
           temporaryAccess: {
             where: {
               status: 'active',
@@ -47,8 +47,11 @@ const requirePremiumAccess = (requiredFeatures = []) => {
         return sendError(res, 'User not found', 404);
       }
 
-      // Check different access types
-      const hasActiveSubscription = !!user.subscription && user.subscription.status === 'active';
+      // Check different access types - fix subscription access to use array
+      const activeSubscription = user.subscriptions?.find(sub => 
+        sub.status === 'active' && new Date(sub.currentPeriodEnd) > new Date()
+      );
+      const hasActiveSubscription = !!activeSubscription;
       const hasTemporaryAccess = user.temporaryAccess && user.temporaryAccess.length > 0;
       const hasValidPurchase = user.purchases && user.purchases.length > 0;
 

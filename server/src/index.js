@@ -324,7 +324,9 @@ app.get('/status', authMiddleware, (req, res) => {
   res.json({ 
     status: 'authenticated',
     user: req.user,
-    subscriptionStatus: req.user.subscription?.status || 'none',
+    subscriptionStatus: req.user.subscriptions?.find(sub => 
+      sub.status === 'active' && new Date(sub.currentPeriodEnd) > new Date()
+    )?.status || 'none',
   });
 });
 
