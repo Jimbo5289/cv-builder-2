@@ -103,8 +103,10 @@ export default function SubscriptionSuccess() {
       });
       
       if (response.ok) {
-        const data = await response.json();
-        console.log('Session processed response:', data);
+        const responseData = await response.json();
+        console.log('Session processed response:', responseData);
+        // Backend wraps response in { success: true, data: {...} }
+        const data = responseData.data || responseData;
         if (data.sessionProcessed) {
           console.log('Session confirmed processed by webhook!');
           setSubscriptionStatus('active');
