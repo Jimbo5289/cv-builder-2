@@ -27,7 +27,6 @@ export default function SubscriptionSuccess() {
         // If this is a mock session in development, just simulate success
         if (mockSession) {
           console.log('Mock subscription session detected');
-          await refreshUser(); // Refresh user data to get updated subscription info
           setSessionData({
             mode: 'subscription',
             payment_status: 'paid',
@@ -37,10 +36,16 @@ export default function SubscriptionSuccess() {
             total_details: { amount_discount: 7900 }
           });
           setLoading(false);
+          // Refresh user in background
+          try {
+            await refreshUser();
+          } catch (error) {
+            console.warn('Failed to refresh user data:', error);
+          }
           return;
         }
         
-        // If we have a session ID, assume payment was successful and show success
+        // If we have a session ID, assume payment was successful and show success immediately
         if (!sessionId) {
           throw new Error('No session ID found. Please check your payment was successful.');
         }
@@ -53,8 +58,22 @@ export default function SubscriptionSuccess() {
           amount_total: 0,
           currency: 'gbp'
         });
-        await refreshUser(); // Refresh user data to get updated subscription info
         setLoading(false);
+        
+        // Refresh user data in background with timeout
+        try {
+          const refreshPromise = refreshUser();
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Refresh timeout')), 10000)
+          );
+          
+          await Promise.race([refreshPromise, timeoutPromise]);
+          console.log('User data refreshed successfully');
+        } catch (error) {
+          console.warn('Failed to refresh user data (this is normal if webhook is delayed):', error);
+          // Don't show error to user - webhook will process subscription later
+        }
+        
         return;
       } catch (err) {
         console.error('Error verifying subscription:', err);
