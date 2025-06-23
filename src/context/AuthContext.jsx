@@ -324,11 +324,12 @@ function AuthProvider({ children }) {
 
             if (response.ok) {
               const data = await response.json();
-              if (data && data.user) {
-                localStorage.setItem('user', JSON.stringify(data.user));
+              const user = data.user || data; // Handle both wrapped and direct user responses
+              if (user && user.id) {
+                localStorage.setItem('user', JSON.stringify(user));
                 setState(prev => ({
                   ...prev,
-                  user: data.user
+                  user: user
                 }));
               }
             } else if (response.status === 401) {
@@ -381,11 +382,12 @@ function AuthProvider({ children }) {
               
               if (retryResponse.ok) {
                 const retryData = await retryResponse.json();
-                if (retryData && retryData.user) {
-                  localStorage.setItem('user', JSON.stringify(retryData.user));
+                const user = retryData.user || retryData; // Handle both wrapped and direct user responses
+                if (user && user.id) {
+                  localStorage.setItem('user', JSON.stringify(user));
                   
                   setState({
-                    user: retryData.user,
+                    user: user,
                     loading: false,
                     isAuthenticated: true,
                     error: null
@@ -446,11 +448,12 @@ function AuthProvider({ children }) {
         }
 
         const data = await response.json();
-        if (data && data.user) {
-          localStorage.setItem('user', JSON.stringify(data.user));
+        const user = data.user || data; // Handle both wrapped and direct user responses
+        if (user && user.id) {
+          localStorage.setItem('user', JSON.stringify(user));
           
           setState({
-            user: data.user,
+            user: user,
             loading: false,
             isAuthenticated: true,
             error: null
@@ -1023,17 +1026,21 @@ function AuthProvider({ children }) {
         throw new Error('Failed to refresh user information');
       }
 
-      const data = await response.json();
+      const userData = await response.json();
+      console.log('RefreshUser API response:', userData);
+      
+      // The /api/auth/me endpoint returns the user directly, not wrapped in a data property
+      const user = userData.user || userData; // Handle both wrapped and direct user responses
       
       try {
-        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('user', JSON.stringify(user));
       } catch (e) {
         console.error('Failed to save user to localStorage:', e);
       }
       
       setState(prev => ({
         ...prev,
-        user: data.user
+        user: user
       }));
       
       return true;
