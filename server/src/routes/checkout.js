@@ -772,4 +772,69 @@ router.get('/plans', asyncHandler(async (req, res) => {
   }
 }));
 
+// Temporary endpoint to run database migration - REMOVE AFTER USE
+router.post('/migrate-session-tracking', async (req, res) => {
+  try {
+    // Only allow this in production with a secret key
+    const migrationKey = req.headers['x-migration-key'];
+    if (migrationKey !== 'migrate-session-tracking-2025') {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+    
+    logger.info('🚀 Starting database migration for session tracking...');
+    
+    // Check if the columns already exist
+    const subscriptionColumns = await prisma.$queryRaw`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'Subscription' AND column_name = 'stripeSessionId'
+    `;
+    
+    const temporaryAccessColumns = await prisma.$queryRaw`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'TemporaryAccess' AND column_name = 'stripeSessionId'
+    `;
+    
+    const results = { subscriptionAdded: false, temporaryAccessAdded: false };
+    
+    // Add stripeSessionId to Subscription table if it doesn't exist
+    if (subscriptionColumns.length === 0) {
+      logger.info('📝 Adding stripeSessionId column to Subscription table...');
+      await prisma.$executeRaw`
+        ALTER TABLE "Subscription" 
+        ADD COLUMN "stripeSessionId" TEXT;
+      `;
+      logger.info('✅ Added stripeSessionId to Subscription table');
+      results.subscriptionAdded = true;
+    } else {
+      logger.info('ℹ️  stripeSessionId column already exists in Subscription table');
+    }
+    
+    // Add stripeSessionId to TemporaryAccess table if it doesn't exist
+    if (temporaryAccessColumns.length === 0) {
+      logger.info('📝 Adding stripeSessionId column to TemporaryAccess table...');
+      await prisma.$executeRaw`
+        ALTER TABLE "TemporaryAccess" 
+        ADD COLUMN "stripeSessionId" TEXT;
+      `;
+      logger.info('✅ Added stripeSessionId to TemporaryAccess table');
+      results.temporaryAccessAdded = true;
+    } else {
+      logger.info('ℹ️  stripeSessionId column already exists in TemporaryAccess table');
+    }
+    
+    logger.info('🎉 Migration completed successfully!');
+    
+    return sendSuccess(res, {
+      message: 'Migration completed successfully',
+      results
+    });
+    
+  } catch (error) {
+    logger.error('❌ Migration failed:', error);
+    return sendError(res, error.message, 500);
+  }
+});
+
 module.exports = router; 
