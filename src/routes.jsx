@@ -60,6 +60,7 @@ const SubscriptionCancel = React.lazy(() => import('./pages/SubscriptionCancel')
 const Subscription = React.lazy(() => import('./pages/Subscription'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Edit = React.lazy(() => import(/* webpackChunkName: "edit" */ './pages/Edit'));
+const Unsubscribe = React.lazy(() => import(/* webpackChunkName: "unsubscribe" */ './pages/Unsubscribe'));
 
 /**
  * Route configuration array
@@ -91,6 +92,7 @@ const routes = [
   { path: '/faq', Component: FAQ },
   { path: '/consent-preferences', Component: ConsentPreferences },
   { path: '/company-info', Component: CompanyInfo },
+  { path: '/unsubscribe', Component: Unsubscribe },
   
   /**
    * Redirects for backward compatibility

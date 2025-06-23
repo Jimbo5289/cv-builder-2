@@ -591,4 +591,64 @@ router.get('/marketing-consent', auth, async (req, res) => {
   }
 });
 
+// GET user preferences (for unsubscribe functionality)
+router.get('/preferences', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        marketingConsent: true,
+        email: true,
+        name: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Return preferences in format expected by frontend
+    res.json({
+      marketingEmails: user.marketingConsent,
+      subscriptionUpdates: true, // These are always enabled for account security
+      securityAlerts: true
+    });
+  } catch (error) {
+    logger.error('Error fetching user preferences:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PUT update user preferences (for unsubscribe functionality)
+router.put('/preferences', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { marketingEmails } = req.body;
+    
+    // Update marketing consent in database
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        marketingConsent: marketingEmails
+      },
+      select: {
+        marketingConsent: true
+      }
+    });
+
+    logger.info(`User ${userId} updated marketing consent to: ${marketingEmails}`);
+
+    res.json({
+      marketingEmails: updatedUser.marketingConsent,
+      subscriptionUpdates: true,
+      securityAlerts: true
+    });
+  } catch (error) {
+    logger.error('Error updating user preferences:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

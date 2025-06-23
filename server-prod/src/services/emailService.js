@@ -71,7 +71,7 @@ const templates = {
                 <p style="margin: 0 0 8px 0;">You are receiving this email because you have a subscription with MyCVBuilder.co.uk. 
                    View our <a href="${FRONTEND_URL}/privacy-policy" style="color: #4a90e2;">Privacy Policy</a> and 
                    <a href="${FRONTEND_URL}/terms" style="color: #4a90e2;">Terms of Service</a>.</p>
-                <p style="margin: 0;">To unsubscribe from marketing emails, <a href="${FRONTEND_URL}/profile" style="color: #4a90e2;">manage your preferences</a> or contact support.</p>
+                <p style="margin: 0;">To unsubscribe from marketing emails, <a href="${FRONTEND_URL}/unsubscribe?email=${encodeURIComponent(user.email)}&user=${user.id || user.email}" style="color: #4a90e2;">manage your preferences</a> or contact support.</p>
               </div>
             </div>
           </div>

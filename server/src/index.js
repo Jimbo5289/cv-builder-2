@@ -67,6 +67,7 @@ const http = require('http');
 const net = require('net');
 const { exec } = require('child_process');
 const userRoutes = require('./routes/user');
+const unsubscribeRoutes = require('./routes/unsubscribe');
 const healthRoutes = require('./routes/health');
 const adminRoutes = require('./routes/admin');
 const debugRoutes = require('./routes/debug');
@@ -259,6 +260,7 @@ app.use(express.urlencoded({
 app.use('/api/cv', cvRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/unsubscribe', unsubscribeRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);

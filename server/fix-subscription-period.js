@@ -13,7 +13,7 @@ async function fixSubscriptionPeriod() {
         email: 'jamesingleton1971@gmail.com'
       },
       include: {
-        subscription: true
+        subscriptions: true
       }
     });
 
@@ -27,14 +27,14 @@ async function fixSubscriptionPeriod() {
     console.log(`   Email: ${user.email}`);
     console.log(`   Name: ${user.name}\n`);
 
-    if (!user.subscription || user.subscription.length === 0) {
+    if (!user.subscriptions || user.subscriptions.length === 0) {
       console.log('❌ No subscriptions found');
       return;
     }
 
     console.log('💳 Current Subscription Details:');
     
-    for (const sub of user.subscription) {
+    for (const sub of user.subscriptions) {
       console.log(`\n--- Subscription ${sub.id} ---`);
       console.log(`   Stripe Subscription ID: ${sub.stripeSubscriptionId}`);
       console.log(`   Stripe Session ID: ${sub.stripeSessionId}`);

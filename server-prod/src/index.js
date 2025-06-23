@@ -13,6 +13,7 @@ const contactRoutes = require('./routes/contact');
 const paymentRoutes = require('./routes/payment');
 const subscriptionRoutes = require('./routes/subscription');
 const twoFactorRoutes = require('./routes/twoFactor');
+const unsubscribeRoutes = require('./routes/unsubscribe');
 const { stripe } = require('./config/stripe');
 const net = require('net');
 const { getSentry } = require('./config/sentry');
@@ -112,6 +113,7 @@ app.use(express.urlencoded({
 app.use('/api/cv', cvRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', require('./routes/user'));
+app.use('/api/unsubscribe', unsubscribeRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
