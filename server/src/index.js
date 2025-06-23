@@ -1,18 +1,42 @@
 /* eslint-disable */
 // Set up warning suppression FIRST, before any modules are loaded
 const originalConsoleWarn = console.warn;
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+
+// Suppress canvas warnings across all console methods
+const isCanvasWarning = (message) => {
+  return typeof message === 'string' && 
+    (message.includes('@napi-rs/canvas') || 
+     message.includes('canvas package') ||
+     message.includes('Failed to load native binding') ||
+     message.includes('Cannot load "@napi-rs/canvas"') ||
+     message.includes('napi-rs/canvas') ||
+     message.includes('native binding'));
+};
+
 console.warn = function(...args) {
   const message = args[0] || '';
-  // Suppress canvas-related warnings that are not critical for server operation
-  if (typeof message === 'string' && 
-      (message.includes('@napi-rs/canvas') || 
-       message.includes('canvas package') ||
-       message.includes('Failed to load native binding') ||
-       message.includes('Cannot load "@napi-rs/canvas"'))) {
+  if (isCanvasWarning(message)) {
     return; // Suppress these warnings
   }
-  // For all other warnings, use the original console.warn
   return originalConsoleWarn.apply(console, args);
+};
+
+console.log = function(...args) {
+  const message = args[0] || '';
+  if (typeof message === 'string' && message.startsWith('Warning:') && isCanvasWarning(message)) {
+    return; // Suppress canvas warnings that might appear as logs
+  }
+  return originalConsoleLog.apply(console, args);
+};
+
+console.error = function(...args) {
+  const message = args[0] || '';
+  if (isCanvasWarning(message)) {
+    return; // Suppress canvas errors that aren't critical
+  }
+  return originalConsoleError.apply(console, args);
 };
 
 // Load environment variables as early as possible

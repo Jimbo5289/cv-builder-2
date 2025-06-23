@@ -40,6 +40,11 @@ router.get('/premium-status', auth, async (req, res) => {
   try {
     const userId = req.user.id;
     
+    logger.info('Premium status check requested', {
+      userId,
+      userEmail: req.user?.email
+    });
+    
     // For development purposes, allow bypassing subscription check
     if (process.env.NODE_ENV !== 'production' && (process.env.MOCK_SUBSCRIPTION_DATA === 'true')) {
       logger.info('Using mock premium status data in development mode');
@@ -85,26 +90,48 @@ router.get('/premium-status', auth, async (req, res) => {
     
     // Determine access type and return appropriate data
     if (activeSubscription) {
+      logger.info('Active subscription found', {
+        userId,
+        subscriptionId: activeSubscription.id,
+        status: activeSubscription.status,
+        periodEnd: activeSubscription.currentPeriodEnd
+      });
+      
       return res.json({
         hasPremiumAccess: true,
         hasAccess: true,
+        isSubscribed: true,
         accessType: 'subscription',
+        subscription: activeSubscription,
         subscriptionData: activeSubscription,
         temporaryAccess: null
       });
     } else if (temporaryAccess) {
+      logger.info('Temporary access found', {
+        userId,
+        accessId: temporaryAccess.id,
+        type: temporaryAccess.type,
+        endTime: temporaryAccess.endTime
+      });
+      
       return res.json({
         hasPremiumAccess: true,
         hasAccess: true,
+        isSubscribed: false,
         accessType: 'temporary',
+        subscription: null,
         subscriptionData: null,
         temporaryAccess: temporaryAccess
       });
     } else {
+      logger.info('No premium access found', { userId });
+      
       return res.json({
         hasPremiumAccess: false,
         hasAccess: false,
+        isSubscribed: false,
         accessType: null,
+        subscription: null,
         subscriptionData: null,
         temporaryAccess: null
       });
