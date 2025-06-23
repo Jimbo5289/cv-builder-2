@@ -247,6 +247,7 @@ async function handleCheckoutSessionCompleted(session) {
             currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
             stripeCustomerId: customer || '',
             stripePriceId: stripeSubscription.items.data[0]?.price?.id || '',
+            stripeSessionId: session.id,
             updatedAt: new Date()
           },
           create: {
@@ -258,6 +259,7 @@ async function handleCheckoutSessionCompleted(session) {
             currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
             stripeCustomerId: customer || '',
             stripePriceId: stripeSubscription.items.data[0]?.price?.id || '',
+            stripeSessionId: session.id,
             createdAt: new Date(),
             updatedAt: new Date()
           }
@@ -312,7 +314,8 @@ async function handleCheckoutSessionCompleted(session) {
               userId: user.id,
               type: '30day-access',
               startTime: new Date(),
-              endTime: expiryDate
+              endTime: expiryDate,
+              stripeSessionId: session.id
             }
           });
           

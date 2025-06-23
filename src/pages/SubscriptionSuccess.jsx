@@ -7,23 +7,22 @@ import { useServer } from '../context/ServerContext';
 export default function SubscriptionSuccess() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { refreshUser, getAuthHeader } = useAuth();
+  const { refreshUser, getAuthHeader, user } = useAuth();
   const { apiUrl } = useServer();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sessionData, setSessionData] = useState(null);
-  const [retryCount, setRetryCount] = useState(0);
-  const maxRetries = 5;
+  const [subscriptionStatus, setSubscriptionStatus] = useState('processing'); // processing, active, failed
+  const [webhookChecks, setWebhookChecks] = useState(0);
+  const maxWebhookChecks = 6; // Check for 30 seconds (6 checks * 5 seconds)
   
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const sessionId = query.get('session_id');
     const mockSession = query.get('mock');
     
-    async function verifySubscription() {
+    async function initializeSuccess() {
       try {
-        setLoading(true);
-        
         // If this is a mock session in development, just simulate success
         if (mockSession) {
           console.log('Mock subscription session detected');
@@ -35,17 +34,12 @@ export default function SubscriptionSuccess() {
             customer_details: { email: 'mock@example.com' },
             total_details: { amount_discount: 7900 }
           });
+          setSubscriptionStatus('active');
           setLoading(false);
-          // Refresh user in background
-          try {
-            await refreshUser();
-          } catch (error) {
-            console.warn('Failed to refresh user data:', error);
-          }
           return;
         }
         
-        // If we have a session ID, assume payment was successful and show success immediately
+        // Check if we have a session ID
         if (!sessionId) {
           throw new Error('No session ID found. Please check your payment was successful.');
         }
@@ -56,44 +50,87 @@ export default function SubscriptionSuccess() {
           mode: 'subscription',
           payment_status: 'paid',
           amount_total: 0,
-          currency: 'gbp'
+          currency: 'gbp',
+          sessionId: sessionId
         });
         setLoading(false);
         
-        // Refresh user data in background with timeout
-        try {
-          const refreshPromise = refreshUser();
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Refresh timeout')), 10000)
-          );
-          
-          await Promise.race([refreshPromise, timeoutPromise]);
-          console.log('User data refreshed successfully');
-        } catch (error) {
-          console.warn('Failed to refresh user data (this is normal if webhook is delayed):', error);
-          // Don't show error to user - webhook will process subscription later
-        }
+        // Start checking for webhook processing
+        checkSubscriptionStatus();
         
-        return;
       } catch (err) {
-        console.error('Error verifying subscription:', err);
-        
-        // If there's a network error but we have a session ID, assume success
-        if (sessionId && retryCount < maxRetries) {
-          console.log(`Network error, retrying in 3 seconds... (attempt ${retryCount + 1}/${maxRetries})`);
-          setTimeout(() => {
-            setRetryCount(prev => prev + 1);
-            verifySubscription();
-          }, 3000);
-        } else {
-          setError(err.message || 'Failed to verify subscription');
-          setLoading(false);
-        }
+        console.error('Error initializing subscription success:', err);
+        setError(err.message || 'Failed to verify subscription');
+        setLoading(false);
       }
     }
     
-    verifySubscription();
-  }, [location.search, refreshUser, apiUrl, getAuthHeader, retryCount]);
+    initializeSuccess();
+  }, [location.search]);
+
+  // Progressive webhook status checking
+  const checkSubscriptionStatus = async () => {
+    const query = new URLSearchParams(location.search);
+    const sessionId = query.get('session_id');
+    
+    if (!sessionId) {
+      console.warn('No session ID available for webhook checking');
+      setSubscriptionStatus('delayed');
+      return;
+    }
+    
+    try {
+      console.log(`Checking if session ${sessionId} has been processed (attempt ${webhookChecks + 1}/${maxWebhookChecks})`);
+      
+      // Check if this specific session has been processed by the webhook
+      const response = await fetch(`${apiUrl}/api/checkout/session-processed/${sessionId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader()
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.sessionProcessed) {
+          console.log('Session confirmed processed by webhook!');
+          setSubscriptionStatus('active');
+          
+          // Refresh user data to get the latest subscription info
+          try {
+            await refreshUser();
+          } catch (refreshError) {
+            console.warn('Failed to refresh user after session confirmation:', refreshError);
+          }
+          return;
+        }
+      }
+      
+      // If not processed yet and we haven't exceeded max checks, try again
+      if (webhookChecks < maxWebhookChecks - 1) {
+        setWebhookChecks(prev => prev + 1);
+        setTimeout(() => {
+          checkSubscriptionStatus();
+        }, 5000); // Check every 5 seconds
+      } else {
+        console.log('Max webhook checks reached, session may need manual verification');
+        setSubscriptionStatus('delayed');
+      }
+      
+    } catch (error) {
+      console.warn('Error checking session processed status:', error);
+      // Don't show error to user - they've already paid successfully
+      if (webhookChecks < maxWebhookChecks - 1) {
+        setWebhookChecks(prev => prev + 1);
+        setTimeout(() => {
+          checkSubscriptionStatus();
+        }, 5000);
+      } else {
+        setSubscriptionStatus('delayed');
+      }
+    }
+  };
   
   return (
     <div className="bg-gradient-to-br from-blue-50 via-white to-green-50 min-h-screen py-12">
@@ -137,8 +174,34 @@ export default function SubscriptionSuccess() {
                 Thank You for Your Purchase!
               </h1>
               <p className="text-green-100 text-lg">
-                Your CV Builder Premium subscription is now active
+                Your payment was processed successfully
               </p>
+              
+              {/* Subscription Status Indicator */}
+              <div className="mt-4">
+                {subscriptionStatus === 'processing' && (
+                  <div className="inline-flex items-center px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-600 mr-2"></div>
+                    Activating your subscription...
+                  </div>
+                )}
+                {subscriptionStatus === 'active' && (
+                  <div className="inline-flex items-center px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+                    <svg className="h-4 w-4 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Premium subscription is now active!
+                  </div>
+                )}
+                {subscriptionStatus === 'delayed' && (
+                  <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm">
+                    <svg className="h-4 w-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Subscription activating shortly
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="px-6 py-8">
@@ -155,6 +218,27 @@ export default function SubscriptionSuccess() {
                       <h4 className="text-green-800 font-semibold">Promotional Code Applied Successfully!</h4>
                       <p className="text-green-700 mt-1">
                         You saved £{((sessionData.total_details.amount_discount || 0) / 100).toFixed(2)} with your promotional code. Smart choice!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Delayed Activation Notice */}
+              {subscriptionStatus === 'delayed' && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h4 className="text-blue-800 font-semibold">Subscription Activating</h4>
+                      <p className="text-blue-700 text-sm mt-1">
+                        Your subscription is being processed and will be active within a few minutes. 
+                        You can start using premium features right away, and if you encounter any issues, 
+                        simply refresh your browser.
                       </p>
                     </div>
                   </div>
@@ -279,14 +363,14 @@ export default function SubscriptionSuccess() {
                   <div className="text-sm text-gray-600">Manage your plan</div>
                 </button>
                 
-                                 <button
-                   onClick={() => navigate('/contact')}
-                   className="p-4 text-center border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
-                 >
-                   <div className="text-2xl mb-2">💬</div>
-                   <div className="font-medium text-gray-900">Get Support</div>
-                   <div className="text-sm text-gray-600">Priority help</div>
-                 </button>
+                <button
+                  onClick={() => navigate('/contact')}
+                  className="p-4 text-center border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+                >
+                  <div className="text-2xl mb-2">💬</div>
+                  <div className="font-medium text-gray-900">Get Support</div>
+                  <div className="text-sm text-gray-600">Priority help</div>
+                </button>
               </div>
 
               {/* Confirmation Details */}

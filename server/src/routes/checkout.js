@@ -587,6 +587,47 @@ router.get('/subscription-status', authMiddleware, asyncHandler(async (req, res)
   }
 }));
 
+// Check if a specific Stripe session has been processed by webhook
+router.get('/session-processed/:sessionId', authMiddleware, asyncHandler(async (req, res) => {
+  const { sessionId } = req.params;
+  
+  try {
+    // Check if we have any subscriptions that were created from this session
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        userId: req.user.id,
+        stripeSessionId: sessionId
+      }
+    });
+
+    // Also check if we have any temporary access records from this session
+    const temporaryAccess = await prisma.temporaryAccess.findFirst({
+      where: {
+        userId: req.user.id,
+        stripeSessionId: sessionId
+      }
+    });
+
+    const isProcessed = !!(subscription || temporaryAccess);
+    
+    return sendSuccess(res, { 
+      sessionProcessed: isProcessed,
+      hasSubscription: !!subscription,
+      hasTemporaryAccess: !!temporaryAccess,
+      subscription: subscription || null,
+      temporaryAccess: temporaryAccess || null
+    });
+  } catch (error) {
+    logger.error('Checking session processed status failed', {
+      userId: req.user?.id,
+      sessionId,
+      error: error.message,
+    });
+    
+    return sendError(res, 'Failed to check session status', 500);
+  }
+}));
+
 // Get subscription plans (public endpoint)
 router.get('/plans', asyncHandler(async (req, res) => {
   try {
