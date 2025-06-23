@@ -55,6 +55,9 @@ export default function SubscriptionSuccess() {
         });
         setLoading(false);
         
+        // Ensure user authentication is valid before checking subscription
+        await ensureAuthenticationValid();
+        
         // Start checking for webhook processing
         checkSubscriptionStatus();
         
@@ -67,6 +70,45 @@ export default function SubscriptionSuccess() {
     
     initializeSuccess();
   }, [location.search]);
+
+  // Ensure user authentication is valid after payment
+  const ensureAuthenticationValid = async () => {
+    try {
+      console.log('Ensuring authentication is valid after payment...');
+      
+      // Check if we have a valid auth token
+      const authHeader = getAuthHeader();
+      if (!authHeader || !authHeader.Authorization) {
+        console.log('No valid auth token found, refreshing user session...');
+        await refreshUser();
+        return;
+      }
+
+      // Test the token by making a quick auth check
+      try {
+        const response = await fetch(`${apiUrl}/api/auth/me`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader()
+          }
+        });
+
+        if (!response.ok) {
+          console.log('Auth token validation failed, refreshing user session...');
+          await refreshUser();
+        } else {
+          console.log('Auth token is valid');
+        }
+      } catch (authError) {
+        console.log('Auth check failed, refreshing user session...', authError);
+        await refreshUser();
+      }
+    } catch (error) {
+      console.warn('Failed to ensure authentication validity:', error);
+      // Continue anyway - user can manually refresh if needed
+    }
+  };
 
   // Progressive webhook status checking
   const checkSubscriptionStatus = async () => {
@@ -82,7 +124,7 @@ export default function SubscriptionSuccess() {
     try {
       console.log(`Checking if session ${sessionId} has been processed (attempt ${webhookChecks + 1}/${maxWebhookChecks})`);
       
-      // First ensure we have a valid auth token
+      // Ensure we have a valid auth token before making the request
       const authHeader = getAuthHeader();
       if (!authHeader || !authHeader.Authorization) {
         console.warn('No valid auth token available, attempting to refresh user session');
@@ -113,7 +155,9 @@ export default function SubscriptionSuccess() {
           
           // Refresh user data to get the latest subscription info
           try {
+            console.log('Refreshing user data after successful subscription activation...');
             await refreshUser();
+            console.log('User data refreshed successfully');
           } catch (refreshError) {
             console.warn('Failed to refresh user after session confirmation:', refreshError);
           }
@@ -191,6 +235,29 @@ export default function SubscriptionSuccess() {
     } catch (error) {
       console.warn('Fallback subscription check failed:', error);
       setSubscriptionStatus('delayed');
+    }
+  };
+
+  // Enhanced navigation with authentication check
+  const handleContinue = async () => {
+    try {
+      console.log('User clicked continue, ensuring authentication is valid...');
+      
+      // Ensure authentication is valid before navigation
+      await ensureAuthenticationValid();
+      
+      // Navigate to home
+      navigate('/', { 
+        replace: true,
+        state: { fromPaymentSuccess: true }
+      });
+    } catch (error) {
+      console.warn('Error during navigation preparation:', error);
+      // Navigate anyway - user can handle auth issues on the next page
+      navigate('/', { 
+        replace: true,
+        state: { fromPaymentSuccess: true }
+      });
     }
   };
   
@@ -395,7 +462,7 @@ export default function SubscriptionSuccess() {
                 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                   <button
-                    onClick={() => navigate('/')}
+                    onClick={handleContinue}
                     className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-8 py-4 rounded-lg hover:from-blue-700 hover:to-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-semibold text-lg min-w-[200px] flex items-center justify-center"
                   >
                     <span className="mr-2">🚀</span>
