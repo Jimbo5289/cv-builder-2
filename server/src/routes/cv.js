@@ -6,7 +6,14 @@ const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 const fs = require('fs');
 const _path = require('path');
-const PDFDocument = require('pdfkit');
+// Lazy load PDFDocument to prevent canvas warnings during startup
+let PDFDocument;
+const getPDFDocument = () => {
+  if (!PDFDocument) {
+    PDFDocument = require('pdfkit');
+  }
+  return PDFDocument;
+};
 const { _execSync } = require('child_process');
 const { promisify } = require('util');
 const _readFileAsync = promisify(fs.readFile);
@@ -779,10 +786,10 @@ router.get('/download/:cvId', authMiddleware, validateCVOwnership, async (req, r
       });
     }
 
-    // Create PDF document with custom size and margins
-    const doc = new PDFDocument({
-      size: 'A4',
-      margins: {
+          // Create PDF document with custom size and margins
+      const doc = new (getPDFDocument())({
+        size: 'A4',
+        margins: {
         top: STYLES.MARGINS.TOP,
         bottom: STYLES.MARGINS.TOP,
         left: STYLES.MARGINS.SIDE,
@@ -2456,7 +2463,8 @@ router.get('/pay-per-cv-status', authMiddleware, async (req, res) => {
       where: {
         userId: req.user.id,
         productName: 'Pay-Per-CV',
-        status: 'completed'
+        status: 'completed',
+        remainingDownloads: { gt: 0 }
       },
       orderBy: { purchaseDate: 'desc' }
     });
@@ -3710,8 +3718,8 @@ router.post('/generate-pdf', (req, res, next) => {
       return res.status(400).json({ error: 'Invalid CV data format' });
     }
     
-    // Create a PDF document
-    const doc = new PDFDocument({ margin: STYLES.MARGINS.TOP });
+          // Create a PDF document
+      const doc = new (getPDFDocument())({ margin: STYLES.MARGINS.TOP });
     
     // Set response headers for PDF download
     res.setHeader('Content-Type', 'application/pdf');

@@ -1,4 +1,24 @@
-// Updated user.js file - 2025-06-15 07:52 - Fix notifications endpoint
+/* eslint-disable */
+// Set up warning suppression FIRST, before any modules are loaded
+const originalConsoleWarn = console.warn;
+console.warn = function(...args) {
+  const message = args[0] || '';
+  // Suppress canvas-related warnings that are not critical for server operation
+  if (typeof message === 'string' && 
+      (message.includes('@napi-rs/canvas') || 
+       message.includes('canvas package') ||
+       message.includes('Failed to load native binding') ||
+       message.includes('Cannot load "@napi-rs/canvas"'))) {
+    return; // Suppress these warnings
+  }
+  // For all other warnings, use the original console.warn
+  return originalConsoleWarn.apply(console, args);
+};
+
+// Load environment variables as early as possible
+require('dotenv').config();
+
+// Now load other modules
 const express = require('express');
 const cors = require('cors');
 const { validateEnv } = require('./config/env');
@@ -26,21 +46,6 @@ const userRoutes = require('./routes/user');
 const healthRoutes = require('./routes/health');
 const adminRoutes = require('./routes/admin');
 const debugRoutes = require('./routes/debug');
-
-// Suppress non-critical canvas warnings that don't affect server functionality
-const originalConsoleWarn = console.warn;
-console.warn = function(...args) {
-  const message = args[0] || '';
-  // Suppress canvas-related warnings that are not critical for server operation
-  if (typeof message === 'string' && 
-      (message.includes('@napi-rs/canvas') || 
-       message.includes('canvas package') ||
-       message.includes('Failed to load native binding'))) {
-    return; // Suppress these warnings
-  }
-  // For all other warnings, use the original console.warn
-  return originalConsoleWarn.apply(console, args);
-};
 
 // Try to import fix-database, but don't fail if it's not available
 let ensureDevUser;

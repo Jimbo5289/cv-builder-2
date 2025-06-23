@@ -4,7 +4,14 @@ const router = express.Router();
 const { stripe } = require('../../config/stripe.cjs');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const PDFDocument = require('pdfkit');
+// Lazy load PDFDocument to prevent canvas warnings during startup
+let PDFDocument;
+const getPDFDocument = () => {
+  if (!PDFDocument) {
+    PDFDocument = require('pdfkit');
+  }
+  return PDFDocument;
+};
 const { logger } = require('../config/logger');
 const { auth: authMiddleware } = require('../middleware/auth');
 const { sendSuccess, sendError, asyncHandler } = require('../utils/responseHandler');
@@ -210,9 +217,9 @@ router.get('/download-cv/:cvId', authMiddleware, asyncHandler(async (req, res) =
 const generateCVContent = async (cv) => {
   return new Promise((resolve, reject) => {
     try {
-      const doc = new PDFDocument({
-        size: 'A4',
-        margin: 50
+              const doc = new (getPDFDocument())({
+          size: 'A4',
+          margin: 50
       });
 
       const buffers = [];
