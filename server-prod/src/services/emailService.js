@@ -44,6 +44,7 @@ const templates = {
         <body>
           <div class="container">
             <div class="header">
+              <img src="${FRONTEND_URL}/images/mycvbuilder-logo.png" alt="MyCVBuilder.co.uk Logo" style="max-width: 80px; height: auto; margin-bottom: 20px; border-radius: 8px;" />
               <h1>Welcome to MyCVBuilder.co.uk!</h1>
             </div>
             <div class="content">
@@ -97,6 +98,7 @@ const templates = {
         <body>
           <div class="container">
             <div class="header">
+              <img src="${FRONTEND_URL}/images/mycvbuilder-logo.png" alt="MyCVBuilder.co.uk Logo" style="max-width: 60px; height: auto; margin-bottom: 15px; border-radius: 6px;" />
               <h1>Payment Failed</h1>
             </div>
             <div class="content">
@@ -138,6 +140,7 @@ const templates = {
         <body>
           <div class="container">
             <div class="header">
+              <img src="${FRONTEND_URL}/images/mycvbuilder-logo.png" alt="MyCVBuilder.co.uk Logo" style="max-width: 60px; height: auto; margin-bottom: 15px; border-radius: 6px;" />
               <h1>Payment Successful</h1>
             </div>
             <div class="content">
@@ -180,6 +183,7 @@ const templates = {
         <body>
           <div class="container">
             <div class="header">
+              <img src="${FRONTEND_URL}/images/mycvbuilder-logo.png" alt="MyCVBuilder.co.uk Logo" style="max-width: 60px; height: auto; margin-bottom: 15px; border-radius: 6px;" />
               <h1>Subscription Cancelled</h1>
             </div>
             <div class="content">
@@ -217,6 +221,7 @@ const templates = {
         <body>
           <div class="container">
             <div class="header">
+              <img src="${FRONTEND_URL}/images/mycvbuilder-logo.png" alt="MyCVBuilder.co.uk Logo" style="max-width: 60px; height: auto; margin-bottom: 15px; border-radius: 6px;" />
               <h1>Password Reset Request</h1>
             </div>
             <div class="content">
@@ -256,6 +261,7 @@ const templates = {
         <body>
           <div class="container">
             <div class="header">
+              <img src="${FRONTEND_URL}/images/mycvbuilder-logo.png" alt="MyCVBuilder.co.uk Logo" style="max-width: 60px; height: auto; margin-bottom: 15px; border-radius: 6px;" />
               <h1>New Contact Form Message</h1>
             </div>
             <div class="content">

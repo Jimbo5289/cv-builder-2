@@ -32,6 +32,10 @@ const templates = {
       <!DOCTYPE html>
       <html>
         <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <link rel="icon" type="image/png" href="${FRONTEND_URL}/images/mycvbuilder-logo.png">
+          <title>Welcome to MyCVBuilder.co.uk Premium!</title>
           <style>
             body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f8fafc; }
             .container { max-width: 600px; margin: 0 auto; background: white; }
@@ -47,9 +51,10 @@ const templates = {
         <body>
           <div class="container">
             <div class="header">
+              <img src="${FRONTEND_URL}/images/mycvbuilder-logo.png" alt="MyCVBuilder.co.uk Logo" style="max-width: 80px; height: auto; margin-bottom: 20px; border-radius: 8px;" />
               <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
               <h1 style="margin: 0; font-size: 28px;">Thank You for Your Purchase!</h1>
-                              <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.9;">Your MyCVBuilder.co.uk Premium subscription is now active</p>
+              <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.9;">Your MyCVBuilder.co.uk Premium subscription is now active</p>
             </div>
             <div class="content">
               <p style="font-size: 18px; margin-bottom: 25px;">Dear ${user.name || 'valued customer'},</p>
@@ -136,6 +141,7 @@ const templates = {
         <body>
           <div class="container">
             <div class="header">
+              <img src="${FRONTEND_URL}/images/mycvbuilder-logo.png" alt="MyCVBuilder.co.uk Logo" style="max-width: 60px; height: auto; margin-bottom: 15px; border-radius: 6px;" />
               <h1>Payment Failed</h1>
             </div>
             <div class="content">
@@ -177,6 +183,7 @@ const templates = {
         <body>
           <div class="container">
             <div class="header">
+              <img src="${FRONTEND_URL}/images/mycvbuilder-logo.png" alt="MyCVBuilder.co.uk Logo" style="max-width: 60px; height: auto; margin-bottom: 15px; border-radius: 6px;" />
               <h1>Payment Successful</h1>
             </div>
             <div class="content">
@@ -219,6 +226,7 @@ const templates = {
         <body>
           <div class="container">
             <div class="header">
+              <img src="${FRONTEND_URL}/images/mycvbuilder-logo.png" alt="MyCVBuilder.co.uk Logo" style="max-width: 60px; height: auto; margin-bottom: 15px; border-radius: 6px;" />
               <h1>Subscription Cancelled</h1>
             </div>
             <div class="content">
@@ -256,6 +264,7 @@ const templates = {
         <body>
           <div class="container">
             <div class="header">
+              <img src="${FRONTEND_URL}/images/mycvbuilder-logo.png" alt="MyCVBuilder.co.uk Logo" style="max-width: 60px; height: auto; margin-bottom: 15px; border-radius: 6px;" />
               <h1>Password Reset Request</h1>
             </div>
             <div class="content">
@@ -295,6 +304,7 @@ const templates = {
         <body>
           <div class="container">
             <div class="header">
+              <img src="${FRONTEND_URL}/images/mycvbuilder-logo.png" alt="MyCVBuilder.co.uk Logo" style="max-width: 60px; height: auto; margin-bottom: 15px; border-radius: 6px;" />
               <h1>New Contact Form Message</h1>
             </div>
             <div class="content">
@@ -502,10 +512,18 @@ const sendEmail = async (user, data, templateName) => {
 
     // Create message object
     const message = {
-      from: process.env.EMAIL_FROM || 'support@cvbuilder.com',
+      from: {
+        name: 'MyCVBuilder.co.uk',
+        address: process.env.EMAIL_FROM || 'support@mycvbuilder.co.uk'
+      },
       to: validatedUser.email,
       subject,
-      html
+      html,
+      headers: {
+        'X-Entity-Ref-ID': 'mycvbuilder-notification',
+        'List-Unsubscribe': `<${FRONTEND_URL}/profile>`,
+        'Organization': 'MyCVBuilder Ltd'
+      }
     };
 
     // If we're in development or email hasn't been configured successfully, use mock
@@ -634,11 +652,17 @@ const sendContactFormEmail = async (senderInfo, message) => {
 
     // Create email message
     const emailMessage = {
-      from: process.env.EMAIL_FROM || 'support@cvbuilder.com',
-      to: process.env.CONTACT_EMAIL || process.env.EMAIL_USER || 'support@cvbuilder.com',
+      from: {
+        name: 'MyCVBuilder.co.uk Contact Form',
+        address: process.env.EMAIL_FROM || 'support@mycvbuilder.co.uk'
+      },
+      to: process.env.CONTACT_EMAIL || process.env.EMAIL_USER || 'support@mycvbuilder.co.uk',
       replyTo: senderInfo.email,
       subject,
-      html
+      html,
+      headers: {
+        'Organization': 'MyCVBuilder Ltd'
+      }
     };
 
     // Check if transporter is available
