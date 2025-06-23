@@ -27,7 +27,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL
 // Email templates
 const templates = {
   subscriptionConfirmation: (user, subscription) => ({
-    subject: '🎉 Welcome to CV Builder Premium! Your subscription is active',
+    subject: '🎉 Welcome to MyCVBuilder.co.uk Premium! Your subscription is active',
     html: `
       <!DOCTYPE html>
       <html>
@@ -49,13 +49,13 @@ const templates = {
             <div class="header">
               <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
               <h1 style="margin: 0; font-size: 28px;">Thank You for Your Purchase!</h1>
-              <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.9;">Your CV Builder Premium subscription is now active</p>
+                              <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.9;">Your MyCVBuilder.co.uk Premium subscription is now active</p>
             </div>
             <div class="content">
               <p style="font-size: 18px; margin-bottom: 25px;">Dear ${user.name || 'valued customer'},</p>
               
               <p style="font-size: 16px; margin-bottom: 25px;">
-                Welcome to <span class="highlight">CV Builder Premium!</span> You've just unlocked our complete suite of AI-powered career tools designed to help you land your dream job.
+                Welcome to <span class="highlight">MyCVBuilder.co.uk Premium!</span> You've just unlocked our complete suite of AI-powered career tools designed to help you land your dream job.
               </p>
 
               <div class="feature-box">
@@ -140,7 +140,7 @@ const templates = {
             </div>
             <div class="content">
               <p>Dear ${user.name || 'valued customer'},</p>
-              <p>We were unable to process your payment for CV Builder. To ensure uninterrupted service, please:</p>
+              <p>We were unable to process your payment for MyCVBuilder.co.uk. To ensure uninterrupted service, please:</p>
               <ol>
                 <li>Check your payment method</li>
                 <li>Ensure sufficient funds are available</li>
@@ -160,7 +160,7 @@ const templates = {
   }),
 
   paymentSuccess: (user, payment) => ({
-    subject: 'Payment Confirmation - CV Builder',
+    subject: 'Payment Confirmation - MyCVBuilder.co.uk',
     html: `
       <!DOCTYPE html>
       <html>
@@ -187,7 +187,7 @@ const templates = {
                 <li>Amount: ${payment.currency.toUpperCase() === 'GBP' ? '£' : payment.currency.toUpperCase()} ${payment.amount.toFixed(2)}</li>
                 <li>Date: ${new Date().toLocaleDateString()}</li>
               </ul>
-              <p>You can now access your CV Builder features or download your enhanced CV.</p>
+              <p>You can now access your MyCVBuilder.co.uk features or download your enhanced CV.</p>
               <p>
                 <a href="${FRONTEND_URL}/dashboard" class="button">Go to Dashboard</a>
               </p>
@@ -202,7 +202,7 @@ const templates = {
   }),
 
   subscriptionCancelled: (user) => ({
-    subject: 'Subscription Cancelled - CV Builder',
+    subject: 'Subscription Cancelled - MyCVBuilder.co.uk',
     html: `
       <!DOCTYPE html>
       <html>
@@ -223,7 +223,7 @@ const templates = {
             </div>
             <div class="content">
               <p>Dear ${user.name || 'valued customer'},</p>
-              <p>Your CV Builder subscription has been cancelled as requested.</p>
+              <p>Your MyCVBuilder.co.uk subscription has been cancelled as requested.</p>
               <p>We're sorry to see you go! If you change your mind, you can reactivate your subscription at any time.</p>
               <p>
                 <a href="${FRONTEND_URL}/pricing" class="button">Reactivate Subscription</a>
@@ -239,7 +239,7 @@ const templates = {
   }),
   
   passwordReset: (user, resetLink) => ({
-    subject: 'Reset Your Password - CV Builder',
+    subject: 'Reset Your Password - MyCVBuilder.co.uk',
     html: `
       <!DOCTYPE html>
       <html>
@@ -260,7 +260,7 @@ const templates = {
             </div>
             <div class="content">
               <p>Dear ${user.name || 'valued user'},</p>
-              <p>We received a request to reset your password for CV Builder. If you didn't make this request, you can safely ignore this email.</p>
+              <p>We received a request to reset your password for MyCVBuilder.co.uk. If you didn't make this request, you can safely ignore this email.</p>
               <p>To reset your password, click the button below:</p>
               <p style="text-align: center; margin: 30px 0;">
                 <a href="${resetLink}" class="button">Reset Password</a>
@@ -308,7 +308,7 @@ const templates = {
               <p>${message.split('\n').join('<br>')}</p>
             </div>
             <div class="footer">
-              <p>This message was sent from the CV Builder contact form.</p>
+              <p>This message was sent from the MyCVBuilder.co.uk contact form.</p>
             </div>
           </div>
         </body>
