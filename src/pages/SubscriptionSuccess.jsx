@@ -14,6 +14,8 @@ export default function SubscriptionSuccess() {
   const [sessionData, setSessionData] = useState(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState('processing'); // processing, active, failed
   const [webhookChecks, setWebhookChecks] = useState(0);
+  const [purchaseType, setPurchaseType] = useState(null); // 'subscription', '30day-access', 'pay-per-cv'
+  const [purchaseDetails, setPurchaseDetails] = useState(null);
   const maxWebhookChecks = 4; // Check for 20 seconds (4 checks * 5 seconds)
   
   useEffect(() => {
@@ -35,6 +37,7 @@ export default function SubscriptionSuccess() {
             total_details: { amount_discount: 7900 }
           });
           setSubscriptionStatus('active');
+          setPurchaseType('subscription');
           setLoading(false);
           return;
         }
@@ -153,9 +156,32 @@ export default function SubscriptionSuccess() {
           console.log('Session confirmed processed by webhook!');
           setSubscriptionStatus('active');
           
+          // Determine purchase type and set details
+          if (data.hasSubscription && data.subscription) {
+            setPurchaseType('subscription');
+            setPurchaseDetails({
+              type: 'subscription',
+              subscription: data.subscription,
+              planType: data.subscription.stripePriceId?.includes('annual') ? 'annual' : 'monthly'
+            });
+          } else if (data.hasTemporaryAccess && data.temporaryAccess) {
+            setPurchaseType(data.temporaryAccess.type);
+            setPurchaseDetails({
+              type: data.temporaryAccess.type,
+              temporaryAccess: data.temporaryAccess,
+              endTime: data.temporaryAccess.endTime
+            });
+          } else {
+            // Fallback to pay-per-cv if no specific type detected
+            setPurchaseType('pay-per-cv');
+            setPurchaseDetails({
+              type: 'pay-per-cv'
+            });
+          }
+          
           // Refresh user data to get the latest subscription info
           try {
-            console.log('Refreshing user data after successful subscription activation...');
+            console.log('Refreshing user data after successful payment activation...');
             await refreshUser();
             console.log('User data refreshed successfully');
           } catch (refreshError) {
@@ -210,7 +236,7 @@ export default function SubscriptionSuccess() {
       // Refresh user data to get latest subscription info
       await refreshUser();
       
-      // Check if user now has an active subscription
+      // Check if user now has an active subscription or temporary access
       const response = await fetch(`${apiUrl}/api/subscriptions/premium-status`, {
         method: 'GET',
         headers: {
@@ -224,12 +250,26 @@ export default function SubscriptionSuccess() {
         if (data.isSubscribed && data.subscription?.status === 'active') {
           console.log('User has active subscription confirmed via fallback check');
           setSubscriptionStatus('active');
+          setPurchaseType('subscription');
+          setPurchaseDetails({
+            type: 'subscription',
+            subscription: data.subscription
+          });
+          return;
+        } else if (data.temporaryAccess) {
+          console.log('User has temporary access confirmed via fallback check');
+          setSubscriptionStatus('active');
+          setPurchaseType(data.temporaryAccess.type);
+          setPurchaseDetails({
+            type: data.temporaryAccess.type,
+            temporaryAccess: data.temporaryAccess
+          });
           return;
         }
       }
       
-      // If still no active subscription found, mark as delayed
-      console.log('No active subscription found via fallback, marking as delayed');
+      // If still no active subscription or access found, mark as delayed
+      console.log('No active subscription or access found via fallback, marking as delayed');
       setSubscriptionStatus('delayed');
       
     } catch (error) {
@@ -246,18 +286,172 @@ export default function SubscriptionSuccess() {
       // Ensure authentication is valid before navigation
       await ensureAuthenticationValid();
       
-      // Navigate to home
-      navigate('/', { 
+      // Navigate to appropriate page based on purchase type
+      let navigationPath = '/';
+      if (purchaseType === 'subscription') {
+        navigationPath = '/dashboard';
+      } else if (purchaseType === '30day-access') {
+        navigationPath = '/dashboard';
+      } else if (purchaseType === 'pay-per-cv') {
+        navigationPath = '/create';
+      }
+      
+      navigate(navigationPath, { 
         replace: true,
-        state: { fromPaymentSuccess: true }
+        state: { fromPaymentSuccess: true, purchaseType }
       });
     } catch (error) {
       console.warn('Error during navigation preparation:', error);
       // Navigate anyway - user can handle auth issues on the next page
       navigate('/', { 
         replace: true,
-        state: { fromPaymentSuccess: true }
+        state: { fromPaymentSuccess: true, purchaseType }
       });
+    }
+  };
+
+  // Get purchase-specific success message
+  const getSuccessMessage = () => {
+    if (!purchaseType) return 'Thank You for Your Purchase!';
+    
+    switch (purchaseType) {
+      case 'subscription':
+        const isAnnual = purchaseDetails?.planType === 'annual' || 
+                        purchaseDetails?.subscription?.stripePriceId?.includes('annual');
+        return isAnnual ? 
+          'Welcome to Your Annual Subscription!' : 
+          'Welcome to Your Monthly Subscription!';
+      case '30day-access':
+        return 'Your 30-Day Access Pass is Active!';
+      case 'pay-per-cv':
+        return 'Your Pay-Per-CV Purchase is Complete!';
+      default:
+        return 'Thank You for Your Purchase!';
+    }
+  };
+
+  // Get purchase-specific subtitle
+  const getSuccessSubtitle = () => {
+    if (!purchaseType) return 'Your payment was processed successfully';
+    
+    switch (purchaseType) {
+      case 'subscription':
+        return 'Your premium subscription is now active and ready to use';
+      case '30day-access':
+        return 'You now have full access to all premium features for 30 days';
+      case 'pay-per-cv':
+        return 'You can now create and download your professional CV';
+      default:
+        return 'Your payment was processed successfully';
+    }
+  };
+
+  // Get purchase-specific status message
+  const getStatusMessage = () => {
+    if (subscriptionStatus === 'processing') {
+      return 'Activating your purchase...';
+    }
+    
+    if (subscriptionStatus === 'active') {
+      switch (purchaseType) {
+        case 'subscription':
+          return 'Premium subscription is now active!';
+        case '30day-access':
+          return '30-Day Access Pass is now active!';
+        case 'pay-per-cv':
+          return 'Pay-Per-CV access is now ready!';
+        default:
+          return 'Your purchase is now active!';
+      }
+    }
+    
+    if (subscriptionStatus === 'delayed') {
+      return 'Purchase activating shortly';
+    }
+    
+    return 'Processing your purchase...';
+  };
+
+  // Get purchase-specific welcome message
+  const getWelcomeMessage = () => {
+    if (!purchaseType) return 'Welcome to CV Builder Premium! 🚀';
+    
+    switch (purchaseType) {
+      case 'subscription':
+        return 'Welcome to CV Builder Premium! 🚀';
+      case '30day-access':
+        return 'Welcome to Your 30-Day Premium Experience! ⭐';
+      case 'pay-per-cv':
+        return 'Let\'s Create Your Professional CV! 📝';
+      default:
+        return 'Welcome to CV Builder! 🚀';
+    }
+  };
+
+  // Get purchase-specific description
+  const getWelcomeDescription = () => {
+    if (!purchaseType) return 'You now have access to powerful AI-driven tools to create professional, ATS-optimized CVs.';
+    
+    switch (purchaseType) {
+      case 'subscription':
+        return 'You\'ve unlocked the complete CV Builder experience. Our powerful AI-driven tools will help you create professional, ATS-optimized CVs that get noticed by employers.';
+      case '30day-access':
+        return 'For the next 30 days, you have full access to all premium features including advanced AI analysis, premium templates, and comprehensive CV optimization tools.';
+      case 'pay-per-cv':
+        return 'You can now create and download one professional CV with basic ATS analysis. Our guided process will help you build an effective CV that stands out.';
+      default:
+        return 'You now have access to powerful tools to create professional CVs.';
+    }
+  };
+
+  // Get purchase-specific next steps
+  const getNextSteps = () => {
+    if (!purchaseType) return [];
+    
+    switch (purchaseType) {
+      case 'subscription':
+        return [
+          'Access unlimited CV creation and editing',
+          'Use advanced AI analysis and optimization',
+          'Choose from premium templates',
+          'Get priority customer support'
+        ];
+      case '30day-access':
+        return [
+          'Create unlimited CVs for 30 days',
+          'Access all premium features and templates',
+          'Get comprehensive AI analysis and feedback',
+          'Download and print your optimized CVs'
+        ];
+      case 'pay-per-cv':
+        return [
+          'Start building your CV with our guided process',
+          'Get basic ATS scoring and feedback',
+          'Choose from standard templates',
+          'Download your completed CV'
+        ];
+      default:
+        return [
+          'Start creating your professional CV',
+          'Access available features',
+          'Download your completed work'
+        ];
+    }
+  };
+
+  // Get appropriate call-to-action text
+  const getCTAText = () => {
+    if (!purchaseType) return 'Continue to Dashboard';
+    
+    switch (purchaseType) {
+      case 'subscription':
+        return 'Go to Dashboard';
+      case '30day-access':
+        return 'Start Creating CVs';
+      case 'pay-per-cv':
+        return 'Create My CV';
+      default:
+        return 'Continue';
     }
   };
   
@@ -269,7 +463,7 @@ export default function SubscriptionSuccess() {
             <div className="px-6 py-12">
               <div className="flex flex-col items-center justify-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-                <p className="text-gray-600 text-lg">Verifying your subscription...</p>
+                <p className="text-gray-600 text-lg">Verifying your purchase...</p>
                 <p className="text-gray-500 text-sm mt-2">Please wait while we confirm your payment</p>
               </div>
             </div>
@@ -283,7 +477,7 @@ export default function SubscriptionSuccess() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-red-800 mb-3">Subscription Verification Issue</h3>
+                <h3 className="text-xl font-bold text-red-800 mb-3">Purchase Verification Issue</h3>
                 <p className="text-gray-600 mb-8 max-w-lg mx-auto">{error}</p>
                 <button
                   onClick={() => navigate('/pricing')}
@@ -300,18 +494,18 @@ export default function SubscriptionSuccess() {
             <div className="bg-gradient-to-r from-green-500 to-blue-600 px-6 py-8 text-center">
               <div className="text-6xl mb-4">🎉</div>
               <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                Thank You for Your Purchase!
+                {getSuccessMessage()}
               </h1>
               <p className="text-green-100 text-lg">
-                Your payment was processed successfully
+                {getSuccessSubtitle()}
               </p>
               
-              {/* Subscription Status Indicator */}
+              {/* Purchase Status Indicator */}
               <div className="mt-4">
                 {subscriptionStatus === 'processing' && (
                   <div className="inline-flex items-center px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-600 mr-2"></div>
-                    Activating your subscription...
+                    {getStatusMessage()}
                   </div>
                 )}
                 {subscriptionStatus === 'active' && (
@@ -319,7 +513,7 @@ export default function SubscriptionSuccess() {
                     <svg className="h-4 w-4 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    Premium subscription is now active!
+                    {getStatusMessage()}
                   </div>
                 )}
                 {subscriptionStatus === 'delayed' && (
@@ -327,7 +521,7 @@ export default function SubscriptionSuccess() {
                     <svg className="h-4 w-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Subscription activating shortly
+                    {getStatusMessage()}
                   </div>
                 )}
               </div>
@@ -363,10 +557,10 @@ export default function SubscriptionSuccess() {
                       </svg>
                     </div>
                     <div className="ml-3 flex-1">
-                      <h4 className="text-blue-800 font-semibold">Subscription Activating</h4>
+                      <h4 className="text-blue-800 font-semibold">Purchase Activating</h4>
                       <p className="text-blue-700 text-sm mt-1">
-                        Your subscription is being processed and will be active within a few minutes. 
-                        You can start using premium features right away, and if you encounter any issues, 
+                        Your purchase is being processed and will be active within a few minutes. 
+                        You can start using the features right away, and if you encounter any issues, 
                         simply refresh your browser.
                       </p>
                       <button
@@ -386,143 +580,146 @@ export default function SubscriptionSuccess() {
               {/* Welcome Message */}
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Welcome to CV Builder Premium! 🚀
+                  {getWelcomeMessage()}
                 </h2>
                 <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                  You've just unlocked the complete CV Builder experience. Our powerful AI-driven tools 
-                  will help you create professional, ATS-optimized CVs that get noticed by employers.
+                  {getWelcomeDescription()}
                 </p>
               </div>
 
               {/* Features Overview */}
               <div className="grid md:grid-cols-2 gap-6 mb-8">
                 <div className="bg-blue-50 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-blue-900 mb-4 flex items-center">
-                    <svg className="h-6 w-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                    AI-Powered Analysis
-                  </h3>
-                  <ul className="space-y-2 text-blue-800">
-                    <li className="flex items-center">
-                      <span className="text-green-500 mr-2">✓</span>
-                      Advanced ATS compatibility scoring
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-green-500 mr-2">✓</span>
-                      Keyword optimization suggestions
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-green-500 mr-2">✓</span>
-                      Industry-specific recommendations
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-green-500 mr-2">✓</span>
-                      Real-time improvement tips
-                    </li>
+                  <div className="flex items-center mb-4">
+                    <div className="flex-shrink-0">
+                      <svg className="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="ml-3 text-lg font-semibold text-gray-900">What's Next?</h3>
+                  </div>
+                  <ul className="space-y-2">
+                    {getNextSteps().map((step, index) => (
+                      <li key={index} className="flex items-start">
+                        <svg className="h-5 w-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-gray-700">{step}</span>
+                      </li>
+                    ))}
                   </ul>
                 </div>
 
                 <div className="bg-green-50 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-green-900 mb-4 flex items-center">
-                    <svg className="h-6 w-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                    </svg>
-                    Premium Templates & Tools
-                  </h3>
-                  <ul className="space-y-2 text-green-800">
-                    <li className="flex items-center">
-                      <span className="text-green-500 mr-2">✓</span>
-                      Professional CV templates
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-green-500 mr-2">✓</span>
-                      Multiple export formats (PDF, Word)
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-green-500 mr-2">✓</span>
-                      Career pathway insights
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-green-500 mr-2">✓</span>
-                      Priority customer support
-                    </li>
-                  </ul>
+                  <div className="flex items-center mb-4">
+                    <div className="flex-shrink-0">
+                      <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="ml-3 text-lg font-semibold text-gray-900">Need Help?</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <p className="text-gray-700">
+                      Our support team is here to help you get the most out of your CV Builder experience.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <a 
+                        href="/contact" 
+                        className="inline-flex items-center px-3 py-2 border border-green-300 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                      >
+                        <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        Contact Support
+                      </a>
+                      <a 
+                        href="/faq" 
+                        className="inline-flex items-center px-3 py-2 border border-green-300 text-sm leading-4 font-medium rounded-md text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                      >
+                        <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        View FAQ
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Next Steps */}
-              <div className="bg-gray-50 rounded-lg p-6 mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
-                  🎯 Ready to Get Started?
-                </h3>
-                <p className="text-gray-600 text-center mb-6">
-                  Your premium features are now unlocked and ready to use. Let's create an amazing CV that gets results!
-                </p>
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={handleContinue}
+                  className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                >
+                  <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                  {getCTAText()}
+                </button>
                 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                {/* Additional action for pay-per-cv users */}
+                {purchaseType === 'pay-per-cv' && (
                   <button
-                    onClick={handleContinue}
-                    className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-8 py-4 rounded-lg hover:from-blue-700 hover:to-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-semibold text-lg min-w-[200px] flex items-center justify-center"
+                    onClick={() => navigate('/cv-tips')}
+                    className="inline-flex items-center justify-center px-8 py-3 border border-gray-300 text-base font-medium rounded-lg shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                   >
-                    <span className="mr-2">🚀</span>
-                    Let's Go!
-                  </button>
-                  
-                  <div className="text-gray-400 text-sm">or</div>
-                  
-                  <button
-                    onClick={() => navigate('/analyze')}
-                    className="border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-600 hover:text-white transition-colors font-semibold flex items-center"
-                  >
-                    <span className="mr-2">🔍</span>
-                    Analyze My CV
-                  </button>
-                </div>
-              </div>
-
-              {/* Additional Resources */}
-              <div className="grid sm:grid-cols-3 gap-4 mb-8">
-                <button
-                  onClick={() => navigate('/templates')}
-                  className="p-4 text-center border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
-                >
-                  <div className="text-2xl mb-2">📄</div>
-                  <div className="font-medium text-gray-900">Browse Templates</div>
-                  <div className="text-sm text-gray-600">Professional designs</div>
-                </button>
-                
-                <button
-                  onClick={() => navigate('/subscription')}
-                  className="p-4 text-center border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors"
-                >
-                  <div className="text-2xl mb-2">💎</div>
-                  <div className="font-medium text-gray-900">My Subscription</div>
-                  <div className="text-sm text-gray-600">Manage your plan</div>
-                </button>
-                
-                <button
-                  onClick={() => navigate('/contact')}
-                  className="p-4 text-center border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
-                >
-                  <div className="text-2xl mb-2">💬</div>
-                  <div className="font-medium text-gray-900">Get Support</div>
-                  <div className="text-sm text-gray-600">Priority help</div>
-                </button>
-              </div>
-
-              {/* Confirmation Details */}
-              <div className="text-center text-gray-500 border-t pt-6">
-                <p className="mb-2">
-                  <span className="inline-flex items-center">
-                    <svg className="h-4 w-4 text-green-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
-                    A confirmation email has been sent to your registered email address
-                  </span>
-                </p>
-                <p className="text-sm">
-                  If you have any questions, our priority support team is here to help!
+                    Get CV Tips
+                  </button>
+                )}
+              </div>
+
+              {/* Purchase-specific additional info */}
+              {purchaseType === '30day-access' && purchaseDetails?.endTime && (
+                <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h4 className="text-yellow-800 font-semibold">Access Duration</h4>
+                      <p className="text-yellow-700 text-sm mt-1">
+                        Your 30-day access will expire on {new Date(purchaseDetails.endTime).toLocaleDateString('en-GB', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}. Make the most of your premium features!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {purchaseType === 'pay-per-cv' && (
+                <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h4 className="text-blue-800 font-semibold">Your Pay-Per-CV Purchase</h4>
+                      <p className="text-blue-700 text-sm mt-1">
+                        You can create and download one CV with basic ATS analysis. Need more? Consider upgrading to a subscription for unlimited access to all features.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Footer */}
+              <div className="mt-8 pt-6 border-t border-gray-200 text-center">
+                <p className="text-sm text-gray-500">
+                  Questions about your purchase? Check your email for the receipt or{' '}
+                  <a href="/contact" className="text-blue-600 hover:text-blue-500">contact our support team</a>.
                 </p>
               </div>
             </div>

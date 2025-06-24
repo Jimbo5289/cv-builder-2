@@ -105,6 +105,55 @@ class AIAnalysisService {
         qualifications: ['Emergency services training', 'Medical certifications', 'Physical fitness standards', 'Background checks', 'Ongoing training', 'Professional certifications'],
         incompatibleFields: ['design', 'marketing', 'finance'],
         transferableFrom: ['healthcare', 'military', 'security', 'law enforcement']
+      },
+      construction: {
+        keywords: ['building safety', 'construction safety', 'OSHA', 'NEBOSH', 'IOSH', 'safety management', 'risk assessment', 'building regulations', 'compliance', 'safety protocols', 'incident investigation', 'safety training', 'hazard identification', 'safety audits', 'construction', 'building', 'site safety', 'scaffolding', 'fall protection', 'PPE', 'safety legislation'],
+        skills: ['Safety management', 'Risk assessment', 'Regulatory compliance', 'Incident investigation', 'Safety training delivery', 'Hazard identification', 'Safety auditing', 'Communication', 'Leadership', 'Problem-solving'],
+        qualifications: ['NEBOSH certification', 'IOSH Managing Safely', 'OSHA certifications', 'Construction safety qualifications', 'Building safety certifications', 'Risk management certifications', 'Professional safety memberships'],
+        incompatibleFields: ['arts', 'design', 'marketing', 'retail'],
+        transferableFrom: ['emergency services', 'engineering', 'healthcare', 'military', 'manufacturing', 'fire service', 'rescue services', 'health and safety']
+      },
+      building_safety: {
+        keywords: ['building safety', 'fire safety', 'building regulations', 'building control', 'safety compliance', 'building codes', 'fire risk assessment', 'building standards', 'safety management', 'regulatory compliance', 'building inspection', 'safety audits', 'building surveying', 'construction safety', 'NEBOSH', 'IOSH', 'CDM', 'building safety manager'],
+        skills: ['Building safety expertise', 'Fire safety knowledge', 'Regulatory compliance', 'Risk assessment', 'Building inspection', 'Safety management', 'Technical analysis', 'Report writing', 'Stakeholder communication'],
+        qualifications: ['Building safety qualifications', 'Fire safety certifications', 'NEBOSH General Certificate', 'IOSH Managing Safely', 'Building control qualifications', 'Construction safety training', 'Professional memberships (IOSH, NEBOSH)'],
+        incompatibleFields: ['arts', 'design', 'retail', 'hospitality', 'marketing'],
+        transferableFrom: ['construction', 'engineering', 'emergency services', 'architecture', 'surveying', 'health and safety', 'fire service', 'rescue services']
+      },
+      safety: {
+        keywords: ['safety management', 'health and safety', 'risk assessment', 'safety compliance', 'safety protocols', 'incident investigation', 'safety training', 'hazard identification', 'safety audits', 'NEBOSH', 'IOSH', 'OSHA', 'safety legislation', 'safety culture', 'occupational health', 'workplace safety'],
+        skills: ['Safety management', 'Risk assessment', 'Regulatory compliance', 'Incident investigation', 'Safety training delivery', 'Hazard identification', 'Safety auditing', 'Communication', 'Leadership'],
+        qualifications: ['NEBOSH certifications', 'IOSH qualifications', 'OSHA training', 'Safety management qualifications', 'Risk management certifications', 'Professional safety memberships'],
+        incompatibleFields: ['arts', 'design', 'retail', 'marketing'],
+        transferableFrom: ['emergency services', 'construction', 'engineering', 'healthcare', 'manufacturing', 'fire service', 'rescue services', 'military', 'police']
+      },
+      manufacturing: {
+        keywords: ['manufacturing', 'production', 'quality control', 'lean manufacturing', 'six sigma', 'process improvement', 'supply chain', 'inventory management', 'production planning', 'equipment maintenance', 'safety protocols', 'ISO standards'],
+        skills: ['Process optimization', 'Quality control', 'Production planning', 'Safety management', 'Team leadership', 'Problem-solving', 'Technical analysis', 'Equipment operation'],
+        qualifications: ['Manufacturing engineering degree', 'Six Sigma certifications', 'Lean manufacturing training', 'Quality management certifications', 'Safety certifications', 'Technical skills training'],
+        incompatibleFields: ['arts', 'design', 'marketing'],
+        transferableFrom: ['engineering', 'construction', 'technology', 'logistics']
+      },
+      legal: {
+        keywords: ['legal', 'law', 'litigation', 'contract law', 'corporate law', 'legal research', 'case law', 'legal writing', 'court proceedings', 'legal compliance', 'regulatory law', 'legal analysis', 'dispute resolution'],
+        skills: ['Legal analysis', 'Research skills', 'Written communication', 'Critical thinking', 'Attention to detail', 'Client communication', 'Case management', 'Regulatory knowledge'],
+        qualifications: ['Law degree', 'Bar admission', 'Legal certifications', 'Continuing legal education', 'Specialized law training', 'Professional legal memberships'],
+        incompatibleFields: ['construction', 'manufacturing', 'arts'],
+        transferableFrom: ['finance', 'business', 'government', 'compliance']
+      },
+      hospitality: {
+        keywords: ['hospitality', 'customer service', 'hotel management', 'food service', 'guest relations', 'tourism', 'event management', 'restaurant management', 'hospitality operations', 'service excellence'],
+        skills: ['Customer service', 'Communication', 'Problem-solving', 'Team management', 'Cultural sensitivity', 'Multitasking', 'Service delivery', 'Conflict resolution'],
+        qualifications: ['Hospitality management degree', 'Customer service training', 'Food safety certifications', 'Hotel management qualifications', 'Tourism certifications'],
+        incompatibleFields: ['engineering', 'technology', 'healthcare'],
+        transferableFrom: ['retail', 'sales', 'customer service', 'event planning']
+      },
+      retail: {
+        keywords: ['retail', 'sales', 'customer service', 'merchandising', 'inventory management', 'retail operations', 'point of sale', 'visual merchandising', 'store management', 'retail sales'],
+        skills: ['Customer service', 'Sales techniques', 'Inventory management', 'Visual merchandising', 'Cash handling', 'Team coordination', 'Product knowledge', 'Communication'],
+        qualifications: ['Retail management training', 'Customer service certifications', 'Sales training', 'Merchandising qualifications', 'Retail operations training'],
+        incompatibleFields: ['engineering', 'healthcare', 'technology'],
+        transferableFrom: ['hospitality', 'customer service', 'sales', 'marketing']
       }
     };
 
@@ -144,6 +193,71 @@ class AIAnalysisService {
         specificSkills: ['Campaign management', 'Digital marketing', 'Analytics', 'Brand strategy', 'Team leadership'],
         seniority: ['Coordinator: 0-2 years', 'Manager: 2-5 years', 'Director: 5+ years'],
         criticalKeywords: ['marketing', 'campaigns', 'digital', 'brand', 'strategy']
+      },
+      'building-safety-manager': {
+        specificSkills: ['Building safety compliance', 'Fire risk assessment', 'Building regulations knowledge', 'Safety auditing', 'Incident investigation', 'Safety training delivery', 'Regulatory compliance'],
+        seniority: ['Assistant: 0-2 years', 'Manager: 2-7 years', 'Senior Manager: 7+ years'],
+        criticalKeywords: ['building safety', 'fire safety', 'building regulations', 'safety compliance', 'risk assessment', 'NEBOSH', 'IOSH']
+      },
+      'safety-manager': {
+        specificSkills: ['Safety management systems', 'Risk assessment', 'Incident investigation', 'Safety training', 'Regulatory compliance', 'Safety auditing', 'Hazard identification'],
+        seniority: ['Safety Officer: 0-3 years', 'Safety Manager: 3-7 years', 'Head of Safety: 7+ years'],
+        criticalKeywords: ['safety management', 'risk assessment', 'NEBOSH', 'IOSH', 'safety compliance', 'health and safety']
+      },
+      'construction-manager': {
+        specificSkills: ['Project management', 'Construction planning', 'Safety management', 'Quality control', 'Budget management', 'Team leadership', 'Regulatory compliance'],
+        seniority: ['Assistant Manager: 0-3 years', 'Manager: 3-7 years', 'Senior Manager: 7+ years'],
+        criticalKeywords: ['construction', 'project management', 'building', 'safety management', 'construction planning']
+      },
+      'fire-safety-engineer': {
+        specificSkills: ['Fire safety engineering', 'Fire risk assessment', 'Fire safety systems design', 'Building regulations', 'Fire modeling', 'Safety compliance'],
+        seniority: ['Graduate Engineer: 0-2 years', 'Engineer: 2-5 years', 'Senior Engineer: 5+ years'],
+        criticalKeywords: ['fire safety', 'fire engineering', 'fire risk assessment', 'building safety', 'fire systems']
+      },
+      'health-safety-advisor': {
+        specificSkills: ['Health and safety advice', 'Risk assessment', 'Policy development', 'Training delivery', 'Compliance monitoring', 'Incident investigation'],
+        seniority: ['Junior Advisor: 0-2 years', 'Advisor: 2-5 years', 'Senior Advisor: 5+ years'],
+        criticalKeywords: ['health and safety', 'safety advice', 'risk assessment', 'NEBOSH', 'IOSH', 'safety compliance']
+      },
+      'quality-manager': {
+        specificSkills: ['Quality management systems', 'Process improvement', 'Quality auditing', 'ISO standards', 'Quality control', 'Team management'],
+        seniority: ['Quality Officer: 0-3 years', 'Quality Manager: 3-7 years', 'Head of Quality: 7+ years'],
+        criticalKeywords: ['quality management', 'quality control', 'ISO', 'quality systems', 'process improvement']
+      },
+      'project-manager': {
+        specificSkills: ['Project planning', 'Resource management', 'Risk management', 'Stakeholder management', 'Budget control', 'Team leadership'],
+        seniority: ['Junior PM: 0-2 years', 'Project Manager: 2-5 years', 'Senior PM: 5+ years'],
+        criticalKeywords: ['project management', 'project planning', 'team leadership', 'budget management', 'stakeholder management']
+      },
+      'compliance-manager': {
+        specificSkills: ['Regulatory compliance', 'Policy development', 'Compliance monitoring', 'Risk assessment', 'Audit management', 'Training delivery'],
+        seniority: ['Compliance Officer: 0-3 years', 'Compliance Manager: 3-7 years', 'Head of Compliance: 7+ years'],
+        criticalKeywords: ['compliance', 'regulatory', 'policy', 'audit', 'risk management']
+      },
+      'risk-manager': {
+        specificSkills: ['Risk assessment', 'Risk management frameworks', 'Risk monitoring', 'Business continuity', 'Insurance management', 'Risk reporting'],
+        seniority: ['Risk Analyst: 0-3 years', 'Risk Manager: 3-7 years', 'Chief Risk Officer: 7+ years'],
+        criticalKeywords: ['risk management', 'risk assessment', 'business continuity', 'risk analysis']
+      },
+      'operations-manager': {
+        specificSkills: ['Operations management', 'Process optimization', 'Team management', 'Performance monitoring', 'Resource planning', 'Quality assurance'],
+        seniority: ['Supervisor: 0-3 years', 'Operations Manager: 3-7 years', 'Director of Operations: 7+ years'],
+        criticalKeywords: ['operations', 'process management', 'team management', 'performance optimization']
+      },
+      'engineer': {
+        specificSkills: ['Engineering design', 'Technical analysis', 'Problem-solving', 'CAD software', 'Project management', 'Quality assurance'],
+        seniority: ['Graduate Engineer: 0-2 years', 'Engineer: 2-5 years', 'Senior Engineer: 5+ years'],
+        criticalKeywords: ['engineering', 'design', 'technical', 'CAD', 'analysis']
+      },
+      'teacher': {
+        specificSkills: ['Curriculum development', 'Lesson planning', 'Student assessment', 'Classroom management', 'Educational technology', 'Student engagement'],
+        seniority: ['Newly Qualified Teacher: 0-2 years', 'Teacher: 2-5 years', 'Senior Teacher: 5+ years'],
+        criticalKeywords: ['teaching', 'education', 'curriculum', 'student', 'classroom']
+      },
+      'sales-manager': {
+        specificSkills: ['Sales strategy', 'Team management', 'Customer relationship management', 'Sales forecasting', 'Performance management', 'Market analysis'],
+        seniority: ['Sales Executive: 0-3 years', 'Sales Manager: 3-7 years', 'Sales Director: 7+ years'],
+        criticalKeywords: ['sales', 'customer', 'revenue', 'team management', 'business development']
       }
     };
 
@@ -154,39 +268,78 @@ class AIAnalysisService {
     };
   }
 
-  // Main analysis method
-  async analyzeCV(cvText, industry = null, role = null, isGeneric = false) {
-    if (!this.isOpenAIEnabled && !this.isAnthropicEnabled) {
-      logger.warn('No AI services available - using enhanced mock analysis');
-      return this.generateMockAnalysis(industry, role, isGeneric);
-    }
-
+  // Main analysis method - Universal approach
+  async analyzeCV(cvText, industry = null, role = null, isGeneric = false, jobDescription = null) {
     try {
-      const industryReqs = industry ? this.getIndustryRequirements(industry) : null;
-      const roleReqs = role ? this.getRoleRequirements(role, industry) : null;
-
-      // Pre-analysis: Quick field detection and compatibility check
-      const compatibilityCheck = this.performCompatibilityCheck(cvText, industry, industryReqs);
+      logger.info('Starting universal CV analysis', { industry, role, isGeneric });
       
-      // Run multiple AI analyses in parallel for cross-validation
-      const analyses = await this.runMultiModelAnalysis(cvText, industry, role, industryReqs, roleReqs, isGeneric);
+      // Step 1: Parse CV content universally
+      const cvData = this.parseCV(cvText);
       
-      // Combine results using consensus engine
-      const finalResult = this.createConsensusAnalysis(analyses, compatibilityCheck, industry, role);
+      // Step 2: Parse job requirements
+      let jobData;
+      if (jobDescription) {
+        // Parse actual job description
+        jobData = this.parseJobDescription(jobDescription);
+        industry = jobData.industry || industry || 'general';
+        role = jobData.role || role || 'general';
+      } else {
+        // Create job data from industry/role parameters
+        if (!industry) {
+          industry = cvData.currentField || this.detectCurrentField(cvText) || 'general';
+        }
+        if (!role) {
+          role = 'general';
+        }
+        
+        const industryReqs = this.getIndustryRequirements(industry);
+        const roleReqs = this.getRoleRequirements(role, industry);
+        
+        jobData = {
+          industry,
+          role,
+          requiredSkills: roleReqs.specificSkills || industryReqs.keywords.slice(0, 8),
+          qualifications: industryReqs.qualifications.slice(0, 5),
+          keywords: industryReqs.keywords.slice(0, 12),
+          experience: [3], // Default 3 years requirement
+          seniority: 'mid',
+          responsibilities: []
+        };
+      }
 
-      logger.info('Multi-model AI Analysis completed successfully', {
-        industry: industry || 'generic',
-        role: role || 'generic',
+      // Step 3: Perform universal algorithmic matching
+      const universalMatch = this.performUniversalMatch(cvData, jobData);
+      
+      // Step 4: Enhance with AI analysis if available
+      let aiResults = null;
+      if (this.isOpenAIEnabled || this.isAnthropicEnabled) {
+        try {
+          logger.info('Running AI enhancement analysis');
+          const industryReqs = this.getIndustryRequirements(industry);
+          const roleReqs = this.getRoleRequirements(role, industry);
+          aiResults = await this.runMultiModelAnalysis(cvText, industry, role, industryReqs, roleReqs, isGeneric);
+        } catch (error) {
+          logger.warn('AI enhancement failed, using algorithmic results only:', error);
+        }
+      }
+      
+      // Step 5: Combine algorithmic and AI results
+      const finalResult = this.combineUniversalAndAIResults(universalMatch, aiResults, cvData, jobData);
+      
+      logger.info('Universal CV analysis completed', {
+        industry,
+        role,
+        matchType: universalMatch.matchType,
+        careerStage: universalMatch.careerStage,
         score: finalResult.score,
-        confidence: finalResult.confidence,
-        modelsUsed: analyses.length
+        aiEnhanced: !!aiResults
       });
-
+      
       return finalResult;
 
     } catch (error) {
-      logger.error('Multi-model AI Analysis failed, falling back to enhanced mock:', error);
-      return this.generateMockAnalysis(industry, role, isGeneric);
+      logger.error('Universal CV analysis failed:', error);
+      return this.generateFallbackAnalysis(cvText, industry, role);
     }
   }
 
@@ -498,16 +651,17 @@ class AIAnalysisService {
 
   createAnalysisPrompt(cvText, industry, role, industryReqs, roleReqs, isGeneric) {
     if (isGeneric) {
-      return `Analyze this CV for general professional quality and provide specific feedback:
+      return `Analyze this CV using professional ATS scoring criteria:
 
 CV Content:
 ${cvText}
 
-Please provide a JSON response with the following structure:
+Perform comprehensive ATS analysis with the following structure:
 {
-  "score": [number 1-100],
-  "formatScore": [number 1-100],
-  "contentScore": [number 1-100],
+  "score": [number 1-100 based on ATS compliance],
+  "formatScore": [formatting and readability 1-100],
+  "contentScore": [content quality and relevance 1-100],
+  "atsCompliance": [ATS system compatibility 1-100],
   "strengths": [array of 3-5 specific strengths],
   "recommendations": [array of 3-5 specific improvements],
   "missingKeywords": [array of important keywords/skills missing],
@@ -516,71 +670,112 @@ Please provide a JSON response with the following structure:
 }
 
 Focus on:
-- Professional presentation and formatting
-- Content clarity and relevance
-- Skills and experience presentation
-- Achievement quantification
-- Professional development areas`;
+- ATS keyword optimization
+- Quantified achievements
+- Skills-experience alignment
+- Professional formatting
+- Industry-standard terminology`;
     }
 
-    return `CRITICAL: You are evaluating how well this CV matches a specific ${role} role in the ${industry} industry. Score based on RELEVANCE and FIT, not general CV quality.
+    return `ADVANCED CV-JOB MATCHING ANALYSIS
 
-CV Content:
+You are an expert ATS system and career matching specialist. Perform a comprehensive analysis comparing this CV against the specific role requirements.
+
+CV CONTENT:
 ${cvText}
 
-Target Role: ${role} in ${industry}
+TARGET ROLE: ${role} in ${industry}
 
-REQUIRED for this role:
-- Essential Skills: ${roleReqs.specificSkills.join(', ')}
-- Critical Keywords: ${roleReqs.criticalKeywords.join(', ')}
-- Industry Keywords: ${industryReqs.keywords.join(', ')}
-- Typical Qualifications: ${industryReqs.qualifications.join(', ')}
+STEP 1 - JOB REQUIREMENT EXTRACTION:
+Extract and analyze these critical elements:
+- Essential technical skills: ${roleReqs.specificSkills.join(', ')}
+- Required keywords: ${roleReqs.criticalKeywords.join(', ')}
+- Industry-specific terms: ${industryReqs.keywords.slice(0, 10).join(', ')}
+- Typical qualifications: ${industryReqs.qualifications.slice(0, 5).join(', ')}
 
-COMPATIBILITY ANALYSIS:
-- Fields INCOMPATIBLE with ${industry}: ${industryReqs.incompatibleFields.join(', ')}
-- Fields that TRANSFER WELL to ${industry}: ${industryReqs.transferableFrom.join(', ')}
+STEP 2 - CV CONTENT ANALYSIS:
+Analyze the CV for:
+1. Relevant work experience and achievements
+2. Technical skills and certifications
+3. Educational background alignment
+4. Quantified accomplishments
+5. Industry-specific terminology usage
+6. Leadership and management experience
+7. Problem-solving examples
+8. Career progression evidence
 
-SCORING INSTRUCTIONS (BE REALISTIC):
-- Score 85-100: CV shows strong direct experience and skills for this specific role
-- Score 70-84: CV shows relevant experience with some gaps to fill
-- Score 55-69: CV shows transferable skills but needs significant development
-- Score 35-54: CV shows limited relevance, major reskilling needed
-- Score 15-34: CV from incompatible field, extensive career change required
-- Score 1-14: CV completely unsuitable for this role
+STEP 3 - COMPATIBILITY ASSESSMENT:
+- Fields highly compatible: ${industryReqs.transferableFrom.join(', ')}
+- Fields with challenges: ${industryReqs.incompatibleFields.join(', ')}
+- Career transition feasibility
+- Skill transferability analysis
+- Experience relevance evaluation
 
-AUTOMATIC SCORE ADJUSTMENTS:
-- If CV is from incompatible field (${industryReqs.incompatibleFields.join(', ')}): MAX score is 35
-- If CV shows no relevant keywords: MAX score is 25
-- If CV is from transferable field (${industryReqs.transferableFrom.join(', ')}): MIN score is 45
+STEP 4 - ATS SCORING CRITERIA:
+Apply professional ATS scoring (1-100):
+- 90-100: Perfect match, immediate hire candidate
+- 80-89: Strong match, minor gaps only
+- 70-79: Good match, some development needed
+- 60-69: Moderate match, significant gaps to address
+- 50-59: Weak match, major reskilling required
+- 40-49: Poor match, extensive career change needed
+- 1-39: No match, completely different field
 
-REALISTIC EXAMPLES:
-- Fire/Rescue → Healthcare Nurse: 75-85 (emergency medical skills transfer)
-- Fire/Rescue → Interior Designer: 15-25 (no relevant skills)
-- Fire/Rescue → Safety Manager: 70-80 (safety expertise transfers)
-- Teacher → Software Developer: 20-30 (completely different skillset)
-- Teacher → Corporate Trainer: 80-90 (teaching skills transfer)
-- Accountant → Graphic Designer: 10-20 (no creative background)
+STEP 5 - REALISTIC SCORING GUIDELINES:
+- Emergency services → Building safety: 75-85 (fire safety expertise transfers)
+- Teaching → Software development: 25-35 (no technical background)
+- Finance → Marketing: 45-55 (some analytical skills transfer)
+- Engineering → Construction: 80-90 (highly relevant technical skills)
+- Retail → Healthcare: 35-45 (customer service transfers, no medical knowledge)
 
-Analyze this CV and provide JSON response:
+CRITICAL INSTRUCTIONS:
+1. BE BRUTALLY HONEST about fit - users need realistic expectations
+2. Score based on ACTUAL RELEVANCE, not generic CV quality
+3. Identify SPECIFIC missing skills/experience for this exact role
+4. Provide ACTIONABLE improvement recommendations
+5. Consider transferable skills but don't overscore unrelated experience
+
+Provide comprehensive JSON analysis:
 {
-  "score": [HONEST RELEVANCE score 1-100 for ${role} in ${industry}],
-  "formatScore": [CV presentation quality 1-100],
-  "contentScore": [Content clarity and structure 1-100],
-  "jobFitScore": [Specific fit for ${role} role 1-100],
-  "strengths": [3-5 strengths SPECIFIC to ${role} requirements, be honest if few exist],
-  "recommendations": [3-5 specific actions to become competitive for ${role}],
-  "missingKeywords": [critical ${industry}/${role} keywords absent from CV],
-  "improvements": [4 detailed steps to transition into ${role}],
-  "experienceLevel": "entry|junior|mid|senior for ${role} (not their current field)",
-  "keySkillGaps": [critical skills missing for ${role} success],
-  "competitiveAdvantages": [unique strengths that could help in ${role}],
-  "relevanceAnalysis": "Honest assessment of how well this background fits ${role} in ${industry}",
-  "careerTransitionAdvice": "Specific advice for moving from their current field to ${role}",
-  "timeToCompetitive": "Realistic timeframe to become competitive for ${role} (e.g., '6 months', '2-3 years', '5+ years')",
-  "fieldCompatibility": "high|medium|low compatibility between current background and ${role}"
+  "score": [HONEST ATS-style score 1-100 for this specific role],
+  "formatScore": [CV formatting and ATS compatibility 1-100],
+  "contentScore": [Content quality and structure 1-100],
+  "jobFitScore": [Specific relevance to ${role} role 1-100],
+  "atsCompliance": [Keyword optimization and ATS readability 1-100],
+  "experienceRelevance": [How relevant is their experience 1-100],
+  "skillsAlignment": [How well skills match requirements 1-100],
+  "qualificationMatch": [Education/certification alignment 1-100],
+  
+  "strengths": [3-5 genuine strengths for THIS specific role],
+  "recommendations": [3-5 specific actions to improve candidacy for THIS role],
+  "missingKeywords": [critical keywords absent from CV that THIS role requires],
+  "missingSkills": [essential skills not demonstrated for THIS role],
+  "improvements": [4 detailed, actionable improvement steps for THIS role],
+  
+  "experienceLevel": "entry|junior|mid|senior for THIS specific role",
+  "careerStage": "career-changer|early-career|experienced|senior-professional",
+  "keySkillGaps": [most critical skills missing for success in THIS role],
+  "competitiveAdvantages": [unique strengths that could help in THIS role],
+  
+  "relevanceAnalysis": "Detailed assessment of background fit for ${role}",
+  "transferableSkills": [skills from their background that apply to THIS role],
+  "careerTransitionAdvice": "Specific advice for transitioning to THIS role",
+  "timeToCompetitive": "Realistic timeframe to become competitive (e.g., '3-6 months', '1-2 years', '3+ years')",
+  "fieldCompatibility": "high|medium|low compatibility with THIS specific role",
+  
+  "atsOptimization": {
+    "keywordDensity": "low|medium|high for THIS role",
+    "missingAtsKeywords": [keywords needed for ATS systems in THIS field],
+    "formatIssues": [specific formatting problems for ATS systems],
+    "optimizationTips": [specific advice for ATS optimization in THIS field]
+  },
+  
+  "developmentPriorities": [top 3 areas to focus development for THIS role],
+  "certificationRecommendations": [specific certifications that would help for THIS role],
+  "nextSteps": [immediate actionable steps to improve candidacy]
 }
 
-BE BRUTALLY HONEST about fit. A CV from an incompatible field should score 15-35 maximum. Users need realistic expectations to make informed career decisions.`;
+Remember: Score realistically based on actual job requirements. A career changer should typically score 30-60 until they develop relevant skills.`;
   }
 
   parseAIResponse(aiResponse, industry, role) {
@@ -599,17 +794,38 @@ BE BRUTALLY HONEST about fit. A CV from an incompatible field should score 15-35
         formatScore: this.validateScore(parsed.formatScore),
         contentScore: this.validateScore(parsed.contentScore),
         jobFitScore: this.validateScore(parsed.jobFitScore || parsed.score),
+        atsCompliance: this.validateScore(parsed.atsCompliance || parsed.formatScore),
+        experienceRelevance: this.validateScore(parsed.experienceRelevance || parsed.score),
+        skillsAlignment: this.validateScore(parsed.skillsAlignment || parsed.score),
+        qualificationMatch: this.validateScore(parsed.qualificationMatch || parsed.contentScore),
+        
         strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 5) : this.getDefaultStrengths(industry, role),
         recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 5) : this.getDefaultRecommendations(industry, role),
         missingKeywords: Array.isArray(parsed.missingKeywords) ? parsed.missingKeywords.slice(0, 8) : this.getDefaultMissingKeywords(industry, role),
+        missingSkills: Array.isArray(parsed.missingSkills) ? parsed.missingSkills.slice(0, 6) : this.getDefaultSkillGaps(industry),
         improvements: Array.isArray(parsed.improvements) ? parsed.improvements.slice(0, 4) : this.getDefaultImprovements(industry, role),
-        keySkillGaps: Array.isArray(parsed.keySkillGaps) ? parsed.keySkillGaps.slice(0, 6) : this.getDefaultSkillGaps(industry),
+        
         experienceLevel: parsed.experienceLevel || 'entry',
+        careerStage: parsed.careerStage || 'early-career',
+        keySkillGaps: Array.isArray(parsed.keySkillGaps) ? parsed.keySkillGaps.slice(0, 6) : this.getDefaultSkillGaps(industry),
         competitiveAdvantages: Array.isArray(parsed.competitiveAdvantages) ? parsed.competitiveAdvantages.slice(0, 4) : [],
+        
         relevanceAnalysis: parsed.relevanceAnalysis || parsed.analysis || 'Analysis completed',
+        transferableSkills: Array.isArray(parsed.transferableSkills) ? parsed.transferableSkills.slice(0, 5) : [],
         careerTransitionAdvice: parsed.careerTransitionAdvice || 'Consider developing relevant skills for this field',
         timeToCompetitive: parsed.timeToCompetitive || 'Varies based on current skills',
-        fieldCompatibility: parsed.fieldCompatibility || 'medium'
+        fieldCompatibility: parsed.fieldCompatibility || 'medium',
+        
+        atsOptimization: {
+          keywordDensity: parsed.atsOptimization?.keywordDensity || 'medium',
+          missingAtsKeywords: Array.isArray(parsed.atsOptimization?.missingAtsKeywords) ? parsed.atsOptimization.missingAtsKeywords.slice(0, 6) : [],
+          formatIssues: Array.isArray(parsed.atsOptimization?.formatIssues) ? parsed.atsOptimization.formatIssues.slice(0, 4) : [],
+          optimizationTips: Array.isArray(parsed.atsOptimization?.optimizationTips) ? parsed.atsOptimization.optimizationTips.slice(0, 4) : []
+        },
+        
+        developmentPriorities: Array.isArray(parsed.developmentPriorities) ? parsed.developmentPriorities.slice(0, 3) : [],
+        certificationRecommendations: Array.isArray(parsed.certificationRecommendations) ? parsed.certificationRecommendations.slice(0, 4) : [],
+        nextSteps: Array.isArray(parsed.nextSteps) ? parsed.nextSteps.slice(0, 4) : []
       };
     } catch (error) {
       logger.error('Failed to parse AI response:', error);
@@ -648,12 +864,74 @@ BE BRUTALLY HONEST about fit. A CV from an incompatible field should score 15-35
     if (industry === 'finance') {
       return ['Quantify financial achievements', 'Include financial software proficiency', 'Highlight analytical project results'];
     }
+    if (industry === 'building_safety' || industry === 'construction' || industry === 'safety') {
+      return ['Highlight NEBOSH/IOSH certifications', 'Include specific safety management achievements', 'Add risk assessment experience', 'Quantify safety improvements and compliance results'];
+    }
+    if (industry === 'engineering') {
+      return ['Include CAD software proficiency', 'Highlight technical project results', 'Add engineering certifications and licenses'];
+    }
+    if (industry === 'education') {
+      return ['Include curriculum development experience', 'Highlight student achievement outcomes', 'Add educational technology skills'];
+    }
+    if (industry === 'marketing') {
+      return ['Include digital marketing metrics and results', 'Highlight campaign performance data', 'Add marketing software proficiency'];
+    }
+    if (industry === 'sales') {
+      return ['Quantify sales achievements and targets met', 'Include CRM software experience', 'Highlight customer relationship successes'];
+    }
+    if (industry === 'manufacturing') {
+      return ['Include Lean/Six Sigma certifications', 'Highlight process improvement results', 'Add quality control achievements'];
+    }
+    if (industry === 'legal') {
+      return ['Include bar admissions and legal certifications', 'Highlight case management experience', 'Add specialized legal area expertise'];
+    }
+    if (industry === 'hospitality') {
+      return ['Include customer service metrics', 'Highlight guest satisfaction scores', 'Add hospitality management experience'];
+    }
+    if (industry === 'retail') {
+      return ['Include sales performance metrics', 'Highlight inventory management experience', 'Add customer service achievements'];
+    }
     return ['Add more quantifiable achievements', 'Include relevant certifications', 'Strengthen skills section'];
   }
 
   getDefaultMissingKeywords(industry, role) {
-    const industryReqs = this.getIndustryRequirements(industry);
-    return industryReqs.keywords.slice(0, 6);
+    if (industry === 'building_safety' || industry === 'construction' || industry === 'safety') {
+      return ['NEBOSH', 'IOSH', 'risk assessment', 'building safety', 'safety management', 'compliance', 'incident investigation', 'safety audits'];
+    }
+    if (industry === 'technology') {
+      return ['programming', 'software development', 'cloud computing', 'agile', 'devops'];
+    }
+    if (industry === 'healthcare') {
+      return ['patient care', 'clinical experience', 'medical terminology', 'healthcare protocols'];
+    }
+    if (industry === 'finance') {
+      return ['financial analysis', 'Excel', 'financial modeling', 'risk assessment'];
+    }
+    if (industry === 'engineering') {
+      return ['CAD', 'technical design', 'engineering analysis', 'project management'];
+    }
+    if (industry === 'education') {
+      return ['curriculum development', 'lesson planning', 'student assessment', 'classroom management'];
+    }
+    if (industry === 'marketing') {
+      return ['digital marketing', 'SEO', 'analytics', 'campaign management'];
+    }
+    if (industry === 'sales') {
+      return ['CRM', 'sales targets', 'customer relationships', 'lead generation'];
+    }
+    if (industry === 'manufacturing') {
+      return ['quality control', 'lean manufacturing', 'process improvement', 'ISO standards'];
+    }
+    if (industry === 'legal') {
+      return ['legal research', 'case law', 'litigation', 'regulatory compliance'];
+    }
+    if (industry === 'hospitality') {
+      return ['customer service', 'guest relations', 'hospitality operations', 'service excellence'];
+    }
+    if (industry === 'retail') {
+      return ['retail operations', 'merchandising', 'inventory management', 'sales techniques'];
+    }
+    return ['leadership', 'project management', 'communication', 'problem-solving'];
   }
 
   getDefaultSkillGaps(industry) {
@@ -760,6 +1038,1059 @@ BE BRUTALLY HONEST about fit. A CV from an incompatible field should score 15-35
     } else {
       return `Consider extensive retraining through formal education, bootcamps, or career change programs. Start with entry-level positions to gain ${industry} experience.`;
     }
+  }
+
+  // Advanced job description parsing
+  parseJobDescription(jobDescription) {
+    if (!jobDescription || typeof jobDescription !== 'string') {
+      return {
+        requiredSkills: [],
+        preferredSkills: [],
+        qualifications: [],
+        experience: [],
+        keywords: [],
+        industry: null,
+        role: null,
+        seniority: 'mid',
+        responsibilities: []
+      };
+    }
+
+    const jd = jobDescription.toLowerCase();
+    
+    // Extract skills using pattern matching
+    const skillPatterns = [
+      /(?:required|must have|essential|mandatory)[^.]*?skills?[^.]*?(?:\d+\+?\s*years?|experience)/gi,
+      /(?:proficiency|experience|skilled?)\s+(?:in|with|using)\s+([^.,\n]+)/gi,
+      /(?:knowledge of|experience with|familiar with)\s+([^.,\n]+)/gi,
+      /(?:bachelor|master|degree|certification|qualified?)\s+(?:in|with)?\s*([^.,\n]+)/gi
+    ];
+
+    const extractedSkills = new Set();
+    const extractedQualifications = new Set();
+    
+    skillPatterns.forEach(pattern => {
+      const matches = [...jd.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[1]) {
+          const items = match[1].split(/[,&+/and]/).map(item => item.trim()).filter(item => item.length > 2);
+          items.forEach(item => extractedSkills.add(item));
+        }
+      });
+    });
+
+    // Extract experience requirements
+    const experienceMatches = jd.match(/(\d+)\+?\s*(?:to\s*\d+)?\s*years?\s*(?:of\s*)?(?:experience|exp)/gi) || [];
+    const experienceYears = experienceMatches.map(match => {
+      const numbers = match.match(/\d+/g);
+      return numbers ? parseInt(numbers[0]) : 0;
+    });
+
+    // Determine seniority level
+    const maxExperience = Math.max(...experienceYears, 0);
+    let seniority = 'entry';
+    if (maxExperience >= 7) seniority = 'senior';
+    else if (maxExperience >= 3) seniority = 'mid';
+    else if (maxExperience >= 1) seniority = 'junior';
+
+    // Detect industry and role
+    const industry = this.detectIndustryFromText(jd);
+    const role = this.detectRoleFromText(jd);
+
+    // Extract responsibilities
+    const responsibilityPatterns = [
+      /(?:responsibilities|duties|tasks|you will|the role involves)[^.]*?([^.]+)/gi,
+      /(?:•|-)([^•\-\n]+)/gi
+    ];
+
+    const responsibilities = new Set();
+    responsibilityPatterns.forEach(pattern => {
+      const matches = [...jd.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[1] && match[1].trim().length > 10) {
+          responsibilities.add(match[1].trim());
+        }
+      });
+    });
+
+    return {
+      requiredSkills: [...extractedSkills].slice(0, 10),
+      preferredSkills: [],
+      qualifications: [...extractedQualifications].slice(0, 8),
+      experience: experienceYears,
+      keywords: this.extractKeywordsFromText(jd),
+      industry,
+      role,
+      seniority,
+      responsibilities: [...responsibilities].slice(0, 6)
+    };
+  }
+
+  detectIndustryFromText(text) {
+    const industryKeywords = {
+      'technology': ['software', 'programming', 'developer', 'engineer', 'tech', 'digital', 'coding', 'it'],
+      'healthcare': ['medical', 'clinical', 'patient', 'healthcare', 'hospital', 'nursing', 'doctor'],
+      'finance': ['financial', 'banking', 'investment', 'accounting', 'finance', 'audit'],
+      'building_safety': ['building safety', 'fire safety', 'building regulations', 'safety compliance', 'construction safety'],
+      'construction': ['construction', 'building', 'contractor', 'site', 'trades'],
+      'education': ['education', 'teaching', 'school', 'university', 'learning', 'academic'],
+      'marketing': ['marketing', 'advertising', 'brand', 'campaign', 'digital marketing'],
+      'engineering': ['engineering', 'mechanical', 'electrical', 'civil', 'aerospace']
+    };
+
+    for (const [industry, keywords] of Object.entries(industryKeywords)) {
+      if (keywords.some(keyword => text.includes(keyword))) {
+        return industry;
+      }
+    }
+    return 'general';
+  }
+
+  detectRoleFromText(text) {
+    const roleKeywords = {
+      'software-developer': ['software developer', 'programmer', 'coding', 'software engineer'],
+      'data-scientist': ['data scientist', 'data analyst', 'machine learning', 'analytics'],
+      'financial-analyst': ['financial analyst', 'finance analyst', 'investment analyst'],
+      'building-safety-manager': ['building safety manager', 'safety manager', 'fire safety'],
+      'project-manager': ['project manager', 'program manager', 'project lead'],
+      'marketing-manager': ['marketing manager', 'brand manager', 'marketing director']
+    };
+
+    for (const [role, keywords] of Object.entries(roleKeywords)) {
+      if (keywords.some(keyword => text.includes(keyword))) {
+        return role;
+      }
+    }
+    return 'general';
+  }
+
+  extractKeywordsFromText(text) {
+    // Remove common words and extract meaningful keywords
+    const commonWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'a', 'an', 'is', 'are', 'will', 'be', 'have', 'has', 'had', 'do', 'does', 'did'];
+    const words = text.match(/\b\w{3,}\b/g) || [];
+    
+    const keywordFreq = {};
+    words.forEach(word => {
+      const lowerWord = word.toLowerCase();
+      if (!commonWords.includes(lowerWord)) {
+        keywordFreq[lowerWord] = (keywordFreq[lowerWord] || 0) + 1;
+      }
+    });
+
+    return Object.keys(keywordFreq)
+      .sort((a, b) => keywordFreq[b] - keywordFreq[a])
+      .slice(0, 15);
+  }
+
+  // Advanced CV parsing and extraction
+  parseCV(cvText) {
+    if (!cvText || typeof cvText !== 'string') {
+      return {
+        skills: [],
+        experience: [],
+        education: [],
+        achievements: [],
+        keywords: [],
+        currentField: null,
+        experienceYears: 0,
+        qualifications: []
+      };
+    }
+
+    const cv = cvText.toLowerCase();
+    
+    // Extract skills section
+    const skillsSection = this.extractSection(cv, ['skills', 'technical skills', 'key skills', 'competencies']);
+    const extractedSkills = this.extractSkillsFromText(skillsSection || cv);
+    
+    // Extract experience section and calculate years
+    const experienceSection = this.extractSection(cv, ['experience', 'work history', 'employment', 'career']);
+    const experienceYears = this.calculateExperienceYears(experienceSection || cv);
+    const workExperience = this.extractWorkExperience(experienceSection || cv);
+    
+    // Extract education
+    const educationSection = this.extractSection(cv, ['education', 'qualifications', 'academic']);
+    const education = this.extractEducation(educationSection || cv);
+    
+    // Extract achievements
+    const achievements = this.extractAchievements(cv);
+    
+    // Detect current field
+    const currentField = this.detectCurrentField(cv);
+    
+    // Extract keywords
+    const keywords = this.extractKeywordsFromText(cv);
+    
+    return {
+      skills: extractedSkills.slice(0, 15),
+      experience: workExperience.slice(0, 5),
+      education: education.slice(0, 4),
+      achievements: achievements.slice(0, 8),
+      keywords: keywords.slice(0, 20),
+      currentField,
+      experienceYears,
+      qualifications: this.extractQualifications(cv)
+    };
+  }
+
+  extractSection(text, sectionTitles) {
+    for (const title of sectionTitles) {
+      const regex = new RegExp(`(${title})[^\\n]*\\n([\\s\\S]*?)(?=\\n\\s*[A-Z][^\\n]*:|$)`, 'i');
+      const match = text.match(regex);
+      if (match && match[2]) {
+        return match[2].trim();
+      }
+    }
+    return null;
+  }
+
+  extractSkillsFromText(text) {
+    const skillPatterns = [
+      /(?:proficient in|experienced with|skilled in|knowledge of|expertise in)\s+([^.,\n]+)/gi,
+      /(?:programming languages?|technologies?|tools?|software)[:\-\s]*([^.\n]+)/gi,
+      /(?:•|-)([^•\-\n]+)/gi
+    ];
+
+    const skills = new Set();
+    
+    skillPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[1]) {
+          const skillList = match[1].split(/[,&+/and]/).map(skill => skill.trim()).filter(skill => skill.length > 2 && skill.length < 30);
+          skillList.forEach(skill => skills.add(skill));
+        }
+      });
+    });
+
+    // Common technical skills to look for
+    const technicalSkills = ['python', 'java', 'javascript', 'react', 'node.js', 'sql', 'aws', 'docker', 'kubernetes', 'git', 'agile', 'scrum', 'excel', 'powerpoint', 'word', 'photoshop', 'illustrator', 'figma', 'sketch'];
+    technicalSkills.forEach(skill => {
+      if (text.includes(skill)) {
+        skills.add(skill);
+      }
+    });
+
+    return [...skills];
+  }
+
+  calculateExperienceYears(text) {
+    // Look for date patterns and calculate total experience
+    const datePatterns = [
+      /(\d{4})\s*[-–]\s*(\d{4}|present|current)/gi,
+      /(\d{1,2}\/\d{4})\s*[-–]\s*(\d{1,2}\/\d{4}|present|current)/gi
+    ];
+
+    let totalYears = 0;
+    const currentYear = new Date().getFullYear();
+
+    datePatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        const startYear = parseInt(match[1].substring(match[1].length - 4));
+        const endYear = match[2].toLowerCase().includes('present') || match[2].toLowerCase().includes('current') ? currentYear : parseInt(match[2].substring(match[2].length - 4));
+        
+        if (startYear && endYear && startYear <= endYear) {
+          totalYears += (endYear - startYear);
+        }
+      });
+    });
+
+    return Math.max(totalYears, 0);
+  }
+
+  extractWorkExperience(text) {
+    const experiencePattern = /([^.\n]+(?:manager|director|analyst|developer|engineer|specialist|coordinator|assistant|lead|senior|junior)[^.\n]*)\s*(?:at|@)\s*([^.\n]+)/gi;
+    const matches = [...text.matchAll(experiencePattern)];
+    
+    return matches.map(match => ({
+      title: match[1].trim(),
+      company: match[2].trim()
+    }));
+  }
+
+  extractEducation(text) {
+    const educationPattern = /(bachelor|master|phd|diploma|certificate|degree)[^.\n]*(?:in|of)\s*([^.\n]+)/gi;
+    const matches = [...text.matchAll(educationPattern)];
+    
+    return matches.map(match => ({
+      level: match[1].trim(),
+      field: match[2].trim()
+    }));
+  }
+
+  extractAchievements(text) {
+    const achievementPatterns = [
+      /(?:achieved|accomplished|delivered|improved|increased|decreased|managed|led|created|developed|implemented)\s+([^.\n]+)/gi,
+      /(?:\d+%|\$\d+|£\d+|€\d+)\s*(?:increase|improvement|reduction|savings?|revenue|profit)/gi
+    ];
+
+    const achievements = new Set();
+    
+    achievementPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[1] && match[1].length > 10 && match[1].length < 100) {
+          achievements.add(match[1].trim());
+        } else if (match[0] && match[0].length > 5 && match[0].length < 50) {
+          achievements.add(match[0].trim());
+        }
+      });
+    });
+
+    return [...achievements];
+  }
+
+  extractQualifications(text) {
+    const qualificationPatterns = [
+      /(nebosh|iosh|osha|cpa|cfa|pmp|cissp|aws certified|microsoft certified|google certified|cisco certified)[^.\n]*/gi,
+      /(certified|certification|qualified|license|licensed)\s+([^.\n]+)/gi
+    ];
+
+    const qualifications = new Set();
+    
+    qualificationPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[0] && match[0].length > 3 && match[0].length < 50) {
+          qualifications.add(match[0].trim());
+        }
+      });
+    });
+
+    return [...qualifications];
+  }
+
+  // Universal CV-Job Matching Algorithm
+  performUniversalMatch(cvData, jobData) {
+    const matchResult = {
+      overallCompatibility: 0,
+      experienceMatch: 0,
+      skillsMatch: 0,
+      educationMatch: 0,
+      transferabilityScore: 0,
+      careerStage: 'entry',
+      matchType: 'direct', // direct, transferable, career-change, entry-level
+      strengthAreas: [],
+      gapAreas: [],
+      developmentPath: []
+    };
+
+    // Determine match type and career stage
+    matchResult.matchType = this.determineMatchType(cvData, jobData);
+    matchResult.careerStage = this.determineCareerStage(cvData, jobData);
+
+    // Calculate individual match scores
+    matchResult.experienceMatch = this.calculateExperienceMatch(cvData, jobData);
+    matchResult.skillsMatch = this.calculateSkillsMatch(cvData, jobData);
+    matchResult.educationMatch = this.calculateEducationMatch(cvData, jobData);
+    matchResult.transferabilityScore = this.calculateTransferabilityScore(cvData, jobData);
+
+    // Calculate overall compatibility based on match type
+    matchResult.overallCompatibility = this.calculateOverallCompatibility(matchResult);
+
+    // Identify strengths and gaps
+    matchResult.strengthAreas = this.identifyStrengthAreas(cvData, jobData);
+    matchResult.gapAreas = this.identifyGapAreas(cvData, jobData);
+    matchResult.developmentPath = this.createDevelopmentPath(matchResult.gapAreas, matchResult.matchType);
+
+    return matchResult;
+  }
+
+  determineMatchType(cvData, jobData) {
+    const cvIndustry = cvData.currentField || this.detectCurrentField(cvData.keywords.join(' '));
+    const jobIndustry = jobData.industry;
+
+    // Direct match - same industry/field
+    if (cvIndustry === jobIndustry) {
+      return 'direct';
+    }
+
+    // Check transferability
+    const industryReqs = this.getIndustryRequirements(jobIndustry);
+    if (industryReqs.transferableFrom.includes(cvIndustry)) {
+      return 'transferable';
+    }
+
+    // Check if entry-level (limited/no experience)
+    if (cvData.experienceYears <= 1 || cvData.experience.length === 0) {
+      return 'entry-level';
+    }
+
+    // Career change
+    return 'career-change';
+  }
+
+  determineCareerStage(cvData, jobData) {
+    const experienceYears = cvData.experienceYears;
+    const hasRelevantEducation = cvData.education.length > 0;
+    const hasLeadershipExp = cvData.keywords.some(keyword => 
+      ['manager', 'lead', 'director', 'supervisor', 'head'].some(title => 
+        keyword.toLowerCase().includes(title)
+      )
+    );
+
+    if (experienceYears === 0 && hasRelevantEducation) return 'graduate';
+    if (experienceYears <= 2) return 'entry';
+    if (experienceYears <= 5) return 'junior';
+    if (experienceYears <= 10 || hasLeadershipExp) return 'mid';
+    return 'senior';
+  }
+
+  calculateExperienceMatch(cvData, jobData) {
+    if (cvData.experienceYears === 0) {
+      // For new graduates/entry-level
+      return jobData.seniority === 'entry' ? 85 : 45;
+    }
+
+    const requiredYears = this.extractRequiredExperience(jobData);
+    if (requiredYears === 0) return 80; // No specific requirement
+
+    const ratio = cvData.experienceYears / requiredYears;
+    if (ratio >= 1.2) return 95; // Over-qualified
+    if (ratio >= 1.0) return 90; // Perfect match
+    if (ratio >= 0.8) return 75; // Close match
+    if (ratio >= 0.5) return 60; // Moderate gap
+    return 35; // Significant gap
+  }
+
+  calculateSkillsMatch(cvData, jobData) {
+    const cvSkills = cvData.skills.map(skill => skill.toLowerCase());
+    const jobRequiredSkills = jobData.requiredSkills.map(skill => skill.toLowerCase());
+    const jobKeywords = jobData.keywords.map(keyword => keyword.toLowerCase());
+
+    if (jobRequiredSkills.length === 0 && jobKeywords.length === 0) {
+      return 70; // No specific requirements
+    }
+
+    let matchedSkills = 0;
+    let totalRequiredSkills = jobRequiredSkills.length + jobKeywords.length;
+
+    // Check direct skill matches
+    jobRequiredSkills.forEach(requiredSkill => {
+      if (cvSkills.some(cvSkill => 
+        cvSkill.includes(requiredSkill) || requiredSkill.includes(cvSkill)
+      )) {
+        matchedSkills++;
+      }
+    });
+
+    // Check keyword matches
+    jobKeywords.forEach(keyword => {
+      if (cvSkills.some(cvSkill => 
+        cvSkill.includes(keyword) || keyword.includes(cvSkill)
+      )) {
+        matchedSkills++;
+      }
+    });
+
+    const matchPercentage = (matchedSkills / totalRequiredSkills) * 100;
+    return Math.min(matchPercentage, 100);
+  }
+
+  calculateEducationMatch(cvData, jobData) {
+    if (cvData.education.length === 0) {
+      // No education listed
+      return jobData.qualifications.length === 0 ? 70 : 40;
+    }
+
+    const cvEducationLevels = cvData.education.map(edu => edu.level?.toLowerCase() || '');
+    const cvEducationFields = cvData.education.map(edu => edu.field?.toLowerCase() || '');
+    
+    let educationScore = 50; // Base score for having education
+
+    // Check degree level requirements
+    const requiresBachelor = jobData.qualifications.some(qual => 
+      qual.toLowerCase().includes('bachelor') || qual.toLowerCase().includes('degree')
+    );
+    const requiresMaster = jobData.qualifications.some(qual => 
+      qual.toLowerCase().includes('master') || qual.toLowerCase().includes('msc') || qual.toLowerCase().includes('mba')
+    );
+
+    const hasBachelor = cvEducationLevels.some(level => 
+      level.includes('bachelor') || level.includes('degree')
+    );
+    const hasMaster = cvEducationLevels.some(level => 
+      level.includes('master') || level.includes('msc') || level.includes('mba')
+    );
+
+    if (requiresMaster && hasMaster) educationScore = 95;
+    else if (requiresMaster && hasBachelor) educationScore = 75;
+    else if (requiresBachelor && hasBachelor) educationScore = 90;
+    else if (requiresBachelor && !hasBachelor) educationScore = 45;
+
+    // Check field relevance
+    const jobIndustryKeywords = this.getIndustryRequirements(jobData.industry).keywords;
+    const fieldRelevant = cvEducationFields.some(field => 
+      jobIndustryKeywords.some(keyword => 
+        field.includes(keyword.toLowerCase()) || keyword.toLowerCase().includes(field)
+      )
+    );
+
+    if (fieldRelevant) educationScore += 15;
+
+    return Math.min(educationScore, 100);
+  }
+
+  calculateTransferabilityScore(cvData, jobData) {
+    const cvIndustry = cvData.currentField;
+    const jobIndustry = jobData.industry;
+
+    if (cvIndustry === jobIndustry) return 100; // Same field
+
+    const industryReqs = this.getIndustryRequirements(jobIndustry);
+    
+    // High transferability
+    if (industryReqs.transferableFrom.includes(cvIndustry)) return 80;
+    
+    // Check for transferable skills
+    const transferableSkills = ['leadership', 'management', 'communication', 'problem-solving', 'teamwork', 'project management'];
+    const hasTransferableSkills = cvData.skills.some(skill => 
+      transferableSkills.some(transferable => 
+        skill.toLowerCase().includes(transferable)
+      )
+    );
+
+    if (hasTransferableSkills) return 60;
+
+    // Low transferability
+    if (industryReqs.incompatibleFields.includes(cvIndustry)) return 25;
+
+    return 45; // Moderate transferability
+  }
+
+  calculateOverallCompatibility(matchResult) {
+    const weights = this.getWeightsByMatchType(matchResult.matchType);
+    
+    const weightedScore = (
+      matchResult.experienceMatch * weights.experience +
+      matchResult.skillsMatch * weights.skills +
+      matchResult.educationMatch * weights.education +
+      matchResult.transferabilityScore * weights.transferability
+    ) / 100;
+
+    return Math.round(weightedScore);
+  }
+
+  getWeightsByMatchType(matchType) {
+    switch (matchType) {
+      case 'direct':
+        return { experience: 0.4, skills: 0.4, education: 0.15, transferability: 0.05 };
+      case 'transferable':
+        return { experience: 0.3, skills: 0.3, education: 0.2, transferability: 0.2 };
+      case 'entry-level':
+        return { experience: 0.1, skills: 0.3, education: 0.5, transferability: 0.1 };
+      case 'career-change':
+        return { experience: 0.2, skills: 0.3, education: 0.25, transferability: 0.25 };
+      default:
+        return { experience: 0.35, skills: 0.35, education: 0.2, transferability: 0.1 };
+    }
+  }
+
+  extractRequiredExperience(jobData) {
+    if (!jobData.experience || jobData.experience.length === 0) return 0;
+    return Math.max(...jobData.experience);
+  }
+
+  identifyStrengthAreas(cvData, jobData) {
+    const strengths = [];
+    
+    // Experience strengths
+    if (cvData.experienceYears > this.extractRequiredExperience(jobData)) {
+      strengths.push('Extensive relevant experience');
+    }
+    
+    // Skills strengths
+    const matchedSkills = this.findMatchedSkills(cvData.skills, jobData.requiredSkills);
+    if (matchedSkills.length > 0) {
+      strengths.push(`Strong skills match: ${matchedSkills.slice(0, 3).join(', ')}`);
+    }
+    
+    // Education strengths
+    if (cvData.education.length > 0) {
+      strengths.push('Relevant educational background');
+    }
+    
+    // Achievement strengths
+    if (cvData.achievements.length > 0) {
+      strengths.push('Demonstrated achievements and results');
+    }
+
+    return strengths.slice(0, 5);
+  }
+
+  identifyGapAreas(cvData, jobData) {
+    const gaps = [];
+    
+    // Experience gaps
+    const requiredExp = this.extractRequiredExperience(jobData);
+    if (cvData.experienceYears < requiredExp) {
+      gaps.push(`${requiredExp - cvData.experienceYears} years additional experience needed`);
+    }
+    
+    // Skills gaps
+    const missingSkills = this.findMissingSkills(cvData.skills, jobData.requiredSkills);
+    if (missingSkills.length > 0) {
+      gaps.push(`Missing key skills: ${missingSkills.slice(0, 3).join(', ')}`);
+    }
+    
+    // Qualification gaps
+    const missingQuals = this.findMissingQualifications(cvData.qualifications, jobData.qualifications);
+    if (missingQuals.length > 0) {
+      gaps.push(`Missing qualifications: ${missingQuals.slice(0, 2).join(', ')}`);
+    }
+
+    return gaps.slice(0, 5);
+  }
+
+  createDevelopmentPath(gapAreas, matchType) {
+    const path = [];
+    
+    switch (matchType) {
+      case 'entry-level':
+        path.push('Focus on relevant coursework and certifications');
+        path.push('Seek internships or entry-level positions');
+        path.push('Build portfolio of relevant projects');
+        break;
+      case 'career-change':
+        path.push('Complete industry-specific training');
+        path.push('Highlight transferable skills');
+        path.push('Network within target industry');
+        break;
+      case 'transferable':
+        path.push('Obtain industry-specific certifications');
+        path.push('Emphasize relevant experience');
+        break;
+      default:
+        path.push('Address specific skill gaps');
+        path.push('Gain additional relevant experience');
+    }
+
+    return path.slice(0, 4);
+  }
+
+  findMatchedSkills(cvSkills, jobSkills) {
+    const matched = [];
+    cvSkills.forEach(cvSkill => {
+      jobSkills.forEach(jobSkill => {
+        if (cvSkill.toLowerCase().includes(jobSkill.toLowerCase()) || 
+            jobSkill.toLowerCase().includes(cvSkill.toLowerCase())) {
+          matched.push(cvSkill);
+        }
+      });
+    });
+    return [...new Set(matched)];
+  }
+
+  findMissingSkills(cvSkills, jobSkills) {
+    const cvSkillsLower = cvSkills.map(skill => skill.toLowerCase());
+    return jobSkills.filter(jobSkill => 
+      !cvSkillsLower.some(cvSkill => 
+        cvSkill.includes(jobSkill.toLowerCase()) || 
+        jobSkill.toLowerCase().includes(cvSkill)
+      )
+    );
+  }
+
+  findMissingQualifications(cvQuals, jobQuals) {
+    const cvQualsLower = cvQuals.map(qual => qual.toLowerCase());
+    return jobQuals.filter(jobQual => 
+      !cvQualsLower.some(cvQual => 
+        cvQual.includes(jobQual.toLowerCase()) || 
+        jobQual.toLowerCase().includes(cvQual)
+      )
+    );
+  }
+
+  // Combine universal algorithmic results with AI enhancement
+  combineUniversalAndAIResults(universalMatch, aiResults, cvData, jobData) {
+    // Base result from universal algorithm
+    const result = {
+      // Core scores (algorithmic)
+      score: universalMatch.overallCompatibility,
+      experienceRelevance: universalMatch.experienceMatch,
+      skillsAlignment: universalMatch.skillsMatch,
+      qualificationMatch: universalMatch.educationMatch,
+      fieldCompatibility: universalMatch.matchType,
+      
+      // Additional scores
+      formatScore: 75, // Default formatting score
+      contentScore: this.calculateContentScore(cvData),
+      jobFitScore: universalMatch.overallCompatibility,
+      atsCompliance: this.calculateATSCompliance(cvData),
+      
+      // Analysis details
+      experienceLevel: this.mapCareerStageToExperienceLevel(universalMatch.careerStage),
+      careerStage: universalMatch.careerStage,
+      
+      // Algorithmic insights
+      strengths: universalMatch.strengthAreas,
+      keySkillGaps: universalMatch.gapAreas,
+      improvements: universalMatch.developmentPath,
+      transferableSkills: this.identifyTransferableSkills(cvData, jobData),
+      
+      // Dynamic recommendations
+      missingKeywords: this.findMissingSkills(cvData.skills, jobData.keywords),
+      missingSkills: this.findMissingSkills(cvData.skills, jobData.requiredSkills),
+      recommendations: this.generateDynamicRecommendations(universalMatch, cvData, jobData),
+      
+      // Career guidance
+      careerTransitionAdvice: this.generateTransitionAdvice(universalMatch.matchType, cvData, jobData),
+      timeToCompetitive: this.estimateTimeToCompetitive(universalMatch, cvData, jobData),
+      
+      // Additional insights
+      competitiveAdvantages: this.identifyCompetitiveAdvantages(cvData, jobData),
+      developmentPriorities: universalMatch.developmentPath.slice(0, 3),
+      certificationRecommendations: this.recommendCertifications(jobData.industry, jobData.role),
+      nextSteps: this.generateNextSteps(universalMatch.matchType, universalMatch.gapAreas),
+      
+      // ATS optimization
+      atsOptimization: {
+        keywordDensity: this.calculateKeywordDensity(cvData, jobData),
+        missingAtsKeywords: this.findMissingSkills(cvData.keywords, jobData.keywords).slice(0, 6),
+        formatIssues: this.identifyFormatIssues(cvData),
+        optimizationTips: this.generateATSOptimizationTips(cvData, jobData)
+      },
+      
+      // Analysis metadata
+      relevanceAnalysis: this.generateRelevanceAnalysis(universalMatch, cvData, jobData),
+      analysisType: 'universal',
+      confidence: this.calculateConfidenceScore(universalMatch, cvData, jobData)
+    };
+
+    // Enhance with AI insights if available
+    if (aiResults && aiResults.length > 0) {
+      const aiResult = this.createConsensusAnalysis(aiResults, null, jobData.industry, jobData.role);
+      
+      // Blend AI insights with algorithmic results
+      result.strengths = this.blendArrayResults(result.strengths, aiResult.strengths, 5);
+      result.recommendations = this.blendArrayResults(result.recommendations, aiResult.recommendations, 5);
+      result.improvements = this.blendArrayResults(result.improvements, aiResult.improvements, 4);
+      result.relevanceAnalysis = aiResult.relevanceAnalysis || result.relevanceAnalysis;
+      result.analysisType = 'hybrid';
+      
+      // Adjust scores slightly based on AI input
+      result.score = Math.round((result.score * 0.7) + (aiResult.score * 0.3));
+    }
+
+    return result;
+  }
+
+  // Generate fallback analysis for critical errors
+  generateFallbackAnalysis(cvText, industry, role) {
+    const basicData = {
+      skills: this.extractBasicSkills(cvText),
+      experienceYears: this.estimateExperienceYears(cvText),
+      hasEducation: cvText.toLowerCase().includes('bachelor') || cvText.toLowerCase().includes('degree'),
+      currentField: this.detectCurrentField(cvText)
+    };
+
+    return {
+      score: 60, // Neutral score
+      formatScore: 70,
+      contentScore: 65,
+      jobFitScore: 60,
+      atsCompliance: 65,
+      experienceRelevance: 60,
+      skillsAlignment: 60,
+      qualificationMatch: 60,
+      
+      strengths: ['Professional experience demonstrated', 'Clear communication evident'],
+      recommendations: ['Optimize for ATS systems', 'Highlight relevant achievements', 'Add quantifiable results'],
+      missingKeywords: ['industry-specific keywords', 'technical skills', 'certifications'],
+      missingSkills: ['role-specific skills', 'technical competencies'],
+      improvements: ['Add relevant certifications', 'Quantify achievements', 'Improve keyword optimization', 'Strengthen skills section'],
+      
+      experienceLevel: basicData.experienceYears > 5 ? 'mid' : 'entry',
+      careerStage: 'transitional',
+      fieldCompatibility: 'medium',
+      
+      transferableSkills: ['Communication', 'Problem-solving', 'Teamwork'],
+      careerTransitionAdvice: 'Focus on developing relevant skills for target role',
+      timeToCompetitive: '6-12 months with focused development',
+      
+      competitiveAdvantages: ['Diverse experience', 'Adaptability'],
+      developmentPriorities: ['Skill development', 'Industry knowledge', 'Certification'],
+      certificationRecommendations: ['Industry-specific certifications'],
+      nextSteps: ['Skill assessment', 'Training plan', 'Network building'],
+      
+      atsOptimization: {
+        keywordDensity: 'low',
+        missingAtsKeywords: ['role keywords', 'industry terms'],
+        formatIssues: ['Keyword optimization needed'],
+        optimizationTips: ['Add industry keywords', 'Use standard formatting', 'Include relevant skills']
+      },
+      
+      relevanceAnalysis: 'Basic analysis completed with limited data',
+      analysisType: 'fallback',
+      confidence: 60
+    };
+  }
+
+  // Helper functions for the universal system
+  calculateContentScore(cvData) {
+    let score = 50; // Base score
+    
+    if (cvData.skills.length > 5) score += 15;
+    if (cvData.experience.length > 0) score += 15;
+    if (cvData.education.length > 0) score += 10;
+    if (cvData.achievements.length > 0) score += 10;
+    
+    return Math.min(score, 100);
+  }
+
+  calculateATSCompliance(cvData) {
+    let score = 60; // Base score
+    
+    if (cvData.skills.length > 8) score += 10;
+    if (cvData.keywords.length > 15) score += 10;
+    if (cvData.qualifications.length > 0) score += 10;
+    if (cvData.achievements.length > 3) score += 10;
+    
+    return Math.min(score, 100);
+  }
+
+  mapCareerStageToExperienceLevel(careerStage) {
+    const mapping = {
+      'graduate': 'entry',
+      'entry': 'entry',
+      'junior': 'junior',
+      'mid': 'mid',
+      'senior': 'senior'
+    };
+    return mapping[careerStage] || 'mid';
+  }
+
+  identifyTransferableSkills(cvData, jobData) {
+    const universalSkills = ['leadership', 'communication', 'problem-solving', 'teamwork', 'project management', 'analytical thinking'];
+    return cvData.skills.filter(skill => 
+      universalSkills.some(universal => 
+        skill.toLowerCase().includes(universal) || universal.includes(skill.toLowerCase())
+      )
+    ).slice(0, 5);
+  }
+
+  generateDynamicRecommendations(universalMatch, cvData, jobData) {
+    const recommendations = [];
+    
+    if (universalMatch.experienceMatch < 70) {
+      recommendations.push('Highlight relevant experience more prominently');
+    }
+    if (universalMatch.skillsMatch < 70) {
+      recommendations.push('Add industry-specific skills and keywords');
+    }
+    if (universalMatch.educationMatch < 70) {
+      recommendations.push('Consider additional certifications or training');
+    }
+    if (cvData.achievements.length < 3) {
+      recommendations.push('Add quantifiable achievements and results');
+    }
+    
+    return recommendations.slice(0, 5);
+  }
+
+  generateTransitionAdvice(matchType, cvData, jobData) {
+    switch (matchType) {
+      case 'direct':
+        return 'Optimize your CV to highlight direct experience and relevant achievements';
+      case 'transferable':
+        return 'Emphasize transferable skills and relevant experience while addressing industry-specific gaps';
+      case 'entry-level':
+        return 'Focus on education, projects, and transferable skills to demonstrate potential';
+      case 'career-change':
+        return 'Highlight transferable skills and consider additional training to bridge the gap';
+      default:
+        return 'Develop relevant skills and experience for your target role';
+    }
+  }
+
+  estimateTimeToCompetitive(universalMatch, cvData, jobData) {
+    const score = universalMatch.overallCompatibility;
+    
+    if (score >= 80) return '1-3 months';
+    if (score >= 60) return '3-6 months';
+    if (score >= 40) return '6-12 months';
+    return '12+ months';
+  }
+
+  blendArrayResults(array1, array2, maxItems) {
+    const combined = [...array1, ...array2];
+    const unique = [...new Set(combined)];
+    return unique.slice(0, maxItems);
+  }
+
+  extractBasicSkills(cvText) {
+    const commonSkills = ['communication', 'leadership', 'teamwork', 'problem-solving', 'management'];
+    const cvLower = cvText.toLowerCase();
+    return commonSkills.filter(skill => cvLower.includes(skill));
+  }
+
+  estimateExperienceYears(cvText) {
+    const yearMatches = cvText.match(/\d{4}/g) || [];
+    const currentYear = new Date().getFullYear();
+    const years = yearMatches.map(y => parseInt(y)).filter(y => y > 1990 && y <= currentYear);
+    
+    if (years.length >= 2) {
+      return currentYear - Math.min(...years);
+    }
+    return 0;
+  }
+
+  // Additional helper functions for universal system
+  identifyCompetitiveAdvantages(cvData, jobData) {
+    const advantages = [];
+    
+    if (cvData.experienceYears > 5) {
+      advantages.push('Extensive professional experience');
+    }
+    if (cvData.achievements.length > 3) {
+      advantages.push('Demonstrated track record of achievements');
+    }
+    if (cvData.education.length > 1) {
+      advantages.push('Strong educational background');
+    }
+    if (cvData.qualifications.length > 0) {
+      advantages.push('Professional certifications and qualifications');
+    }
+    
+    return advantages.slice(0, 4);
+  }
+
+  recommendCertifications(industry, role) {
+    const certificationMap = {
+      'technology': ['AWS Certified', 'Microsoft Certified', 'Google Cloud Certified', 'Scrum Master'],
+      'healthcare': ['CPR Certification', 'Medical Assistant Certification', 'Healthcare Management'],
+      'finance': ['CPA', 'CFA', 'FRM', 'Series 7'],
+      'building_safety': ['NEBOSH General Certificate', 'IOSH Managing Safely', 'Fire Safety Certification'],
+      'construction': ['OSHA 30', 'Construction Safety Certification', 'Project Management'],
+      'education': ['Teaching License', 'Educational Leadership Certification', 'Subject Matter Certification'],
+      'marketing': ['Google Analytics', 'Digital Marketing Certification', 'HubSpot Certification'],
+      'sales': ['Sales Certification', 'CRM Certification', 'Negotiation Training']
+    };
+    
+    return certificationMap[industry] || ['Industry-specific certification', 'Professional development courses'];
+  }
+
+  generateNextSteps(matchType, gapAreas) {
+    const steps = [];
+    
+    switch (matchType) {
+      case 'entry-level':
+        steps.push('Complete relevant online courses');
+        steps.push('Build a portfolio of projects');
+        steps.push('Apply for internships or entry-level positions');
+        break;
+      case 'career-change':
+        steps.push('Enroll in industry-specific training');
+        steps.push('Network with professionals in target field');
+        steps.push('Consider transitional roles');
+        break;
+      case 'transferable':
+        steps.push('Highlight transferable skills in CV');
+        steps.push('Obtain industry-specific certifications');
+        steps.push('Gain relevant experience through projects');
+        break;
+      default:
+        steps.push('Address identified skill gaps');
+        steps.push('Optimize CV for target role');
+        steps.push('Expand professional network');
+    }
+    
+    return steps.slice(0, 4);
+  }
+
+  calculateKeywordDensity(cvData, jobData) {
+    if (jobData.keywords.length === 0) return 'medium';
+    
+    const cvKeywords = cvData.keywords.map(k => k.toLowerCase());
+    const jobKeywords = jobData.keywords.map(k => k.toLowerCase());
+    
+    const matches = jobKeywords.filter(jobKeyword => 
+      cvKeywords.some(cvKeyword => 
+        cvKeyword.includes(jobKeyword) || jobKeyword.includes(cvKeyword)
+      )
+    );
+    
+    const density = (matches.length / jobKeywords.length) * 100;
+    
+    if (density > 70) return 'high';
+    if (density > 40) return 'medium';
+    return 'low';
+  }
+
+  identifyFormatIssues(cvData) {
+    const issues = [];
+    
+    if (cvData.skills.length < 5) {
+      issues.push('Limited skills section');
+    }
+    if (cvData.achievements.length < 2) {
+      issues.push('Lack of quantifiable achievements');
+    }
+    if (cvData.keywords.length < 10) {
+      issues.push('Insufficient keyword optimization');
+    }
+    
+    return issues.slice(0, 4);
+  }
+
+  generateATSOptimizationTips(cvData, jobData) {
+    const tips = [];
+    
+    if (this.calculateKeywordDensity(cvData, jobData) === 'low') {
+      tips.push('Increase relevant keyword density throughout CV');
+    }
+    if (cvData.skills.length < 8) {
+      tips.push('Expand skills section with industry-specific terms');
+    }
+    if (cvData.achievements.length < 3) {
+      tips.push('Add quantified achievements with numbers and percentages');
+    }
+    tips.push('Use standard section headings (Experience, Education, Skills)');
+    
+    return tips.slice(0, 4);
+  }
+
+  generateRelevanceAnalysis(universalMatch, cvData, jobData) {
+    const { matchType, careerStage, overallCompatibility } = universalMatch;
+    
+    let analysis = `Career stage: ${careerStage}. Match type: ${matchType}. `;
+    
+    if (overallCompatibility >= 80) {
+      analysis += 'Strong alignment with role requirements. ';
+    } else if (overallCompatibility >= 60) {
+      analysis += 'Good potential with some development needed. ';
+    } else if (overallCompatibility >= 40) {
+      analysis += 'Moderate fit requiring significant skill development. ';
+    } else {
+      analysis += 'Limited alignment, major career transition required. ';
+    }
+    
+    if (matchType === 'transferable') {
+      analysis += 'Transferable skills provide a foundation for role transition.';
+    } else if (matchType === 'entry-level') {
+      analysis += 'Educational background and potential are key strengths.';
+    } else if (matchType === 'career-change') {
+      analysis += 'Professional experience exists but requires significant retraining.';
+    }
+    
+    return analysis;
+  }
+
+  calculateConfidenceScore(universalMatch, cvData, jobData) {
+    let confidence = 70; // Base confidence
+    
+    // Higher confidence for more data
+    if (cvData.skills.length > 8) confidence += 5;
+    if (cvData.experience.length > 2) confidence += 5;
+    if (cvData.education.length > 0) confidence += 5;
+    if (cvData.achievements.length > 3) confidence += 5;
+    
+    // Higher confidence for clear matches
+    if (universalMatch.overallCompatibility > 80) confidence += 10;
+    if (universalMatch.matchType === 'direct') confidence += 10;
+    
+    return Math.min(confidence, 100);
   }
 }
 

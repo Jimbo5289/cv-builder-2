@@ -105,6 +105,55 @@ class AIAnalysisService {
         qualifications: ['Emergency services training', 'Medical certifications', 'Physical fitness standards', 'Background checks', 'Ongoing training', 'Professional certifications'],
         incompatibleFields: ['design', 'marketing', 'finance'],
         transferableFrom: ['healthcare', 'military', 'security', 'law enforcement']
+      },
+      construction: {
+        keywords: ['building safety', 'construction safety', 'OSHA', 'NEBOSH', 'IOSH', 'safety management', 'risk assessment', 'building regulations', 'compliance', 'safety protocols', 'incident investigation', 'safety training', 'hazard identification', 'safety audits', 'construction', 'building', 'site safety', 'scaffolding', 'fall protection', 'PPE', 'safety legislation'],
+        skills: ['Safety management', 'Risk assessment', 'Regulatory compliance', 'Incident investigation', 'Safety training delivery', 'Hazard identification', 'Safety auditing', 'Communication', 'Leadership', 'Problem-solving'],
+        qualifications: ['NEBOSH certification', 'IOSH Managing Safely', 'OSHA certifications', 'Construction safety qualifications', 'Building safety certifications', 'Risk management certifications', 'Professional safety memberships'],
+        incompatibleFields: ['arts', 'design', 'marketing'],
+        transferableFrom: ['emergency services', 'engineering', 'healthcare', 'military', 'manufacturing']
+      },
+      building_safety: {
+        keywords: ['building safety', 'fire safety', 'building regulations', 'building control', 'safety compliance', 'building codes', 'fire risk assessment', 'building standards', 'safety management', 'regulatory compliance', 'building inspection', 'safety audits', 'building surveying', 'construction safety', 'NEBOSH', 'IOSH', 'CDM', 'building safety manager'],
+        skills: ['Building safety expertise', 'Fire safety knowledge', 'Regulatory compliance', 'Risk assessment', 'Building inspection', 'Safety management', 'Technical analysis', 'Report writing', 'Stakeholder communication'],
+        qualifications: ['Building safety qualifications', 'Fire safety certifications', 'NEBOSH General Certificate', 'IOSH Managing Safely', 'Building control qualifications', 'Construction safety training', 'Professional memberships (IOSH, NEBOSH)'],
+        incompatibleFields: ['arts', 'design', 'retail', 'hospitality', 'marketing'],
+        transferableFrom: ['construction', 'engineering', 'emergency services', 'architecture', 'surveying', 'health and safety', 'fire service', 'rescue services']
+      },
+      safety: {
+        keywords: ['safety management', 'health and safety', 'risk assessment', 'safety compliance', 'safety protocols', 'incident investigation', 'safety training', 'hazard identification', 'safety audits', 'NEBOSH', 'IOSH', 'OSHA', 'safety legislation', 'safety culture', 'occupational health', 'workplace safety'],
+        skills: ['Safety management', 'Risk assessment', 'Regulatory compliance', 'Incident investigation', 'Safety training delivery', 'Hazard identification', 'Safety auditing', 'Communication', 'Leadership'],
+        qualifications: ['NEBOSH certifications', 'IOSH qualifications', 'OSHA training', 'Safety management qualifications', 'Risk management certifications', 'Professional safety memberships'],
+        incompatibleFields: ['arts', 'design', 'retail'],
+        transferableFrom: ['emergency services', 'construction', 'engineering', 'healthcare', 'manufacturing']
+      },
+      manufacturing: {
+        keywords: ['manufacturing', 'production', 'quality control', 'lean manufacturing', 'six sigma', 'process improvement', 'supply chain', 'inventory management', 'production planning', 'equipment maintenance', 'safety protocols', 'ISO standards'],
+        skills: ['Process optimization', 'Quality control', 'Production planning', 'Safety management', 'Team leadership', 'Problem-solving', 'Technical analysis', 'Equipment operation'],
+        qualifications: ['Manufacturing engineering degree', 'Six Sigma certifications', 'Lean manufacturing training', 'Quality management certifications', 'Safety certifications', 'Technical skills training'],
+        incompatibleFields: ['arts', 'design', 'marketing'],
+        transferableFrom: ['engineering', 'construction', 'technology', 'logistics']
+      },
+      legal: {
+        keywords: ['legal', 'law', 'litigation', 'contract law', 'corporate law', 'legal research', 'case law', 'legal writing', 'court proceedings', 'legal compliance', 'regulatory law', 'legal analysis', 'dispute resolution'],
+        skills: ['Legal analysis', 'Research skills', 'Written communication', 'Critical thinking', 'Attention to detail', 'Client communication', 'Case management', 'Regulatory knowledge'],
+        qualifications: ['Law degree', 'Bar admission', 'Legal certifications', 'Continuing legal education', 'Specialized law training', 'Professional legal memberships'],
+        incompatibleFields: ['construction', 'manufacturing', 'arts'],
+        transferableFrom: ['finance', 'business', 'government', 'compliance']
+      },
+      hospitality: {
+        keywords: ['hospitality', 'customer service', 'hotel management', 'food service', 'guest relations', 'tourism', 'event management', 'restaurant management', 'hospitality operations', 'service excellence'],
+        skills: ['Customer service', 'Communication', 'Problem-solving', 'Team management', 'Cultural sensitivity', 'Multitasking', 'Service delivery', 'Conflict resolution'],
+        qualifications: ['Hospitality management degree', 'Customer service training', 'Food safety certifications', 'Hotel management qualifications', 'Tourism certifications'],
+        incompatibleFields: ['engineering', 'technology', 'healthcare'],
+        transferableFrom: ['retail', 'sales', 'customer service', 'event planning']
+      },
+      retail: {
+        keywords: ['retail', 'sales', 'customer service', 'merchandising', 'inventory management', 'retail operations', 'point of sale', 'visual merchandising', 'store management', 'retail sales'],
+        skills: ['Customer service', 'Sales techniques', 'Inventory management', 'Visual merchandising', 'Cash handling', 'Team coordination', 'Product knowledge', 'Communication'],
+        qualifications: ['Retail management training', 'Customer service certifications', 'Sales training', 'Merchandising qualifications', 'Retail operations training'],
+        incompatibleFields: ['engineering', 'healthcare', 'technology'],
+        transferableFrom: ['hospitality', 'customer service', 'sales', 'marketing']
       }
     };
 
@@ -144,6 +193,71 @@ class AIAnalysisService {
         specificSkills: ['Campaign management', 'Digital marketing', 'Analytics', 'Brand strategy', 'Team leadership'],
         seniority: ['Coordinator: 0-2 years', 'Manager: 2-5 years', 'Director: 5+ years'],
         criticalKeywords: ['marketing', 'campaigns', 'digital', 'brand', 'strategy']
+      },
+      'building-safety-manager': {
+        specificSkills: ['Building safety compliance', 'Fire risk assessment', 'Building regulations knowledge', 'Safety auditing', 'Incident investigation', 'Safety training delivery', 'Regulatory compliance'],
+        seniority: ['Assistant: 0-2 years', 'Manager: 2-7 years', 'Senior Manager: 7+ years'],
+        criticalKeywords: ['building safety', 'fire safety', 'building regulations', 'safety compliance', 'risk assessment', 'NEBOSH', 'IOSH']
+      },
+      'safety-manager': {
+        specificSkills: ['Safety management systems', 'Risk assessment', 'Incident investigation', 'Safety training', 'Regulatory compliance', 'Safety auditing', 'Hazard identification'],
+        seniority: ['Safety Officer: 0-3 years', 'Safety Manager: 3-7 years', 'Head of Safety: 7+ years'],
+        criticalKeywords: ['safety management', 'risk assessment', 'NEBOSH', 'IOSH', 'safety compliance', 'health and safety']
+      },
+      'construction-manager': {
+        specificSkills: ['Project management', 'Construction planning', 'Safety management', 'Quality control', 'Budget management', 'Team leadership', 'Regulatory compliance'],
+        seniority: ['Assistant Manager: 0-3 years', 'Manager: 3-7 years', 'Senior Manager: 7+ years'],
+        criticalKeywords: ['construction', 'project management', 'building', 'safety management', 'construction planning']
+      },
+      'fire-safety-engineer': {
+        specificSkills: ['Fire safety engineering', 'Fire risk assessment', 'Fire safety systems design', 'Building regulations', 'Fire modeling', 'Safety compliance'],
+        seniority: ['Graduate Engineer: 0-2 years', 'Engineer: 2-5 years', 'Senior Engineer: 5+ years'],
+        criticalKeywords: ['fire safety', 'fire engineering', 'fire risk assessment', 'building safety', 'fire systems']
+      },
+      'health-safety-advisor': {
+        specificSkills: ['Health and safety advice', 'Risk assessment', 'Policy development', 'Training delivery', 'Compliance monitoring', 'Incident investigation'],
+        seniority: ['Junior Advisor: 0-2 years', 'Advisor: 2-5 years', 'Senior Advisor: 5+ years'],
+        criticalKeywords: ['health and safety', 'safety advice', 'risk assessment', 'NEBOSH', 'IOSH', 'safety compliance']
+      },
+      'quality-manager': {
+        specificSkills: ['Quality management systems', 'Process improvement', 'Quality auditing', 'ISO standards', 'Quality control', 'Team management'],
+        seniority: ['Quality Officer: 0-3 years', 'Quality Manager: 3-7 years', 'Head of Quality: 7+ years'],
+        criticalKeywords: ['quality management', 'quality control', 'ISO', 'quality systems', 'process improvement']
+      },
+      'project-manager': {
+        specificSkills: ['Project planning', 'Resource management', 'Risk management', 'Stakeholder management', 'Budget control', 'Team leadership'],
+        seniority: ['Junior PM: 0-2 years', 'Project Manager: 2-5 years', 'Senior PM: 5+ years'],
+        criticalKeywords: ['project management', 'project planning', 'team leadership', 'budget management', 'stakeholder management']
+      },
+      'compliance-manager': {
+        specificSkills: ['Regulatory compliance', 'Policy development', 'Compliance monitoring', 'Risk assessment', 'Audit management', 'Training delivery'],
+        seniority: ['Compliance Officer: 0-3 years', 'Compliance Manager: 3-7 years', 'Head of Compliance: 7+ years'],
+        criticalKeywords: ['compliance', 'regulatory', 'policy', 'audit', 'risk management']
+      },
+      'risk-manager': {
+        specificSkills: ['Risk assessment', 'Risk management frameworks', 'Risk monitoring', 'Business continuity', 'Insurance management', 'Risk reporting'],
+        seniority: ['Risk Analyst: 0-3 years', 'Risk Manager: 3-7 years', 'Chief Risk Officer: 7+ years'],
+        criticalKeywords: ['risk management', 'risk assessment', 'business continuity', 'risk analysis']
+      },
+      'operations-manager': {
+        specificSkills: ['Operations management', 'Process optimization', 'Team management', 'Performance monitoring', 'Resource planning', 'Quality assurance'],
+        seniority: ['Supervisor: 0-3 years', 'Operations Manager: 3-7 years', 'Director of Operations: 7+ years'],
+        criticalKeywords: ['operations', 'process management', 'team management', 'performance optimization']
+      },
+      'engineer': {
+        specificSkills: ['Engineering design', 'Technical analysis', 'Problem-solving', 'CAD software', 'Project management', 'Quality assurance'],
+        seniority: ['Graduate Engineer: 0-2 years', 'Engineer: 2-5 years', 'Senior Engineer: 5+ years'],
+        criticalKeywords: ['engineering', 'design', 'technical', 'CAD', 'analysis']
+      },
+      'teacher': {
+        specificSkills: ['Curriculum development', 'Lesson planning', 'Student assessment', 'Classroom management', 'Educational technology', 'Student engagement'],
+        seniority: ['Newly Qualified Teacher: 0-2 years', 'Teacher: 2-5 years', 'Senior Teacher: 5+ years'],
+        criticalKeywords: ['teaching', 'education', 'curriculum', 'student', 'classroom']
+      },
+      'sales-manager': {
+        specificSkills: ['Sales strategy', 'Team management', 'Customer relationship management', 'Sales forecasting', 'Performance management', 'Market analysis'],
+        seniority: ['Sales Executive: 0-3 years', 'Sales Manager: 3-7 years', 'Sales Director: 7+ years'],
+        criticalKeywords: ['sales', 'customer', 'revenue', 'team management', 'business development']
       }
     };
 
@@ -154,7 +268,7 @@ class AIAnalysisService {
     };
   }
 
-  // Main analysis method
+  // Main analysis method - Universal approach
   async analyzeCV(cvText, industry = null, role = null, isGeneric = false) {
     if (!this.isOpenAIEnabled && !this.isAnthropicEnabled) {
       logger.warn('No AI services available - using enhanced mock analysis');
@@ -648,12 +762,74 @@ BE BRUTALLY HONEST about fit. A CV from an incompatible field should score 15-35
     if (industry === 'finance') {
       return ['Quantify financial achievements', 'Include financial software proficiency', 'Highlight analytical project results'];
     }
+    if (industry === 'building_safety' || industry === 'construction' || industry === 'safety') {
+      return ['Highlight NEBOSH/IOSH certifications', 'Include specific safety management achievements', 'Add risk assessment experience', 'Quantify safety improvements and compliance results'];
+    }
+    if (industry === 'engineering') {
+      return ['Include CAD software proficiency', 'Highlight technical project results', 'Add engineering certifications and licenses'];
+    }
+    if (industry === 'education') {
+      return ['Include curriculum development experience', 'Highlight student achievement outcomes', 'Add educational technology skills'];
+    }
+    if (industry === 'marketing') {
+      return ['Include digital marketing metrics and results', 'Highlight campaign performance data', 'Add marketing software proficiency'];
+    }
+    if (industry === 'sales') {
+      return ['Quantify sales achievements and targets met', 'Include CRM software experience', 'Highlight customer relationship successes'];
+    }
+    if (industry === 'manufacturing') {
+      return ['Include Lean/Six Sigma certifications', 'Highlight process improvement results', 'Add quality control achievements'];
+    }
+    if (industry === 'legal') {
+      return ['Include bar admissions and legal certifications', 'Highlight case management experience', 'Add specialized legal area expertise'];
+    }
+    if (industry === 'hospitality') {
+      return ['Include customer service metrics', 'Highlight guest satisfaction scores', 'Add hospitality management experience'];
+    }
+    if (industry === 'retail') {
+      return ['Include sales performance metrics', 'Highlight inventory management experience', 'Add customer service achievements'];
+    }
     return ['Add more quantifiable achievements', 'Include relevant certifications', 'Strengthen skills section'];
   }
 
   getDefaultMissingKeywords(industry, role) {
-    const industryReqs = this.getIndustryRequirements(industry);
-    return industryReqs.keywords.slice(0, 6);
+    if (industry === 'building_safety' || industry === 'construction' || industry === 'safety') {
+      return ['NEBOSH', 'IOSH', 'risk assessment', 'building safety', 'safety management', 'compliance', 'incident investigation', 'safety audits'];
+    }
+    if (industry === 'technology') {
+      return ['programming', 'software development', 'cloud computing', 'agile', 'devops'];
+    }
+    if (industry === 'healthcare') {
+      return ['patient care', 'clinical experience', 'medical terminology', 'healthcare protocols'];
+    }
+    if (industry === 'finance') {
+      return ['financial analysis', 'Excel', 'financial modeling', 'risk assessment'];
+    }
+    if (industry === 'engineering') {
+      return ['CAD', 'technical design', 'engineering analysis', 'project management'];
+    }
+    if (industry === 'education') {
+      return ['curriculum development', 'lesson planning', 'student assessment', 'classroom management'];
+    }
+    if (industry === 'marketing') {
+      return ['digital marketing', 'SEO', 'analytics', 'campaign management'];
+    }
+    if (industry === 'sales') {
+      return ['CRM', 'sales targets', 'customer relationships', 'lead generation'];
+    }
+    if (industry === 'manufacturing') {
+      return ['quality control', 'lean manufacturing', 'process improvement', 'ISO standards'];
+    }
+    if (industry === 'legal') {
+      return ['legal research', 'case law', 'litigation', 'regulatory compliance'];
+    }
+    if (industry === 'hospitality') {
+      return ['customer service', 'guest relations', 'hospitality operations', 'service excellence'];
+    }
+    if (industry === 'retail') {
+      return ['retail operations', 'merchandising', 'inventory management', 'sales techniques'];
+    }
+    return ['leadership', 'project management', 'communication', 'problem-solving'];
   }
 
   getDefaultSkillGaps(industry) {

@@ -220,17 +220,37 @@ async function handleCheckoutSessionCompleted(session) {
           });
           
           logger.info(`30-day access created for user ${user.id} (${user.email}), expires: ${expiryDate}`);
+          
+          // Send specific 30-day access confirmation email
+          await emailService.sendTemporaryAccessConfirmation({
+            email: user.email,
+            name: user.name
+          }, {
+            startTime: new Date(),
+            endTime: expiryDate
+          });
+          logger.info(`30-day access confirmation email sent to ${user.email}`);
+        } else if (session.metadata && session.metadata.planType === 'pay-per-cv') {
+          // Send specific pay-per-cv confirmation email
+          await emailService.sendPayPerCvConfirmation({
+            email: user.email,
+            name: user.name
+          }, {
+            amount: amount_total ? amount_total / 100 : 0,
+            currency: currency || 'gbp'
+          });
+          logger.info(`Pay-per-CV confirmation email sent to ${user.email}`);
+        } else {
+          // Send generic payment success email for other one-time payments
+          await emailService.sendPaymentSuccessNotification({
+            email: user.email,
+            name: user.name
+          }, {
+            amount: amount_total ? amount_total / 100 : 0,
+            currency: currency || 'gbp' // Default to GBP
+          });
+          logger.info(`Payment success email sent to ${user.email}`);
         }
-        
-        // Send a payment success email
-        await emailService.sendPaymentSuccessNotification({
-          email: user.email,
-          name: user.name
-        }, {
-          amount: amount_total ? amount_total / 100 : 0,
-          currency: currency || 'gbp' // Default to GBP
-        });
-        logger.info(`Payment success email sent to ${user.email}`);
       } catch (error) {
         logger.error(`Error processing one-time payment: ${error}`);
         // Don't throw the error to avoid failing the whole webhook

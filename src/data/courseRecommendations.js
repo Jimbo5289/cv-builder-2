@@ -735,6 +735,114 @@ export const COURSE_RECOMMENDATIONS = {
       provider: 'CIOB Academy',
       url: 'https://ciobacademy.org/product/building-regulations-in-practice/', 
       level: 'Intermediate'
+    },
+    { 
+      title: 'Fire Safety Engineering Principles',
+      provider: 'Institution of Fire Engineers',
+      url: 'https://www.ife.org.uk/Training-and-Development', 
+      level: 'Advanced'
+    },
+    { 
+      title: 'NEBOSH Fire Safety Certificate',
+      provider: 'NEBOSH',
+      url: 'https://www.nebosh.org.uk/qualifications/fire-safety/', 
+      level: 'Intermediate'
+    },
+    { 
+      title: 'Building Safety Manager Qualification',
+      provider: 'IFSM',
+      url: 'https://www.ifsm.org.uk/qualifications/', 
+      level: 'Advanced'
+    }
+  ],
+  
+  'fire safety': [
+    { 
+      title: 'Fire Risk Assessment and Management',
+      provider: 'Institution of Fire Engineers',
+      url: 'https://www.ife.org.uk/Training-and-Development', 
+      level: 'Intermediate'
+    },
+    { 
+      title: 'Fire Safety in Buildings',
+      provider: 'NEBOSH',
+      url: 'https://www.nebosh.org.uk/qualifications/fire-safety/', 
+      level: 'Intermediate'
+    },
+    { 
+      title: 'Fire Investigation Techniques',
+      provider: 'National Association of Fire Investigators',
+      url: 'https://www.nafi.org/education/', 
+      level: 'Advanced'
+    },
+    { 
+      title: 'Emergency Services to Building Safety Transition',
+      provider: 'Fire Service College',
+      url: 'https://www.fireservicecollege.ac.uk/', 
+      level: 'Intermediate'
+    }
+  ],
+  
+  'emergency services transition': [
+    { 
+      title: 'Career Transition: Emergency Services to Safety',
+      provider: 'Career Development Institute',
+      url: 'https://www.thecdi.net/', 
+      level: 'Beginner'
+    },
+    { 
+      title: 'Transferable Skills Assessment',
+      provider: 'Professional Development Academy',
+      url: 'https://www.skillsassessment.org/', 
+      level: 'Beginner'
+    },
+    { 
+      title: 'Safety Management Systems',
+      provider: 'IOSH',
+      url: 'https://www.iosh.com/qualifications/', 
+      level: 'Intermediate'
+    }
+  ],
+  
+  'risk assessment': [
+    { 
+      title: 'Professional Risk Assessment',
+      provider: 'IOSH',
+      url: 'https://www.iosh.com/qualifications/', 
+      level: 'Intermediate'
+    },
+    { 
+      title: 'Fire Risk Assessment Competency',
+      provider: 'Institution of Fire Engineers',
+      url: 'https://www.ife.org.uk/Training-and-Development', 
+      level: 'Advanced'
+    },
+    { 
+      title: 'Health and Safety Risk Management',
+      provider: 'NEBOSH',
+      url: 'https://www.nebosh.org.uk/', 
+      level: 'Intermediate'
+    }
+  ],
+  
+  'safety management': [
+    { 
+      title: 'IOSH Managing Safely',
+      provider: 'IOSH',
+      url: 'https://www.iosh.com/qualifications/managing-safely/', 
+      level: 'Intermediate'
+    },
+    { 
+      title: 'NEBOSH General Certificate',
+      provider: 'NEBOSH',
+      url: 'https://www.nebosh.org.uk/qualifications/health-and-safety/ngc1/', 
+      level: 'Intermediate'
+    },
+    { 
+      title: 'Safety Leadership and Culture',
+      provider: 'Institute of Occupational Safety and Health',
+      url: 'https://www.iosh.com/', 
+      level: 'Advanced'
     }
   ],
   
@@ -1506,6 +1614,340 @@ export const COURSE_RECOMMENDATIONS = {
     }
   ],
 
+  'retail-management': [
+    {
+      title: 'Retail Management Fundamentals',
+      provider: 'Retail Management Institute',
+      url: 'https://www.alison.com/course/retail-management-fundamentals',
+      description: 'Essential retail operations and customer service management'
+    },
+    {
+      title: 'Point of Sale (POS) Systems Training',
+      provider: 'Retail Technology Institute',
+      url: 'https://www.alison.com/course/pos-systems-training',
+      description: 'Modern POS systems and payment processing'
+    },
+    {
+      title: 'Inventory Management for Retail',
+      provider: 'Supply Chain Academy',
+      url: 'https://www.alison.com/course/inventory-management-retail',
+      description: 'Stock control and inventory optimization'
+    },
+    {
+      title: 'Visual Merchandising and Store Layout',
+      provider: 'Merchandising Institute',
+      url: 'https://www.alison.com/course/visual-merchandising-store-layout',
+      description: 'Product display and store design principles'
+    },
+    {
+      title: 'Retail Sales Techniques',
+      provider: 'Sales Training Academy',
+      url: 'https://www.alison.com/course/retail-sales-techniques',
+      description: 'Effective selling strategies and customer engagement'
+    }
+  ],
+
+  'beauty-services': [
+    {
+      title: 'Cosmetology Fundamentals',
+      provider: 'Beauty Education Institute',
+      url: 'https://www.alison.com/course/cosmetology-fundamentals',
+      description: 'Hair, skin, and nail care basics'
+    },
+    {
+      title: 'Advanced Hair Cutting and Styling',
+      provider: 'Professional Beauty Academy',
+      url: 'https://www.alison.com/course/advanced-hair-cutting-styling',
+      description: 'Professional hair cutting and styling techniques'
+    },
+    {
+      title: 'Makeup Artistry Certification',
+      provider: 'Makeup Academy',
+      url: 'https://www.alison.com/course/makeup-artistry-certification',
+      description: 'Professional makeup application and artistry'
+    },
+    {
+      title: 'Nail Technology and Art',
+      provider: 'Nail Technology Institute',
+      url: 'https://www.alison.com/course/nail-technology-art',
+      description: 'Manicure, pedicure, and nail art techniques'
+    },
+    {
+      title: 'Spa and Wellness Services',
+      provider: 'Wellness Professional Academy',
+      url: 'https://www.alison.com/course/spa-wellness-services',
+      description: 'Holistic beauty and wellness treatments'
+    }
+  ],
+
+  'hospitality-service': [
+    {
+      title: 'Hotel Operations Management',
+      provider: 'Hospitality Management Institute',
+      url: 'https://www.alison.com/course/hotel-operations-management',
+      description: 'Front office, housekeeping, and guest services'
+    },
+    {
+      title: 'Food Service and Restaurant Management',
+      provider: 'Culinary Management Academy',
+      url: 'https://www.alison.com/course/food-service-restaurant-management',
+      description: 'Restaurant operations and food service management'
+    },
+    {
+      title: 'Culinary Arts and Kitchen Management',
+      provider: 'Culinary Institute',
+      url: 'https://www.alison.com/course/culinary-arts-kitchen-management',
+      description: 'Professional cooking and kitchen operations'
+    },
+    {
+      title: 'Event Planning and Coordination',
+      provider: 'Event Management Academy',
+      url: 'https://www.alison.com/course/event-planning-coordination',
+      description: 'Event planning, coordination, and execution'
+    },
+    {
+      title: 'Tourism and Travel Services',
+      provider: 'Tourism Professional Institute',
+      url: 'https://www.alison.com/course/tourism-travel-services',
+      description: 'Travel planning and tourism industry operations'
+    }
+  ],
+
+  'transport-logistics': [
+    {
+      title: 'Commercial Driver\'s License (CDL) Training',
+      provider: 'Professional Drivers Institute',
+      url: 'https://www.alison.com/course/commercial-drivers-license-training',
+      description: 'CDL training and commercial driving certification'
+    },
+    {
+      title: 'Warehouse Operations and Management',
+      provider: 'Logistics Academy',
+      url: 'https://www.alison.com/course/warehouse-operations-management',
+      description: 'Warehouse management and inventory control'
+    },
+    {
+      title: 'Supply Chain Management',
+      provider: 'Supply Chain Institute',
+      url: 'https://www.alison.com/course/supply-chain-management',
+      description: 'End-to-end supply chain optimization'
+    },
+    {
+      title: 'Transportation Safety and Compliance',
+      provider: 'Transportation Safety Council',
+      url: 'https://www.alison.com/course/transportation-safety-compliance',
+      description: 'DOT regulations and transportation safety'
+    },
+    {
+      title: 'Fleet Management and Optimization',
+      provider: 'Fleet Management Institute',
+      url: 'https://www.alison.com/course/fleet-management-optimization',
+      description: 'Vehicle fleet operations and cost optimization'
+    }
+  ],
+
+  'security-services': [
+    {
+      title: 'Security Guard Fundamentals',
+      provider: 'Security Training Institute',
+      url: 'https://www.alison.com/course/security-guard-fundamentals',
+      description: 'Basic security operations and procedures'
+    },
+    {
+      title: 'Security Technology and Surveillance',
+      provider: 'Security Technology Academy',
+      url: 'https://www.alison.com/course/security-technology-surveillance',
+      description: 'Security systems and surveillance technology'
+    },
+    {
+      title: 'Emergency Response and Crisis Management',
+      provider: 'Emergency Response Institute',
+      url: 'https://www.alison.com/course/emergency-response-crisis-management',
+      description: 'Emergency procedures and crisis response'
+    },
+    {
+      title: 'Risk Assessment and Security Planning',
+      provider: 'Risk Management Academy',
+      url: 'https://www.alison.com/course/risk-assessment-security-planning',
+      description: 'Security risk analysis and planning'
+    },
+    {
+      title: 'Private Investigation Techniques',
+      provider: 'Investigation Training Center',
+      url: 'https://www.alison.com/course/private-investigation-techniques',
+      description: 'Investigation methods and evidence gathering'
+    }
+  ],
+
+  'agriculture-farming': [
+    {
+      title: 'Sustainable Agriculture Practices',
+      provider: 'Agricultural Institute',
+      url: 'https://www.alison.com/course/sustainable-agriculture-practices',
+      description: 'Environmentally sustainable farming methods'
+    },
+    {
+      title: 'Crop Production and Management',
+      provider: 'Crop Science Academy',
+      url: 'https://www.alison.com/course/crop-production-management',
+      description: 'Crop planning, planting, and harvest management'
+    },
+    {
+      title: 'Livestock Management',
+      provider: 'Animal Science Institute',
+      url: 'https://www.alison.com/course/livestock-management',
+      description: 'Animal husbandry and livestock care'
+    },
+    {
+      title: 'Agricultural Equipment Operation',
+      provider: 'Farm Equipment Training Center',
+      url: 'https://www.alison.com/course/agricultural-equipment-operation',
+      description: 'Farm machinery operation and maintenance'
+    },
+    {
+      title: 'Farm Business Management',
+      provider: 'Agricultural Business Institute',
+      url: 'https://www.alison.com/course/farm-business-management',
+      description: 'Agricultural business planning and financial management'
+    }
+  ],
+
+  'landscaping-horticulture': [
+    {
+      title: 'Landscape Design Fundamentals',
+      provider: 'Landscape Design Institute',
+      url: 'https://www.alison.com/course/landscape-design-fundamentals',
+      description: 'Basic landscape design principles and planning'
+    },
+    {
+      title: 'Plant Identification and Care',
+      provider: 'Horticulture Academy',
+      url: 'https://www.alison.com/course/plant-identification-care',
+      description: 'Plant species identification and care techniques'
+    },
+    {
+      title: 'Turf Management and Lawn Care',
+      provider: 'Turf Management Institute',
+      url: 'https://www.alison.com/course/turf-management-lawn-care',
+      description: 'Professional lawn care and turf maintenance'
+    },
+    {
+      title: 'Irrigation Systems Design',
+      provider: 'Irrigation Technology Center',
+      url: 'https://www.alison.com/course/irrigation-systems-design',
+      description: 'Water management and irrigation system installation'
+    },
+    {
+      title: 'Landscape Business Management',
+      provider: 'Green Industry Institute',
+      url: 'https://www.alison.com/course/landscape-business-management',
+      description: 'Landscaping business operations and customer relations'
+    }
+  ],
+
+  'retail-management': [
+    {
+      title: 'Retail Management Fundamentals',
+      provider: 'Retail Management Institute',
+      url: 'https://www.alison.com/course/retail-management-fundamentals',
+      description: 'Essential retail operations and customer service management'
+    },
+    {
+      title: 'Point of Sale (POS) Systems Training',
+      provider: 'Retail Technology Institute',
+      url: 'https://www.alison.com/course/pos-systems-training',
+      description: 'Modern POS systems and payment processing'
+    },
+    {
+      title: 'Inventory Management for Retail',
+      provider: 'Supply Chain Academy',
+      url: 'https://www.alison.com/course/inventory-management-retail',
+      description: 'Stock control and inventory optimization'
+    },
+    {
+      title: 'Visual Merchandising and Store Layout',
+      provider: 'Merchandising Institute',
+      url: 'https://www.alison.com/course/visual-merchandising-store-layout',
+      description: 'Product display and store design principles'
+    },
+    {
+      title: 'Retail Sales Techniques',
+      provider: 'Sales Training Academy',
+      url: 'https://www.alison.com/course/retail-sales-techniques',
+      description: 'Effective selling strategies and customer engagement'
+    }
+  ],
+
+  'beauty-services': [
+    {
+      title: 'Cosmetology Fundamentals',
+      provider: 'Beauty Education Institute',
+      url: 'https://www.alison.com/course/cosmetology-fundamentals',
+      description: 'Hair, skin, and nail care basics'
+    },
+    {
+      title: 'Advanced Hair Cutting and Styling',
+      provider: 'Professional Beauty Academy',
+      url: 'https://www.alison.com/course/advanced-hair-cutting-styling',
+      description: 'Professional hair cutting and styling techniques'
+    },
+    {
+      title: 'Makeup Artistry Certification',
+      provider: 'Makeup Academy',
+      url: 'https://www.alison.com/course/makeup-artistry-certification',
+      description: 'Professional makeup application and artistry'
+    },
+    {
+      title: 'Nail Technology and Art',
+      provider: 'Nail Technology Institute',
+      url: 'https://www.alison.com/course/nail-technology-art',
+      description: 'Manicure, pedicure, and nail art techniques'
+    },
+    {
+      title: 'Spa and Wellness Services',
+      provider: 'Wellness Professional Academy',
+      url: 'https://www.alison.com/course/spa-wellness-services',
+      description: 'Holistic beauty and wellness treatments'
+    }
+  ],
+
+  'hospitality-service': [
+    {
+      title: 'Hotel Operations Management',
+      provider: 'Hospitality Management Institute',
+      url: 'https://www.alison.com/course/hotel-operations-management',
+      description: 'Front office, housekeeping, and guest services'
+    },
+    {
+      title: 'Food Service and Restaurant Management',
+      provider: 'Culinary Management Academy',
+      url: 'https://www.alison.com/course/food-service-restaurant-management',
+      description: 'Restaurant operations and food service management'
+    },
+    {
+      title: 'Culinary Arts and Kitchen Management',
+      provider: 'Culinary Institute',
+      url: 'https://www.alison.com/course/culinary-arts-kitchen-management',
+      description: 'Professional cooking and kitchen operations'
+    },
+    {
+      title: 'Event Planning and Coordination',
+      provider: 'Event Management Academy',
+      url: 'https://www.alison.com/course/event-planning-coordination',
+      description: 'Event planning, coordination, and execution'
+    },
+    {
+      title: 'Tourism and Travel Services',
+      provider: 'Tourism Professional Institute',
+      url: 'https://www.alison.com/course/tourism-travel-services',
+      description: 'Travel planning and tourism industry operations'
+    }
+  ],
+
+  'transport-logistics': [
+    {
+      title: 'Commercial Driver\'s License (CDL) Training',
+      provider: 'Professional Drivers Institute',
   // Retail roles
   'store-manager': ['retail-management', 'leadership'],
   'sales-associate': ['retail-management', 'customer service'],

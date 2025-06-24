@@ -208,6 +208,146 @@ const templates = {
     `
   }),
 
+  temporaryAccessPurchase: (user, accessDetails) => ({
+    subject: '30-Day Access Pass Activated - MyCVBuilder.co.uk',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #22c55e; color: white; padding: 20px; text-align: center; }
+            .content { padding: 20px; }
+            .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+            .button { display: inline-block; padding: 10px 20px; background: #22c55e; color: white; text-decoration: none; border-radius: 5px; }
+            .highlight { background: #f0f9ff; padding: 15px; border-left: 4px solid #22c55e; margin: 20px 0; }
+            .feature-list { background: #f8fafc; padding: 15px; border-radius: 8px; margin: 15px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <img src="${FRONTEND_URL}/images/mycvbuilder-logo.png" alt="MyCVBuilder.co.uk Logo" style="max-width: 60px; height: auto; margin-bottom: 15px; border-radius: 6px;" />
+              <h1>🎉 Your 30-Day Access Pass is Active!</h1>
+            </div>
+            <div class="content">
+              <p>Dear ${user.name || 'valued customer'},</p>
+              <p>Congratulations! Your 30-Day Access Pass has been successfully activated. You now have full access to all premium features for the next 30 days.</p>
+              
+              <div class="highlight">
+                <h3>📅 Access Period</h3>
+                <p><strong>Start Date:</strong> ${new Date(accessDetails.startTime).toLocaleDateString('en-GB')}</p>
+                <p><strong>End Date:</strong> ${new Date(accessDetails.endTime).toLocaleDateString('en-GB')}</p>
+                <p><em>Make the most of your premium access!</em></p>
+              </div>
+
+              <div class="feature-list">
+                <h3>✨ What You Can Do Now:</h3>
+                <ul>
+                  <li>✅ Create unlimited professional CVs</li>
+                  <li>✅ Access all premium templates</li>
+                  <li>✅ Get comprehensive AI analysis and feedback</li>
+                  <li>✅ Use advanced ATS optimization tools</li>
+                  <li>✅ Download and print your CVs</li>
+                  <li>✅ Get skills gap identification</li>
+                  <li>✅ Receive upskill course recommendations</li>
+                </ul>
+              </div>
+
+              <h3>🚀 Ready to Start?</h3>
+              <p>Your premium features are now unlocked and ready to use. Start creating an amazing CV that gets results!</p>
+              
+              <p style="text-align: center; margin: 30px 0;">
+                <a href="${FRONTEND_URL}/dashboard" class="button">Start Creating CVs</a>
+              </p>
+
+              <p>If you have any questions or need assistance, our support team is here to help.</p>
+            </div>
+            <div class="footer">
+              <p>This is an automated message, please do not reply directly to this email.</p>
+              <p>Visit <a href="${FRONTEND_URL}">MyCVBuilder.co.uk</a> | <a href="${FRONTEND_URL}/contact">Contact Support</a></p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+  }),
+
+  payPerCvPurchase: (user, paymentDetails) => ({
+    subject: 'Pay-Per-CV Purchase Confirmed - MyCVBuilder.co.uk',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #3b82f6; color: white; padding: 20px; text-align: center; }
+            .content { padding: 20px; }
+            .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+            .button { display: inline-block; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px; }
+            .highlight { background: #eff6ff; padding: 15px; border-left: 4px solid #3b82f6; margin: 20px 0; }
+            .feature-list { background: #f8fafc; padding: 15px; border-radius: 8px; margin: 15px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <img src="${FRONTEND_URL}/images/mycvbuilder-logo.png" alt="MyCVBuilder.co.uk Logo" style="max-width: 60px; height: auto; margin-bottom: 15px; border-radius: 6px;" />
+              <h1>📝 Your Pay-Per-CV Purchase is Ready!</h1>
+            </div>
+            <div class="content">
+              <p>Dear ${user.name || 'valued customer'},</p>
+              <p>Thank you for your Pay-Per-CV purchase! You can now create and download one professional CV with our guided process and basic ATS analysis.</p>
+              
+              <div class="highlight">
+                <h3>💳 Purchase Details</h3>
+                <p><strong>Amount:</strong> £${paymentDetails.amount.toFixed(2)}</p>
+                <p><strong>Date:</strong> ${new Date().toLocaleDateString('en-GB')}</p>
+                <p><strong>CV Downloads:</strong> 1 CV download included</p>
+              </div>
+
+              <div class="feature-list">
+                <h3>📋 What's Included:</h3>
+                <ul>
+                  <li>✅ Guided CV creation process</li>
+                  <li>✅ Access to standard templates</li>
+                  <li>✅ Basic ATS scoring and feedback</li>
+                  <li>✅ One CV download/print</li>
+                  <li>✅ Professional formatting help</li>
+                </ul>
+              </div>
+
+              <h3>🎯 Next Steps:</h3>
+              <ol>
+                <li>Click the button below to start creating your CV</li>
+                <li>Fill in your information using our guided process</li>
+                <li>Get basic ATS feedback and scoring</li>
+                <li>Download your completed CV</li>
+              </ol>
+              
+              <p style="text-align: center; margin: 30px 0;">
+                <a href="${FRONTEND_URL}/create" class="button">Create My CV</a>
+              </p>
+
+              <div style="background: #fef3c7; padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b; margin: 20px 0;">
+                <h4 style="color: #92400e; margin-top: 0;">💡 Need More Features?</h4>
+                <p style="color: #92400e; margin-bottom: 0;">If you need to create multiple CVs or want access to advanced AI analysis, consider upgrading to our monthly or annual subscription for unlimited access to all premium features.</p>
+              </div>
+
+              <p>If you have any questions or need assistance, our support team is here to help.</p>
+            </div>
+            <div class="footer">
+              <p>This is an automated message, please do not reply directly to this email.</p>
+              <p>Visit <a href="${FRONTEND_URL}">MyCVBuilder.co.uk</a> | <a href="${FRONTEND_URL}/contact">Contact Support</a></p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+  }),
+
   subscriptionCancelled: (user) => ({
     subject: 'Subscription Cancelled - MyCVBuilder.co.uk',
     html: `
@@ -619,6 +759,26 @@ const sendPaymentSuccessNotification = async (user, payment) => {
 };
 
 /**
+ * Send 30-day access purchase confirmation email
+ * @param {Object} user - User object
+ * @param {Object} accessDetails - Access details including start and end time
+ * @returns {Promise<void>}
+ */
+const sendTemporaryAccessConfirmation = async (user, accessDetails) => {
+  return sendEmail(user, accessDetails, 'temporaryAccessPurchase');
+};
+
+/**
+ * Send pay-per-cv purchase confirmation email
+ * @param {Object} user - User object
+ * @param {Object} paymentDetails - Payment details
+ * @returns {Promise<void>}
+ */
+const sendPayPerCvConfirmation = async (user, paymentDetails) => {
+  return sendEmail(user, paymentDetails, 'payPerCvPurchase');
+};
+
+/**
  * Send subscription cancelled notification email
  * @param {Object} user - User object
  * @returns {Promise<void>}
@@ -700,6 +860,8 @@ module.exports = {
   sendSubscriptionConfirmation,
   sendPaymentFailedNotification,
   sendPaymentSuccessNotification,
+  sendTemporaryAccessConfirmation,
+  sendPayPerCvConfirmation,
   sendSubscriptionCancelledNotification,
   sendPasswordResetEmail,
   sendContactFormEmail
