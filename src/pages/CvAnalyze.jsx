@@ -13,6 +13,7 @@ import AnalysisProgressTracker from '../components/AnalysisProgressTracker';
 import CourseRecommendations from '../components/CourseRecommendations';
 import CVPreviewResult from '../components/CVPreviewResult';
 import { findCourseRecommendations } from '../data/courseRecommendations';
+import './Analyze.css'; // Import the animation styles
 
 // Global objects that exist in browser environment
 /* global FormData, File */
@@ -27,6 +28,8 @@ const CvAnalyze = () => {
   const [error, setError] = useState(''); // Error message state
   const [activeTab, setActiveTab] = useState('upload'); // Active tab for CV input ('upload' or 'paste')
   const [cvText, setCvText] = useState(''); // Text of CV for analysis
+  const [analysisProgress, setAnalysisProgress] = useState(0); // Progress percentage
+  const [analysisStage, setAnalysisStage] = useState(''); // Current stage description
 
   // Context hooks for authentication and server connection
   const { isAuthenticated, user, getAuthHeader } = useAuth();
@@ -199,10 +202,29 @@ const CvAnalyze = () => {
     setError('');
     setAnalysisResults(null);
     setProgressStep(2); // Update progress to Analysis step
+    setAnalysisProgress(0);
+    setAnalysisStage('Initializing analysis...');
     
-    try {
-      // Check subscription status but allow through if in testing mode
-      const hasSubscription = await checkSubscription();
+    // Simulate progress updates with delays for better UX
+    const updateProgress = (progress, stage) => {
+      setAnalysisProgress(progress);
+      setAnalysisStage(stage);
+    };
+
+    // Add realistic delays between progress updates
+    const delayedProgress = async (progress, stage, delay = 500) => {
+      updateProgress(progress, stage);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    };
+    
+          try {
+        // Start progress animation
+        await delayedProgress(10, 'Checking access permissions...', 300);
+        
+        // Check subscription status but allow through if in testing mode
+        const hasSubscription = await checkSubscription();
+        
+        await delayedProgress(20, 'Access verified - preparing analysis...', 400);
       
       // If testing mode is enabled, bypass the subscription check
       if (!hasSubscription && !mockSubscription && !premiumEnabled && !bypassPayment && !devMode) {
@@ -212,10 +234,12 @@ const CvAnalyze = () => {
         return;
       }
       
-      console.log('Proceeding with analysis');
-      
-      // Create form data to send the file or text
-      const formData = new FormData();
+              console.log('Proceeding with analysis');
+        
+        await delayedProgress(30, 'Extracting CV content...', 600);
+        
+        // Create form data to send the file or text
+        const formData = new FormData();
       
       if (activeTab === 'upload' && file) {
         // Explicitly log file information for debugging
@@ -234,19 +258,35 @@ const CvAnalyze = () => {
       const headers = getAuthHeader();
       delete headers['Content-Type']; // This is crucial for multipart/form-data to work properly
       
-      console.log(`Submitting CV analysis request to ${apiUrl}/api/cv/analyze-only`);
-      
-      const response = await fetch(`${apiUrl}/api/cv/analyze-only`, {
+              await delayedProgress(50, 'Processing with AI analysis...', 800);
+        
+        console.log(`Submitting CV analysis request to ${apiUrl}/api/cv/analyze-only`);
+        
+        await delayedProgress(70, 'Analyzing CV structure and content...', 1000);
+        
+        const response = await fetch(`${apiUrl}/api/cv/analyze-only`, {
         method: 'POST',
         headers: headers,
         body: formData
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Analysis results:', data);
-        setProgressStep(3); // Update progress to Results step
-        setAnalysisResults(data);
+              if (response.ok) {
+          await delayedProgress(85, 'Generating recommendations...', 600);
+          
+          const data = await response.json();
+          console.log('Analysis results:', data);
+          
+          await delayedProgress(95, 'Finalizing analysis...', 400);
+          
+          setProgressStep(3); // Update progress to Results step
+          
+          // Complete the progress
+          updateProgress(100, 'Analysis complete!');
+          
+          // Small delay before showing results
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          setAnalysisResults(data);
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
         setError(`Analysis failed: ${errorData.message || response.statusText}`);
@@ -313,8 +353,99 @@ const CvAnalyze = () => {
             </div>
           </div>
         )}
-        
-        {!analysisResults && (
+
+        {isAnalyzing ? (
+          // Analysis Loading Screen with Sophisticated Animation
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 mx-4 max-w-md w-full shadow-2xl">
+              <div className="text-center">
+                {/* Animated CV Icon */}
+                <div className="relative mx-auto w-16 h-20 mb-6">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg cv-icon-glow"></div>
+                  <div className="absolute inset-1 bg-white dark:bg-gray-800 rounded-md flex items-center justify-center">
+                    <svg className="w-8 h-8 text-blue-500 cv-icon-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  {/* Scanning lines animation */}
+                  <div className="absolute inset-0 overflow-hidden rounded-lg">
+                    <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-75"
+                         style={{
+                           animation: 'scan 2s linear infinite',
+                           top: `${Math.min(analysisProgress, 90)}%`
+                         }}>
+                    </div>
+                  </div>
+                  {/* Additional animated elements */}
+                  <div className="absolute -top-2 -right-2 w-4 h-4">
+                    <div className="w-full h-full bg-green-500 rounded-full animate-ping"></div>
+                    <div className="absolute inset-0 w-full h-full bg-green-500 rounded-full opacity-75"></div>
+                  </div>
+                </div>
+
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+                  Analyzing Your CV
+                </h3>
+                
+                <p className="text-gray-600 dark:text-gray-400 mb-6 min-h-[1.5rem]">
+                  {analysisStage}
+                </p>
+
+                {/* Progress Bar */}
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4 overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-500 ease-out progress-shimmer"
+                    style={{ width: `${analysisProgress}%` }}
+                  >
+                  </div>
+                </div>
+
+                {/* Progress Percentage */}
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
+                  {analysisProgress}% Complete
+                </div>
+
+                {/* Stage Indicators */}
+                <div className="flex justify-center space-x-2 mb-6">
+                  {['Extracting', 'Analyzing', 'Processing', 'Complete'].map((stage, index) => {
+                    const stageProgress = (index + 1) * 25;
+                    const isActive = analysisProgress >= stageProgress;
+                    const isCurrent = analysisProgress >= (index * 25) && analysisProgress < stageProgress;
+                    
+                    return (
+                      <div key={stage} className="flex flex-col items-center">
+                        <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                          isActive 
+                            ? 'bg-green-500 scale-110' 
+                            : isCurrent 
+                              ? 'bg-blue-500 animate-pulse scale-110' 
+                              : 'bg-gray-300 dark:bg-gray-600'
+                        }`}></div>
+                        <span className={`text-xs mt-1 transition-colors duration-300 ${
+                          isActive 
+                            ? 'text-green-600 dark:text-green-400 font-medium' 
+                            : isCurrent 
+                              ? 'text-blue-600 dark:text-blue-400 font-medium' 
+                              : 'text-gray-400'
+                        }`}>
+                          {stage}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Educational Tips based on progress */}
+                <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+                  {analysisProgress < 25 && "💡 Our AI analyzes structure, formatting, and keyword optimization"}
+                  {analysisProgress >= 25 && analysisProgress < 50 && "🔍 Evaluating content quality and professional impact"}
+                  {analysisProgress >= 50 && analysisProgress < 75 && "⚡ Generating personalized improvement recommendations"}
+                  {analysisProgress >= 75 && "✨ Finalizing your comprehensive CV analysis report"}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : !analysisResults && (
           // Existing upload UI remains the same
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
             {/* Existing upload tabs */}
