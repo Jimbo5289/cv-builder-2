@@ -283,8 +283,8 @@ class AIAnalysisService {
     
     try {
       // Pass the existing database connection to avoid creating a new one
-      const { db } = require('../config/database');
-      const roleService = new RoleRequirementsService(db);
+      const { client } = require('../config/database');
+      const roleService = new RoleRequirementsService(client);
       
       const requirements = await roleService.getRoleRequirements(role);
       return requirements;

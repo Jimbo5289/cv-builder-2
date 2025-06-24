@@ -5,15 +5,21 @@ class RoleRequirementsService {
     // Use provided Prisma client or create a new one
     if (prismaClient) {
       this.prisma = prismaClient;
+      logger.info('RoleRequirementsService initialized with provided Prisma client');
     } else {
       // Import and use existing database connection
       try {
-        const { db } = require('../config/database');
-        this.prisma = db;
+        const { client } = require('../config/database');
+        if (client) {
+          this.prisma = client;
+          logger.info('RoleRequirementsService initialized with existing database client');
+        } else {
+          logger.warn('No database client available from config, will use hardcoded data');
+          this.prisma = null;
+        }
       } catch (error) {
-        logger.error('Failed to get database connection, creating new Prisma client:', error);
-        const { PrismaClient } = require('@prisma/client');
-        this.prisma = new PrismaClient();
+        logger.error('Failed to get database connection, will use hardcoded data:', error);
+        this.prisma = null;
       }
     }
     this.cache = new Map(); // Cache for performance
@@ -305,9 +311,15 @@ class RoleRequirementsService {
     }
 
     try {
-      // Check if database connection is available
+      // Check if database connection is available with detailed logging
       if (!this.prisma) {
         logger.warn('No database connection available, using hardcoded data');
+        return this.getHardcodedRoleRequirements(roleKey);
+      }
+
+      // Check if the database connection has the required methods
+      if (typeof this.prisma.jobRole?.findUnique !== 'function') {
+        logger.warn('Database connection does not have required methods, using hardcoded data');
         return this.getHardcodedRoleRequirements(roleKey);
       }
 
@@ -336,6 +348,7 @@ class RoleRequirementsService {
         
         // Cache the result
         this.cache.set(roleKey, formatted);
+        logger.info(`Role ${roleKey} loaded from database successfully`);
         return formatted;
       }
 
