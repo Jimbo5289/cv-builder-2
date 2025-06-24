@@ -280,9 +280,12 @@ class AIAnalysisService {
   // Role-specific requirements - now using database-driven approach
   async getRoleRequirements(role, industry) {
     const RoleRequirementsService = require('./roleRequirementsService');
-    const roleService = new RoleRequirementsService();
     
     try {
+      // Pass the existing database connection to avoid creating a new one
+      const { db } = require('../config/database');
+      const roleService = new RoleRequirementsService(db);
+      
       const requirements = await roleService.getRoleRequirements(role);
       return requirements;
     } catch (error) {
