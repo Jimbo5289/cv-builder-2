@@ -537,7 +537,7 @@ class AIAnalysisService {
       relevanceAnalysis: this.createConsensusRelevanceAnalysis(analyses, compatibilityCheck),
       careerTransitionAdvice: this.createConsensusTransitionAdvice(analyses, compatibilityCheck),
       timeToCompetitive: this.determineConsensusTimeframe(analyses, compatibilityCheck),
-      fieldCompatibility: compatibilityCheck.compatibility,
+      fieldCompatibility: compatibilityCheck?.compatibility || 'medium',
       confidence: confidence,
       analysisQuality: confidence > 80 ? 'high' : confidence > 60 ? 'medium' : 'low',
       modelsUsed: analyses.map(a => a.source)
@@ -548,6 +548,10 @@ class AIAnalysisService {
 
   // Validate AI results against hard compatibility rules
   validateWithCompatibility(result, compatibilityCheck, industry, role) {
+    if (!compatibilityCheck) {
+      return result; // Skip validation if no compatibility check available
+    }
+    
     const industryReqs = this.getIndustryRequirements(industry);
     
     // Apply hard limits based on compatibility
@@ -627,10 +631,17 @@ class AIAnalysisService {
 
   createConsensusRelevanceAnalysis(analyses, compatibilityCheck) {
     const analysis = analyses[0]?.relevanceAnalysis || '';
+    if (!compatibilityCheck) {
+      return analysis || 'CV analysis completed';
+    }
     return `${analysis} (Compatibility: ${compatibilityCheck.compatibility}, Keyword Match: ${compatibilityCheck.keywordScore}%)`;
   }
 
   createConsensusTransitionAdvice(analyses, compatibilityCheck) {
+    if (!compatibilityCheck) {
+      return analyses[0]?.careerTransitionAdvice || 'Focus on developing relevant skills and experience for your target role';
+    }
+    
     if (compatibilityCheck.compatibility === 'low') {
       return 'Significant career change required. Consider formal education, bootcamps, or extensive retraining programs. Start with entry-level positions to gain industry experience.';
     } else if (compatibilityCheck.compatibility === 'medium') {
@@ -641,6 +652,10 @@ class AIAnalysisService {
   }
 
   determineConsensusTimeframe(analyses, compatibilityCheck) {
+    if (!compatibilityCheck) {
+      return analyses[0]?.timeToCompetitive || '6-12 months';
+    }
+    
     switch (compatibilityCheck.compatibility) {
       case 'high': return '3-6 months';
       case 'medium': return '1-2 years';
