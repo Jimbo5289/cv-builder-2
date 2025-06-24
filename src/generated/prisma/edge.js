@@ -269,7 +269,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/jamesingleton/cv-builder-2/cv-builder-2-1/src/generated/prisma",
+      "value": "/Users/jamesingleton/cv-builder-2/cv-builder-2-2/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -283,7 +283,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/jamesingleton/cv-builder-2/cv-builder-2-1/prisma/schema.prisma",
+    "sourceFilePath": "/Users/jamesingleton/cv-builder-2/cv-builder-2-2/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -296,7 +296,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
+  "postinstall": true,
   "inlineDatasources": {
     "db": {
       "url": {
