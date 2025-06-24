@@ -1134,6 +1134,18 @@ router.post('/enhance', checkSubscription, upload.fields([
       // Get analysis results
       if (req.body.analysisResults) {
         _analysisResults = req.body.analysisResults;
+        logger.info('Analysis results found, extracting CV content from analysis data');
+        
+        // Try to extract CV content from analysis results
+        if (_analysisResults.extractedContent) {
+          extractedContent = _analysisResults.extractedContent;
+          cvText = JSON.stringify(_analysisResults.extractedContent);
+          logger.info('Using extracted content from analysis results');
+        } else if (_analysisResults.cvContent) {
+          extractedContent = _analysisResults.cvContent;
+          cvText = JSON.stringify(_analysisResults.cvContent);
+          logger.info('Using CV content from analysis results');
+        }
       }
       
       // Get job description text
@@ -1141,49 +1153,47 @@ router.post('/enhance', checkSubscription, upload.fields([
         jobDescriptionText = req.body.jobDescription;
       }
       
-      // Extract CV content from cvFile if provided
-      if (req.body.cvFile && typeof req.body.cvFile === 'object') {
+      // Extract CV content from cvFile if provided (but note: File objects can't be sent in JSON)
+      if (req.body.cvFile && typeof req.body.cvFile === 'object' && !extractedContent) {
+        // Only use this if we don't have content from analysis results
         extractedContent = req.body.cvFile;
         cvText = JSON.stringify(req.body.cvFile);
-      } else {
-        cvText = "This is a sample CV for demonstration with JSON request.";
-        // Use default extracted content as fallback
+        logger.info('Using CV file object content');
+      }
+      
+      // If we still don't have extracted content, create a basic structure
+      if (!extractedContent) {
+        logger.warn('No CV content found in request, using fallback structure');
+        cvText = "CV content not properly extracted from request.";
         extractedContent = {
           personalInfo: {
-            fullName: "John Doe",
-            email: "john.doe@example.com",
-            phone: "123-456-7890",
-            location: "New York, NY"
+            fullName: "User",
+            email: "user@example.com",
+            phone: "Phone number",
+            location: "Location"
           },
-          personalStatement: "Experienced professional with a background in software development and project management.",
+          personalStatement: "Professional seeking career advancement.",
           skills: [
-            { skill: "JavaScript", level: "Advanced" },
-            { skill: "Project Management", level: "Intermediate" },
-            { skill: "Communication", level: "Advanced" }
+            { skill: "Communication", level: "Advanced" },
+            { skill: "Problem Solving", level: "Advanced" },
+            { skill: "Teamwork", level: "Advanced" }
           ],
           experiences: [
             {
-              position: "Senior Developer",
-              company: "Tech Solutions Inc.",
-              startDate: "2018",
-              endDate: "Present",
-              description: "Lead development of web applications and mentored junior developers."
-            },
-            {
-              position: "Project Manager",
-              company: "Digital Innovations",
-              startDate: "2015",
-              endDate: "2018",
-              description: "Managed cross-functional teams for client projects."
+              position: "Professional Role",
+              company: "Previous Company",
+              startDate: "Start Date",
+              endDate: "End Date",
+              description: "Professional experience and achievements."
             }
           ],
           education: [
             {
-              institution: "University of Technology",
-              degree: "Bachelor of Science in Computer Science",
-              startDate: "2011",
-              endDate: "2015",
-              description: "Graduated with honors"
+              institution: "Educational Institution",
+              degree: "Degree",
+              startDate: "Start Date",
+              endDate: "End Date",
+              description: "Educational background"
             }
           ]
         };
@@ -1440,9 +1450,34 @@ router.post('/enhance', checkSubscription, upload.fields([
 function generatePersonalStatement(cvContent, jobTitle, industry, keySkills) {
   // Ensure cvContent and its properties exist
   if (!cvContent) {
-    cvContent = { experiences: [], education: [], skills: [] };
+    cvContent = { experiences: [], education: [], skills: [], personalStatement: '' };
   }
   
+  // If there's already a personal statement, enhance it rather than replace it
+  if (cvContent.personalStatement && cvContent.personalStatement.trim()) {
+    const existingStatement = cvContent.personalStatement.trim();
+    
+    // Add job-specific keywords to existing statement if they're missing
+    const safeKeySkills = Array.isArray(keySkills) ? keySkills : [];
+    const cleanJobTitle = (jobTitle && jobTitle !== 'professional role') ? jobTitle : '';
+    const cleanIndustry = (industry && industry !== 'relevant industry') ? industry : '';
+    
+    let enhancedStatement = existingStatement;
+    
+    // Add job title relevance if not present
+    if (cleanJobTitle && !existingStatement.toLowerCase().includes(cleanJobTitle.toLowerCase())) {
+      enhancedStatement += ` Seeking to apply my expertise in a ${cleanJobTitle} role.`;
+    }
+    
+    // Add industry relevance if not present
+    if (cleanIndustry && !existingStatement.toLowerCase().includes(cleanIndustry.toLowerCase())) {
+      enhancedStatement += ` Passionate about contributing to the ${cleanIndustry} sector.`;
+    }
+    
+    return enhancedStatement;
+  }
+  
+  // Only generate new statement if no existing one
   // Extract years of experience from CV
   let yearsOfExperience = 0;
   if (cvContent.experiences && cvContent.experiences.length > 0) {
@@ -1456,32 +1491,67 @@ function generatePersonalStatement(cvContent, jobTitle, industry, keySkills) {
   }
   
   // Create experience level description
-  let experienceLevel = 'experienced';
+  let experienceLevel = 'Professional';
   if (yearsOfExperience < 2) {
-    experienceLevel = 'motivated';
+    experienceLevel = 'Motivated professional';
   } else if (yearsOfExperience >= 8) {
-    experienceLevel = 'highly experienced';
+    experienceLevel = 'Highly experienced professional';
+  } else if (yearsOfExperience >= 3) {
+    experienceLevel = 'Experienced professional';
   }
   
   // Extract highest degree
   let education = '';
   if (cvContent.education && cvContent.education.length > 0) {
     const degree = cvContent.education[0].degree;
-    if (degree) {
+    if (degree && degree !== 'Degree') {
       education = ` with a ${degree}`;
     }
   }
   
-  // Extract key skills from CV - add null check to prevent "cannot read property 'slice' of undefined"
-  const topSkills = (cvContent.skills && Array.isArray(cvContent.skills)) 
-    ? cvContent.skills.slice(0, 3).map(s => s.skill || '').join(', ') 
-    : 'professional skills';
+  // Extract key skills from CV - use actual skills, not placeholders
+  let topSkills = '';
+  if (cvContent.skills && Array.isArray(cvContent.skills) && cvContent.skills.length > 0) {
+    const realSkills = cvContent.skills
+      .filter(s => s.skill && s.skill !== 'Skill 1' && s.skill !== 'Categorize Your Skills' && s.skill !== 'Add Proficiency Levels')
+      .slice(0, 3)
+      .map(s => s.skill);
+    
+    if (realSkills.length > 0) {
+      topSkills = ` with expertise in ${realSkills.join(', ')}`;
+    }
+  }
   
-  // Ensure keySkills is an array
-  const safeKeySkills = Array.isArray(keySkills) ? keySkills : [];
+  // Get most recent job title from experience
+  let currentField = '';
+  if (cvContent.experiences && cvContent.experiences.length > 0) {
+    const latestExp = cvContent.experiences[0];
+    if (latestExp.position && latestExp.position !== 'Position') {
+      currentField = ` currently working as ${latestExp.position}`;
+    }
+  }
+  
+  // Clean up job title and industry
+  const cleanJobTitle = (jobTitle && jobTitle !== 'professional role') ? jobTitle : 'this role';
+  const cleanIndustry = (industry && industry !== 'relevant industry') ? industry : '';
+  
+  // Ensure keySkills is an array and has real values
+  const safeKeySkills = Array.isArray(keySkills) ? keySkills.filter(skill => skill && skill.trim().length > 0) : [];
   
   // Generate statement with actual information
-  return `${experienceLevel} ${jobTitle || 'professional'}${education} with expertise in ${topSkills}. Passionate about delivering exceptional results in the ${industry || 'professional'} sector. Demonstrated track record of ${safeKeySkills.length > 0 ? safeKeySkills[0].toLowerCase() : 'achieving business goals'} and ${safeKeySkills.length > 1 ? safeKeySkills[1].toLowerCase() : 'driving innovation'}. Seeking to leverage my skills and experience to make a significant impact in a challenging ${jobTitle || 'professional'} role.`;
+  let statement = `${experienceLevel}${education}${topSkills}${currentField}.`;
+  
+  if (cleanIndustry) {
+    statement += ` Passionate about delivering exceptional results in the ${cleanIndustry} sector.`;
+  }
+  
+  if (safeKeySkills.length > 0) {
+    statement += ` Demonstrated experience in ${safeKeySkills.slice(0, 2).join(' and ').toLowerCase()}.`;
+  }
+  
+  statement += ` Seeking to leverage my skills and experience to make a significant impact in ${cleanJobTitle}.`;
+  
+  return statement;
 }
 
 // Helper function to enhance work experience based on job requirements
@@ -1493,35 +1563,63 @@ function generateWorkExperienceEnhancements(experiences, jobTitle, keySkills) {
   const safeKeySkills = Array.isArray(keySkills) ? keySkills : [];
   const safeJobTitle = jobTitle || 'professional';
   
-  // Add targeted advice based on actual experiences
+  // If we have actual experiences, enhance them
   if (safeExperiences.length > 0) {
-    // Suggest quantifying achievements
+    safeExperiences.forEach((exp, index) => {
+      if (exp && exp.position && exp.position !== 'Position') {
+        // Extract job-relevant keywords
+        const relevantKeywords = safeKeySkills
+          .map(skill => skill.replace(/experience in|knowledge of|proficiency with|skill in/i, '').trim())
+          .filter(skill => skill && skill.length > 2)
+          .slice(0, 3);
+        
+        // Enhance the description with job-relevant content
+        let enhancedDescription = exp.description || `Responsible for ${exp.position.toLowerCase()} duties at ${exp.company}.`;
+        
+        // Add quantifiable achievements suggestion
+        if (!enhancedDescription.match(/\d+%|\$\d+|\d+\s*(projects|clients|team|people)/i)) {
+          enhancedDescription += ` Achieved measurable results including improved efficiency and team performance.`;
+        }
+        
+        // Add relevant keywords if not present
+        relevantKeywords.forEach(keyword => {
+          if (!enhancedDescription.toLowerCase().includes(keyword.toLowerCase())) {
+            enhancedDescription += ` Utilized ${keyword} to drive business objectives.`;
+          }
+        });
+        
+        enhancements.push({
+          title: exp.position,
+          description: enhancedDescription,
+          company: exp.company,
+          startDate: exp.startDate,
+          endDate: exp.endDate,
+          originalPosition: exp.position
+        });
+      }
+    });
+  }
+  
+  // If no real experiences or only placeholder data, provide enhancement suggestions
+  if (enhancements.length === 0 || safeExperiences.every(exp => !exp.position || exp.position === 'Position')) {
     enhancements.push({
       title: "Quantify Your Achievements",
-      description: `Strengthen your ${safeJobTitle} experience by adding specific metrics and results. For example, in your role at ${safeExperiences[0].company || 'your company'}, include percentages, numbers, or monetary values that demonstrate your impact.`
+      description: `Add specific metrics and results to your experience entries. Include percentages, numbers, or monetary values that demonstrate your impact in previous roles.`
     });
     
-    // Suggest highlighting relevant skills
+    enhancements.push({
+      title: "Use Powerful Action Verbs",
+      description: `Begin bullet points with strong action verbs relevant to ${safeJobTitle} roles, such as 'Implemented', 'Coordinated', 'Analyzed', 'Developed', or 'Led' to make your achievements more impactful.`
+    });
+    
     if (safeKeySkills.length > 0) {
-      const relevantSkill = safeKeySkills[0].replace(/experience in/i, '').replace(/knowledge of/i, '').trim();
+      const relevantSkill = safeKeySkills[0].replace(/experience in|knowledge of/i, '').trim();
       enhancements.push({
         title: "Highlight Relevant Skills",
-        description: `Emphasize your experience with ${relevantSkill} in your role at ${safeExperiences[0].company || 'your company'}. Specifically mention how you applied this skill in your day-to-day responsibilities.`
+        description: `Emphasize your experience with ${relevantSkill} in your role descriptions. Specifically mention how you applied this skill in your day-to-day responsibilities.`
       });
     }
   }
-  
-  // Always add action verbs advice
-  enhancements.push({
-    title: "Use Powerful Action Verbs",
-    description: `Begin bullet points with strong action verbs relevant to ${safeJobTitle} roles, such as 'Implemented', 'Coordinated', 'Analyzed', 'Developed', or 'Led' to make your achievements more impactful.`
-  });
-  
-  // Add advice about job-specific terminology
-  enhancements.push({
-    title: "Use Industry Terminology",
-    description: `Incorporate ${safeJobTitle}-specific terminology and keywords throughout your experience descriptions to demonstrate your familiarity with the field.`
-  });
   
   return enhancements;
 }
@@ -1537,39 +1635,69 @@ function generateSkillEnhancements(cvSkills, keySkills, _requirements) {
   // Create a set of existing skills for easy checking
   const existingSkillsSet = new Set(safeCvSkills.map(s => (s.skill || '').toLowerCase()));
   
-  // Add missing key skills from job description
+  // First, add all existing skills that aren't placeholders
+  safeCvSkills.forEach(skillObj => {
+    if (skillObj && skillObj.skill && 
+        skillObj.skill !== 'Skill 1' && 
+        skillObj.skill !== 'Categorize Your Skills' && 
+        skillObj.skill !== 'Add Proficiency Levels') {
+      skillEnhancements.push({
+        title: skillObj.skill,
+        description: `Existing skill with ${skillObj.level || 'intermediate'} proficiency`,
+        level: skillObj.level || 'Intermediate'
+      });
+    }
+  });
+  
+  // Extract and add missing key skills from job description
   const missingSkills = [];
   safeKeySkills.forEach(skill => {
     if (!skill) return;
     
-    // Extract core skill terms
-    const skillTerms = skill.toLowerCase().match(/(?:experience in|knowledge of|proficiency with|skill in)\s+([^,.]+)/i);
-    if (skillTerms && skillTerms[1]) {
-      const coreTerm = skillTerms[1].trim();
-      if (!existingSkillsSet.has(coreTerm) && missingSkills.length < 3) {
-        missingSkills.push(coreTerm);
-      }
+    // Extract core skill terms using multiple patterns
+    let coreTerm = skill.replace(/(?:experience in|knowledge of|proficiency with|skill in|expertise in|familiar with)/gi, '').trim();
+    
+    // Clean up common phrases
+    coreTerm = coreTerm.replace(/^(a|an|the)\s+/gi, '');
+    coreTerm = coreTerm.replace(/\s+(required|preferred|essential|desired)$/gi, '');
+    coreTerm = coreTerm.split(/[,;]|and/)[0].trim(); // Take first part if comma/semicolon separated
+    
+    if (coreTerm && coreTerm.length > 2 && !existingSkillsSet.has(coreTerm.toLowerCase()) && missingSkills.length < 5) {
+      missingSkills.push(coreTerm);
+      existingSkillsSet.add(coreTerm.toLowerCase()); // Prevent duplicates
     }
   });
   
-  if (missingSkills.length > 0) {
+  // Add missing skills as recommendations to add
+  missingSkills.forEach(skill => {
     skillEnhancements.push({
-      title: "Add Required Skills",
-      description: `Consider adding these key skills mentioned in the job description: ${missingSkills.join(', ')}.`
+      title: skill,
+      description: `Key skill mentioned in job requirements - consider highlighting this skill`,
+      level: 'Required',
+      isRecommended: true
+    });
+  });
+  
+  // If we have very few skills, provide some general suggestions
+  if (skillEnhancements.length < 3) {
+    skillEnhancements.push({
+      title: "Communication",
+      description: "Essential soft skill for most professional roles",
+      level: "Advanced"
+    });
+    
+    skillEnhancements.push({
+      title: "Problem Solving",
+      description: "Critical thinking and analytical skills",
+      level: "Advanced"
+    });
+    
+    skillEnhancements.push({
+      title: "Teamwork",
+      description: "Collaboration and interpersonal skills",
+      level: "Advanced"
     });
   }
-  
-  // Suggest skill categorization
-  skillEnhancements.push({
-    title: "Categorize Your Skills",
-    description: "Organize your skills into categories (e.g., Technical Skills, Soft Skills, Industry Knowledge) to make them more scannable for recruiters."
-  });
-  
-  // Suggest proficiency levels
-  skillEnhancements.push({
-    title: "Add Proficiency Levels",
-    description: "Consider indicating your proficiency level for each skill (e.g., Expert, Advanced, Intermediate) to give employers a clearer picture of your capabilities."
-  });
   
   return skillEnhancements;
 }
@@ -1617,6 +1745,172 @@ function generateCourseRecommendations(keySkills, jobTitle, industry) {
   });
   
   return courses;
+}
+
+// Helper function to extract structured CV content from text
+function extractStructuredCVContent(cvText) {
+  if (!cvText || cvText.length < 20) {
+    return {
+      personalInfo: { fullName: "User", email: "user@example.com", phone: "Phone number", location: "Location" },
+      personalStatement: "",
+      skills: [],
+      experiences: [],
+      education: []
+    };
+  }
+  
+  // Extract personal information
+  const fullNameMatch = cvText.match(/(?:^|\n)([A-Z][a-z]+ [A-Z][a-z]+(?:\s[A-Z][a-z]+)?)/m);
+  const emailMatch = cvText.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
+  const phoneMatch = cvText.match(/(\+?[0-9]{1,3}[-\s]?[0-9]{3,}[-\s]?[0-9]{3,})/);
+  const locationMatch = cvText.match(/((?:[A-Z][a-z]+,?\s*)+(?:[A-Z]{2}|[A-Z][a-z]+))/);
+  
+  // Extract personal statement (usually the first paragraph after contact info)
+  const personalStatementMatch = cvText.match(/(?:PROFILE|SUMMARY|OBJECTIVE|PERSONAL STATEMENT)(?:\s*:?\s*)([\s\S]*?)(?:\n(?:EXPERIENCE|EDUCATION|EMPLOYMENT|SKILLS|WORK HISTORY)|$)/i);
+  let personalStatement = "";
+  if (personalStatementMatch && personalStatementMatch[1]) {
+    personalStatement = personalStatementMatch[1].trim().split('\n')[0]; // Take first paragraph
+    if (personalStatement.length > 500) {
+      personalStatement = personalStatement.substring(0, 500) + "...";
+    }
+  }
+  
+  // Extract skills
+  const skillsSection = cvText.match(/(?:SKILLS|EXPERTISE|COMPETENCIES|KEY SKILLS)(?:\s*:?\s*)([\s\S]*?)(?:\n(?:EXPERIENCE|EDUCATION|EMPLOYMENT|WORK HISTORY)|$)/i);
+  const skills = [];
+  
+  if (skillsSection && skillsSection[1]) {
+    const skillText = skillsSection[1];
+    // Look for bullet points or comma-separated skills
+    const skillMatches = skillText.match(/[•\-*]\s*([^\n]+)/g) || skillText.split(/[,;]\s*/);
+    
+    skillMatches.forEach(skill => {
+      let cleanSkill = skill.replace(/[•\-*]\s*/, '').trim();
+      if (cleanSkill.length > 2 && cleanSkill.length < 50 && 
+          !['SKILLS', 'EXPERTISE', 'COMPETENCIES', 'EXPERIENCE', 'EDUCATION', 'EMPLOYMENT'].includes(cleanSkill.toUpperCase())) {
+        skills.push({ skill: cleanSkill, level: 'Intermediate' });
+      }
+    });
+  }
+  
+  // Extract work experience
+  const experienceSection = cvText.match(/(?:EXPERIENCE|EMPLOYMENT|WORK HISTORY|PROFESSIONAL EXPERIENCE)(?:\s*:?\s*)([\s\S]*?)(?:\n(?:EDUCATION|SKILLS|CERTIFICATIONS|AWARDS)|$)/i);
+  const experiences = [];
+  
+  if (experienceSection && experienceSection[1]) {
+    const experienceBlocks = experienceSection[1].split(/\n\s*\n/);
+    
+    experienceBlocks.forEach(block => {
+      if (block.trim().length < 20) return;
+      
+      const lines = block.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+      if (lines.length < 2) return;
+      
+      // First line usually contains position and/or company
+      const firstLine = lines[0];
+      const dateMatch = firstLine.match(/([0-9]{4})(?:\s*[-–]\s*)([0-9]{4}|Present|Current)/i);
+      
+      let position = "";
+      let company = "";
+      let startDate = "";
+      let endDate = "";
+      
+      if (dateMatch) {
+        startDate = dateMatch[1];
+        endDate = dateMatch[2];
+        // Remove dates from first line to extract position/company
+        const withoutDate = firstLine.replace(dateMatch[0], '').trim();
+        const parts = withoutDate.split(/\s*[-–,|]\s*/);
+        position = parts[0] || "Position";
+        company = parts[1] || "Company";
+      } else {
+        // Try to find position and company in first two lines
+        position = lines[0] || "Position";
+        if (lines[1] && !lines[1].match(/^[•\-*]/)) {
+          company = lines[1];
+        } else {
+          company = "Company";
+        }
+      }
+      
+      // Extract description from remaining lines
+      const descriptionLines = lines.slice(1).filter(line => 
+        !line.includes(company) && 
+        line.length > 10 &&
+        !line.match(/^[0-9]{4}/)
+      );
+      const description = descriptionLines.join(' ').substring(0, 300);
+      
+      if (position !== "Position" || description.length > 10) {
+        experiences.push({
+          position: position.trim(),
+          company: company.trim(),
+          startDate: startDate || "",
+          endDate: endDate || "",
+          description: description.trim() || `Professional responsibilities in ${position.toLowerCase()}.`
+        });
+      }
+    });
+  }
+  
+  // Extract education
+  const educationSection = cvText.match(/(?:EDUCATION|ACADEMIC BACKGROUND|QUALIFICATIONS)(?:\s*:?\s*)([\s\S]*?)(?:\n(?:SKILLS|EXPERIENCE|CERTIFICATIONS|AWARDS)|$)/i);
+  const education = [];
+  
+  if (educationSection && educationSection[1]) {
+    const educationBlocks = educationSection[1].split(/\n\s*\n/);
+    
+    educationBlocks.forEach(block => {
+      if (block.trim().length < 10) return;
+      
+      const lines = block.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+      if (lines.length === 0) return;
+      
+      const firstLine = lines[0];
+      const degreeMatch = firstLine.match(/(Bachelor|Master|PhD|Doctor|Diploma|Certificate|BSc|MSc|BA|MA)(?:\s+of\s+|\s+in\s+|\s+)([^,\n]+)/i);
+      const institutionMatch = block.match(/([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:University|College|Institute|School)/i);
+      const dateMatch = block.match(/([0-9]{4})(?:\s*[-–]\s*)([0-9]{4}|Present)/i);
+      
+      if (degreeMatch || institutionMatch) {
+        education.push({
+          institution: institutionMatch ? institutionMatch[0] : "Educational Institution",
+          degree: degreeMatch ? degreeMatch[0] : "Degree",
+          startDate: dateMatch ? dateMatch[1] : "",
+          endDate: dateMatch ? dateMatch[2] : "",
+          description: ""
+        });
+      }
+    });
+  }
+  
+  return {
+    personalInfo: {
+      fullName: fullNameMatch ? fullNameMatch[1] : "User",
+      email: emailMatch ? emailMatch[1] : "user@example.com",
+      phone: phoneMatch ? phoneMatch[1] : "Phone number",
+      location: locationMatch ? locationMatch[1] : "Location"
+    },
+    personalStatement: personalStatement,
+    skills: skills.length > 0 ? skills : [
+      { skill: "Communication", level: "Advanced" },
+      { skill: "Problem Solving", level: "Advanced" },
+      { skill: "Teamwork", level: "Advanced" }
+    ],
+    experiences: experiences.length > 0 ? experiences : [{
+      position: "Professional Role",
+      company: "Previous Company",
+      startDate: "",
+      endDate: "",
+      description: "Professional experience and achievements."
+    }],
+    education: education.length > 0 ? education : [{
+      institution: "Educational Institution",
+      degree: "Degree",
+      startDate: "",
+      endDate: "",
+      description: ""
+    }]
+  };
 }
 
 // Removed duplicate save endpoint and schema - using the unified one below
@@ -3049,8 +3343,14 @@ router.post('/analyze', (req, res, next) => {
     
     // Extract CV text for analysis
     let cvText = '';
+    let extractedCVContent = null;
+    
     try {
       cvText = await extractTextFromFile(cvFile);
+      
+      // Also extract structured CV content for enhancement purposes
+      extractedCVContent = extractStructuredCVContent(cvText);
+      
     } catch (extractError) {
       logger.warn('PDF/DOCX extraction failed, using fallback text extraction:', extractError.message);
       
@@ -3062,9 +3362,27 @@ router.post('/analyze', (req, res, next) => {
         if (cvText.length < 50) {
           cvText = `Professional CV submitted for ${industry} ${role} analysis. Content extraction temporarily unavailable - using AI analysis fallback.`;
         }
+        
+        // Extract structured content from fallback text
+        extractedCVContent = extractStructuredCVContent(cvText);
+        
       } catch (fallbackError) {
         logger.error('Fallback text extraction also failed:', fallbackError.message);
         cvText = `Professional CV submitted for ${industry} ${role} analysis. Content extraction temporarily unavailable - using AI analysis fallback.`;
+        
+        // Create minimal structured content
+        extractedCVContent = {
+          personalInfo: {
+            fullName: "User",
+            email: "user@example.com",
+            phone: "Phone number",
+            location: "Location"
+          },
+          personalStatement: "",
+          skills: [],
+          experiences: [],
+          education: []
+        };
       }
     }
 
@@ -3108,11 +3426,15 @@ router.post('/analyze', (req, res, next) => {
       jobDescriptionSource: _jobDescriptionSource
     };
 
+    // Add extracted CV content to results for enhancement
+    formattedResults.extractedContent = extractedCVContent;
+
     logger.info('CV analysis completed', {
       industry: industry || 'generic',
       role: role || 'generic',
       score: formattedResults.score,
-      aiEnabled: aiAnalysisService.isEnabled
+      aiEnabled: aiAnalysisService.isEnabled,
+      hasExtractedContent: !!extractedCVContent
     });
     
     res.json(formattedResults);
@@ -3915,13 +4237,21 @@ router.post('/apply-enhancements', (req, res, next) => {
       personalInfo: cvContent?.personalInfo || {},
       // Add enhanced personal statement
       personalStatement: enhancedData.personalStatement || '',
-      // Update skills with enhanced ones
-      skills: enhancedData.skills.map(skill => ({
-        skill: skill.title,
-        level: 'Advanced' // Default level
+      // Update skills with enhanced ones - handle both title and skill properties
+      skills: (enhancedData.skills || []).map(skill => ({
+        skill: skill.title || skill.skill || 'Unknown Skill',
+        level: skill.level || 'Advanced' // Use provided level or default
       })),
-      // Keep existing experiences but apply enhancements if available
-      experiences: cvContent?.experiences || [],
+      // Apply enhanced work experiences if available, otherwise keep original
+      experiences: enhancedData.workExperience && enhancedData.workExperience.length > 0 
+        ? enhancedData.workExperience.map(exp => ({
+            position: exp.title || exp.position || exp.originalPosition || 'Position',
+            company: exp.company || 'Company',
+            startDate: exp.startDate || '',
+            endDate: exp.endDate || '',
+            description: exp.description || ''
+          }))
+        : cvContent?.experiences || [],
       // Keep existing education
       education: cvContent?.education || [],
       // Keep existing references

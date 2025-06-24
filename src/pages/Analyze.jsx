@@ -323,8 +323,9 @@ const Analyze = () => {
       setIsEnhancing(true);
       
       // Prepare data for the enhance request
+      // Use extracted content from analysis results instead of raw file
       const enhanceData = {
-        cvFile: file || null,
+        cvFile: analysisResults.extractedContent || null,
         jobDescription: jobDescriptionText || null,
         analysisResults: analysisResults
       };
