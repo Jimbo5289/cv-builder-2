@@ -10,6 +10,7 @@ import { useServer } from '../context/ServerContext';
 import SubscriptionModal from '../components/SubscriptionModal';
 import CourseRecommendations from '../components/CourseRecommendations';
 import { findCourseRecommendations } from '../data/courseRecommendations';
+import './Analyze.css';
 import { FiUpload, FiCheck, FiX, FiAlertCircle, FiFileText } from 'react-icons/fi';
 import CvAnalysisNextSteps from '../components/CvAnalysisNextSteps';
 import AnalysisProgressTracker from '../components/AnalysisProgressTracker';
@@ -33,6 +34,11 @@ const Analyze = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false); // State for subscription modal visibility
   const [showPreview, setShowPreview] = useState(false); // State for CV preview visibility
   const [previewData, setPreviewData] = useState(null); // Data for CV preview
+  const [analysisProgress, setAnalysisProgress] = useState(0); // Progress percentage
+  const [analysisStage, setAnalysisStage] = useState(''); // Current stage description
+  const [enhancedCV, setEnhancedCV] = useState(null);
+  const [extractedCVContent, setExtractedCVContent] = useState(null);
+  const [isEnhancing, setIsEnhancing] = useState(false);
 
   // Context hooks for authentication and server connection
   const { isAuthenticated, user, getAuthHeader } = useAuth();
@@ -208,9 +214,24 @@ const Analyze = () => {
     setIsAnalyzing(true);
     setError('');
     setAnalysisResults(null);
+    setAnalysisProgress(0);
+    setAnalysisStage('Initializing analysis...');
+    
+    // Simulate progress updates with delays for better UX
+    const updateProgress = (progress, stage) => {
+      setAnalysisProgress(progress);
+      setAnalysisStage(stage);
+    };
+
+    // Add realistic delays between progress updates
+    const delayedProgress = async (progress, stage, delay = 500) => {
+      updateProgress(progress, stage);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    };
     
     try {
-      // Check subscription status
+      // Check subscription status with delay
+      await delayedProgress(10, 'Verifying subscription...', 300);
       const hasSubscription = import.meta.env.DEV || await checkSubscription();
       
       // If testing mode is enabled, bypass the subscription check
@@ -222,6 +243,8 @@ const Analyze = () => {
       }
       
       console.log('User has active subscription, proceeding with analysis');
+      
+      await delayedProgress(20, 'Preparing CV for analysis...', 400);
       
       // Create form data to send the file
       const formData = new FormData();
@@ -242,9 +265,13 @@ const Analyze = () => {
       // Check if browser is Safari
       const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
       
+      await delayedProgress(30, 'Extracting CV content...', 600);
+      
       // Use the endpoint with special handling for Safari
       const apiEndpoint = `${apiUrl}/api/cv/analyze`;
       console.log(`Sending CV to ${apiEndpoint} from ${isSafari ? 'Safari' : 'non-Safari'} browser`);
+      
+      await delayedProgress(50, 'Analyzing CV content...', 300);
       
       // Safari sometimes has issues with complex fetch requests, use a more basic approach
       if (isSafari) {
@@ -266,8 +293,10 @@ const Analyze = () => {
         });
         
         if (response.ok) {
+          updateProgress(80, 'Processing analysis results...');
           const data = await response.json();
           console.log('Analysis results:', data);
+          updateProgress(100, 'Analysis complete!');
           setAnalysisResults(data);
         } else {
           const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
@@ -282,8 +311,10 @@ const Analyze = () => {
         });
         
         if (response.ok) {
+          updateProgress(80, 'Processing analysis results...');
           const data = await response.json();
           console.log('Analysis results:', data);
+          updateProgress(100, 'Analysis complete!');
           setAnalysisResults(data);
         } else {
           const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
@@ -312,10 +343,6 @@ const Analyze = () => {
     return 'text-red-600';
   };
 
-  const [isEnhancing, setIsEnhancing] = useState(false);
-  const [enhancedCV, setEnhancedCV] = useState(null);
-  const [extractedCVContent, setExtractedCVContent] = useState(null);
-  
   const handleAIEnhance = async () => {
     if (!analysisResults) return;
     
@@ -541,7 +568,99 @@ const Analyze = () => {
           />
         )}
 
-        {!analysisResults ? (
+        {isAnalyzing ? (
+          // Analysis Loading Screen
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 mx-4 max-w-md w-full shadow-2xl">
+              <div className="text-center">
+                {/* Animated CV Icon */}
+                <div className="relative mx-auto w-16 h-20 mb-6">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg cv-icon-glow"></div>
+                  <div className="absolute inset-1 bg-white dark:bg-gray-800 rounded-md flex items-center justify-center">
+                    <svg className="w-8 h-8 text-blue-500 cv-icon-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  {/* Scanning lines animation */}
+                  <div className="absolute inset-0 overflow-hidden rounded-lg">
+                    <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-75"
+                         style={{
+                           animation: 'scan 2s linear infinite',
+                           top: `${Math.min(analysisProgress, 90)}%`
+                         }}>
+                    </div>
+                  </div>
+                  {/* Additional animated elements */}
+                  <div className="absolute -top-2 -right-2 w-4 h-4">
+                    <div className="w-full h-full bg-green-500 rounded-full animate-ping"></div>
+                    <div className="absolute inset-0 w-full h-full bg-green-500 rounded-full opacity-75"></div>
+                  </div>
+                </div>
+
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+                  Analyzing Your CV
+                </h3>
+                
+                <p className="text-gray-600 dark:text-gray-400 mb-6 min-h-[1.5rem]">
+                  {analysisStage}
+                </p>
+
+                {/* Progress Bar */}
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4 overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-500 ease-out progress-shimmer"
+                    style={{ width: `${analysisProgress}%` }}
+                  >
+                  </div>
+                </div>
+
+                {/* Progress Percentage */}
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
+                  {analysisProgress}% Complete
+                </div>
+
+                {/* Stage Indicators */}
+                <div className="flex justify-center space-x-2 mb-6">
+                  {['Extracting', 'Analyzing', 'Processing', 'Complete'].map((stage, index) => {
+                    const stageProgress = (index + 1) * 25;
+                    const isActive = analysisProgress >= stageProgress;
+                    const isCurrent = analysisProgress >= (index * 25) && analysisProgress < stageProgress;
+                    
+                    return (
+                      <div key={stage} className="flex flex-col items-center">
+                        <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                          isActive 
+                            ? 'bg-green-500 scale-110' 
+                            : isCurrent 
+                              ? 'bg-blue-500 animate-pulse scale-110' 
+                              : 'bg-gray-300 dark:bg-gray-600'
+                        }`}></div>
+                        <span className={`text-xs mt-1 transition-colors duration-300 ${
+                          isActive 
+                            ? 'text-green-600 dark:text-green-400 font-medium' 
+                            : isCurrent 
+                              ? 'text-blue-600 dark:text-blue-400 font-medium' 
+                              : 'text-gray-400'
+                        }`}>
+                          {stage}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Fun Facts */}
+                <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                  {analysisProgress < 25 && "💡 Did you know? Our AI analyzes over 50 different CV criteria to give you the most accurate feedback possible."}
+                  {analysisProgress >= 25 && analysisProgress < 50 && "🎯 We're matching your skills against industry requirements and ATS systems."}
+                  {analysisProgress >= 50 && analysisProgress < 75 && "📊 Our algorithm evaluates your CV's formatting, content quality, and keyword optimization."}
+                  {analysisProgress >= 75 && analysisProgress < 100 && "✨ Almost done! We're generating personalized recommendations just for you."}
+                  {analysisProgress >= 100 && "🎉 Analysis complete! Preparing your detailed feedback..."}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : !analysisResults ? (
           <div>
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Step 1: Upload Your CV</h2>
