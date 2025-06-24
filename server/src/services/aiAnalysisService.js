@@ -65,11 +65,11 @@ class AIAnalysisService {
         transferableFrom: ['mathematics', 'economics', 'data analysis', 'consulting', 'insurance']
       },
       design: {
-        keywords: ['creative design', 'visual design', 'UI/UX', 'graphic design', 'interior design', 'Adobe Creative Suite', 'Photoshop', 'Illustrator', 'Figma', 'color theory', 'typography', 'composition', 'branding', 'layout', 'prototyping', 'user experience', 'aesthetic', 'portfolio'],
-        skills: ['Creative thinking', 'Visual communication', 'Attention to aesthetic detail', 'Client consultation', 'Project management', 'Software proficiency', 'Problem-solving through design'],
-        qualifications: ['Design degree/diploma', 'Portfolio of work', 'Design software certifications', 'Industry experience', 'Client testimonials'],
-        incompatibleFields: ['emergency services', 'healthcare', 'finance', 'manufacturing'],
-        transferableFrom: ['architecture', 'art', 'marketing', 'photography']
+        keywords: ['creative design', 'visual design', 'UI/UX', 'graphic design', 'interior design', 'fashion design', 'apparel design', 'Adobe Creative Suite', 'Photoshop', 'Illustrator', 'Figma', 'fashion illustration', 'pattern making', 'garment construction', 'textile design', 'fashion merchandising', 'trend forecasting', 'color theory', 'typography', 'composition', 'branding', 'layout', 'prototyping', 'user experience', 'aesthetic', 'portfolio', 'draping', 'sewing', 'fashion sketching', 'fashion CAD', 'sustainable fashion', 'fashion styling', 'fabric selection'],
+        skills: ['Creative thinking', 'Visual communication', 'Attention to aesthetic detail', 'Client consultation', 'Project management', 'Software proficiency', 'Problem-solving through design', 'Fashion illustration', 'Pattern making', 'Textile knowledge', 'Trend analysis', 'Color theory application'],
+        qualifications: ['Design degree/diploma', 'Fashion design degree', 'Portfolio of work', 'Design software certifications', 'Fashion industry experience', 'Client testimonials', 'Fashion design certifications'],
+        incompatibleFields: ['emergency services', 'healthcare', 'finance', 'manufacturing', 'technology'],
+        transferableFrom: ['architecture', 'art', 'marketing', 'photography', 'textiles', 'visual arts', 'retail fashion']
       },
       engineering: {
         keywords: ['design', 'CAD', 'technical drawings', 'specifications', 'quality control', 'prototyping', 'testing', 'manufacturing', 'engineering analysis', 'compliance', 'problem-solving', 'product development', 'process improvement', 'technical documentation', 'AutoCAD', 'SolidWorks', 'MATLAB'],
@@ -154,6 +154,16 @@ class AIAnalysisService {
         qualifications: ['Retail management training', 'Customer service certifications', 'Sales training', 'Merchandising qualifications', 'Retail operations training'],
         incompatibleFields: ['engineering', 'healthcare', 'technology'],
         transferableFrom: ['hospitality', 'customer service', 'sales', 'marketing']
+      },
+      'sales-manager': {
+        specificSkills: ['Sales strategy', 'Team management', 'Customer relationship management', 'Sales forecasting', 'Performance management', 'Market analysis'],
+        seniority: ['Sales Executive: 0-3 years', 'Sales Manager: 3-7 years', 'Sales Director: 7+ years'],
+        criticalKeywords: ['sales', 'customer', 'revenue', 'team management', 'business development']
+      },
+      'fashion-designer': {
+        specificSkills: ['Fashion illustration', 'Garment construction', 'Pattern making', 'Textile knowledge', 'Trend analysis', 'Adobe Creative Suite', 'Fashion sketching', 'Draping', 'Sewing techniques', 'Fashion merchandising', 'Color theory', 'Fabric selection', 'Fashion history', 'Sustainable fashion'],
+        seniority: ['Assistant Designer: 0-2 years', 'Designer: 2-5 years', 'Senior Designer: 5-8 years', 'Creative Director: 8+ years'],
+        criticalKeywords: ['fashion design', 'apparel design', 'garment construction', 'pattern making', 'fashion illustration', 'textile design', 'trend forecasting', 'fashion merchandising', 'clothing design', 'fashion sketching', 'draping', 'fashion portfolio', 'fashion CAD', 'sustainable fashion', 'fashion styling']
       }
     };
 
@@ -258,6 +268,11 @@ class AIAnalysisService {
         specificSkills: ['Sales strategy', 'Team management', 'Customer relationship management', 'Sales forecasting', 'Performance management', 'Market analysis'],
         seniority: ['Sales Executive: 0-3 years', 'Sales Manager: 3-7 years', 'Sales Director: 7+ years'],
         criticalKeywords: ['sales', 'customer', 'revenue', 'team management', 'business development']
+      },
+      'fashion-designer': {
+        specificSkills: ['Fashion illustration', 'Garment construction', 'Pattern making', 'Textile knowledge', 'Trend analysis', 'Adobe Creative Suite', 'Fashion sketching', 'Draping', 'Sewing techniques', 'Fashion merchandising', 'Color theory', 'Fabric selection', 'Fashion history', 'Sustainable fashion'],
+        seniority: ['Assistant Designer: 0-2 years', 'Designer: 2-5 years', 'Senior Designer: 5-8 years', 'Creative Director: 8+ years'],
+        criticalKeywords: ['fashion design', 'apparel design', 'garment construction', 'pattern making', 'fashion illustration', 'textile design', 'trend forecasting', 'fashion merchandising', 'clothing design', 'fashion sketching', 'draping', 'fashion portfolio', 'fashion CAD', 'sustainable fashion', 'fashion styling']
       }
     };
 
@@ -900,6 +915,12 @@ Remember: Score realistically based on actual job requirements. A career changer
     if (industry === 'legal') {
       return ['Include bar admissions and legal certifications', 'Highlight case management experience', 'Add specialized legal area expertise'];
     }
+    if (industry === 'design' && (role === 'fashion-designer' || role?.includes('fashion'))) {
+      return ['Showcase fashion design portfolio with diverse projects', 'Include specific fashion software proficiency (Adobe Illustrator, CLO 3D, Gerber)', 'Highlight trend forecasting and market research experience', 'Add fashion industry internships and collaborations', 'Quantify design project outcomes and commercial success'];
+    }
+    if (industry === 'design') {
+      return ['Include design software proficiency prominently', 'Showcase portfolio with diverse project examples', 'Highlight client collaboration and project outcomes'];
+    }
     if (industry === 'hospitality') {
       return ['Include customer service metrics', 'Highlight guest satisfaction scores', 'Add hospitality management experience'];
     }
@@ -1168,7 +1189,8 @@ Remember: Score realistically based on actual job requirements. A career changer
       'financial-analyst': ['financial analyst', 'finance analyst', 'investment analyst'],
       'building-safety-manager': ['building safety manager', 'safety manager', 'fire safety'],
       'project-manager': ['project manager', 'program manager', 'project lead'],
-      'marketing-manager': ['marketing manager', 'brand manager', 'marketing director']
+      'marketing-manager': ['marketing manager', 'brand manager', 'marketing director'],
+      'fashion-designer': ['fashion designer', 'apparel designer', 'clothing designer', 'textile designer', 'fashion stylist']
     };
 
     for (const [role, keywords] of Object.entries(roleKeywords)) {

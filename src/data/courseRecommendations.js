@@ -782,6 +782,134 @@ export const COURSE_RECOMMENDATIONS = {
     }
   ],
   
+  // Fashion Design specific courses
+  'fashion design': [
+    { 
+      title: 'Fashion Design: Concept to Creation',
+      provider: 'Fashion Institute of Technology (FIT)',
+      url: 'https://www.alison.com/course/fashion-design-concept-creation', 
+      level: 'Beginner'
+    },
+    { 
+      title: 'Pattern Making for Fashion Design',
+      provider: 'Parsons School of Design',
+      url: 'https://www.alison.com/course/pattern-making-fashion-design', 
+      level: 'Intermediate'
+    },
+    {
+      title: 'Fashion Illustration and Sketching',
+      provider: 'Central Saint Martins',
+      url: 'https://www.alison.com/course/fashion-illustration-sketching',
+      level: 'Beginner'
+    },
+    {
+      title: 'Textile Science and Fabric Selection',
+      provider: 'Fashion Institute of Design',
+      url: 'https://www.alison.com/course/textile-science-fabric-selection',
+      level: 'Intermediate'
+    }
+  ],
+  'fashion illustration': [
+    {
+      title: 'Digital Fashion Illustration with Adobe Illustrator',
+      provider: 'Adobe Creative Academy',
+      url: 'https://www.alison.com/course/digital-fashion-illustration-adobe',
+      level: 'Intermediate'
+    },
+    {
+      title: 'Fashion Sketching Fundamentals',
+      provider: 'Fashion Design Academy',
+      url: 'https://www.alison.com/course/fashion-sketching-fundamentals',
+      level: 'Beginner'
+    },
+    {
+      title: 'Technical Fashion Drawing',
+      provider: 'Fashion Institute',
+      url: 'https://www.alison.com/course/technical-fashion-drawing',
+      level: 'Advanced'
+    }
+  ],
+  'pattern making': [
+    {
+      title: 'Pattern Making: From Sketch to Pattern',
+      provider: 'Fashion Academy',
+      url: 'https://www.alison.com/course/pattern-making-sketch-to-pattern',
+      level: 'Beginner'
+    },
+    {
+      title: 'Advanced Pattern Drafting Techniques',
+      provider: 'Pattern Making Institute',
+      url: 'https://www.alison.com/course/advanced-pattern-drafting',
+      level: 'Advanced'
+    },
+    {
+      title: 'Computer-Aided Pattern Design (CAD)',
+      provider: 'Fashion Technology Institute',
+      url: 'https://www.alison.com/course/computer-aided-pattern-design',
+      level: 'Intermediate'
+    }
+  ],
+  'fashion merchandising': [
+    {
+      title: 'Fashion Merchandising and Retail Buying',
+      provider: 'Fashion Business Academy',
+      url: 'https://www.alison.com/course/fashion-merchandising-retail-buying',
+      level: 'Intermediate'
+    },
+    {
+      title: 'Fashion Trend Forecasting',
+      provider: 'Trend Analysis Institute',
+      url: 'https://www.alison.com/course/fashion-trend-forecasting',
+      level: 'Advanced'
+    },
+    {
+      title: 'Fashion Marketing and Brand Management',
+      provider: 'Fashion Marketing Institute',
+      url: 'https://www.alison.com/course/fashion-marketing-brand-management',
+      level: 'Intermediate'
+    }
+  ],
+  'garment construction': [
+    {
+      title: 'Garment Construction Techniques',
+      provider: 'Sewing and Design Institute',
+      url: 'https://www.alison.com/course/garment-construction-techniques',
+      level: 'Beginner'
+    },
+    {
+      title: 'Advanced Sewing and Tailoring',
+      provider: 'Master Tailoring Academy',
+      url: 'https://www.alison.com/course/advanced-sewing-tailoring',
+      level: 'Advanced'
+    },
+    {
+      title: 'Fashion Production and Manufacturing',
+      provider: 'Fashion Production Institute',
+      url: 'https://www.alison.com/course/fashion-production-manufacturing',
+      level: 'Intermediate'
+    }
+  ],
+  'sustainable fashion': [
+    {
+      title: 'Sustainable Fashion Design',
+      provider: 'Green Fashion Institute',
+      url: 'https://www.alison.com/course/sustainable-fashion-design',
+      level: 'Intermediate'
+    },
+    {
+      title: 'Circular Fashion and Waste Reduction',
+      provider: 'Sustainable Design Academy',
+      url: 'https://www.alison.com/course/circular-fashion-waste-reduction',
+      level: 'Advanced'
+    },
+    {
+      title: 'Eco-Friendly Textile Innovation',
+      provider: 'Textile Innovation Lab',
+      url: 'https://www.alison.com/course/eco-friendly-textile-innovation',
+      level: 'Advanced'
+    }
+  ],
+
   // Generic fallback courses for any missing skills
   'general': [
     { 
@@ -1694,6 +1822,7 @@ const ROLE_SKILLS_MAPPING = {
   'cybersecurity-analyst': ['it', 'safety'],
   'devops-engineer': ['programming', 'it'],
   'ui-ux-designer': ['communication', 'leadership'],
+  'fashion-designer': ['fashion design', 'fashion illustration', 'pattern making', 'garment construction'],
   'cloud-architect': ['it', 'programming'],
 
   // Healthcare roles  
@@ -3490,7 +3619,7 @@ function findCourseRecommendationsInternal(keywords = [], count = 3, industry = 
     'finance': ['finance', 'data analysis'],
     'marketing': ['marketing', 'communication'],
     'education': ['education', 'teaching', 'curriculum development', 'research', 'assessment', 'student engagement', 'educational technology', 'educational leadership', 'educational project management'],
-    'design': ['communication'],
+    'design': ['fashion design', 'fashion illustration', 'pattern making', 'fashion merchandising', 'garment construction', 'sustainable fashion', 'communication'],
     'engineering': ['aerospace engineering', 'civil engineering', 'mechanical engineering', 'electrical engineering', 'chemical engineering', 'biomedical engineering', 'professional engineer', 'cad design', 'project management', 'safety'],
     'aerospace': ['aerospace engineering', 'mechanical engineering', 'professional engineer', 'cad design', 'project management'],
     'civil': ['civil engineering', 'project management', 'safety', 'professional engineer'],
