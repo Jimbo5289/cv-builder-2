@@ -164,6 +164,107 @@ class AIAnalysisService {
         specificSkills: ['Fashion illustration', 'Garment construction', 'Pattern making', 'Textile knowledge', 'Trend analysis', 'Adobe Creative Suite', 'Fashion sketching', 'Draping', 'Sewing techniques', 'Fashion merchandising', 'Color theory', 'Fabric selection', 'Fashion history', 'Sustainable fashion'],
         seniority: ['Assistant Designer: 0-2 years', 'Designer: 2-5 years', 'Senior Designer: 5-8 years', 'Creative Director: 8+ years'],
         criticalKeywords: ['fashion design', 'apparel design', 'garment construction', 'pattern making', 'fashion illustration', 'textile design', 'trend forecasting', 'fashion merchandising', 'clothing design', 'fashion sketching', 'draping', 'fashion portfolio', 'fashion CAD', 'sustainable fashion', 'fashion styling']
+      },
+
+      // Technology roles
+      'network-engineer': {
+        specificSkills: ['Network configuration', 'Cisco certification', 'TCP/IP protocols', 'Network security', 'Routing and switching', 'Network monitoring', 'Troubleshooting', 'VPN configuration', 'Firewall management'],
+        seniority: ['Junior Engineer: 0-2 years', 'Network Engineer: 2-5 years', 'Senior Engineer: 5+ years'],
+        criticalKeywords: ['network administration', 'cisco', 'routing', 'switching', 'TCP/IP', 'network security', 'infrastructure']
+      },
+      'product-manager': {
+        specificSkills: ['Product strategy', 'Market research', 'User experience design', 'Agile methodology', 'Stakeholder management', 'Data analysis', 'Product roadmapping', 'Cross-functional leadership'],
+        seniority: ['Associate PM: 0-2 years', 'Product Manager: 2-5 years', 'Senior PM: 5+ years'],
+        criticalKeywords: ['product management', 'product strategy', 'user experience', 'agile', 'product roadmap', 'market research']
+      },
+      'cybersecurity-analyst': {
+        specificSkills: ['Security monitoring', 'Incident response', 'Vulnerability assessment', 'Security frameworks', 'Threat analysis', 'SIEM tools', 'Penetration testing', 'Security compliance'],
+        seniority: ['Junior Analyst: 0-2 years', 'Security Analyst: 2-5 years', 'Senior Analyst: 5+ years'],
+        criticalKeywords: ['cybersecurity', 'security analysis', 'incident response', 'vulnerability assessment', 'SIEM', 'penetration testing']
+      },
+      'devops-engineer': {
+        specificSkills: ['CI/CD pipelines', 'Docker containerization', 'Kubernetes orchestration', 'Cloud platforms', 'Infrastructure as code', 'Monitoring tools', 'Version control', 'Automation scripting'],
+        seniority: ['Junior DevOps: 0-2 years', 'DevOps Engineer: 2-5 years', 'Senior DevOps: 5+ years'],
+        criticalKeywords: ['devops', 'CI/CD', 'docker', 'kubernetes', 'cloud infrastructure', 'automation', 'deployment']
+      },
+      'ui-ux-designer': {
+        specificSkills: ['User interface design', 'User experience research', 'Prototyping', 'Wireframing', 'Design systems', 'Usability testing', 'Adobe Creative Suite', 'Figma/Sketch'],
+        seniority: ['Junior Designer: 0-2 years', 'UX Designer: 2-5 years', 'Senior Designer: 5+ years'],
+        criticalKeywords: ['UI/UX design', 'user experience', 'prototyping', 'wireframing', 'usability testing', 'design systems']
+      },
+      'cloud-architect': {
+        specificSkills: ['Cloud architecture design', 'AWS/Azure/GCP', 'Microservices architecture', 'Serverless computing', 'Cloud security', 'Cost optimization', 'Migration strategies'],
+        seniority: ['Cloud Engineer: 0-3 years', 'Cloud Architect: 3-7 years', 'Principal Architect: 7+ years'],
+        criticalKeywords: ['cloud architecture', 'AWS', 'Azure', 'GCP', 'microservices', 'serverless', 'cloud migration']
+      },
+
+      // Healthcare roles
+      'physician': {
+        specificSkills: ['Medical diagnosis', 'Patient care', 'Clinical procedures', 'Medical documentation', 'Treatment planning', 'Emergency medicine', 'Evidence-based medicine'],
+        seniority: ['Resident: 0-4 years', 'Attending Physician: 4-10 years', 'Senior Physician: 10+ years'],
+        criticalKeywords: ['medical practice', 'patient care', 'clinical diagnosis', 'medical procedures', 'healthcare delivery']
+      },
+      'medical-technician': {
+        specificSkills: ['Laboratory testing', 'Medical equipment operation', 'Sample analysis', 'Quality control', 'Medical terminology', 'Safety protocols'],
+        seniority: ['Entry Level: 0-2 years', 'Technician: 2-5 years', 'Senior Technician: 5+ years'],
+        criticalKeywords: ['medical technology', 'laboratory testing', 'medical equipment', 'clinical analysis', 'healthcare support']
+      },
+      'healthcare-admin': {
+        specificSkills: ['Healthcare management', 'Medical billing', 'Healthcare compliance', 'Staff coordination', 'Budget management', 'Patient services'],
+        seniority: ['Coordinator: 0-3 years', 'Administrator: 3-7 years', 'Director: 7+ years'],
+        criticalKeywords: ['healthcare administration', 'medical management', 'healthcare operations', 'patient services', 'medical billing']
+      },
+      'pharmacist': {
+        specificSkills: ['Pharmaceutical care', 'Drug dispensing', 'Medication therapy management', 'Clinical pharmacy', 'Drug interactions', 'Patient counseling'],
+        seniority: ['Staff Pharmacist: 0-3 years', 'Clinical Pharmacist: 3-7 years', 'Pharmacy Manager: 7+ years'],
+        criticalKeywords: ['pharmacy practice', 'pharmaceutical care', 'medication management', 'drug therapy', 'clinical pharmacy']
+      },
+      'physical-therapist': {
+        specificSkills: ['Physical assessment', 'Treatment planning', 'Therapeutic exercises', 'Manual therapy', 'Patient education', 'Rehabilitation techniques'],
+        seniority: ['Staff PT: 0-3 years', 'Senior PT: 3-7 years', 'Lead Therapist: 7+ years'],
+        criticalKeywords: ['physical therapy', 'rehabilitation', 'therapeutic exercise', 'manual therapy', 'patient treatment']
+      },
+      'nutritionist': {
+        specificSkills: ['Nutritional assessment', 'Diet planning', 'Nutrition education', 'Medical nutrition therapy', 'Food science', 'Health promotion'],
+        seniority: ['Entry Level: 0-2 years', 'Nutritionist: 2-5 years', 'Senior Nutritionist: 5+ years'],
+        criticalKeywords: ['nutrition science', 'dietetics', 'nutritional counseling', 'diet planning', 'health nutrition']
+      },
+      'mental-health': {
+        specificSkills: ['Psychological assessment', 'Therapy techniques', 'Mental health counseling', 'Crisis intervention', 'Treatment planning', 'Case management'],
+        seniority: ['Associate: 0-3 years', 'Therapist: 3-7 years', 'Senior Clinician: 7+ years'],
+        criticalKeywords: ['mental health', 'psychological therapy', 'counseling', 'behavioral health', 'clinical psychology']
+      },
+
+      // Finance roles
+      'accountant': {
+        specificSkills: ['Financial reporting', 'Tax preparation', 'Bookkeeping', 'Audit procedures', 'Financial analysis', 'Compliance', 'Accounting software'],
+        seniority: ['Staff Accountant: 0-3 years', 'Senior Accountant: 3-6 years', 'Accounting Manager: 6+ years'],
+        criticalKeywords: ['accounting', 'financial reporting', 'tax preparation', 'bookkeeping', 'audit', 'financial statements']
+      },
+      'investment-banker': {
+        specificSkills: ['Financial modeling', 'Valuation analysis', 'Mergers & acquisitions', 'Capital markets', 'Client relationships', 'Deal structuring'],
+        seniority: ['Analyst: 0-2 years', 'Associate: 2-4 years', 'VP: 4-7 years', 'Director: 7+ years'],
+        criticalKeywords: ['investment banking', 'financial modeling', 'mergers acquisitions', 'capital markets', 'deal structuring']
+      },
+      'financial-advisor': {
+        specificSkills: ['Investment planning', 'Portfolio management', 'Financial planning', 'Client relationship management', 'Risk assessment', 'Retirement planning'],
+        seniority: ['Junior Advisor: 0-3 years', 'Financial Advisor: 3-7 years', 'Senior Advisor: 7+ years'],
+        criticalKeywords: ['financial planning', 'investment advisory', 'portfolio management', 'wealth management', 'financial consulting']
+      },
+      'insurance-underwriter': {
+        specificSkills: ['Risk assessment', 'Policy evaluation', 'Underwriting guidelines', 'Financial analysis', 'Insurance regulations', 'Data analysis'],
+        seniority: ['Junior Underwriter: 0-3 years', 'Underwriter: 3-6 years', 'Senior Underwriter: 6+ years'],
+        criticalKeywords: ['insurance underwriting', 'risk assessment', 'policy evaluation', 'insurance analysis', 'underwriting']
+      },
+      'compliance-officer': {
+        specificSkills: ['Regulatory compliance', 'Policy development', 'Risk management', 'Audit coordination', 'Training delivery', 'Compliance monitoring'],
+        seniority: ['Compliance Analyst: 0-3 years', 'Compliance Officer: 3-7 years', 'Compliance Manager: 7+ years'],
+        criticalKeywords: ['regulatory compliance', 'policy development', 'risk management', 'compliance monitoring', 'regulatory affairs']
+      },
+      'credit-analyst': {
+        specificSkills: ['Credit analysis', 'Financial statement analysis', 'Risk assessment', 'Loan evaluation', 'Credit scoring', 'Industry analysis'],
+        seniority: ['Junior Analyst: 0-3 years', 'Credit Analyst: 3-6 years', 'Senior Analyst: 6+ years'],
+        criticalKeywords: ['credit analysis', 'financial analysis', 'risk assessment', 'loan evaluation', 'credit risk']
       }
     };
 
@@ -176,8 +277,22 @@ class AIAnalysisService {
     };
   }
 
-  // Role-specific requirements
-  getRoleRequirements(role, industry) {
+  // Role-specific requirements - now using database-driven approach
+  async getRoleRequirements(role, industry) {
+    const RoleRequirementsService = require('./roleRequirementsService');
+    const roleService = new RoleRequirementsService();
+    
+    try {
+      const requirements = await roleService.getRoleRequirements(role);
+      return requirements;
+    } catch (error) {
+      logger.error('Error fetching role requirements, using fallback:', error);
+      return this.getFallbackRoleRequirements();
+    }
+  }
+
+  // Fallback role requirements for when database fails
+  getFallbackRoleRequirements() {
     const roleRequirements = {
       'software-developer': {
         specificSkills: ['Programming languages', 'Software architecture', 'Code review', 'Testing methodologies', 'Debugging'],
@@ -273,6 +388,107 @@ class AIAnalysisService {
         specificSkills: ['Fashion illustration', 'Garment construction', 'Pattern making', 'Textile knowledge', 'Trend analysis', 'Adobe Creative Suite', 'Fashion sketching', 'Draping', 'Sewing techniques', 'Fashion merchandising', 'Color theory', 'Fabric selection', 'Fashion history', 'Sustainable fashion'],
         seniority: ['Assistant Designer: 0-2 years', 'Designer: 2-5 years', 'Senior Designer: 5-8 years', 'Creative Director: 8+ years'],
         criticalKeywords: ['fashion design', 'apparel design', 'garment construction', 'pattern making', 'fashion illustration', 'textile design', 'trend forecasting', 'fashion merchandising', 'clothing design', 'fashion sketching', 'draping', 'fashion portfolio', 'fashion CAD', 'sustainable fashion', 'fashion styling']
+      },
+
+      // Technology roles
+      'network-engineer': {
+        specificSkills: ['Network configuration', 'Cisco certification', 'TCP/IP protocols', 'Network security', 'Routing and switching', 'Network monitoring', 'Troubleshooting', 'VPN configuration', 'Firewall management'],
+        seniority: ['Junior Engineer: 0-2 years', 'Network Engineer: 2-5 years', 'Senior Engineer: 5+ years'],
+        criticalKeywords: ['network administration', 'cisco', 'routing', 'switching', 'TCP/IP', 'network security', 'infrastructure']
+      },
+      'product-manager': {
+        specificSkills: ['Product strategy', 'Market research', 'User experience design', 'Agile methodology', 'Stakeholder management', 'Data analysis', 'Product roadmapping', 'Cross-functional leadership'],
+        seniority: ['Associate PM: 0-2 years', 'Product Manager: 2-5 years', 'Senior PM: 5+ years'],
+        criticalKeywords: ['product management', 'product strategy', 'user experience', 'agile', 'product roadmap', 'market research']
+      },
+      'cybersecurity-analyst': {
+        specificSkills: ['Security monitoring', 'Incident response', 'Vulnerability assessment', 'Security frameworks', 'Threat analysis', 'SIEM tools', 'Penetration testing', 'Security compliance'],
+        seniority: ['Junior Analyst: 0-2 years', 'Security Analyst: 2-5 years', 'Senior Analyst: 5+ years'],
+        criticalKeywords: ['cybersecurity', 'security analysis', 'incident response', 'vulnerability assessment', 'SIEM', 'penetration testing']
+      },
+      'devops-engineer': {
+        specificSkills: ['CI/CD pipelines', 'Docker containerization', 'Kubernetes orchestration', 'Cloud platforms', 'Infrastructure as code', 'Monitoring tools', 'Version control', 'Automation scripting'],
+        seniority: ['Junior DevOps: 0-2 years', 'DevOps Engineer: 2-5 years', 'Senior DevOps: 5+ years'],
+        criticalKeywords: ['devops', 'CI/CD', 'docker', 'kubernetes', 'cloud infrastructure', 'automation', 'deployment']
+      },
+      'ui-ux-designer': {
+        specificSkills: ['User interface design', 'User experience research', 'Prototyping', 'Wireframing', 'Design systems', 'Usability testing', 'Adobe Creative Suite', 'Figma/Sketch'],
+        seniority: ['Junior Designer: 0-2 years', 'UX Designer: 2-5 years', 'Senior Designer: 5+ years'],
+        criticalKeywords: ['UI/UX design', 'user experience', 'prototyping', 'wireframing', 'usability testing', 'design systems']
+      },
+      'cloud-architect': {
+        specificSkills: ['Cloud architecture design', 'AWS/Azure/GCP', 'Microservices architecture', 'Serverless computing', 'Cloud security', 'Cost optimization', 'Migration strategies'],
+        seniority: ['Cloud Engineer: 0-3 years', 'Cloud Architect: 3-7 years', 'Principal Architect: 7+ years'],
+        criticalKeywords: ['cloud architecture', 'AWS', 'Azure', 'GCP', 'microservices', 'serverless', 'cloud migration']
+      },
+
+      // Healthcare roles
+      'physician': {
+        specificSkills: ['Medical diagnosis', 'Patient care', 'Clinical procedures', 'Medical documentation', 'Treatment planning', 'Emergency medicine', 'Evidence-based medicine'],
+        seniority: ['Resident: 0-4 years', 'Attending Physician: 4-10 years', 'Senior Physician: 10+ years'],
+        criticalKeywords: ['medical practice', 'patient care', 'clinical diagnosis', 'medical procedures', 'healthcare delivery']
+      },
+      'medical-technician': {
+        specificSkills: ['Laboratory testing', 'Medical equipment operation', 'Sample analysis', 'Quality control', 'Medical terminology', 'Safety protocols'],
+        seniority: ['Entry Level: 0-2 years', 'Technician: 2-5 years', 'Senior Technician: 5+ years'],
+        criticalKeywords: ['medical technology', 'laboratory testing', 'medical equipment', 'clinical analysis', 'healthcare support']
+      },
+      'healthcare-admin': {
+        specificSkills: ['Healthcare management', 'Medical billing', 'Healthcare compliance', 'Staff coordination', 'Budget management', 'Patient services'],
+        seniority: ['Coordinator: 0-3 years', 'Administrator: 3-7 years', 'Director: 7+ years'],
+        criticalKeywords: ['healthcare administration', 'medical management', 'healthcare operations', 'patient services', 'medical billing']
+      },
+      'pharmacist': {
+        specificSkills: ['Pharmaceutical care', 'Drug dispensing', 'Medication therapy management', 'Clinical pharmacy', 'Drug interactions', 'Patient counseling'],
+        seniority: ['Staff Pharmacist: 0-3 years', 'Clinical Pharmacist: 3-7 years', 'Pharmacy Manager: 7+ years'],
+        criticalKeywords: ['pharmacy practice', 'pharmaceutical care', 'medication management', 'drug therapy', 'clinical pharmacy']
+      },
+      'physical-therapist': {
+        specificSkills: ['Physical assessment', 'Treatment planning', 'Therapeutic exercises', 'Manual therapy', 'Patient education', 'Rehabilitation techniques'],
+        seniority: ['Staff PT: 0-3 years', 'Senior PT: 3-7 years', 'Lead Therapist: 7+ years'],
+        criticalKeywords: ['physical therapy', 'rehabilitation', 'therapeutic exercise', 'manual therapy', 'patient treatment']
+      },
+      'nutritionist': {
+        specificSkills: ['Nutritional assessment', 'Diet planning', 'Nutrition education', 'Medical nutrition therapy', 'Food science', 'Health promotion'],
+        seniority: ['Entry Level: 0-2 years', 'Nutritionist: 2-5 years', 'Senior Nutritionist: 5+ years'],
+        criticalKeywords: ['nutrition science', 'dietetics', 'nutritional counseling', 'diet planning', 'health nutrition']
+      },
+      'mental-health': {
+        specificSkills: ['Psychological assessment', 'Therapy techniques', 'Mental health counseling', 'Crisis intervention', 'Treatment planning', 'Case management'],
+        seniority: ['Associate: 0-3 years', 'Therapist: 3-7 years', 'Senior Clinician: 7+ years'],
+        criticalKeywords: ['mental health', 'psychological therapy', 'counseling', 'behavioral health', 'clinical psychology']
+      },
+
+      // Finance roles
+      'accountant': {
+        specificSkills: ['Financial reporting', 'Tax preparation', 'Bookkeeping', 'Audit procedures', 'Financial analysis', 'Compliance', 'Accounting software'],
+        seniority: ['Staff Accountant: 0-3 years', 'Senior Accountant: 3-6 years', 'Accounting Manager: 6+ years'],
+        criticalKeywords: ['accounting', 'financial reporting', 'tax preparation', 'bookkeeping', 'audit', 'financial statements']
+      },
+      'investment-banker': {
+        specificSkills: ['Financial modeling', 'Valuation analysis', 'Mergers & acquisitions', 'Capital markets', 'Client relationships', 'Deal structuring'],
+        seniority: ['Analyst: 0-2 years', 'Associate: 2-4 years', 'VP: 4-7 years', 'Director: 7+ years'],
+        criticalKeywords: ['investment banking', 'financial modeling', 'mergers acquisitions', 'capital markets', 'deal structuring']
+      },
+      'financial-advisor': {
+        specificSkills: ['Investment planning', 'Portfolio management', 'Financial planning', 'Client relationship management', 'Risk assessment', 'Retirement planning'],
+        seniority: ['Junior Advisor: 0-3 years', 'Financial Advisor: 3-7 years', 'Senior Advisor: 7+ years'],
+        criticalKeywords: ['financial planning', 'investment advisory', 'portfolio management', 'wealth management', 'financial consulting']
+      },
+      'insurance-underwriter': {
+        specificSkills: ['Risk assessment', 'Policy evaluation', 'Underwriting guidelines', 'Financial analysis', 'Insurance regulations', 'Data analysis'],
+        seniority: ['Junior Underwriter: 0-3 years', 'Underwriter: 3-6 years', 'Senior Underwriter: 6+ years'],
+        criticalKeywords: ['insurance underwriting', 'risk assessment', 'policy evaluation', 'insurance analysis', 'underwriting']
+      },
+      'compliance-officer': {
+        specificSkills: ['Regulatory compliance', 'Policy development', 'Risk management', 'Audit coordination', 'Training delivery', 'Compliance monitoring'],
+        seniority: ['Compliance Analyst: 0-3 years', 'Compliance Officer: 3-7 years', 'Compliance Manager: 7+ years'],
+        criticalKeywords: ['regulatory compliance', 'policy development', 'risk management', 'compliance monitoring', 'regulatory affairs']
+      },
+      'credit-analyst': {
+        specificSkills: ['Credit analysis', 'Financial statement analysis', 'Risk assessment', 'Loan evaluation', 'Credit scoring', 'Industry analysis'],
+        seniority: ['Junior Analyst: 0-3 years', 'Credit Analyst: 3-6 years', 'Senior Analyst: 6+ years'],
+        criticalKeywords: ['credit analysis', 'financial analysis', 'risk assessment', 'loan evaluation', 'credit risk']
       }
     };
 
@@ -308,7 +524,7 @@ class AIAnalysisService {
         }
         
         const industryReqs = this.getIndustryRequirements(industry);
-        const roleReqs = this.getRoleRequirements(role, industry);
+        const roleReqs = await this.getRoleRequirements(role, industry);
         
         jobData = {
           industry,
@@ -331,7 +547,7 @@ class AIAnalysisService {
         try {
           logger.info('Running AI enhancement analysis');
           const industryReqs = this.getIndustryRequirements(industry);
-          const roleReqs = this.getRoleRequirements(role, industry);
+          const roleReqs = await this.getRoleRequirements(role, industry);
           aiResults = await this.runMultiModelAnalysis(cvText, industry, role, industryReqs, roleReqs, isGeneric);
         } catch (error) {
           logger.warn('AI enhancement failed, using algorithmic results only:', error);
