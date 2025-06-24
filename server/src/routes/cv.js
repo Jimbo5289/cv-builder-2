@@ -3910,26 +3910,28 @@ router.post('/apply-enhancements', (req, res, next) => {
       : `Enhanced CV - ${currentDate}`;
     
     // Create a new CV with the enhanced data
+    const cvContentObject = {
+      // Start with the extracted data from original CV if available
+      personalInfo: cvContent?.personalInfo || {},
+      // Add enhanced personal statement
+      personalStatement: enhancedData.personalStatement || '',
+      // Update skills with enhanced ones
+      skills: enhancedData.skills.map(skill => ({
+        skill: skill.title,
+        level: 'Advanced' // Default level
+      })),
+      // Keep existing experiences but apply enhancements if available
+      experiences: cvContent?.experiences || [],
+      // Keep existing education
+      education: cvContent?.education || [],
+      // Keep existing references
+      references: cvContent?.references || []
+    };
+
     const cvData = {
       userId: req.user.id,
       title: cvTitle,
-      content: {
-        // Start with the extracted data from original CV if available
-        personalInfo: cvContent?.personalInfo || {},
-        // Add enhanced personal statement
-        personalStatement: enhancedData.personalStatement || '',
-        // Update skills with enhanced ones
-        skills: enhancedData.skills.map(skill => ({
-          skill: skill.title,
-          level: 'Advanced' // Default level
-        })),
-        // Keep existing experiences but apply enhancements if available
-        experiences: cvContent?.experiences || [],
-        // Keep existing education
-        education: cvContent?.education || [],
-        // Keep existing references
-        references: cvContent?.references || []
-      }
+      content: JSON.stringify(cvContentObject) // Convert object to string for Prisma
     };
     
     // Create the CV in the database
@@ -3943,7 +3945,7 @@ router.post('/apply-enhancements', (req, res, next) => {
     return res.status(201).json({
       message: 'Enhanced CV created successfully',
       cvId: cv.id,
-      cvContent: cvData.content,
+      cvContent: cvContentObject, // Return the object, not the stringified version
       title: cvTitle
     });
   } catch (error) {
