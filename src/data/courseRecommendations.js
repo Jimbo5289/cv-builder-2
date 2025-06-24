@@ -735,6 +735,24 @@ export const COURSE_RECOMMENDATIONS = {
       provider: 'CIOB Academy',
       url: 'https://ciobacademy.org/product/building-regulations-in-practice/', 
       level: 'Intermediate'
+    },
+    {
+      title: 'Fire Safety Management Level 4',
+      provider: 'NEBOSH',
+      url: 'https://www.nebosh.org.uk/qualifications/fire-safety-management/',
+      level: 'Advanced'
+    },
+    {
+      title: 'Fire Risk Assessment Training',
+      provider: 'Institution of Fire Engineers',
+      url: 'https://www.ife.org.uk/Training',
+      level: 'Intermediate'
+    },
+    {
+      title: 'Emergency Response Planning',
+      provider: 'Emergency Planning Society',
+      url: 'https://www.the-eps.org/training',
+      level: 'Advanced'
     }
   ],
   
@@ -3442,7 +3460,6 @@ const ROLE_SKILLS_MAPPING = {
   'environmental-consultant': ['agriculture-farming', 'research']
 };
 
-// Helper function to find recommendations based on keywords and industry context
 export const findCourseRecommendations = (keywords = [], count = 3, industry = null, role = null, cvEducation = null) => {
   // If role is provided, prioritize role-specific skills
   if (role && ROLE_SKILLS_MAPPING[role]) {
