@@ -3238,54 +3238,27 @@ router.post('/analyze', (req, res, next) => {
     let role = 'general';
     
     if (jobDescriptionText && jobDescriptionText.length > 0) {
-      // This is a simple keyword extraction in the mock version
-      // In production, you would use NLP techniques or AI to extract relevant keywords
+      // CRITICAL FIX: Use the proper aiAnalysisService industry detection instead of hardcoded logic
+      industry = aiAnalysisService.detectIndustryFromText(jobDescriptionText);
       
-      // Extract industry from job description
-      if (jobDescriptionText.toLowerCase().includes('healthcare') || 
-          jobDescriptionText.toLowerCase().includes('medical') ||
-          jobDescriptionText.toLowerCase().includes('hospital') ||
-          jobDescriptionText.toLowerCase().includes('patient')) {
-        industry = 'healthcare';
-        extractedKeywords.push('healthcare', 'patient care');
-      } else if (jobDescriptionText.toLowerCase().includes('finance') || 
-                 jobDescriptionText.toLowerCase().includes('accounting') ||
-                 jobDescriptionText.toLowerCase().includes('financial')) {
-        industry = 'finance';
-        extractedKeywords.push('finance', 'accounting');
-      } else if (jobDescriptionText.toLowerCase().includes('marketing') || 
-                 jobDescriptionText.toLowerCase().includes('digital marketing') ||
-                 jobDescriptionText.toLowerCase().includes('social media')) {
-        industry = 'marketing';
+      // Set appropriate keywords based on detected industry
+      if (industry === 'building_safety') {
+        extractedKeywords.push('building safety', 'fire safety', 'safety management', 'compliance', 'regulations', 'risk assessment', 'IOSH', 'NEBOSH', 'fire risk assessment', 'building regulations');
+      } else if (industry === 'emergency_services') {
+        extractedKeywords.push('emergency response', 'fire service', 'rescue', 'incident management', 'crisis management', 'safety', 'watch manager');
+      } else if (industry === 'healthcare') {
+        extractedKeywords.push('healthcare', 'patient care', 'medical', 'clinical');
+      } else if (industry === 'finance') {
+        extractedKeywords.push('finance', 'accounting', 'financial analysis');
+      } else if (industry === 'marketing') {
         extractedKeywords.push('marketing', 'digital marketing');
-      } else if (jobDescriptionText.toLowerCase().includes('education') || 
-                 jobDescriptionText.toLowerCase().includes('teaching') ||
-                 jobDescriptionText.toLowerCase().includes('teacher') ||
-                 jobDescriptionText.toLowerCase().includes('school')) {
-        industry = 'education';
+      } else if (industry === 'education') {
         extractedKeywords.push('education', 'teaching');
-      } else if (jobDescriptionText.toLowerCase().includes('engineering') || 
-                 jobDescriptionText.toLowerCase().includes('engineer') ||
-                 jobDescriptionText.toLowerCase().includes('technical design')) {
-        industry = 'engineering';
+      } else if (industry === 'engineering') {
         extractedKeywords.push('engineering', 'technical design');
-      } else if (jobDescriptionText.toLowerCase().includes('developer') || 
-                 jobDescriptionText.toLowerCase().includes('software') ||
-                 jobDescriptionText.toLowerCase().includes('programming') ||
-                 jobDescriptionText.toLowerCase().includes('code')) {
-        industry = 'technology';
+      } else if (industry === 'technology') {
         extractedKeywords.push('programming', 'software development');
-      } else if (jobDescriptionText.toLowerCase().includes('building safety') ||
-                 jobDescriptionText.toLowerCase().includes('fire safety') ||
-                 jobDescriptionText.toLowerCase().includes('head of building safety') ||
-                 jobDescriptionText.toLowerCase().includes('building safety manager') ||
-                 jobDescriptionText.toLowerCase().includes('fire risk assessment')) {
-        industry = 'building_safety';
-        extractedKeywords.push('building safety', 'fire safety', 'safety management', 'compliance', 'regulations', 'risk assessment');
-      } else if (jobDescriptionText.toLowerCase().includes('safety') || 
-                 jobDescriptionText.toLowerCase().includes('compliance') ||
-                 jobDescriptionText.toLowerCase().includes('regulations')) {
-        industry = 'safety';
+      } else if (industry === 'safety') {
         extractedKeywords.push('safety', 'compliance', 'regulations');
       }
       
@@ -3317,20 +3290,17 @@ router.post('/analyze', (req, res, next) => {
         extractedKeywords.push('data analysis');
       }
       
-      // Role detection
-      if (jobDescriptionText.toLowerCase().includes('manager') || 
-          jobDescriptionText.toLowerCase().includes('director') ||
-          jobDescriptionText.toLowerCase().includes('head of')) {
-        role = 'manager';
+      // Role detection using proper method
+      role = aiAnalysisService.detectRoleFromText(jobDescriptionText);
+      
+      // Add role-specific keywords
+      if (role === 'building-safety-manager' || role === 'safety-manager') {
+        extractedKeywords.push('leadership', 'management', 'safety management', 'compliance');
+      } else if (role === 'manager') {
         extractedKeywords.push('leadership', 'management');
-      } else if (jobDescriptionText.toLowerCase().includes('developer') || 
-                 jobDescriptionText.toLowerCase().includes('programmer') ||
-                 jobDescriptionText.toLowerCase().includes('engineer')) {
-        role = 'developer';
+      } else if (role === 'developer') {
         extractedKeywords.push('technical skills', 'coding');
-      } else if (jobDescriptionText.toLowerCase().includes('analyst') || 
-                 jobDescriptionText.toLowerCase().includes('data scientist')) {
-        role = 'analyst';
+      } else if (role === 'analyst') {
         extractedKeywords.push('data analysis', 'statistics');
       }
     } else {
