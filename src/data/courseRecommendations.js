@@ -6,45 +6,195 @@ export const courseRecommendations = {
   universalSkillMapping: {
     // Technical Skills
     'python': [
-      { title: 'Python Programming Masterclass', provider: 'TechLearn', duration: '12 weeks', level: 'Beginner to Advanced' },
-      { title: 'Data Science with Python', provider: 'DataCamp', duration: '8 weeks', level: 'Intermediate' },
-      { title: 'Python for Automation', provider: 'Coursera', duration: '6 weeks', level: 'Beginner' }
+      { 
+        title: 'Python for Everybody Specialization', 
+        provider: 'Coursera (University of Michigan)', 
+        duration: '8 months', 
+        level: 'Beginner',
+        url: 'https://www.coursera.org/specializations/python'
+      },
+      { 
+        title: 'Python Programming MOOC', 
+        provider: 'University of Helsinki', 
+        duration: '14 weeks', 
+        level: 'Beginner',
+        url: 'https://programming-24.mooc.fi/'
+      },
+      { 
+        title: 'Data Science with Python', 
+        provider: 'DataCamp', 
+        duration: '8 weeks', 
+        level: 'Intermediate',
+        url: 'https://www.datacamp.com/tracks/data-scientist-with-python'
+      }
     ],
     'javascript': [
-      { title: 'Complete JavaScript Course', provider: 'TechAcademy', duration: '10 weeks', level: 'Beginner to Advanced' },
-      { title: 'React.js Development', provider: 'FrontEnd Masters', duration: '8 weeks', level: 'Intermediate' },
-      { title: 'Node.js Backend Development', provider: 'BackEnd Pro', duration: '12 weeks', level: 'Advanced' }
+      { 
+        title: 'freeCodeCamp JavaScript Algorithms', 
+        provider: 'freeCodeCamp', 
+        duration: '300 hours', 
+        level: 'Beginner to Advanced',
+        url: 'https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/'
+      },
+      { 
+        title: 'The Odin Project - Full Stack JavaScript', 
+        provider: 'The Odin Project', 
+        duration: '1000+ hours', 
+        level: 'Beginner to Advanced',
+        url: 'https://www.theodinproject.com/paths/full-stack-javascript'
+      },
+      { 
+        title: 'React.js Development', 
+        provider: 'React Official Docs', 
+        duration: 'Self-paced', 
+        level: 'Intermediate',
+        url: 'https://react.dev/learn'
+      }
     ],
     'data analysis': [
-      { title: 'Data Analysis with Excel', provider: 'Microsoft Learn', duration: '4 weeks', level: 'Beginner' },
-      { title: 'Advanced Analytics with Python', provider: 'DataCamp', duration: '10 weeks', level: 'Intermediate' },
-      { title: 'Statistical Analysis Masterclass', provider: 'StatsPro', duration: '8 weeks', level: 'Advanced' }
+      { 
+        title: 'Google Data Analytics Certificate', 
+        provider: 'Coursera (Google)', 
+        duration: '6 months', 
+        level: 'Beginner',
+        url: 'https://www.coursera.org/professional-certificates/google-data-analytics'
+      },
+      { 
+        title: 'Data Analysis with Excel', 
+        provider: 'Microsoft Learn', 
+        duration: '4 weeks', 
+        level: 'Beginner',
+        url: 'https://learn.microsoft.com/en-us/training/paths/analyze-data-with-excel/'
+      },
+      { 
+        title: 'Advanced Analytics with Python', 
+        provider: 'DataCamp', 
+        duration: '10 weeks', 
+        level: 'Intermediate',
+        url: 'https://www.datacamp.com/tracks/data-analyst-with-python'
+      }
     ],
     'project management': [
-      { title: 'PMP Certification Prep', provider: 'PMI', duration: '12 weeks', level: 'Professional' },
-      { title: 'Agile Project Management', provider: 'Scrum Alliance', duration: '6 weeks', level: 'Intermediate' },
-      { title: 'Project Leadership Skills', provider: 'Leadership Institute', duration: '8 weeks', level: 'Advanced' }
+      { 
+        title: 'Google Project Management Certificate', 
+        provider: 'Coursera (Google)', 
+        duration: '6 months', 
+        level: 'Beginner',
+        url: 'https://www.coursera.org/professional-certificates/google-project-management'
+      },
+      { 
+        title: 'PMP Certification Prep', 
+        provider: 'PMI', 
+        duration: '12 weeks', 
+        level: 'Professional',
+        url: 'https://www.pmi.org/certifications/project-management-pmp'
+      },
+      { 
+        title: 'Agile Project Management', 
+        provider: 'Scrum Alliance', 
+        duration: '6 weeks', 
+        level: 'Intermediate',
+        url: 'https://www.scrumalliance.org/get-certified'
+      }
     ],
     'digital marketing': [
-      { title: 'Google Digital Marketing Course', provider: 'Google', duration: '6 weeks', level: 'Beginner' },
-      { title: 'Social Media Marketing Strategy', provider: 'HubSpot', duration: '4 weeks', level: 'Intermediate' },
-      { title: 'Advanced SEO Techniques', provider: 'SEO Masters', duration: '8 weeks', level: 'Advanced' }
+      { 
+        title: 'Google Digital Marketing Course', 
+        provider: 'Google Skillshop', 
+        duration: '40 hours', 
+        level: 'Beginner',
+        url: 'https://skillshop.exceedlms.com/student/catalog'
+      },
+      { 
+        title: 'HubSpot Content Marketing', 
+        provider: 'HubSpot Academy', 
+        duration: '4.5 hours', 
+        level: 'Beginner',
+        url: 'https://academy.hubspot.com/courses/content-marketing'
+      },
+      { 
+        title: 'Facebook Social Media Marketing', 
+        provider: 'Coursera (Facebook)', 
+        duration: '6 months', 
+        level: 'Intermediate',
+        url: 'https://www.coursera.org/professional-certificates/facebook-social-media-marketing'
+      }
     ],
     'fire safety': [
-      { title: 'NEBOSH Fire Safety Certificate', provider: 'NEBOSH', duration: '5 days', level: 'Professional' },
-      { title: 'Fire Risk Assessment Course', provider: 'Fire Safety Training', duration: '3 days', level: 'Intermediate' },
-      { title: 'Fire Prevention Management', provider: 'IFE', duration: '10 weeks', level: 'Advanced' }
+      { 
+        title: 'NEBOSH Fire Safety Certificate', 
+        provider: 'NEBOSH', 
+        duration: '5 days', 
+        level: 'Professional',
+        url: 'https://www.nebosh.org.uk/qualifications/'
+      },
+      { 
+        title: 'Fire Risk Assessment Course', 
+        provider: 'Fire Safety Training', 
+        duration: '3 days', 
+        level: 'Intermediate',
+        url: 'https://www.ife.org.uk/Training-and-Development'
+      },
+      { 
+        title: 'Fire Prevention Management', 
+        provider: 'IFE', 
+        duration: '10 weeks', 
+        level: 'Advanced',
+        url: 'https://www.ife.org.uk/Training-and-Development'
+      }
     ],
     'building safety': [
-      { title: 'Building Safety Act 2022 Overview', provider: 'CIOB', duration: '2 days', level: 'Professional' },
-      { title: 'Institute of Fire Engineers Membership', provider: 'IFE', duration: '6 months', level: 'Professional' },
-      { title: 'Building Regulations Compliance', provider: 'BSI', duration: '5 days', level: 'Intermediate' },
-      { title: 'Principal Building Surveyor Training', provider: 'RICS', duration: '12 weeks', level: 'Advanced' }
+      { 
+        title: 'Building Safety Act 2022 Overview', 
+        provider: 'CIOB', 
+        duration: '2 days', 
+        level: 'Professional',
+        url: 'https://www.ciob.org/learning'
+      },
+      { 
+        title: 'Institute of Fire Engineers Membership', 
+        provider: 'IFE', 
+        duration: '6 months', 
+        level: 'Professional',
+        url: 'https://www.ife.org.uk/Membership'
+      },
+      { 
+        title: 'Building Regulations Compliance', 
+        provider: 'BSI', 
+        duration: '5 days', 
+        level: 'Intermediate',
+        url: 'https://www.bsigroup.com/en-GB/training/'
+      },
+      { 
+        title: 'Principal Building Surveyor Training', 
+        provider: 'RICS', 
+        duration: '12 weeks', 
+        level: 'Advanced',
+        url: 'https://www.rics.org/careers'
+      }
     ],
     'health and safety': [
-      { title: 'IOSH Managing Safety', provider: 'IOSH', duration: '4 days', level: 'Professional' },
-      { title: 'NEBOSH General Certificate', provider: 'NEBOSH', duration: '10 days', level: 'Professional' },
-      { title: 'Risk Assessment Techniques', provider: 'Safety Institute', duration: '3 days', level: 'Intermediate' }
+      { 
+        title: 'IOSH Managing Safety', 
+        provider: 'IOSH', 
+        duration: '4 days', 
+        level: 'Professional',
+        url: 'https://www.iosh.com/training-and-skills/'
+      },
+      { 
+        title: 'NEBOSH General Certificate', 
+        provider: 'NEBOSH', 
+        duration: '10 days', 
+        level: 'Professional',
+        url: 'https://www.nebosh.org.uk/qualifications/'
+      },
+      { 
+        title: 'Risk Assessment Techniques', 
+        provider: 'Safety Institute', 
+        duration: '3 days', 
+        level: 'Intermediate',
+        url: 'https://www.iosh.com/training-and-skills/'
+      }
     ],
     'leadership': [
       { title: 'Strategic Leadership Program', provider: 'Leadership Academy', duration: '8 weeks', level: 'Advanced' },
@@ -105,15 +255,64 @@ export const courseRecommendations = {
     },
     building_safety: {
       core: [
-        { title: 'Institute of Fire Engineers Membership', provider: 'IFE', duration: '6 months', level: 'Professional', priority: 'critical' },
-        { title: 'Building Safety Act 2022 Implementation', provider: 'BSR', duration: '3 days', level: 'Professional', priority: 'critical' },
-        { title: 'Fire Safety Engineering', provider: 'Fire Engineering Institute', duration: '12 weeks', level: 'Advanced', priority: 'high' },
-        { title: 'Building Regulations Compliance', provider: 'LABC', duration: '5 days', level: 'Professional', priority: 'high' }
+        { 
+          title: 'Institute of Fire Engineers Membership', 
+          provider: 'IFE', 
+          duration: '6 months', 
+          level: 'Professional', 
+          priority: 'critical',
+          url: 'https://www.ife.org.uk/Membership'
+        },
+        { 
+          title: 'Building Safety Act 2022 Implementation', 
+          provider: 'BSR', 
+          duration: '3 days', 
+          level: 'Professional', 
+          priority: 'critical',
+          url: 'https://www.gov.uk/guidance/building-safety-regulator'
+        },
+        { 
+          title: 'Fire Safety Engineering', 
+          provider: 'Fire Engineering Institute', 
+          duration: '12 weeks', 
+          level: 'Advanced', 
+          priority: 'high',
+          url: 'https://www.ife.org.uk/Training-and-Development'
+        },
+        { 
+          title: 'Building Regulations Compliance', 
+          provider: 'LABC', 
+          duration: '5 days', 
+          level: 'Professional', 
+          priority: 'high',
+          url: 'https://www.labc.co.uk/'
+        }
       ],
       specialized: [
-        { title: 'Structural Fire Safety Design', provider: 'Structural Institute', duration: '8 weeks', level: 'Advanced', priority: 'medium' },
-        { title: 'Fire Risk Assessment Advanced', provider: 'FRA Specialists', duration: '5 days', level: 'Professional', priority: 'medium' },
-        { title: 'Building Control Surveying', provider: 'RICS', duration: '16 weeks', level: 'Professional', priority: 'medium' }
+        { 
+          title: 'Structural Fire Safety Design', 
+          provider: 'Structural Institute', 
+          duration: '8 weeks', 
+          level: 'Advanced', 
+          priority: 'medium',
+          url: 'https://www.istructe.org/training/'
+        },
+        { 
+          title: 'Fire Risk Assessment Advanced', 
+          provider: 'FRA Specialists', 
+          duration: '5 days', 
+          level: 'Professional', 
+          priority: 'medium',
+          url: 'https://www.fpa.org.uk/training/'
+        },
+        { 
+          title: 'Building Control Surveying', 
+          provider: 'RICS', 
+          duration: '16 weeks', 
+          level: 'Professional', 
+          priority: 'medium',
+          url: 'https://www.rics.org/careers/areas-of-practice/building-control-surveying'
+        }
       ]
     },
     finance: {
@@ -192,10 +391,42 @@ export const courseRecommendations = {
   // PROFESSIONAL QUALIFICATIONS by industry
   professionalQualifications: {
     building_safety: [
-      { title: 'Institute of Fire Engineers - Graduate Membership', provider: 'IFE', duration: '12 months', level: 'Professional', priority: 'critical', type: 'membership' },
-      { title: 'Institute of Fire Engineers - Member Grade', provider: 'IFE', duration: '18 months', level: 'Professional', priority: 'critical', type: 'membership' },
-      { title: 'NEBOSH Fire Safety Certificate', provider: 'NEBOSH', duration: '5 days', level: 'Professional', priority: 'high', type: 'certification' },
-      { title: 'IOSH Managing Safety', provider: 'IOSH', duration: '4 days', level: 'Professional', priority: 'high', type: 'certification' }
+      { 
+        title: 'Institute of Fire Engineers - Graduate Membership', 
+        provider: 'IFE', 
+        duration: '12 months', 
+        level: 'Professional', 
+        priority: 'critical', 
+        type: 'membership',
+        url: 'https://www.ife.org.uk/Membership'
+      },
+      { 
+        title: 'Institute of Fire Engineers - Member Grade', 
+        provider: 'IFE', 
+        duration: '18 months', 
+        level: 'Professional', 
+        priority: 'critical', 
+        type: 'membership',
+        url: 'https://www.ife.org.uk/Membership'
+      },
+      { 
+        title: 'NEBOSH Fire Safety Certificate', 
+        provider: 'NEBOSH', 
+        duration: '5 days', 
+        level: 'Professional', 
+        priority: 'high', 
+        type: 'certification',
+        url: 'https://www.nebosh.org.uk/qualifications/'
+      },
+      { 
+        title: 'IOSH Managing Safety', 
+        provider: 'IOSH', 
+        duration: '4 days', 
+        level: 'Professional', 
+        priority: 'high', 
+        type: 'certification',
+        url: 'https://www.iosh.com/training-and-skills/'
+      }
     ],
     emergency_services: [
       { title: 'IOSH Working Safety', provider: 'IOSH', duration: '1 day', level: 'Professional', priority: 'high', type: 'certification' },

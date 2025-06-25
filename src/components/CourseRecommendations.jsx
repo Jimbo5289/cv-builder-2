@@ -30,14 +30,25 @@ const CourseRecommendations = ({ courses = [], title = 'Recommended Courses' }) 
                 </span>
               </div>
             </div>
-            <a 
-              href={course.url} 
-              target="_blank"
-              rel="noopener noreferrer" 
-              className="inline-flex items-center px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
-            >
-              View Course <FiExternalLink className="ml-1" />
-            </a>
+            {course.url ? (
+              <a 
+                href={course.url} 
+                target="_blank"
+                rel="noopener noreferrer" 
+                className="inline-flex items-center px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+              >
+                View Course <FiExternalLink className="ml-1" />
+              </a>
+            ) : (
+              <a 
+                href={`https://www.google.com/search?q=${encodeURIComponent(course.title + ' ' + course.provider + ' course')}`}
+                target="_blank"
+                rel="noopener noreferrer" 
+                className="inline-flex items-center px-3 py-1.5 text-sm bg-gray-600 hover:bg-gray-700 text-white rounded-md transition-colors"
+              >
+                Search Course <FiExternalLink className="ml-1" />
+              </a>
+            )}
           </div>
         ))}
       </div>
