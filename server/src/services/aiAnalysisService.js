@@ -506,6 +506,7 @@ class AIAnalysisService {
 
   // Main analysis method - Universal approach
   async analyzeCV(cvText, industry = null, role = null, isGeneric = false, jobDescription = null) {
+    const startTime = Date.now(); // Track processing time
     try {
       logger.info('Starting universal CV analysis', { industry, role, isGeneric });
       
@@ -1759,51 +1760,138 @@ Remember: Score realistically based on actual job requirements. A career changer
   }
 
   detectIndustryFromText(text) {
+    const textLower = text.toLowerCase();
+    
     const industryKeywords = {
-      'building_safety': ['building safety', 'fire safety', 'building regulations', 'safety compliance', 'construction safety', 'building control', 'safety management', 'fire risk assessment', 'building standards', 'CDM regulations', 'building surveying'],
-      'emergency_services': ['emergency services', 'fire service', 'rescue', 'ambulance', 'paramedic', 'firefighter', 'emergency response', 'fire brigade', 'crisis management'],
-      'safety': ['safety management', 'health and safety', 'IOSH', 'NEBOSH', 'risk assessment', 'safety compliance', 'occupational health', 'workplace safety'],
-      'construction': ['construction', 'building', 'contractor', 'site', 'trades', 'civil engineering', 'project management'],
-      'technology': ['software', 'programming', 'developer', 'engineer', 'tech', 'digital', 'coding', 'it'],
-      'healthcare': ['medical', 'clinical', 'patient', 'healthcare', 'hospital', 'nursing', 'doctor'],
-      'finance': ['financial', 'banking', 'investment', 'accounting', 'finance', 'audit'],
-      'education': ['education', 'teaching', 'school', 'university', 'learning', 'academic'],
-      'marketing': ['marketing', 'advertising', 'brand', 'campaign', 'digital marketing'],
-      'engineering': ['engineering', 'mechanical', 'electrical', 'civil', 'aerospace']
+      'building_safety': [
+        'building safety', 'head of building safety', 'fire safety', 'building regulations', 
+        'safety compliance', 'construction safety', 'building control', 'safety management', 
+        'fire risk assessment', 'building standards', 'CDM regulations', 'building surveying',
+        'institute of fire engineers', 'institution of fire engineers', 'ife', 'member grade ife',
+        'building safety act', 'golden thread', 'competent person scheme', 'fire safety manager',
+        'building safety manager', 'fire engineering', 'structural fire protection'
+      ],
+      'emergency_services': [
+        'emergency services', 'fire service', 'rescue', 'ambulance', 'paramedic', 'firefighter', 
+        'emergency response', 'fire brigade', 'crisis management', 'kent fire', 'watch manager',
+        'station manager', 'fire and rescue', 'emergency care', 'incident command'
+      ],
+      'safety': [
+        'safety management', 'health and safety', 'IOSH', 'NEBOSH', 'risk assessment', 
+        'safety compliance', 'occupational health', 'workplace safety', 'safety officer',
+        'safety consultant', 'health and safety advisor'
+      ],
+      'construction': [
+        'construction', 'building', 'contractor', 'site', 'trades', 'civil engineering', 
+        'project management', 'construction management', 'site management'
+      ],
+      'technology': [
+        'software', 'programming', 'developer', 'engineer', 'tech', 'digital', 'coding', 'it',
+        'software development', 'web development', 'data science', 'artificial intelligence'
+      ],
+      'healthcare': [
+        'medical', 'clinical', 'patient', 'healthcare', 'hospital', 'nursing', 'doctor',
+        'physician', 'nurse', 'medical care', 'patient care'
+      ],
+      'finance': [
+        'financial', 'banking', 'investment', 'accounting', 'finance', 'audit',
+        'financial analyst', 'investment banking', 'financial services'
+      ],
+      'education': [
+        'education', 'teaching', 'school', 'university', 'learning', 'academic',
+        'teacher', 'professor', 'educational', 'curriculum'
+      ],
+      'marketing': [
+        'marketing', 'advertising', 'brand', 'campaign', 'digital marketing',
+        'marketing manager', 'brand management', 'social media marketing'
+      ],
+      'engineering': [
+        'engineering', 'mechanical', 'electrical', 'civil', 'aerospace',
+        'engineer', 'engineering manager', 'technical engineering'
+      ]
     };
 
     let bestMatch = 'general';
     let maxMatches = 0;
 
     for (const [industry, keywords] of Object.entries(industryKeywords)) {
-      const matches = keywords.filter(keyword => text.includes(keyword)).length;
+      const matches = keywords.filter(keyword => 
+        textLower.includes(keyword.toLowerCase())
+      ).length;
       if (matches > maxMatches) {
         maxMatches = matches;
         bestMatch = industry;
       }
     }
     
+    // Special case for building safety positions
+    if (textLower.includes('head of building safety') || 
+        textLower.includes('building safety manager') ||
+        textLower.includes('fire safety manager')) {
+      return 'building_safety';
+    }
+    
     return bestMatch;
   }
 
   detectRoleFromText(text) {
+    const textLower = text.toLowerCase();
+    
     const roleKeywords = {
-      'building-safety-manager': ['building safety manager', 'head of building safety', 'building safety', 'fire safety manager', 'safety manager'],
-      'software-developer': ['software developer', 'programmer', 'coding', 'software engineer'],
-      'data-scientist': ['data scientist', 'data analyst', 'machine learning', 'analytics'],
-      'financial-analyst': ['financial analyst', 'finance analyst', 'investment analyst'],
-      'project-manager': ['project manager', 'program manager', 'project lead'],
-      'marketing-manager': ['marketing manager', 'brand manager', 'marketing director'],
-      'fashion-designer': ['fashion designer', 'apparel designer', 'clothing designer', 'textile designer', 'fashion stylist'],
-      'safety-manager': ['safety manager', 'health and safety manager', 'risk manager', 'compliance manager'],
-      'construction-manager': ['construction manager', 'site manager', 'project manager', 'building manager']
+      'building-safety-manager': [
+        'building safety manager', 'head of building safety', 'building safety', 
+        'fire safety manager', 'safety manager', 'building safety officer',
+        'fire safety officer', 'fire safety consultant', 'building control officer'
+      ],
+      'emergency-services-manager': [
+        'watch manager', 'station manager', 'crew manager', 'fire service manager',
+        'emergency services manager', 'incident commander', 'rescue manager'
+      ],
+      'software-developer': [
+        'software developer', 'programmer', 'coding', 'software engineer',
+        'web developer', 'frontend developer', 'backend developer'
+      ],
+      'data-scientist': [
+        'data scientist', 'data analyst', 'machine learning', 'analytics',
+        'data engineer', 'business analyst'
+      ],
+      'financial-analyst': [
+        'financial analyst', 'finance analyst', 'investment analyst',
+        'financial advisor', 'finance manager'
+      ],
+      'project-manager': [
+        'project manager', 'program manager', 'project lead',
+        'project coordinator', 'programme manager'
+      ],
+      'marketing-manager': [
+        'marketing manager', 'brand manager', 'marketing director',
+        'digital marketing manager', 'marketing coordinator'
+      ],
+      'fashion-designer': [
+        'fashion designer', 'apparel designer', 'clothing designer', 
+        'textile designer', 'fashion stylist'
+      ],
+      'safety-manager': [
+        'safety manager', 'health and safety manager', 'risk manager', 
+        'compliance manager', 'safety advisor', 'safety consultant'
+      ],
+      'construction-manager': [
+        'construction manager', 'site manager', 'project manager', 
+        'building manager', 'construction supervisor'
+      ]
     };
 
     for (const [role, keywords] of Object.entries(roleKeywords)) {
-      if (keywords.some(keyword => text.includes(keyword))) {
+      if (keywords.some(keyword => textLower.includes(keyword.toLowerCase()))) {
         return role;
       }
     }
+    
+    // Special case for building safety positions
+    if (textLower.includes('head of building safety')) {
+      return 'building-safety-manager';
+    }
+    
     return 'general';
   }
 
