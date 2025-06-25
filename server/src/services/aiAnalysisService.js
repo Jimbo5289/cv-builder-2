@@ -1899,6 +1899,16 @@ Remember: Score realistically based on actual job requirements. A career changer
       education: educationSection
     });
 
+    // ENHANCED: Add comprehensive extraction for revolutionary analysis
+    const industryExperience = this.extractIndustryExperience(cvText);
+    const leadershipExperience = this.extractLeadershipExperience(cvText);
+    const professionalMemberships = this.extractProfessionalMemberships(cvText);
+    const quantifiedAchievements = this.extractQuantifiedAchievements(cvText);
+    const teamManagementExperience = this.extractTeamManagementExperience(cvText);
+    const budgetManagementExperience = this.extractBudgetManagementExperience(cvText);
+    const clientInteractionExperience = this.extractClientInteractionExperience(cvText);
+    const crossFunctionalExperience = this.extractCrossFunctionalExperience(cvText);
+
     return {
       skills: [...new Set([...extractedSkills, ...contextualSkills])].slice(0, 25),
       experience: workExperience.slice(0, 8),
@@ -1914,7 +1924,18 @@ Remember: Score realistically based on actual job requirements. A career changer
       certifications: certifications.slice(0, 10),
       projects: projects.slice(0, 6),
       languages: languages.slice(0, 5),
-      sectionQuality
+      sectionQuality,
+      
+      // REVOLUTIONARY: Enhanced comprehensive extraction
+      industryExperience: industryExperience.slice(0, 5),
+      leadershipExperience: leadershipExperience.slice(0, 5),
+      professionalMemberships: professionalMemberships.slice(0, 5),
+      quantifiedAchievements: quantifiedAchievements.slice(0, 8),
+      teamManagementExperience: teamManagementExperience.slice(0, 3),
+      budgetManagementExperience: budgetManagementExperience.slice(0, 3),
+      clientInteractionExperience: clientInteractionExperience.slice(0, 3),
+      crossFunctionalExperience: crossFunctionalExperience.slice(0, 3),
+      careerProgression: this.analyzeCareerProgression(workExperience)
     };
   }
 
@@ -3791,6 +3812,403 @@ Remember: Score realistically based on actual job requirements. A career changer
 
     const category = this.mapSkillToCourseCategory(skill, 'general');
     return trainingTimes[category] || '1-3 months';
+  }
+
+  // MISSING METHOD IMPLEMENTATIONS - Adding the extraction methods I referenced
+  extractPersonalInfo(text) {
+    const personalInfo = {};
+    
+    // Extract name patterns
+    const namePatterns = [
+      /^([A-Z][a-z]+ [A-Z][a-z]+(?:\s[A-Z][a-z]+)?)/m,
+      /name[:\s]+([A-Z][a-z]+ [A-Z][a-z]+)/i,
+      /([A-Z][A-Z\s]+)(?:\n|$)/m
+    ];
+    
+    namePatterns.forEach(pattern => {
+      const match = text.match(pattern);
+      if (match && !personalInfo.name) {
+        personalInfo.name = match[1].trim();
+      }
+    });
+    
+    // Extract contact information
+    const emailMatch = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
+    if (emailMatch) personalInfo.email = emailMatch[1];
+    
+    const phoneMatch = text.match(/(\+?[\d\s\-\(\)]{10,20})/);
+    if (phoneMatch) personalInfo.phone = phoneMatch[1];
+    
+    const locationMatch = text.match(/([\w\s]+,\s*[\w\s]+(?:,\s*[\w\s]+)?)/);
+    if (locationMatch) personalInfo.location = locationMatch[1];
+    
+    return personalInfo;
+  }
+
+  extractCareerObjective(text) {
+    const objectivePatterns = [
+      /(?:objective|summary|profile|career\s+objective|professional\s+summary)[:\s]*([^.\n]*(?:\.[^.\n]*){0,3})/gi,
+      /(?:seeking|looking\s+for|interested\s+in)[:\s]*([^.\n]*(?:\.[^.\n]*){0,2})/gi
+    ];
+    
+    for (const pattern of objectivePatterns) {
+      const match = text.match(pattern);
+      if (match && match[1] && match[1].length > 20) {
+        return match[1].trim();
+      }
+    }
+    return '';
+  }
+
+  extractIndustryExperience(text) {
+    const industryKeywords = {
+      'technology': ['software', 'programming', 'development', 'coding', 'IT', 'tech', 'cloud', 'digital'],
+      'healthcare': ['medical', 'clinical', 'patient', 'healthcare', 'hospital', 'nursing', 'EMT', 'paramedic'],
+      'finance': ['financial', 'accounting', 'banking', 'investment', 'insurance', 'audit'],
+      'emergency_services': ['fire', 'rescue', 'emergency', 'paramedic', 'ambulance', 'fire service', 'watch manager'],
+      'building_safety': ['building safety', 'fire safety', 'building regulations', 'fire risk assessment'],
+      'education': ['teaching', 'education', 'academic', 'training', 'curriculum', 'student'],
+      'engineering': ['engineering', 'design', 'technical', 'CAD', 'manufacturing'],
+      'marketing': ['marketing', 'advertising', 'branding', 'digital marketing', 'social media'],
+      'retail': ['retail', 'sales', 'customer service', 'store', 'merchandising'],
+      'construction': ['construction', 'building', 'contractor', 'site', 'safety']
+    };
+    
+    const industryExperience = [];
+    const lowerText = text.toLowerCase();
+    
+    Object.entries(industryKeywords).forEach(([industry, keywords]) => {
+      const matchCount = keywords.filter(keyword => lowerText.includes(keyword)).length;
+      if (matchCount > 0) {
+        industryExperience.push({
+          industry,
+          relevance: matchCount / keywords.length,
+          keywords: keywords.filter(keyword => lowerText.includes(keyword))
+        });
+      }
+    });
+    
+    return industryExperience.sort((a, b) => b.relevance - a.relevance);
+  }
+
+  extractLeadershipExperience(text) {
+    const leadershipPatterns = [
+      /(manager|supervisor|director|lead|head|chief|coordinator|team lead)[^.\n]*([^.\n]*)/gi,
+      /(managed|supervised|led|coordinated|directed|headed)\s+([^.\n]*team[^.\n]*)/gi,
+      /(responsible\s+for\s+managing|oversaw|guided|mentored)\s+([^.\n]*)/gi
+    ];
+    
+    const leadership = [];
+    leadershipPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[0] && match[0].length > 10) {
+          leadership.push(match[0].trim());
+        }
+      });
+    });
+    
+    return [...new Set(leadership)];
+  }
+
+  extractProfessionalMemberships(text) {
+    const membershipPatterns = [
+      /(member|fellow|associate|chartered)\s+(?:of\s+)?([^.\n]*(?:institute|institution|association|society|organization)[^.\n]*)/gi,
+      /(institute\s+of\s+fire\s+engineers|ife|iosh|nebosh|ciob|rics|ieee|acm)[^.\n]*/gi,
+      /(professional\s+membership|member\s+grade|graduate\s+membership)[^.\n]*/gi
+    ];
+    
+    const memberships = [];
+    membershipPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[0] && match[0].length > 5) {
+          memberships.push(match[0].trim());
+        }
+      });
+    });
+    
+    return [...new Set(memberships)];
+  }
+
+  extractQuantifiedAchievements(text) {
+    const quantifiedPatterns = [
+      /(\d+%|\d+\.\d+%|\d+x|\d+\s*times|\$\d+|\d+\+|\d+k|\d+m|\d+\s*people|\d+\s*team|\d+\s*staff|\d+\s*years|\d+\s*months)/gi
+    ];
+    
+    const achievements = [];
+    quantifiedPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        const context = text.substring(Math.max(0, match.index - 50), match.index + match[0].length + 50);
+        if (context.includes('achieved') || context.includes('increased') || context.includes('improved') || 
+            context.includes('reduced') || context.includes('delivered') || context.includes('managed')) {
+          achievements.push(context.trim());
+        }
+      });
+    });
+    
+    return [...new Set(achievements)];
+  }
+
+  extractAdvancedSkillsFromText(text) {
+    const result = {
+      skills: [],
+      levels: {},
+      tools: [],
+      methodologies: []
+    };
+    
+    // Enhanced skill extraction with proficiency levels
+    const skillLevelPatterns = [
+      /(expert|advanced|proficient|intermediate|beginner|basic)\s+(?:in\s+|with\s+|at\s+)?([^.\n,]+)/gi,
+      /([^.\n,]+)\s+\(?(expert|advanced|proficient|intermediate|beginner|basic|novice)\)?/gi,
+      /(skilled|experienced|competent)\s+(?:in\s+|with\s+|at\s+)?([^.\n,]+)/gi
+    ];
+    
+    skillLevelPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        let skill, level;
+        if (match[1] && (match[1].includes('expert') || match[1].includes('advanced') || match[1].includes('proficient'))) {
+          level = match[1];
+          skill = match[2];
+        } else {
+          skill = match[1];
+          level = match[2] || 'experienced';
+        }
+        
+        if (skill && skill.length > 2 && skill.length < 50) {
+          const cleanSkill = skill.trim().toLowerCase();
+          result.skills.push(cleanSkill);
+          result.levels[cleanSkill] = level.toLowerCase();
+        }
+      });
+    });
+    
+    return result;
+  }
+
+  // Add other missing extraction methods with simple implementations
+  extractLicenses(text) {
+    const licensePatterns = [
+      /(license|licensed|certification|certified)\s+([^.\n,]+)/gi
+    ];
+    
+    const licenses = [];
+    licensePatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[0] && match[0].length > 5) {
+          licenses.push(match[0].trim());
+        }
+      });
+    });
+    
+    return [...new Set(licenses)];
+  }
+
+  extractContinuousLearning(text) {
+    const learningPatterns = [
+      /(training|course|workshop|seminar|conference)\s+([^.\n,]+)/gi,
+      /(completed|attended|participated)\s+([^.\n]*(?:training|course|workshop)[^.\n]*)/gi
+    ];
+    
+    const learning = [];
+    learningPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[0] && match[0].length > 10) {
+          learning.push(match[0].trim());
+        }
+      });
+    });
+    
+    return [...new Set(learning)];
+  }
+
+  extractAwards(text) {
+    const awardPatterns = [
+      /(award|recognition|honor|achievement|commendation)\s+([^.\n,]+)/gi,
+      /(received|won|earned)\s+([^.\n]*(?:award|recognition|honor)[^.\n]*)/gi
+    ];
+    
+    const awards = [];
+    awardPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[0] && match[0].length > 10) {
+          awards.push(match[0].trim());
+        }
+      });
+    });
+    
+    return [...new Set(awards)];
+  }
+
+  extractPublications(text) {
+    const publicationPatterns = [
+      /(published|publication|paper|article|journal)\s+([^.\n,]+)/gi
+    ];
+    
+    const publications = [];
+    publicationPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[0] && match[0].length > 10) {
+          publications.push(match[0].trim());
+        }
+      });
+    });
+    
+    return [...new Set(publications)];
+  }
+
+  extractVolunteerWork(text) {
+    const volunteerPatterns = [
+      /(volunteer|volunteering|community|charity)\s+([^.\n,]+)/gi
+    ];
+    
+    const volunteer = [];
+    volunteerPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[0] && match[0].length > 10) {
+          volunteer.push(match[0].trim());
+        }
+      });
+    });
+    
+    return [...new Set(volunteer)];
+  }
+
+  extractSpecializations(text) {
+    const specializationPatterns = [
+      /(specialist|specialization|expertise|focus)\s+([^.\n,]+)/gi
+    ];
+    
+    const specializations = [];
+    specializationPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[0] && match[0].length > 10) {
+          specializations.push(match[0].trim());
+        }
+      });
+    });
+    
+    return [...new Set(specializations)];
+  }
+
+  extractComplianceKnowledge(text) {
+    const compliancePatterns = [
+      /(compliance|regulatory|regulation|standard)\s+([^.\n,]+)/gi,
+      /(gdpr|sox|iso|nebosh|iosh|osha)\s*([^.\n,]*)/gi
+    ];
+    
+    const compliance = [];
+    compliancePatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[0] && match[0].length > 5) {
+          compliance.push(match[0].trim());
+        }
+      });
+    });
+    
+    return [...new Set(compliance)];
+  }
+
+  extractTeamManagementExperience(text) {
+    const teamPatterns = [
+      /(managed|supervised|led|coordinated)\s+(?:a\s+)?team\s+of\s+(\d+)/gi,
+      /(team\s+of\s+\d+|managed\s+\d+\s+people|supervised\s+\d+\s+staff)/gi
+    ];
+    
+    const teamExp = [];
+    teamPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[0]) teamExp.push(match[0].trim());
+      });
+    });
+    
+    return [...new Set(teamExp)];
+  }
+
+  extractBudgetManagementExperience(text) {
+    const budgetPatterns = [
+      /(managed|oversaw|responsible\s+for)\s+(?:a\s+)?budget\s+of\s+[\$£€]?[\d,]+/gi,
+      /(budget\s+management|financial\s+responsibility|cost\s+control)/gi
+    ];
+    
+    const budgetExp = [];
+    budgetPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[0]) budgetExp.push(match[0].trim());
+      });
+    });
+    
+    return [...new Set(budgetExp)];
+  }
+
+  extractClientInteractionExperience(text) {
+    const clientPatterns = [
+      /(client|customer|stakeholder)\s+(interaction|management|service|support|relations)/gi,
+      /(interfaced\s+with|worked\s+with|collaborated\s+with)\s+(clients|customers|stakeholders)/gi
+    ];
+    
+    const clientExp = [];
+    clientPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[0]) clientExp.push(match[0].trim());
+      });
+    });
+    
+    return [...new Set(clientExp)];
+  }
+
+  extractCrossFunctionalExperience(text) {
+    const crossFunctionalPatterns = [
+      /(cross.functional|cross.departmental|collaborated\s+with\s+multiple)/gi,
+      /(worked\s+across|liaison\s+with|coordinated\s+between)/gi
+    ];
+    
+    const crossExp = [];
+    crossFunctionalPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[0]) crossExp.push(match[0].trim());
+      });
+    });
+    
+    return [...new Set(crossExp)];
+  }
+
+  analyzeCareerProgression(experiences) {
+    if (!experiences || experiences.length === 0) return [];
+    
+    const progression = experiences.map(exp => ({
+      role: exp.title || exp.position,
+      company: exp.company,
+      seniority: this.detectSeniorityLevel(exp.title || exp.position),
+      responsibilities: exp.description || exp.responsibilities || ''
+    }));
+    
+    return progression.sort((a, b) => b.seniority - a.seniority);
+  }
+
+  detectSeniorityLevel(title) {
+    if (!title) return 1;
+    const lowerTitle = title.toLowerCase();
+    
+    if (lowerTitle.includes('director') || lowerTitle.includes('vp') || lowerTitle.includes('head of')) return 5;
+    if (lowerTitle.includes('senior') || lowerTitle.includes('lead') || lowerTitle.includes('principal')) return 4;
+    if (lowerTitle.includes('manager') || lowerTitle.includes('supervisor')) return 3;
+    if (lowerTitle.includes('junior') || lowerTitle.includes('assistant') || lowerTitle.includes('intern')) return 1;
+    return 2; // Mid-level
   }
 }
 
