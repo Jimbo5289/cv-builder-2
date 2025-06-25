@@ -327,4 +327,89 @@ const calculateRelevanceScore = (course, gapAreas, matchType) => {
   return score;
 };
 
+// MISSING FUNCTION: Add the basic findCourseRecommendations function
+export const findCourseRecommendations = (skillGaps, maxCourses = 6) => {
+  if (!Array.isArray(skillGaps) || skillGaps.length === 0) {
+    return [];
+  }
+
+  const recommendations = [];
+  
+  // Map skill gaps to course recommendations
+  skillGaps.forEach(skill => {
+    const skillLower = skill.toLowerCase();
+    
+    // Check if we have specific courses for this skill
+    if (courseRecommendations.universalSkillMapping[skillLower]) {
+      const skillCourses = courseRecommendations.universalSkillMapping[skillLower]
+        .slice(0, 2); // Take top 2 courses per skill
+      recommendations.push(...skillCourses);
+    } else {
+      // Fallback: try to match partial skill names
+      Object.keys(courseRecommendations.universalSkillMapping).forEach(mappedSkill => {
+        if (skillLower.includes(mappedSkill) || mappedSkill.includes(skillLower)) {
+          const matchedCourses = courseRecommendations.universalSkillMapping[mappedSkill]
+            .slice(0, 1); // Take top course for partial matches
+          recommendations.push(...matchedCourses);
+        }
+      });
+    }
+  });
+
+  // Remove duplicates and limit results
+  const uniqueCourses = removeDuplicateCourses(recommendations);
+  return uniqueCourses.slice(0, maxCourses);
+};
+
+// MISSING FUNCTION: Add the findCourseRecommendationsWithPathway function
+export const findCourseRecommendationsWithPathway = (industry, role, cvData, pathwayData) => {
+  // This function integrates course recommendations with career pathway analysis
+  const recommendations = [];
+  
+  try {
+    // Get basic course recommendations
+    const basicCourses = getPersonalizedCourseRecommendations(
+      cvData || {}, 
+      { industry, role }, 
+      pathwayData?.skillGaps || [], 
+      pathwayData?.matchType || 'direct',
+      cvData?.currentField || 'unknown',
+      industry
+    );
+    
+    // Add pathway-specific enhancements
+    if (pathwayData && pathwayData.recommendedCourses) {
+      recommendations.push(...pathwayData.recommendedCourses);
+    }
+    
+    // Merge with basic courses and remove duplicates
+    recommendations.push(...basicCourses);
+    
+    // Remove duplicates based on title and provider
+    const uniqueCourses = removeDuplicateCourses(recommendations);
+    
+    // Return structured result with pathway integration
+    return {
+      courses: uniqueCourses.slice(0, 8),
+      pathway: pathwayData || null,
+      totalRecommendations: uniqueCourses.length,
+      categories: {
+        professional: uniqueCourses.filter(c => c.type === 'certification' || c.type === 'membership'),
+        skills: uniqueCourses.filter(c => !c.type || c.type === 'course'),
+        transition: uniqueCourses.filter(c => c.priority === 'critical')
+      }
+    };
+  } catch (error) {
+    console.error('Error in findCourseRecommendationsWithPathway:', error);
+    
+    // Fallback to basic recommendations
+    return {
+      courses: courseRecommendations.industrySpecific[industry]?.core?.slice(0, 6) || [],
+      pathway: null,
+      totalRecommendations: 0,
+      categories: { professional: [], skills: [], transition: [] }
+    };
+  }
+};
+
 export default courseRecommendations; 
