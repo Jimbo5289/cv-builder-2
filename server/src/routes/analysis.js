@@ -12,10 +12,15 @@ let aiAnalysisService = null;
 let cvParser = null;
 
 try {
-  const { PrismaClient } = require('@prisma/client');
-  prisma = new PrismaClient();
+  // Only initialize Prisma if DATABASE_URL is available
+  if (process.env.DATABASE_URL) {
+    const { PrismaClient } = require('@prisma/client');
+    prisma = new PrismaClient();
+  } else {
+    console.warn('DATABASE_URL not found, Prisma client will not be initialized');
+  }
 } catch (err) {
-  console.warn('Prisma not available, using mock mode');
+  console.warn('Prisma not available, using mock mode:', err.message);
 }
 
 try {
@@ -196,7 +201,9 @@ router.get('/courses/recommendations', authMiddleware, async (req, res) => {
       error: error.message,
       query: req.query
     });
-    res.status(500).json({ error: 'Failed to get course recommendations' });
+    
+    // Fallback to mock data on any error
+    res.json(getMockCourseRecommendations());
   }
 });
 
@@ -246,7 +253,12 @@ router.get('/history', authMiddleware, async (req, res) => {
       userId: req.user?.id,
       error: error.message
     });
-    res.status(500).json({ error: 'Failed to get analysis history' });
+    
+    // Fallback to empty data on any error
+    res.json({
+      analyses: [],
+      pagination: { page: 1, limit: 10, total: 0, pages: 0 }
+    });
   }
 });
 
