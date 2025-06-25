@@ -1323,7 +1323,7 @@ Remember: Score realistically based on actual job requirements. A career changer
     }
   }
 
-  // Advanced job description parsing
+  // Advanced job description parsing - handles ANY job description format
   parseJobDescription(jobDescription) {
     if (!jobDescription || typeof jobDescription !== 'string') {
       return {
@@ -1341,72 +1341,221 @@ Remember: Score realistically based on actual job requirements. A career changer
 
     const jd = jobDescription.toLowerCase();
     
-    // Extract skills using pattern matching
+    // Enhanced skill extraction patterns - handles multiple formats
     const skillPatterns = [
-      /(?:required|must have|essential|mandatory)[^.]*?skills?[^.]*?(?:\d+\+?\s*years?|experience)/gi,
-      /(?:proficiency|experience|skilled?)\s+(?:in|with|using)\s+([^.,\n]+)/gi,
-      /(?:knowledge of|experience with|familiar with)\s+([^.,\n]+)/gi,
-      /(?:bachelor|master|degree|certification|qualified?)\s+(?:in|with)?\s*([^.,\n]+)/gi
+      // Requirements patterns
+      /(?:required|must have|essential|mandatory|need|looking for)[^.]*?(?:skills?|experience|knowledge)[^.]*?([^.]+)/gi,
+      /(?:proficiency|experience|skilled?|expertise)\s+(?:in|with|using)\s+([^.,\n]+)/gi,
+      /(?:knowledge of|experience with|familiar with|competent in)\s+([^.,\n]+)/gi,
+      /(?:bachelor|master|degree|certification|qualified?|license)\s+(?:in|with)?\s*([^.,\n]+)/gi,
+      
+      // Bullet point patterns
+      /•\s*([^•\n]+)/gi,
+      /-\s*([^-\n]+)/gi,
+      /\*\s*([^*\n]+)/gi,
+      
+      // Responsibility patterns
+      /(?:responsibilities|duties|you will|role involves|key tasks)[^.]*?([^.]+)/gi,
+      
+      // Technical skill patterns
+      /(?:proficient|expert|advanced|intermediate|beginner)\s+(?:in|with|at)\s+([^.,\n]+)/gi
     ];
 
     const extractedSkills = new Set();
     const extractedQualifications = new Set();
+    const responsibilities = new Set();
     
-    skillPatterns.forEach(pattern => {
+    skillPatterns.forEach((pattern, index) => {
       const matches = [...jd.matchAll(pattern)];
       matches.forEach(match => {
         if (match[1]) {
-          const items = match[1].split(/[,&+/and]/).map(item => item.trim()).filter(item => item.length > 2);
-          items.forEach(item => extractedSkills.add(item));
+          const cleanText = this.cleanExtractedText(match[1]);
+          const items = this.splitSkillText(cleanText);
+          
+          items.forEach(item => {
+            if (item.length > 2) {
+              // Categorize extracted items
+              if (this.isQualification(item)) {
+                extractedQualifications.add(item);
+              } else if (this.isResponsibility(item)) {
+                responsibilities.add(item);
+              } else {
+                extractedSkills.add(item);
+              }
+            }
+          });
         }
       });
     });
 
-    // Extract experience requirements
-    const experienceMatches = jd.match(/(\d+)\+?\s*(?:to\s*\d+)?\s*years?\s*(?:of\s*)?(?:experience|exp)/gi) || [];
-    const experienceYears = experienceMatches.map(match => {
-      const numbers = match.match(/\d+/g);
-      return numbers ? parseInt(numbers[0]) : 0;
+    // Extract experience requirements with multiple patterns
+    const experiencePatterns = [
+      /(\d+)\+?\s*(?:to\s*(\d+))?\s*years?\s*(?:of\s*)?(?:experience|exp)/gi,
+      /(?:minimum|at least|minimum of)\s*(\d+)\s*years?/gi,
+      /(\d+)-(\d+)\s*years?\s*experience/gi,
+      /(?:entry level|graduate|junior|senior|lead|principal|director)/gi
+    ];
+
+    const experienceYears = [];
+    experiencePatterns.forEach(pattern => {
+      const matches = [...jd.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[1]) experienceYears.push(parseInt(match[1]));
+        if (match[2]) experienceYears.push(parseInt(match[2]));
+      });
     });
 
-    // Determine seniority level
-    const maxExperience = Math.max(...experienceYears, 0);
-    let seniority = 'entry';
-    if (maxExperience >= 7) seniority = 'senior';
-    else if (maxExperience >= 3) seniority = 'mid';
-    else if (maxExperience >= 1) seniority = 'junior';
+    // Dynamic seniority detection
+    const seniority = this.determineSeniorityFromText(jd, Math.max(...experienceYears, 0));
 
-    // Detect industry and role
+    // Enhanced industry and role detection
     const industry = this.detectIndustryFromText(jd);
     const role = this.detectRoleFromText(jd);
 
-    // Extract responsibilities
-    const responsibilityPatterns = [
-      /(?:responsibilities|duties|tasks|you will|the role involves)[^.]*?([^.]+)/gi,
-      /(?:•|-)([^•\-\n]+)/gi
+    // Extract comprehensive keywords
+    const keywords = this.extractComprehensiveKeywords(jd);
+
+    return {
+      requiredSkills: [...extractedSkills].slice(0, 15),
+      preferredSkills: this.extractPreferredSkills(jd),
+      qualifications: [...extractedQualifications].slice(0, 10),
+      experience: experienceYears,
+      keywords: keywords,
+      industry,
+      role,
+      seniority,
+      responsibilities: [...responsibilities].slice(0, 8)
+    };
+  }
+
+  // Clean and normalize extracted text
+  cleanExtractedText(text) {
+    return text
+      .replace(/[^\w\s,&+/()-]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  // Split skill text into individual items
+  splitSkillText(text) {
+    const separators = [',', '&', ' and ', ' or ', '+', '/', ';', '•', '-'];
+    let items = [text];
+    
+    separators.forEach(separator => {
+      items = items.flatMap(item => item.split(separator));
+    });
+    
+    return items.map(item => item.trim()).filter(item => item.length > 0);
+  }
+
+  // Determine if extracted text is a qualification
+  isQualification(text) {
+    const qualificationKeywords = [
+      'degree', 'bachelor', 'master', 'phd', 'certification', 'license',
+      'diploma', 'certificate', 'qualification', 'accreditation'
+    ];
+    return qualificationKeywords.some(keyword => text.toLowerCase().includes(keyword));
+  }
+
+  // Determine if extracted text is a responsibility
+  isResponsibility(text) {
+    const responsibilityKeywords = [
+      'manage', 'lead', 'develop', 'implement', 'coordinate', 'oversee',
+      'responsible for', 'ensure', 'maintain', 'conduct', 'perform'
+    ];
+    return responsibilityKeywords.some(keyword => text.toLowerCase().includes(keyword)) && text.length > 20;
+  }
+
+  // Determine seniority from job description text
+  determineSeniorityFromText(text, maxExperience) {
+    const seniorityKeywords = {
+      'entry': ['entry level', 'graduate', 'trainee', 'junior', 'assistant', '0-2 years'],
+      'junior': ['junior', 'associate', '1-3 years', '2-4 years'],
+      'mid': ['mid level', 'experienced', '3-7 years', '4-8 years'],
+      'senior': ['senior', 'lead', 'principal', '7+ years', '8+ years', '10+ years'],
+      'executive': ['director', 'manager', 'head of', 'chief', 'vp', 'vice president']
+    };
+
+    for (const [level, keywords] of Object.entries(seniorityKeywords)) {
+      if (keywords.some(keyword => text.includes(keyword))) {
+        return level;
+      }
+    }
+
+    // Fallback to experience-based determination
+    if (maxExperience >= 10) return 'senior';
+    if (maxExperience >= 5) return 'mid';
+    if (maxExperience >= 2) return 'junior';
+    return 'entry';
+  }
+
+  // Extract preferred skills separately
+  extractPreferredSkills(text) {
+    const preferredPatterns = [
+      /(?:preferred|desirable|nice to have|bonus)[^.]*?([^.]+)/gi,
+      /(?:plus|advantage|beneficial)\s+(?:if|to have)\s+([^.,\n]+)/gi
     ];
 
-    const responsibilities = new Set();
-    responsibilityPatterns.forEach(pattern => {
-      const matches = [...jd.matchAll(pattern)];
+    const preferredSkills = new Set();
+    preferredPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
       matches.forEach(match => {
-        if (match[1] && match[1].trim().length > 10) {
-          responsibilities.add(match[1].trim());
+        if (match[1]) {
+          const items = this.splitSkillText(this.cleanExtractedText(match[1]));
+          items.forEach(item => {
+            if (item.length > 2) preferredSkills.add(item);
+          });
         }
       });
     });
 
-    return {
-      requiredSkills: [...extractedSkills].slice(0, 10),
-      preferredSkills: [],
-      qualifications: [...extractedQualifications].slice(0, 8),
-      experience: experienceYears,
-      keywords: this.extractKeywordsFromText(jd),
-      industry,
-      role,
-      seniority,
-      responsibilities: [...responsibilities].slice(0, 6)
-    };
+    return [...preferredSkills].slice(0, 8);
+  }
+
+  // Extract comprehensive keywords for ATS optimization
+  extractComprehensiveKeywords(text) {
+    // Remove common words and extract meaningful keywords
+    const commonWords = new Set([
+      'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by',
+      'a', 'an', 'is', 'are', 'will', 'be', 'have', 'has', 'had', 'do', 'does', 'did',
+      'this', 'that', 'these', 'those', 'we', 'you', 'they', 'them', 'our', 'your'
+    ]);
+    
+    const words = text.match(/\b\w{3,}\b/g) || [];
+    const keywordFreq = {};
+    
+    words.forEach(word => {
+      const lowerWord = word.toLowerCase();
+      if (!commonWords.has(lowerWord) && lowerWord.length >= 3) {
+        keywordFreq[lowerWord] = (keywordFreq[lowerWord] || 0) + 1;
+      }
+    });
+
+    // Extract multi-word phrases that are important
+    const phrases = this.extractImportantPhrases(text);
+    phrases.forEach(phrase => {
+      keywordFreq[phrase] = (keywordFreq[phrase] || 0) + 2; // Give phrases higher weight
+    });
+
+    return Object.keys(keywordFreq)
+      .sort((a, b) => keywordFreq[b] - keywordFreq[a])
+      .slice(0, 20);
+  }
+
+  // Extract important multi-word phrases
+  extractImportantPhrases(text) {
+    const phrasePatterns = [
+      /\b(?:project management|data analysis|customer service|software development|machine learning|artificial intelligence|quality assurance|business development|risk management|emergency response|fire safety|building safety|health and safety)\b/gi,
+      /\b(?:team leadership|problem solving|critical thinking|time management|attention to detail|excellent communication|strong analytical|proven track record)\b/gi
+    ];
+
+    const phrases = new Set();
+    phrasePatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => phrases.add(match[0].toLowerCase()));
+    });
+
+    return [...phrases];
   }
 
   detectIndustryFromText(text) {
@@ -1538,34 +1687,176 @@ Remember: Score realistically based on actual job requirements. A career changer
     return null;
   }
 
+  // Enhanced CV parsing for universal skill and experience extraction
   extractSkillsFromText(text) {
+    if (!text) return [];
+
     const skillPatterns = [
-      /(?:proficient in|experienced with|skilled in|knowledge of|expertise in)\s+([^.,\n]+)/gi,
-      /(?:programming languages?|technologies?|tools?|software)[:\-\s]*([^.\n]+)/gi,
-      /(?:•|-)([^•\-\n]+)/gi
+      // Technical skills sections
+      /(?:technical skills?|core competencies|key skills?|skills?)[^:]*?:([^.]*?)(?:\n\n|\n[A-Z]|$)/gi,
+      
+      // Software and tools
+      /(?:software|tools?|technologies|platforms?)[^:]*?:([^.]*?)(?:\n\n|\n[A-Z]|$)/gi,
+      
+      // Programming languages
+      /(?:programming languages?|languages?|coding)[^:]*?:([^.]*?)(?:\n\n|\n[A-Z]|$)/gi,
+      
+      // Certifications and qualifications
+      /(?:certified in|qualified in|proficient in|experienced with|skilled in)\s+([^.,\n]+)/gi,
+      
+      // Achievement-based skills
+      /(?:achieved|accomplished|delivered|managed|led|developed|implemented|designed|created)\s+([^.,\n]+)/gi,
+      
+      // Responsibility-based skills
+      /(?:responsible for|duties included|tasks involved|experience in)\s+([^.,\n]+)/gi,
+      
+      // Bullet point skills
+      /[•\-\*]\s*([^•\-\*\n]+)/gi
     ];
 
-    const skills = new Set();
-    
+    const extractedSkills = new Set();
+    const text_lower = text.toLowerCase();
+
     skillPatterns.forEach(pattern => {
-      const matches = [...text.matchAll(pattern)];
+      const matches = [...text_lower.matchAll(pattern)];
       matches.forEach(match => {
         if (match[1]) {
-          const skillList = match[1].split(/[,&+/and]/).map(skill => skill.trim()).filter(skill => skill.length > 2 && skill.length < 30);
-          skillList.forEach(skill => skills.add(skill));
+          const skillText = this.cleanExtractedText(match[1]);
+          const skills = this.extractIndividualSkills(skillText);
+          skills.forEach(skill => {
+            if (skill.length > 2 && !this.isCommonWord(skill)) {
+              extractedSkills.add(skill);
+            }
+          });
         }
       });
     });
 
-    // Common technical skills to look for
-    const technicalSkills = ['python', 'java', 'javascript', 'react', 'node.js', 'sql', 'aws', 'docker', 'kubernetes', 'git', 'agile', 'scrum', 'excel', 'powerpoint', 'word', 'photoshop', 'illustrator', 'figma', 'sketch'];
-    technicalSkills.forEach(skill => {
-      if (text.includes(skill)) {
-        skills.add(skill);
-      }
+    // Extract skills from context (work experience descriptions)
+    const contextualSkills = this.extractContextualSkills(text_lower);
+    contextualSkills.forEach(skill => extractedSkills.add(skill));
+
+    // Extract industry-specific skills
+    const industrySkills = this.extractIndustrySpecificSkills(text_lower);
+    industrySkills.forEach(skill => extractedSkills.add(skill));
+
+    return [...extractedSkills].slice(0, 25);
+  }
+
+  // Extract individual skills from combined text
+  extractIndividualSkills(text) {
+    const separators = [',', '&', ';', '|', ' and ', ' or ', '+', '/', '•', '-', '*'];
+    let skills = [text];
+    
+    separators.forEach(separator => {
+      skills = skills.flatMap(skill => skill.split(separator));
+    });
+    
+    return skills
+      .map(skill => skill.trim())
+      .filter(skill => skill.length > 1)
+      .map(skill => this.normalizeSkill(skill));
+  }
+
+  // Normalize skill names for consistency
+  normalizeSkill(skill) {
+    const normalizations = {
+      'js': 'javascript',
+      'py': 'python',
+      'mgmt': 'management',
+      'admin': 'administration',
+      'dev': 'development',
+      'pm': 'project management',
+      'h&s': 'health and safety',
+      'qa': 'quality assurance',
+      'qc': 'quality control'
+    };
+
+    const normalized = normalizations[skill.toLowerCase()];
+    return normalized || skill;
+  }
+
+  // Extract contextual skills from work descriptions
+  extractContextualSkills(text) {
+    const contextualPatterns = [
+      // Action verbs with skills
+      /(?:managed|led|supervised|coordinated|implemented|developed|designed|created|built|delivered|achieved)\s+([^.,\n]{10,50})/gi,
+      
+      // Experience with specific tools/technologies
+      /(?:using|with|via|through)\s+([A-Z][a-zA-Z\s]{2,20})/gi,
+      
+      // Skills in achievements
+      /(?:expertise in|experience in|specialization in|background in)\s+([^.,\n]+)/gi
+    ];
+
+    const skills = new Set();
+    contextualPatterns.forEach(pattern => {
+      const matches = [...text.matchAll(pattern)];
+      matches.forEach(match => {
+        if (match[1]) {
+          const skill = match[1].trim();
+          if (skill.length > 3 && skill.length < 50) {
+            skills.add(skill);
+          }
+        }
+      });
     });
 
     return [...skills];
+  }
+
+  // Extract industry-specific skills based on context
+  extractIndustrySpecificSkills(text) {
+    const industrySkillMappings = {
+      'emergency services': ['emergency response', 'crisis management', 'incident command', 'fire safety', 'rescue operations', 'first aid', 'cpr'],
+      'healthcare': ['patient care', 'clinical assessment', 'medical procedures', 'healthcare delivery', 'patient safety'],
+      'technology': ['software development', 'programming', 'system design', 'database management', 'cloud computing'],
+      'finance': ['financial analysis', 'risk assessment', 'portfolio management', 'regulatory compliance'],
+      'construction': ['project management', 'safety management', 'building regulations', 'construction planning'],
+      'education': ['curriculum development', 'student assessment', 'educational technology', 'classroom management']
+    };
+
+    const skills = new Set();
+    for (const [industry, skillList] of Object.entries(industrySkillMappings)) {
+      if (text.includes(industry.replace(' ', '')) || 
+          skillList.some(skill => text.includes(skill.replace(' ', '')))) {
+        skillList.forEach(skill => {
+          if (text.includes(skill.replace(' ', '')) || 
+              this.hasRelatedTerms(text, skill)) {
+            skills.add(skill);
+          }
+        });
+      }
+    }
+
+    return [...skills];
+  }
+
+  // Check if text has terms related to a skill
+  hasRelatedTerms(text, skill) {
+    const relatedTerms = {
+      'fire safety': ['fire', 'safety', 'building safety', 'risk assessment'],
+      'emergency response': ['emergency', 'response', 'crisis', 'incident'],
+      'project management': ['project', 'management', 'coordination', 'planning'],
+      'patient care': ['patient', 'care', 'clinical', 'medical']
+    };
+
+    const terms = relatedTerms[skill];
+    if (!terms) return false;
+
+    return terms.filter(term => text.includes(term)).length >= 2;
+  }
+
+  // Check if a word is too common to be a skill
+  isCommonWord(word) {
+    const commonWords = new Set([
+      'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by',
+      'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had',
+      'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might',
+      'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they'
+    ]);
+    
+    return commonWords.has(word.toLowerCase()) || word.length < 3;
   }
 
   calculateExperienceYears(text) {
@@ -1750,36 +2041,196 @@ Remember: Score realistically based on actual job requirements. A career changer
 
   calculateSkillsMatch(cvData, jobData) {
     const cvSkills = cvData.skills.map(skill => skill.toLowerCase());
-    const jobRequiredSkills = jobData.requiredSkills.map(skill => skill.toLowerCase());
-    const jobKeywords = jobData.keywords.map(keyword => keyword.toLowerCase());
+    const jobSkills = [...jobData.requiredSkills, ...jobData.keywords].map(skill => skill.toLowerCase());
+    
+    if (jobSkills.length === 0) return 50;
 
-    if (jobRequiredSkills.length === 0 && jobKeywords.length === 0) {
-      return 70; // No specific requirements
+    // Direct skill matches
+    const directMatches = jobSkills.filter(jobSkill => 
+      cvSkills.some(cvSkill => 
+        cvSkill.includes(jobSkill) || 
+        jobSkill.includes(cvSkill) ||
+        this.areSkillsSimilar(cvSkill, jobSkill)
+      )
+    );
+
+    // Semantic skill matching for transferable concepts
+    const semanticMatches = this.findSemanticSkillMatches(cvSkills, jobSkills);
+    
+    // Industry context matching
+    const contextMatches = this.findContextualSkillMatches(cvData, jobData);
+
+    const totalMatches = new Set([...directMatches, ...semanticMatches, ...contextMatches]).size;
+    const matchPercentage = (totalMatches / jobSkills.length) * 100;
+
+    // Apply universal transferability bonuses
+    const transferabilityBonus = this.calculateUniversalTransferabilityBonus(cvData, jobData);
+    
+    return Math.min(100, Math.round(matchPercentage + transferabilityBonus));
+  }
+
+  // Semantic skill matching for related concepts
+  findSemanticSkillMatches(cvSkills, jobSkills) {
+    const semanticMappings = {
+      // Leadership and management
+      'leadership': ['management', 'team lead', 'supervision', 'coordination', 'director'],
+      'management': ['leadership', 'oversight', 'administration', 'coordination'],
+      'project management': ['project coordination', 'program management', 'project delivery'],
+      
+      // Safety and compliance
+      'safety': ['health and safety', 'risk management', 'compliance', 'security'],
+      'fire safety': ['building safety', 'emergency response', 'risk assessment'],
+      'risk assessment': ['hazard identification', 'safety analysis', 'compliance'],
+      
+      // Technical skills
+      'analysis': ['analytical', 'data analysis', 'research', 'evaluation'],
+      'problem solving': ['troubleshooting', 'resolution', 'critical thinking'],
+      'communication': ['presentation', 'interpersonal', 'client relations'],
+      
+      // Industry specific
+      'emergency response': ['crisis management', 'incident response', 'emergency planning'],
+      'customer service': ['client relations', 'customer support', 'customer care'],
+      'quality control': ['quality assurance', 'quality management', 'inspection']
+    };
+
+    const matches = [];
+    cvSkills.forEach(cvSkill => {
+      jobSkills.forEach(jobSkill => {
+        // Check semantic mappings
+        for (const [concept, synonyms] of Object.entries(semanticMappings)) {
+          if ((cvSkill.includes(concept) || synonyms.some(syn => cvSkill.includes(syn))) &&
+              (jobSkill.includes(concept) || synonyms.some(syn => jobSkill.includes(syn)))) {
+            matches.push(jobSkill);
+          }
+        }
+      });
+    });
+
+    return [...new Set(matches)];
+  }
+
+  // Find contextual matches based on industry knowledge
+  findContextualSkillMatches(cvData, jobData) {
+    const matches = [];
+    const cvField = cvData.currentField;
+    const jobIndustry = jobData.industry;
+
+    // Industry context mappings for transferable skills
+    const industryContexts = {
+      'emergency_services': {
+        'leadership': ['team management', 'crisis leadership', 'incident command'],
+        'training': ['emergency training', 'safety training', 'professional development'],
+        'assessment': ['risk assessment', 'incident analysis', 'safety evaluation']
+      },
+      'healthcare': {
+        'care': ['patient care', 'clinical care', 'health services'],
+        'documentation': ['medical records', 'clinical documentation', 'patient records'],
+        'emergency': ['emergency response', 'urgent care', 'crisis management']
+      },
+      'technology': {
+        'development': ['software development', 'system development', 'application development'],
+        'analysis': ['data analysis', 'system analysis', 'technical analysis'],
+        'design': ['system design', 'software design', 'technical design']
+      },
+      'finance': {
+        'analysis': ['financial analysis', 'data analysis', 'market analysis'],
+        'management': ['portfolio management', 'risk management', 'asset management'],
+        'reporting': ['financial reporting', 'compliance reporting', 'regulatory reporting']
+      }
+    };
+
+    if (industryContexts[cvField]) {
+      const contextMappings = industryContexts[cvField];
+      cvData.skills.forEach(cvSkill => {
+        for (const [baseSkill, contextualSkills] of Object.entries(contextMappings)) {
+          if (cvSkill.toLowerCase().includes(baseSkill)) {
+            jobData.requiredSkills.forEach(jobSkill => {
+              if (contextualSkills.some(contextSkill => 
+                jobSkill.toLowerCase().includes(contextSkill.toLowerCase()))) {
+                matches.push(jobSkill);
+              }
+            });
+          }
+        }
+      });
     }
 
-    let matchedSkills = 0;
-    let totalRequiredSkills = jobRequiredSkills.length + jobKeywords.length;
+    return [...new Set(matches)];
+  }
 
-    // Check direct skill matches
-    jobRequiredSkills.forEach(requiredSkill => {
-      if (cvSkills.some(cvSkill => 
-        cvSkill.includes(requiredSkill) || requiredSkill.includes(cvSkill)
-      )) {
-        matchedSkills++;
-      }
-    });
+  // Calculate universal transferability bonus for any field combination
+  calculateUniversalTransferabilityBonus(cvData, jobData) {
+    let bonus = 0;
+    const cvField = cvData.currentField;
+    const jobIndustry = jobData.industry;
 
-    // Check keyword matches
-    jobKeywords.forEach(keyword => {
-      if (cvSkills.some(cvSkill => 
-        cvSkill.includes(keyword) || keyword.includes(cvSkill)
-      )) {
-        matchedSkills++;
-      }
-    });
+    // High-value transferable experience patterns
+    const universalTransferables = [
+      'leadership', 'management', 'communication', 'problem solving',
+      'project management', 'training', 'analysis', 'compliance',
+      'safety', 'emergency response', 'customer service', 'teamwork'
+    ];
 
-    const matchPercentage = (matchedSkills / totalRequiredSkills) * 100;
-    return Math.min(matchPercentage, 100);
+    // Count high-value transferable skills
+    const transferableCount = cvData.skills.filter(skill => 
+      universalTransferables.some(transferable => 
+        skill.toLowerCase().includes(transferable.toLowerCase())
+      )
+    ).length;
+
+    // Base transferability bonus
+    bonus += Math.min(15, transferableCount * 2);
+
+    // Experience level bonus for senior candidates
+    if (cvData.experienceYears >= 5) {
+      bonus += 10;
+    }
+
+    // Industry-specific high transferability
+    const industryTransferability = {
+      'emergency_services_to_safety': 25,
+      'healthcare_to_emergency': 20,
+      'engineering_to_construction': 20,
+      'finance_to_business': 15,
+      'education_to_training': 15,
+      'military_to_security': 20,
+      'management_to_management': 15
+    };
+
+    // Apply specific transferability bonuses
+    const transferKey = `${cvField}_to_${jobIndustry}`;
+    if (industryTransferability[transferKey]) {
+      bonus += industryTransferability[transferKey];
+    }
+
+    // Cross-industry management experience
+    if (cvData.skills.some(skill => skill.toLowerCase().includes('management')) &&
+        jobData.requiredSkills.some(skill => skill.toLowerCase().includes('management'))) {
+      bonus += 10;
+    }
+
+    return Math.min(30, bonus); // Cap bonus at 30%
+  }
+
+  // Check if two skills are semantically similar
+  areSkillsSimilar(skill1, skill2) {
+    const similarityMappings = [
+      ['javascript', 'js'],
+      ['python', 'py'],
+      ['management', 'mgmt'],
+      ['administration', 'admin'],
+      ['development', 'dev'],
+      ['analysis', 'analytics'],
+      ['customer service', 'customer support'],
+      ['project management', 'project coordination'],
+      ['fire safety', 'fire protection'],
+      ['building safety', 'construction safety']
+    ];
+
+    return similarityMappings.some(([term1, term2]) => 
+      (skill1.includes(term1) && skill2.includes(term2)) ||
+      (skill1.includes(term2) && skill2.includes(term1))
+    );
   }
 
   calculateEducationMatch(cvData, jobData) {
