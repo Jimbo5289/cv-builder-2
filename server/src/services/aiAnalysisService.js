@@ -620,11 +620,22 @@ class AIAnalysisService {
   // Detect current professional field from CV
   detectCurrentField(cvText) {
     const fieldKeywords = {
-      'emergency_services': ['fire', 'rescue', 'ambulance', 'paramedic', 'emt', 'emergency response', 'firefighter'],
-      'healthcare': ['nurse', 'doctor', 'medical', 'patient care', 'clinical', 'hospital'],
-      'technology': ['software', 'programming', 'developer', 'code', 'technical', 'IT'],
+      'emergency_services': [
+        'fire', 'rescue', 'ambulance', 'paramedic', 'emt', 'emergency response', 'firefighter',
+        'kent fire', 'fire service', 'fire brigade', 'watch manager', 'station manager',
+        'emergency medical', 'first aid', 'crisis management', 'incident command', 'fire safety',
+        'building safety', 'fire risk assessment', 'IOSH', 'NEBOSH', 'health and safety',
+        'fire prevention', 'fire protection', 'emergency care', 'rescue operations'
+      ],
+      'building_safety': [
+        'building safety', 'fire safety', 'building regulations', 'building control', 'construction safety',
+        'IOSH', 'NEBOSH', 'fire risk assessment', 'building codes', 'safety management',
+        'building inspection', 'regulatory compliance', 'CDM', 'building standards'
+      ],
+      'healthcare': ['nurse', 'doctor', 'medical', 'patient care', 'clinical', 'hospital', 'healthcare'],
+      'technology': ['software', 'programming', 'developer', 'code', 'technical', 'IT', 'javascript', 'python'],
       'education': ['teacher', 'teaching', 'education', 'classroom', 'student', 'curriculum'],
-      'finance': ['accounting', 'financial', 'banking', 'audit', 'investment'],
+      'finance': ['accounting', 'financial', 'banking', 'audit', 'investment', 'finance'],
       'marketing': ['marketing', 'advertising', 'brand', 'campaign', 'social media'],
       'design': ['design', 'creative', 'visual', 'graphic', 'UI/UX', 'artistic'],
       'sales': ['sales', 'customer', 'client', 'revenue', 'negotiation']
@@ -644,7 +655,7 @@ class AIAnalysisService {
       }
     }
 
-    return maxScore > 30 ? detectedField : 'unknown';
+    return maxScore > 20 ? detectedField : 'unknown';
   }
 
   // Run multiple AI models in parallel
@@ -971,11 +982,28 @@ Apply professional ATS scoring (1-100):
 - 1-39: No match, completely different field
 
 STEP 5 - REALISTIC SCORING GUIDELINES:
-- Emergency services → Building safety: 75-85 (fire safety expertise transfers)
+- Emergency services → Building safety: 85-95 (fire safety expertise transfers directly)
+- Emergency services → Healthcare: 75-85 (emergency medical experience)
+- Fire service → Construction safety: 80-90 (safety management expertise)
 - Teaching → Software development: 25-35 (no technical background)
-- Finance → Marketing: 45-55 (some analytical skills transfer)
+- Finance → Marketing: 45-55 (analytical skills transfer)
 - Engineering → Construction: 80-90 (highly relevant technical skills)
 - Retail → Healthcare: 35-45 (customer service transfers, no medical knowledge)
+- Manufacturing → Engineering: 70-80 (technical knowledge transfers)
+
+CRITICAL EMERGENCY SERVICES TRANSFERABILITY:
+When analyzing Emergency Services CVs (fire, rescue, ambulance, paramedic):
+- Fire safety experience = HIGHLY RELEVANT to building safety roles (85-95 score)
+- IOSH/NEBOSH qualifications = PERFECT for safety management roles 
+- Risk assessment skills = DIRECTLY applicable to building safety
+- Emergency response = VALUABLE for crisis management roles
+- Leadership in high-pressure situations = EXCELLENT for management roles
+
+DO NOT UNDERESTIMATE EMERGENCY SERVICES EXPERIENCE:
+- Fire officers understand building safety better than most
+- Emergency services training includes safety protocols and risk assessment
+- Watch Managers have proven leadership and crisis management skills
+- Fire Risk Assessment experience is DIRECTLY relevant to building safety
 
 CRITICAL INSTRUCTIONS:
 1. BE BRUTALLY HONEST about fit - users need realistic expectations
@@ -1383,33 +1411,43 @@ Remember: Score realistically based on actual job requirements. A career changer
 
   detectIndustryFromText(text) {
     const industryKeywords = {
+      'building_safety': ['building safety', 'fire safety', 'building regulations', 'safety compliance', 'construction safety', 'building control', 'safety management', 'fire risk assessment', 'building standards', 'CDM regulations', 'building surveying'],
+      'emergency_services': ['emergency services', 'fire service', 'rescue', 'ambulance', 'paramedic', 'firefighter', 'emergency response', 'fire brigade', 'crisis management'],
+      'safety': ['safety management', 'health and safety', 'IOSH', 'NEBOSH', 'risk assessment', 'safety compliance', 'occupational health', 'workplace safety'],
+      'construction': ['construction', 'building', 'contractor', 'site', 'trades', 'civil engineering', 'project management'],
       'technology': ['software', 'programming', 'developer', 'engineer', 'tech', 'digital', 'coding', 'it'],
       'healthcare': ['medical', 'clinical', 'patient', 'healthcare', 'hospital', 'nursing', 'doctor'],
       'finance': ['financial', 'banking', 'investment', 'accounting', 'finance', 'audit'],
-      'building_safety': ['building safety', 'fire safety', 'building regulations', 'safety compliance', 'construction safety'],
-      'construction': ['construction', 'building', 'contractor', 'site', 'trades'],
       'education': ['education', 'teaching', 'school', 'university', 'learning', 'academic'],
       'marketing': ['marketing', 'advertising', 'brand', 'campaign', 'digital marketing'],
       'engineering': ['engineering', 'mechanical', 'electrical', 'civil', 'aerospace']
     };
 
+    let bestMatch = 'general';
+    let maxMatches = 0;
+
     for (const [industry, keywords] of Object.entries(industryKeywords)) {
-      if (keywords.some(keyword => text.includes(keyword))) {
-        return industry;
+      const matches = keywords.filter(keyword => text.includes(keyword)).length;
+      if (matches > maxMatches) {
+        maxMatches = matches;
+        bestMatch = industry;
       }
     }
-    return 'general';
+    
+    return bestMatch;
   }
 
   detectRoleFromText(text) {
     const roleKeywords = {
+      'building-safety-manager': ['building safety manager', 'head of building safety', 'building safety', 'fire safety manager', 'safety manager'],
       'software-developer': ['software developer', 'programmer', 'coding', 'software engineer'],
       'data-scientist': ['data scientist', 'data analyst', 'machine learning', 'analytics'],
       'financial-analyst': ['financial analyst', 'finance analyst', 'investment analyst'],
-      'building-safety-manager': ['building safety manager', 'safety manager', 'fire safety'],
       'project-manager': ['project manager', 'program manager', 'project lead'],
       'marketing-manager': ['marketing manager', 'brand manager', 'marketing director'],
-      'fashion-designer': ['fashion designer', 'apparel designer', 'clothing designer', 'textile designer', 'fashion stylist']
+      'fashion-designer': ['fashion designer', 'apparel designer', 'clothing designer', 'textile designer', 'fashion stylist'],
+      'safety-manager': ['safety manager', 'health and safety manager', 'risk manager', 'compliance manager'],
+      'construction-manager': ['construction manager', 'site manager', 'project manager', 'building manager']
     };
 
     for (const [role, keywords] of Object.entries(roleKeywords)) {
@@ -1796,20 +1834,36 @@ Remember: Score realistically based on actual job requirements. A career changer
 
     const industryReqs = this.getIndustryRequirements(jobIndustry);
     
-    // High transferability
-    if (industryReqs.transferableFrom.includes(cvIndustry)) return 80;
+    // Special high-compatibility cases (emergency services → building safety, etc.)
+    const specialHighTransfers = {
+      'emergency_services': ['building_safety', 'safety', 'construction', 'healthcare'],
+      'building_safety': ['emergency_services', 'safety', 'construction'],
+      'engineering': ['construction', 'manufacturing', 'technology'],
+      'finance': ['business', 'consulting', 'data analysis'],
+      'healthcare': ['emergency_services', 'social work', 'research']
+    };
+
+    // Check for special high-compatibility transfers (90+ score)
+    if (specialHighTransfers[cvIndustry]?.includes(jobIndustry)) {
+      return 95;
+    }
+
+    // High transferability from mappings (85+ score)
+    if (industryReqs.transferableFrom.includes(cvIndustry)) {
+      return 85;
+    }
     
-    // Check for transferable skills
-    const transferableSkills = ['leadership', 'management', 'communication', 'problem-solving', 'teamwork', 'project management'];
+    // Check for transferable skills (medium transferability)
+    const transferableSkills = ['leadership', 'management', 'communication', 'problem-solving', 'teamwork', 'project management', 'safety', 'compliance', 'risk assessment'];
     const hasTransferableSkills = cvData.skills.some(skill => 
       transferableSkills.some(transferable => 
         skill.toLowerCase().includes(transferable)
       )
     );
 
-    if (hasTransferableSkills) return 60;
+    if (hasTransferableSkills) return 65;
 
-    // Low transferability
+    // Low transferability for incompatible fields
     if (industryReqs.incompatibleFields.includes(cvIndustry)) return 25;
 
     return 45; // Moderate transferability
