@@ -114,11 +114,13 @@ class AIAnalysisService {
         transferableFrom: ['emergency services', 'engineering', 'healthcare', 'military', 'manufacturing', 'fire service', 'rescue services', 'health and safety']
       },
       building_safety: {
-        keywords: ['building safety', 'fire safety', 'building regulations', 'building control', 'safety compliance', 'building codes', 'fire risk assessment', 'building standards', 'safety management', 'regulatory compliance', 'building inspection', 'safety audits', 'building surveying', 'construction safety', 'NEBOSH', 'IOSH', 'CDM', 'building safety manager'],
-        skills: ['Building safety expertise', 'Fire safety knowledge', 'Regulatory compliance', 'Risk assessment', 'Building inspection', 'Safety management', 'Technical analysis', 'Report writing', 'Stakeholder communication'],
-        qualifications: ['Building safety qualifications', 'Fire safety certifications', 'NEBOSH General Certificate', 'IOSH Managing Safely', 'Building control qualifications', 'Construction safety training', 'Professional memberships (IOSH, NEBOSH)'],
+        keywords: ['building safety', 'fire safety', 'building regulations', 'building control', 'safety compliance', 'building codes', 'fire risk assessment', 'building standards', 'safety management', 'regulatory compliance', 'building inspection', 'safety audits', 'building surveying', 'construction safety', 'NEBOSH', 'IOSH', 'CDM', 'building safety manager', 'institute of fire engineers', 'IFE', 'member grade', 'graduate membership', 'fire engineering', 'fire risk assessor', 'competent person', 'building act', 'building safety act', 'golden thread', 'BSA'],
+        skills: ['Building safety expertise', 'Fire safety knowledge', 'Regulatory compliance', 'Risk assessment', 'Building inspection', 'Safety management', 'Technical analysis', 'Report writing', 'Stakeholder communication', 'Fire engineering principles', 'Building safety act compliance', 'Fire risk assessment', 'Emergency evacuation planning'],
+        qualifications: ['Building safety qualifications', 'Fire safety certifications', 'NEBOSH General Certificate', 'IOSH Managing Safely', 'Building control qualifications', 'Construction safety training', 'Professional memberships (IOSH, NEBOSH)', 'Institute of Fire Engineers membership', 'Member Grade IFE', 'Graduate Membership IFE', 'IFE Diploma', 'Fire Engineering qualifications', 'Fire Risk Assessment certification', 'Building Safety Act training'],
         incompatibleFields: ['arts', 'design', 'retail', 'hospitality', 'marketing'],
-        transferableFrom: ['construction', 'engineering', 'emergency services', 'architecture', 'surveying', 'health and safety', 'fire service', 'rescue services']
+        transferableFrom: ['construction', 'engineering', 'emergency services', 'architecture', 'surveying', 'health and safety', 'fire service', 'rescue services', 'kent fire and rescue', 'watch manager'],
+        criticalQualifications: ['institute of fire engineers', 'member grade ife', 'graduate membership ife', 'ife diploma', 'fire engineering qualification', 'fire risk assessment certification'],
+        professionalBodies: ['Institute of Fire Engineers', 'Institution of Fire Engineers', 'IFE', 'IOSH', 'NEBOSH', 'CIOB', 'RICS']
       },
       safety: {
         keywords: ['safety management', 'health and safety', 'risk assessment', 'safety compliance', 'safety protocols', 'incident investigation', 'safety training', 'hazard identification', 'safety audits', 'NEBOSH', 'IOSH', 'OSHA', 'safety legislation', 'safety culture', 'occupational health', 'workplace safety'],
@@ -981,6 +983,16 @@ Apply professional ATS scoring (1-100):
 - 40-49: Poor match, extensive career change needed
 - 1-39: No match, completely different field
 
+CRITICAL: For Building Safety roles, specifically check for:
+- Institute of Fire Engineers membership (Member Grade IFE, Graduate Membership IFE)
+- IFE Diploma in Fire Engineering
+- Fire Risk Assessment qualifications
+- Building Safety Act knowledge
+- Fire engineering expertise
+- Professional body memberships (IFE, IOSH, NEBOSH)
+
+MISSING IFE QUALIFICATION = MAJOR SCORING IMPACT for Building Safety roles
+
 STEP 5 - REALISTIC SCORING GUIDELINES:
 - Emergency services → Building safety: 85-95 (fire safety expertise transfers directly)
 - Emergency services → Healthcare: 75-85 (emergency medical experience)
@@ -1011,6 +1023,10 @@ CRITICAL INSTRUCTIONS:
 3. Identify SPECIFIC missing skills/experience for this exact role
 4. Provide ACTIONABLE improvement recommendations
 5. Consider transferable skills but don't overscore unrelated experience
+6. For Building Safety roles: MANDATORY to check for Institute of Fire Engineers qualifications
+7. Emergency services experience should score HIGH for Building Safety (80-95) due to fire safety expertise
+8. Missing professional qualifications (like IFE membership) should be flagged as critical gaps
+9. Include specific professional body requirements in missing qualifications section
 
 Provide comprehensive JSON analysis:
 {
@@ -1357,6 +1373,8 @@ Remember: Score realistically based on actual job requirements. A career changer
       
       // Qualifications and certifications (very high weight)
       { pattern: /(?:bachelor|master|degree|certification|qualified?|license|certified)\s+(?:in|with)?\s*([^.,\n]+)/gi, weight: 0.95 },
+      { pattern: /(?:member grade|graduate membership|fellow|chartered|professional membership)\s+(?:of\s+)?([^.,\n]+)/gi, weight: 1.0 },
+      { pattern: /(?:institute of fire engineers|institution of fire engineers|ife|member grade ife|graduate membership ife)\s*([^.,\n]*)/gi, weight: 1.0 },
       
       // Preferred/nice-to-have (lower weight)
       { pattern: /(?:preferred|desirable|nice to have|bonus|plus|advantage)[^.]*?([^.]+)/gi, weight: 0.6 },
@@ -1491,15 +1509,32 @@ Remember: Score realistically based on actual job requirements. A career changer
     return skills;
   }
 
-  // NEW: Identify technical vs soft skills
+  // ENHANCED: Identify technical vs soft skills including building safety
   isTechnicalSkill(skill) {
     const technicalKeywords = [
+      // Technology skills
       'programming', 'software', 'database', 'cloud', 'api', 'framework',
       'javascript', 'python', 'java', 'sql', 'html', 'css', 'react', 'angular',
       'aws', 'azure', 'docker', 'kubernetes', 'git', 'linux', 'windows',
       'networking', 'security', 'encryption', 'automation', 'devops',
       'machine learning', 'ai', 'data science', 'analytics', 'excel',
-      'powerbi', 'tableau', 'salesforce', 'sap', 'oracle'
+      'powerbi', 'tableau', 'salesforce', 'sap', 'oracle',
+      
+      // Building safety and engineering technical skills
+      'fire risk assessment', 'building regulations', 'building codes', 'cad',
+      'autocad', 'solidworks', 'building control', 'fire engineering',
+      'structural analysis', 'hvac systems', 'fire suppression systems',
+      'smoke control', 'emergency lighting', 'fire alarm systems',
+      'sprinkler systems', 'evacuation planning', 'means of escape',
+      'compartmentation', 'fire doors', 'fire stopping', 'passive fire protection',
+      'active fire protection', 'fire load calculations', 'egress analysis',
+      'building safety act', 'golden thread', 'competent person scheme',
+      
+      // Safety and engineering technical skills
+      'nebosh', 'iosh', 'osha', 'risk assessment', 'hazard identification',
+      'incident investigation', 'safety management systems', 'permit to work',
+      'method statements', 'safety case', 'quantified risk assessment',
+      'failure mode analysis', 'root cause analysis', 'bow tie analysis'
     ];
     return technicalKeywords.some(keyword => skill.toLowerCase().includes(keyword));
   }

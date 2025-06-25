@@ -693,6 +693,30 @@ export const COURSE_RECOMMENDATIONS = {
       provider: 'Alison',
       url: 'https://alison.com/course/health-and-safety-in-the-workplace-revised', 
       level: 'Intermediate'
+    },
+    {
+      title: 'NEBOSH General Certificate',
+      provider: 'NEBOSH',
+      url: 'https://www.nebosh.org.uk/qualifications/health-safety/national-general-certificate/',
+      level: 'Advanced'
+    },
+    {
+      title: 'IOSH Managing Safely',
+      provider: 'IOSH',
+      url: 'https://www.iosh.com/courses-and-training/iosh-courses/managing-safely/',
+      level: 'Intermediate'
+    },
+    {
+      title: 'Fire Safety Management Level 4',
+      provider: 'NEBOSH',
+      url: 'https://www.nebosh.org.uk/qualifications/fire-safety-management/',
+      level: 'Advanced'
+    },
+    {
+      title: 'Building Safety and Compliance',
+      provider: 'RICS Training',
+      url: 'https://www.rics.org/courses-events/search-results/?topic=BuildingSafety',
+      level: 'Advanced'
     }
   ],
   'compliance': [
@@ -923,6 +947,165 @@ export const COURSE_RECOMMENDATIONS = {
       provider: 'Alison',
       url: 'https://alison.com/course/career-development-skills-for-success', 
       level: 'Beginner'
+    }
+  ],
+
+  'building safety': [
+    { 
+      title: 'Building Safety and Compliance',
+      provider: 'RICS Training',
+      url: 'https://www.rics.org/courses-events/search-results/?topic=BuildingSafety', 
+      level: 'Advanced'
+    },
+    { 
+      title: 'Building Regulations and Safety',
+      provider: 'CIOB Academy',
+      url: 'https://ciobacademy.org/product/building-regulations-in-practice/', 
+      level: 'Intermediate'
+    },
+    {
+      title: 'Fire Safety Management Level 4',
+      provider: 'NEBOSH',
+      url: 'https://www.nebosh.org.uk/qualifications/fire-safety-management/',
+      level: 'Advanced'
+    },
+    {
+      title: 'Fire Risk Assessment Training',
+      provider: 'Institution of Fire Engineers',
+      url: 'https://www.ife.org.uk/Training',
+      level: 'Intermediate'
+    },
+    {
+      title: 'Institute of Fire Engineers - Member Grade',
+      provider: 'Institution of Fire Engineers',
+      url: 'https://www.ife.org.uk/Membership/Individual-Membership',
+      level: 'Professional'
+    },
+    {
+      title: 'Institute of Fire Engineers - Graduate Membership',
+      provider: 'Institution of Fire Engineers', 
+      url: 'https://www.ife.org.uk/Membership/Graduate-Membership',
+      level: 'Professional'
+    },
+    {
+      title: 'Emergency Response Planning',
+      provider: 'Emergency Planning Society',
+      url: 'https://www.the-eps.org/training',
+      level: 'Advanced'
+    }
+  ],
+  
+  'fire safety': [
+    {
+      title: 'Fire Safety Management Level 4',
+      provider: 'NEBOSH',
+      url: 'https://www.nebosh.org.uk/qualifications/fire-safety-management/',
+      level: 'Advanced'
+    },
+    {
+      title: 'Fire Risk Assessment Training',
+      provider: 'Institution of Fire Engineers',
+      url: 'https://www.ife.org.uk/Training',
+      level: 'Intermediate'
+    },
+    {
+      title: 'Institute of Fire Engineers - Member Grade',
+      provider: 'Institution of Fire Engineers',
+      url: 'https://www.ife.org.uk/Membership/Individual-Membership',
+      level: 'Professional'
+    },
+    {
+      title: 'Fire Safety Engineering',
+      provider: 'Institution of Fire Engineers',
+      url: 'https://www.ife.org.uk/Training',
+      level: 'Advanced'
+    },
+    {
+      title: 'Building Fire Safety Regulations',
+      provider: 'CIOB Academy',
+      url: 'https://ciobacademy.org/product/building-fire-safety/',
+      level: 'Intermediate'
+    },
+    {
+      title: 'Emergency Response Planning',
+      provider: 'Emergency Planning Society',
+      url: 'https://www.the-eps.org/training',
+      level: 'Advanced'
+    }
+  ],
+
+  'emergency response': [
+    {
+      title: 'Emergency Response Planning',
+      provider: 'Emergency Planning Society',
+      url: 'https://www.the-eps.org/training',
+      level: 'Advanced'
+    },
+    {
+      title: 'Crisis Management and Emergency Response',
+      provider: 'Emergency Management Institute',
+      url: 'https://training.fema.gov/courses/',
+      level: 'Intermediate'
+    },
+    {
+      title: 'Incident Command System Training',
+      provider: 'FEMA',
+      url: 'https://training.fema.gov/emicourses/',
+      level: 'Advanced'
+    },
+    {
+      title: 'Emergency First Aid and CPR',
+      provider: 'Red Cross',
+      url: 'https://www.redcross.org/take-a-class/first-aid',
+      level: 'Beginner'
+    }
+  ],
+
+  'safety management': [
+    {
+      title: 'NEBOSH General Certificate',
+      provider: 'NEBOSH',
+      url: 'https://www.nebosh.org.uk/qualifications/health-safety/national-general-certificate/',
+      level: 'Advanced'
+    },
+    {
+      title: 'IOSH Managing Safely',
+      provider: 'IOSH',
+      url: 'https://www.iosh.com/courses-and-training/iosh-courses/managing-safely/',
+      level: 'Intermediate'
+    },
+    {
+      title: 'Safety Leadership and Management',
+      provider: 'Safety Institute',
+      url: 'https://www.alison.com/course/safety-leadership-management',
+      level: 'Advanced'
+    },
+    {
+      title: 'Risk Assessment and Management',
+      provider: 'Safety Training Institute',
+      url: 'https://www.alison.com/course/risk-assessment-management',
+      level: 'Intermediate'
+    }
+  ],
+
+  'risk assessment': [
+    {
+      title: 'Risk Assessment and Management',
+      provider: 'Safety Training Institute',
+      url: 'https://www.alison.com/course/risk-assessment-management',
+      level: 'Intermediate'
+    },
+    {
+      title: 'Fire Risk Assessment Training',
+      provider: 'Institution of Fire Engineers',
+      url: 'https://www.ife.org.uk/Training',
+      level: 'Intermediate'
+    },
+    {
+      title: 'Health and Safety Risk Assessment',
+      provider: 'IOSH',
+      url: 'https://www.iosh.com/courses-and-training/iosh-courses/risk-assessment/',
+      level: 'Advanced'
     }
   ],
 
@@ -3635,13 +3818,17 @@ function findCourseRecommendationsInternal(keywords = [], count = 3, industry = 
     'pharmaceutical': ['pharmacy', 'medical', 'healthcare'],
     'veterinary': ['veterinary', 'healthcare', 'medical'],
     'sales': ['communication', 'customer service'],
-    'emergency_services': ['emergency response', 'first aid', 'cpr', 'safety']
+          'building_safety': ['building safety', 'fire safety', 'iosh', 'safety', 'emergency response', 'first aid', 'leadership', 'project management'],
+      'safety': ['building safety', 'fire safety', 'iosh', 'safety', 'emergency response', 'first aid', 'leadership', 'project management'],
+      'emergency_services': ['emergency response', 'first aid', 'cpr', 'safety', 'building safety', 'fire safety', 'iosh', 'leadership']
   };
   
   // Define courses to exclude for specific industries
   const industryExclusions = {
     'healthcare': ['it', 'programming', 'engineering', 'aerospace engineering', 'civil engineering', 'mechanical engineering', 'marketing', 'finance', 'construction-safety', 'carpentry', 'electrical-trades'],
-    'emergency_services': ['it', 'programming', 'marketing', 'finance', 'education', 'engineering', 'construction-safety', 'carpentry'],
+          'emergency_services': ['it', 'programming', 'marketing', 'finance', 'education', 'engineering', 'carpentry'],
+      'building_safety': ['it', 'programming', 'marketing', 'finance', 'education', 'carpentry', 'electrical-trades'],
+      'safety': ['it', 'programming', 'marketing', 'finance', 'education', 'carpentry', 'electrical-trades'],
     'finance': ['healthcare', 'nursing', 'medical', 'clinical', 'it', 'programming', 'education', 'engineering', 'construction-safety', 'carpentry', 'electrical-trades'],
     'technology': ['healthcare', 'nursing', 'medical', 'clinical', 'education', 'civil engineering', 'aerospace engineering', 'construction-safety', 'carpentry', 'plumbing-trades'],
     'education': ['it', 'programming', 'healthcare', 'nursing', 'medical', 'clinical', 'engineering', 'aerospace engineering', 'civil engineering', 'marketing', 'finance', 'construction-safety', 'carpentry', 'electrical-trades'],
