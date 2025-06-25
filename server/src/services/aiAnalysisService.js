@@ -2484,36 +2484,7 @@ Remember: Score realistically based on actual job requirements. A career changer
   }
 
   // ENHANCED: Dynamic overall compatibility calculation with weighted components
-  calculateOverallCompatibility(matchResult) {
-    const weights = this.getWeightsByMatchType(matchResult.matchType);
-    
-    // CRITICAL: Quality-weighted scoring
-    const weightedScore = (
-      matchResult.experienceMatch * weights.experience +
-      matchResult.skillsMatch * weights.skills +
-      matchResult.educationMatch * weights.education +
-      matchResult.transferabilityScore * weights.transferability
-    ) / 100;
 
-    // NEW: Dynamic adjustments based on match quality
-    let finalScore = weightedScore;
-    
-    // Career stage adjustments
-    if (matchResult.careerStage === 'senior' && matchResult.experienceMatch > 90) {
-      finalScore += 5; // Bonus for senior candidates with excellent experience
-    }
-    
-    if (matchResult.careerStage === 'entry' && matchResult.educationMatch > 85) {
-      finalScore += 5; // Bonus for entry-level with strong education
-    }
-    
-    // Match type specific adjustments
-    if (matchResult.matchType === 'transferable' && matchResult.skillsMatch > 80) {
-      finalScore += 5; // Bonus for transferable candidates with strong skills
-    }
-
-    return Math.round(Math.min(100, Math.max(0, finalScore)));
-  }
 
   // ENHANCED: Weighted scoring by match type with industry considerations  
   getWeightsByMatchType(matchType) {
@@ -2621,14 +2592,32 @@ Remember: Score realistically based on actual job requirements. A career changer
   calculateOverallCompatibility(matchResult) {
     const weights = this.getWeightsByMatchType(matchResult.matchType);
     
+    // CRITICAL FIX: Proper weighted score calculation
     const weightedScore = (
       matchResult.experienceMatch * weights.experience +
       matchResult.skillsMatch * weights.skills +
       matchResult.educationMatch * weights.education +
       matchResult.transferabilityScore * weights.transferability
-    ) / 100;
+    );
 
-    return Math.round(weightedScore);
+    // Dynamic adjustments based on match quality
+    let finalScore = weightedScore;
+    
+    // Career stage adjustments
+    if (matchResult.careerStage === 'senior' && matchResult.experienceMatch > 90) {
+      finalScore += 5; // Bonus for senior candidates with excellent experience
+    }
+    
+    if (matchResult.careerStage === 'entry' && matchResult.educationMatch > 85) {
+      finalScore += 5; // Bonus for entry-level with strong education
+    }
+    
+    // Match type specific adjustments
+    if (matchResult.matchType === 'transferable' && matchResult.skillsMatch > 80) {
+      finalScore += 5; // Bonus for transferable candidates with strong skills
+    }
+
+    return Math.round(Math.min(100, Math.max(0, finalScore)));
   }
 
   extractRequiredExperience(jobData) {
