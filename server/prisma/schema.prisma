@@ -30,6 +30,7 @@ model User {
   payments            Payment[]
   subscriptions       Subscription[]
   temporaryAccess     TemporaryAccess[]
+  analysisHistory     CVAnalysis[]
 }
 
 model CV {
@@ -42,6 +43,7 @@ model CV {
   atsScore  Int?
   user      User        @relation(fields: [userId], references: [id])
   sections  CVSection[]
+  analyses  CVAnalysis[]
 }
 
 model CVSection {
@@ -93,4 +95,132 @@ model TemporaryAccess {
   updatedAt       DateTime @updatedAt
   stripeSessionId String?  // Track which checkout session created this access
   user            User     @relation(fields: [userId], references: [id])
+}
+
+// New models for enhanced CV analysis system
+
+model Industry {
+  id              String              @id @default(cuid())
+  name            String              @unique
+  displayName     String
+  description     String?
+  keywords        String[]            // Industry-specific keywords
+  requiredSkills  String[]            // Core skills for this industry
+  transferableFrom String[]           // Industries that transfer well to this one
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  roles           Role[]
+  analysisTemplates AnalysisTemplate[]
+  courseRecommendations CourseRecommendation[]
+}
+
+model Role {
+  id              String              @id @default(cuid())
+  name            String
+  displayName     String
+  industryId      String
+  description     String?
+  keywords        String[]            // Role-specific keywords
+  requiredSkills  String[]            // Core skills for this role
+  experienceLevel String              // Entry, Mid, Senior, Executive
+  salaryRange     String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  industry        Industry            @relation(fields: [industryId], references: [id])
+  analysisTemplates AnalysisTemplate[]
+  courseRecommendations CourseRecommendation[]
+
+  @@unique([name, industryId])
+}
+
+model CourseRecommendation {
+  id          String   @id @default(cuid())
+  title       String
+  provider    String
+  description String?
+  url         String?
+  duration    String?
+  level       String   // Beginner, Intermediate, Advanced, Professional
+  cost        String?  // Free, Paid, Subscription
+  rating      Float?
+  skillTags   String[] // Skills this course teaches
+  industryId  String?
+  roleId      String?
+  priority    Int      @default(5) // 1-10, higher = more important
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  industry    Industry? @relation(fields: [industryId], references: [id])
+  role        Role?     @relation(fields: [roleId], references: [id])
+  analysisRecommendations AnalysisRecommendationCourse[]
+
+  @@index([skillTags])
+  @@index([level])
+  @@index([priority])
+}
+
+model AnalysisTemplate {
+  id                String              @id @default(cuid())
+  name              String
+  industryId        String?
+  roleId            String?
+  scoringWeights    Json                // Weights for different scoring criteria
+  keywordPatterns   String[]            // Important keywords to look for
+  strenghtIndicators String[]           // What makes a strong CV in this area
+  improvementAreas  String[]            // Common improvement areas
+  isActive          Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  industry          Industry?           @relation(fields: [industryId], references: [id])
+  role              Role?               @relation(fields: [roleId], references: [id])
+  analyses          CVAnalysis[]
+
+  @@unique([industryId, roleId])
+}
+
+model CVAnalysis {
+  id                    String                @id @default(cuid())
+  userId                String
+  cvId                  String?
+  jobDescription        String?
+  detectedIndustry      String?
+  detectedRole          String?
+  overallScore          Int
+  atsScore              Int
+  contentScore          Int
+  formatScore           Int
+  jobMatchScore         Int?
+  strengths             String[]
+  weaknesses            String[]
+  missingKeywords       String[]
+  recommendedImprovements String[]
+  analysisTemplateId    String?
+  aiModel               String?             // Which AI model was used
+  processingTime        Int?                // Analysis time in milliseconds
+  createdAt             DateTime            @default(now())
+  user                  User                @relation(fields: [userId], references: [id])
+  cv                    CV?                 @relation(fields: [cvId], references: [id])
+  analysisTemplate      AnalysisTemplate?   @relation(fields: [analysisTemplateId], references: [id])
+  courseRecommendations AnalysisRecommendationCourse[]
+
+  @@index([userId])
+  @@index([detectedIndustry])
+  @@index([detectedRole])
+  @@index([overallScore])
+}
+
+model AnalysisRecommendationCourse {
+  id                  String               @id @default(cuid())
+  analysisId          String
+  courseId            String
+  relevanceScore      Float                // How relevant this course is (0-1)
+  priority            Int                  // Priority order for display
+  reason              String?              // Why this course was recommended
+  createdAt           DateTime             @default(now())
+  analysis            CVAnalysis           @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  course              CourseRecommendation @relation(fields: [courseId], references: [id])
+
+  @@unique([analysisId, courseId])
+  @@index([priority])
+  @@index([relevanceScore])
 }

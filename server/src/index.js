@@ -71,6 +71,7 @@ const unsubscribeRoutes = require('./routes/unsubscribe');
 const healthRoutes = require('./routes/health');
 const adminRoutes = require('./routes/admin');
 const debugRoutes = require('./routes/debug');
+const analysisRoutes = require('./routes/analysis');
 
 // Try to import fix-database, but don't fail if it's not available
 let ensureDevUser;
@@ -271,6 +272,7 @@ app.use('/api/health', healthRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/debug', debugRoutes);
+app.use('/api/analysis', analysisRoutes);
 
 // Webhook route must come after raw body parser
 app.use('/api/webhook/stripe', webhookRoutes);

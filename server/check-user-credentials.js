@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+on't make const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 
 // Use production database URL
