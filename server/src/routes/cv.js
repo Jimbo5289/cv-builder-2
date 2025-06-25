@@ -3275,12 +3275,18 @@ router.post('/analyze', (req, res, next) => {
                  jobDescriptionText.toLowerCase().includes('code')) {
         industry = 'technology';
         extractedKeywords.push('programming', 'software development');
+      } else if (jobDescriptionText.toLowerCase().includes('building safety') ||
+                 jobDescriptionText.toLowerCase().includes('fire safety') ||
+                 jobDescriptionText.toLowerCase().includes('head of building safety') ||
+                 jobDescriptionText.toLowerCase().includes('building safety manager') ||
+                 jobDescriptionText.toLowerCase().includes('fire risk assessment')) {
+        industry = 'building_safety';
+        extractedKeywords.push('building safety', 'fire safety', 'safety management', 'compliance', 'regulations', 'risk assessment');
       } else if (jobDescriptionText.toLowerCase().includes('safety') || 
-                 jobDescriptionText.toLowerCase().includes('building safety') ||
                  jobDescriptionText.toLowerCase().includes('compliance') ||
                  jobDescriptionText.toLowerCase().includes('regulations')) {
         industry = 'safety';
-        extractedKeywords.push('safety', 'compliance', 'regulations', 'building safety');
+        extractedKeywords.push('safety', 'compliance', 'regulations');
       }
       
       // Check for specific qualifications
