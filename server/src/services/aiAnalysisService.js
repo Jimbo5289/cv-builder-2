@@ -2165,14 +2165,29 @@ Remember: Score realistically based on actual job requirements. A career changer
       return 'direct';
     }
 
-    // Check transferability
+    // CRITICAL: Special high-compatibility transfers (emergency services → building safety, etc.)
+    const specialHighTransfers = {
+      'emergency_services': ['building_safety', 'safety', 'construction', 'healthcare'],
+      'building_safety': ['emergency_services', 'safety', 'construction'],
+      'engineering': ['construction', 'manufacturing', 'technology'],
+      'finance': ['business', 'consulting', 'data analysis'],
+      'healthcare': ['emergency_services', 'social work', 'research']
+    };
+
+    // Check for special high-compatibility transfers first
+    if (specialHighTransfers[cvIndustry]?.includes(jobIndustry)) {
+      return 'transferable';
+    }
+
+    // Check standard transferability from industry requirements
     const industryReqs = this.getIndustryRequirements(jobIndustry);
     if (industryReqs.transferableFrom.includes(cvIndustry)) {
       return 'transferable';
     }
 
-    // Check if entry-level (limited/no experience)
-    if (cvData.experienceYears <= 1 || cvData.experience.length === 0) {
+    // Check if entry-level (limited/no experience) - but not for experienced candidates
+    if ((cvData.experienceYears <= 1 || cvData.experience.length === 0) && 
+        cvData.experienceYears < 5) { // Ensure experienced emergency services aren't classified as entry-level
       return 'entry-level';
     }
 
