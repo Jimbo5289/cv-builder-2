@@ -571,6 +571,22 @@ class AIAnalysisService {
         aiEnhanced: !!aiResults
       });
       
+      // REVOLUTIONARY: Add comprehensive personalized insights
+      finalResult.personalizedFeedback = this.generatePersonalizedFeedback(cvData, jobData, universalMatch);
+      finalResult.dynamicCourseRecommendations = this.generateDynamicCourseRecommendations(cvData, jobData, universalMatch.gapAreas);
+      
+      // Enhanced metadata with deep insights
+      finalResult.analysisMetadata = {
+        analysisVersion: '4.0-Revolutionary',
+        confidenceScore: this.calculateConfidenceScore(universalMatch, cvData, jobData),
+        matchType: universalMatch.matchType,
+        careerStage: universalMatch.careerStage,
+        cvQualityScore: this.calculateContentScore(cvData),
+        atsCompliance: this.calculateATSCompliance(cvData),
+        processingTime: Date.now() - startTime,
+        aiEnhanced: !!aiResults
+      };
+
       return finalResult;
 
     } catch (error) {
@@ -1017,16 +1033,33 @@ DO NOT UNDERESTIMATE EMERGENCY SERVICES EXPERIENCE:
 - Watch Managers have proven leadership and crisis management skills
 - Fire Risk Assessment experience is DIRECTLY relevant to building safety
 
-CRITICAL INSTRUCTIONS:
-1. BE BRUTALLY HONEST about fit - users need realistic expectations
-2. Score based on ACTUAL RELEVANCE, not generic CV quality
-3. Identify SPECIFIC missing skills/experience for this exact role
-4. Provide ACTIONABLE improvement recommendations
-5. Consider transferable skills but don't overscore unrelated experience
-6. For Building Safety roles: MANDATORY to check for Institute of Fire Engineers qualifications
-7. Emergency services experience should score HIGH for Building Safety (80-95) due to fire safety expertise
-8. Missing professional qualifications (like IFE membership) should be flagged as critical gaps
-9. Include specific professional body requirements in missing qualifications section
+CRITICAL INSTRUCTIONS FOR THOROUGH ANALYSIS:
+1. DEEP CONTENT ANALYSIS: Analyze EVERY detail in the CV against EVERY requirement in the job description
+2. NO GENERIC RESPONSES: Every recommendation must be specific to THIS CV and THIS job
+3. COMPREHENSIVE SKILL MAPPING: Map each CV skill/experience to specific job requirements
+4. DETAILED GAP ANALYSIS: Identify exactly what's missing and why it matters for this role
+5. SPECIFIC IMPROVEMENT ACTIONS: Provide precise steps tailored to this person's background
+6. PROFESSIONAL QUALIFICATION AUDIT: Check for ALL industry-specific certifications/memberships
+7. TRANSFERABILITY ASSESSMENT: Explain HOW skills transfer and WHY they're relevant
+8. QUANTIFIED SCORING: Base scores on actual alignment, not CV formatting
+9. PERSONALIZED NEXT STEPS: Create development path specific to this career transition
+10. INDUSTRY-SPECIFIC FEEDBACK: Use terminology and requirements specific to the target field
+
+FOR ANY ROLE/INDUSTRY COMBINATION:
+- Research the specific requirements of THIS exact role
+- Identify the critical qualifications/certifications for THIS field
+- Assess experience relevance in context of THIS industry
+- Provide career pathway advice specific to THIS transition
+- Flag missing credentials that are essential for THIS role
+- Recommend courses/certifications that directly address THIS person's gaps
+
+SCORING MUST REFLECT ACTUAL JOB FIT:
+- 90-100: CV demonstrates almost all required qualifications/experience
+- 80-89: Strong relevant background with minor gaps in specific areas
+- 70-79: Good transferable experience but missing key qualifications
+- 60-69: Some relevant skills but significant gaps in requirements
+- 50-59: Limited relevance, major reskilling/qualification needed
+- Below 50: Poor fit requiring fundamental career change
 
 Provide comprehensive JSON analysis:
 {
@@ -3590,6 +3623,174 @@ Remember: Score realistically based on actual job requirements. A career changer
       (skill1.includes(term1) && skill2.includes(term2)) ||
       (skill1.includes(term2) && skill2.includes(term1))
     );
+  }
+
+  // REVOLUTIONARY: Enhanced Feedback Generation for ANY CV/Job Combination
+  generatePersonalizedFeedback(cvData, jobData, universalMatch) {
+    const feedback = {
+      specificStrengths: [],
+      preciseDevelopmentAreas: [],
+      personalizedNextSteps: [],
+      industrySpecificAdvice: [],
+      qualificationGaps: [],
+      certificationRecommendations: [],
+      skillDevelopmentPlan: []
+    };
+
+    // SPECIFIC STRENGTHS based on actual CV content
+    if (cvData.experienceYears >= jobData.requiredExperience) {
+      feedback.specificStrengths.push(`Strong ${cvData.experienceYears}-year track record in ${cvData.currentField}, exceeding the ${jobData.requiredExperience}-year requirement`);
+    }
+
+    if (cvData.leadershipExperience && cvData.leadershipExperience.length > 0) {
+      feedback.specificStrengths.push(`Proven leadership experience: ${cvData.leadershipExperience[0]}`);
+    }
+
+    if (cvData.quantifiedAchievements && cvData.quantifiedAchievements.length > 0) {
+      feedback.specificStrengths.push(`Demonstrated impact with quantified results: ${cvData.quantifiedAchievements[0]}`);
+    }
+
+    // PRECISE DEVELOPMENT AREAS based on specific gaps
+    const missingSkills = this.findMissingSkills(cvData.skills, jobData.requiredSkills);
+    missingSkills.forEach(skill => {
+      feedback.preciseDevelopmentAreas.push(`Develop expertise in ${skill} - critical for this role`);
+    });
+
+    const missingQualifications = this.findMissingQualifications(cvData.qualifications, jobData.qualifications);
+    missingQualifications.forEach(qual => {
+      feedback.qualificationGaps.push(`Essential qualification: ${qual}`);
+    });
+
+    // PERSONALIZED NEXT STEPS based on career stage and background
+    if (universalMatch.matchType === 'transferable') {
+      feedback.personalizedNextSteps.push(`Leverage your ${cvData.currentField} background by highlighting transferable skills in ${jobData.industry}`);
+      feedback.personalizedNextSteps.push(`Consider certification in ${jobData.industry}-specific qualifications to strengthen your application`);
+    }
+
+    if (universalMatch.matchType === 'career-change') {
+      feedback.personalizedNextSteps.push(`Plan a 6-12 month transition period to develop core ${jobData.industry} skills`);
+      feedback.personalizedNextSteps.push(`Network with professionals in ${jobData.industry} to understand industry expectations`);
+    }
+
+    // INDUSTRY-SPECIFIC ADVICE
+    feedback.industrySpecificAdvice = this.generateIndustrySpecificAdvice(cvData.currentField, jobData.industry, cvData);
+
+    return feedback;
+  }
+
+  generateIndustrySpecificAdvice(currentField, targetIndustry, cvData) {
+    const advice = [];
+    
+    const industryTransitions = {
+      'emergency_services': {
+        'building_safety': [
+          'Emphasize fire risk assessment experience - directly applicable to building safety roles',
+          'Highlight IOSH/NEBOSH qualifications as they\'re highly valued in building safety',
+          'Consider pursuing Institute of Fire Engineers membership for professional credibility',
+          'Focus on regulatory compliance experience from emergency services'
+        ],
+        'healthcare': [
+          'Leverage emergency medical response experience',
+          'Highlight patient care and crisis management skills',
+          'Consider additional medical training or certifications',
+          'Emphasize ability to work under pressure in healthcare settings'
+        ]
+      },
+      'technology': {
+        'finance': [
+          'Develop financial domain knowledge through relevant courses',
+          'Learn financial regulations and compliance requirements',
+          'Consider fintech-specific technologies and frameworks',
+          'Network within financial services industry'
+        ]
+      },
+      'healthcare': {
+        'emergency_services': [
+          'Highlight emergency response and crisis management experience',
+          'Emphasize ability to make critical decisions under pressure',
+          'Consider emergency medical technician certifications',
+          'Focus on teamwork and communication skills from healthcare'
+        ]
+      }
+    };
+
+    if (industryTransitions[currentField] && industryTransitions[currentField][targetIndustry]) {
+      return industryTransitions[currentField][targetIndustry];
+    }
+
+    // Generic advice for any transition
+    return [
+      `Research ${targetIndustry} industry standards and best practices`,
+      `Network with ${targetIndustry} professionals for insider insights`,
+      `Consider entry-level positions or internships to gain ${targetIndustry} experience`,
+      `Develop ${targetIndustry}-specific technical skills through training`
+    ];
+  }
+
+  // ENHANCED: Dynamic course recommendation based on specific gaps
+  generateDynamicCourseRecommendations(cvData, jobData, gapAreas) {
+    const recommendations = [];
+    
+    // Match missing skills to specific courses
+    gapAreas.forEach(gap => {
+      const courseCategory = this.mapSkillToCourseCategory(gap, jobData.industry);
+      if (courseCategory) {
+        recommendations.push({
+          skill: gap,
+          category: courseCategory,
+          urgency: this.assessSkillUrgency(gap, jobData),
+          timeframe: this.estimateTrainingTime(gap)
+        });
+      }
+    });
+
+    return recommendations.sort((a, b) => b.urgency - a.urgency);
+  }
+
+  mapSkillToCourseCategory(skill, industry) {
+    const skillToCourse = {
+      'project management': 'project management',
+      'data analysis': 'data analysis',
+      'fire safety': 'fire safety',
+      'building safety': 'building safety',
+      'python': 'programming',
+      'javascript': 'programming',
+      'leadership': 'leadership',
+      'communication': 'communication',
+      'risk assessment': 'risk assessment'
+    };
+
+    return skillToCourse[skill.toLowerCase()] || null;
+  }
+
+  assessSkillUrgency(skill, jobData) {
+    // Check if skill is in core requirements (high urgency)
+    if (jobData.coreRequirements && jobData.coreRequirements.includes(skill)) {
+      return 10;
+    }
+    
+    // Check if skill is in required skills (medium urgency)
+    if (jobData.requiredSkills.includes(skill)) {
+      return 7;
+    }
+    
+    // Default urgency for preferred skills
+    return 5;
+  }
+
+  estimateTrainingTime(skill) {
+    const trainingTimes = {
+      'programming': '3-6 months',
+      'project management': '2-3 months',
+      'data analysis': '2-4 months',
+      'fire safety': '1-2 months',
+      'building safety': '1-3 months',
+      'leadership': '2-4 months',
+      'communication': '1-2 months'
+    };
+
+    const category = this.mapSkillToCourseCategory(skill, 'general');
+    return trainingTimes[category] || '1-3 months';
   }
 }
 
