@@ -330,7 +330,7 @@ const CvAnalyze = () => {
   }, [analysisResults]);
 
   return (
-    <div className="container mx-auto px-4 pt-20 pb-8 min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="container mx-auto px-4 pt-20 pb-8 min-h-screen bg-gradient-to-br from-green-50 to-slate-50 dark:from-green-950 dark:to-gray-900">
       {/* Existing heading */}
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">CV Analysis</h1>
@@ -447,7 +447,7 @@ const CvAnalyze = () => {
           </div>
         ) : !analysisResults && (
           // Existing upload UI remains the same
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow rounded-lg p-6 mb-6 border border-green-100 dark:border-green-900/30">
             {/* Existing upload tabs */}
             <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
               <button
@@ -567,7 +567,7 @@ const CvAnalyze = () => {
         {analysisResults && (
           <div className="space-y-6">
             {/* Analysis Results Section */}
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow rounded-lg p-6 border border-green-100 dark:border-green-900/30">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">Analysis Results</h2>
                 <button 

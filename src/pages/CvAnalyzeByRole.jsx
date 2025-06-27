@@ -396,7 +396,7 @@ const CvAnalyzeByRole = () => {
   }, [analysisResults]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-slate-50 dark:from-purple-950 dark:to-gray-900">
       {/* Title section */}
       <div className="container mx-auto px-4 max-w-4xl pt-20 pb-8">
         <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-2">
@@ -513,7 +513,7 @@ const CvAnalyzeByRole = () => {
           </div>
         ) : !analysisResults ? (
           <>
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow rounded-lg p-6 mb-6 border border-purple-100 dark:border-purple-900/30">
               {/* File Upload Area */}
               <div 
                 className={`border-2 border-dashed rounded-lg p-8 text-center ${
@@ -661,7 +661,7 @@ const CvAnalyzeByRole = () => {
         ) : (
           // Results display section
           <div className="space-y-6">
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow rounded-lg p-6 border border-purple-100 dark:border-purple-900/30">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   {useGenericScope 

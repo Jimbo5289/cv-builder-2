@@ -534,14 +534,14 @@ const Analyze = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 dark:from-blue-950 dark:to-gray-900">
       {/* Title section */}
-      <div className="container mx-auto px-4 max-w-4xl mb-8">
+      <div className="container mx-auto px-4 max-w-4xl pt-20 pb-8">
         <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-2">
-          CV Analysis with Job Description Matching
+          CV Analysis Against Job Description
         </h1>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-8">
-          Upload your CV and a job description to see how well they match. Get personalized recommendations to improve your chances of landing an interview.
+          Upload your CV and job description to get targeted optimization advice
         </p>
       </div>
 
@@ -560,7 +560,7 @@ const Analyze = () => {
         />
       )}
 
-      <div className="max-w-4xl mx-auto px-4 py-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <div className="max-w-4xl mx-auto px-4 py-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg shadow-md border border-blue-100 dark:border-blue-900/30">
         {/* Subscription Modal */}
         {showSubscriptionModal && (
           <SubscriptionModal

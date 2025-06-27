@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry }) => {
   // Use actual analysis results if available, with fallbacks
@@ -10,6 +11,10 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry }) 
   const improvementSuggestions = analysisResults?.improvementSuggestions || {};
   const careerTransitionAdvice = analysisResults?.careerTransitionAdvice || null;
   const timeToCompetitive = analysisResults?.timeToCompetitive || null;
+
+  // Get current location to determine which analysis page we're on
+  const location = useLocation();
+  const isOnRoleSpecificPage = location.pathname === '/cv-analyze-by-role';
 
   // Generate personalized next steps based on actual analysis results
   const getPersonalizedNextSteps = () => {
@@ -266,16 +271,29 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry }) 
             Browse Templates
           </Link>
           
+          {/* Conditional button based on current page */}
           {missingKeywords && missingKeywords.length > 0 && (
-            <Link 
-              to="/cv-analyze-by-role" 
-              className="inline-flex items-center justify-center px-4 py-2 bg-purple-600 dark:bg-purple-700 text-white rounded-lg hover:bg-purple-700 dark:hover:bg-purple-800 transition-colors"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              Role-Specific Analysis
-            </Link>
+            isOnRoleSpecificPage ? (
+              <Link 
+                to="/analyze" 
+                className="inline-flex items-center justify-center px-4 py-2 bg-[#3498db] dark:bg-blue-700 text-white rounded-lg hover:bg-[#2980b9] dark:hover:bg-blue-800 transition-colors"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Job Description Analysis
+              </Link>
+            ) : (
+              <Link 
+                to="/cv-analyze-by-role" 
+                className="inline-flex items-center justify-center px-4 py-2 bg-[#9b59b6] dark:bg-purple-700 text-white rounded-lg hover:bg-[#8e44ad] dark:hover:bg-purple-800 transition-colors"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                Role-Specific Analysis
+              </Link>
+            )
           )}
         </div>
       </div>
