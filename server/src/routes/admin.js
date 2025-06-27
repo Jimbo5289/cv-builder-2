@@ -50,6 +50,7 @@ const adminAuth = async (req, res, next) => {
       select: { 
         id: true, 
         email: true, 
+        role: true,
         isActive: true 
       }
     });
