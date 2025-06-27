@@ -66,6 +66,9 @@ async function apiCall(endpoint, options = {}) {
     const config = {
         headers: {
             'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
             ...(authToken && { 'Authorization': `Bearer ${authToken}` })
         },
         ...options
@@ -176,7 +179,7 @@ async function verifyToken() {
 // Dashboard Functions
 async function loadDashboardStats() {
     try {
-        const stats = await apiCall('/api/admin/dashboard');
+        const stats = await apiCall(`/api/admin/dashboard?_t=${Date.now()}`);
         
         // Handle the actual backend response structure
         document.getElementById('totalUsers').textContent = stats.users?.total || 0;
@@ -197,6 +200,7 @@ async function loadUsers(page = 1, search = '') {
         const params = new URLSearchParams({
             page: page.toString(),
             limit: usersPerPage.toString(),
+            _t: Date.now().toString(), // Cache busting parameter
             ...(search && { search })
         });
         
@@ -207,6 +211,9 @@ async function loadUsers(page = 1, search = '') {
         filteredUsers = allUsers;
         totalUsers = response.pagination?.total || 0;
         currentPage = page;
+        
+        console.log('Loaded users:', allUsers); // Debug log
+        console.log('First user roles:', allUsers.map(u => ({ email: u.email, role: u.role })).slice(0, 3)); // Debug log
         
         renderUsersTable();
         renderPagination();
@@ -241,6 +248,8 @@ function renderUsersTable() {
             const badge = document.createElement('span');
             badge.className = 'px-2 py-1 text-xs font-semibold rounded-full ml-2';
             
+            console.log('Creating role badge for user:', { email: user.email, role: user.role, isAdmin: user.email === 'jamesingleton1971@gmail.com' }); // Debug log
+            
             if (user.role === 'superuser') {
                 badge.className += ' bg-purple-100 text-purple-800';
                 badge.textContent = '👑 Superuser';
@@ -251,6 +260,8 @@ function renderUsersTable() {
                 badge.className += ' bg-gray-100 text-gray-800';
                 badge.textContent = '👤 User';
             }
+            
+            console.log('Created badge with text:', badge.textContent); // Debug log
             
             return badge;
         })();

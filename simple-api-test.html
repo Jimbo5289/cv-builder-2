@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; border-left: 4px solid #f44336; }
+        .success { background: #e8f5e9; border-left: 4px solid #4caf50; }
+        pre { white-space: pre-wrap; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Simple API Role Test</h1>
+    <p>This tests if the backend API includes role data in responses.</p>
+    
+    <button onclick="testAPI()">Test Backend API</button>
+    <div id="result"></div>
+
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result">Testing API...</div>';
+            
+            try {
+                // Test if we can reach the backend at all
+                const response = await fetch('https://cv-builder-backend-zjax.onrender.com/api/health');
+                
+                if (response.ok) {
+                    const healthData = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Backend is responding!</h3>
+                            <p><strong>Status:</strong> ${healthData.status || 'OK'}</p>
+                            <p><strong>Service:</strong> ${healthData.service || 'Unknown'}</p>
+                            <p>The backend is online and responding. The role badge issue is likely:</p>
+                            <ul>
+                                <li>🔑 <strong>Authentication needed</strong> - Admin panel requires login to see role data</li>
+                                <li>🌐 <strong>Frontend caching</strong> - Browser is loading old admin panel files</li>
+                                <li>📱 <strong>JavaScript error</strong> - Something preventing badges from rendering</li>
+                            </ul>
+                            <p><strong>Next steps:</strong></p>
+                            <ol>
+                                <li>Reset your admin password using the Render shell command above</li>
+                                <li>Login to admin panel with new password</li>
+                                <li>Check browser console for JavaScript errors</li>
+                                <li>Force refresh with Cmd+Shift+R</li>
+                            </ol>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Backend connection failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>This could mean:</p>
+                        <ul>
+                            <li>🚨 Backend service is down</li>
+                            <li>🌐 Network connectivity issue</li>
+                            <li>⚙️ Backend still deploying</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html> 
