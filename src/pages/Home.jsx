@@ -322,34 +322,35 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-[#2c3e50] dark:text-white mb-4">
-              Join 10,000+ Professionals
+              Professional CV Builder Platform
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Our platform has helped thousands of professionals land their dream jobs
+              Industry-standard tools and templates designed to help you create outstanding CVs
             </p>
           </div>
 
-          {/* Success Statistics */}
+          {/* Platform Features - Replaced statistics with feature highlights */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-[#E78F81] mb-2">10,000+</div>
-              <div className="text-gray-600 dark:text-gray-400 font-medium">CVs Created</div>
+              <div className="text-3xl md:text-4xl font-bold text-[#E78F81] mb-2">4</div>
+              <div className="text-gray-600 dark:text-gray-400 font-medium">Template Types</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-[#3498db] mb-2">95%</div>
-              <div className="text-gray-600 dark:text-gray-400 font-medium">ATS Pass Rate</div>
+              <div className="text-3xl md:text-4xl font-bold text-[#3498db] mb-2">AI</div>
+              <div className="text-gray-600 dark:text-gray-400 font-medium">Powered Analysis</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-[#2ecc71] mb-2">85%</div>
-              <div className="text-gray-600 dark:text-gray-400 font-medium">Interview Rate</div>
+              <div className="text-3xl md:text-4xl font-bold text-[#2ecc71] mb-2">ATS</div>
+              <div className="text-gray-600 dark:text-gray-400 font-medium">Optimized</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-[#9b59b6] mb-2">4.8/5</div>
-              <div className="text-gray-600 dark:text-gray-400 font-medium">User Rating</div>
+              <div className="text-3xl md:text-4xl font-bold text-[#9b59b6] mb-2">Free</div>
+              <div className="text-gray-600 dark:text-gray-400 font-medium">To Start</div>
             </div>
           </div>
 
-          {/* Testimonials */}
+          {/* Testimonials - COMMENTED OUT until we have real customer feedback */}
+          {/* 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <div className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg">
               <div className="flex items-center mb-4">
@@ -417,6 +418,7 @@ export default function Home() {
               </div>
             </div>
           </div>
+          */}
 
           {/* Trust Indicators */}
           <div className="text-center">
