@@ -244,7 +244,7 @@ router.get('/users/:id', authMiddleware, adminAuth, async (req, res) => {
         temporaryAccess: {
           select: {
             id: true,
-            expiresAt: true,
+            endTime: true,
             createdAt: true
           }
         }
