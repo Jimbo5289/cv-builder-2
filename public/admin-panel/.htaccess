@@ -1,0 +1,68 @@
+# CV Builder Admin Panel - Apache Security Configuration
+# Place this file in the admin panel directory for additional protection
+
+# Deny access to sensitive files
+<Files "*.md">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files ".htaccess">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "*.log">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Security headers
+<IfModule mod_headers.c>
+    # Prevent framing (clickjacking protection)
+    Header always append X-Frame-Options DENY
+    
+    # Prevent MIME type sniffing
+    Header set X-Content-Type-Options nosniff
+    
+    # Enable XSS protection
+    Header set X-XSS-Protection "1; mode=block"
+    
+    # Force HTTPS (if available)
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    
+    # Prevent referrer leakage
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Content Security Policy
+    Header set Content-Security-Policy "default-src 'self' https://cv-builder-backend-zjax.onrender.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data:;"
+</IfModule>
+
+# Disable directory browsing
+Options -Indexes
+
+# Custom error pages (optional)
+ErrorDocument 403 /error/403.html
+ErrorDocument 404 /error/404.html
+
+# Password protection (uncomment and configure for additional security)
+# AuthType Basic
+# AuthName "CV Builder Admin Access"
+# AuthUserFile /path/to/.htpasswd
+# Require valid-user
+
+# IP restriction (uncomment and modify for IP-based access control)
+# <RequireAll>
+#     Require ip 192.168.1.0/24
+#     Require ip 10.0.0.0/8
+# </RequireAll>
+
+# Rate limiting (if mod_evasive is available)
+<IfModule mod_evasive24.c>
+    DOSHashTableSize    3000
+    DOSPageCount        5
+    DOSSiteCount        100
+    DOSPageInterval     1
+    DOSSiteInterval     1
+    DOSBlockingPeriod   60
+</IfModule> 
