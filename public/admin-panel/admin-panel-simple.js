@@ -231,6 +231,16 @@ async function loadUserProfile() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log('DOM loaded, initializing admin panel...');
+    
+    // Add immediate debugging
+    const loginModeBtn = document.getElementById('loginModeBtn');
+    const signupModeBtn = document.getElementById('signupModeBtn');
+    console.log('Toggle buttons found:', {
+        loginModeBtn: !!loginModeBtn,
+        signupModeBtn: !!signupModeBtn
+    });
+    
     // Check for stored token
     const storedToken = localStorage.getItem('adminToken');
     if (storedToken) {
@@ -240,6 +250,29 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Show login screen and set up login-specific event listeners
         showElement('loginScreen');
         setupLoginEventListeners();
+        
+        // Backup: Add event listeners directly with more debugging
+        setTimeout(() => {
+            console.log('Adding backup event listeners...');
+            const loginBtn = document.getElementById('loginModeBtn');
+            const signupBtn = document.getElementById('signupModeBtn');
+            
+            if (loginBtn) {
+                loginBtn.onclick = function() {
+                    console.log('Login button clicked via onclick');
+                    switchToLoginMode();
+                };
+                console.log('Login button onclick added');
+            }
+            
+            if (signupBtn) {
+                signupBtn.onclick = function() {
+                    console.log('Signup button clicked via onclick');
+                    switchToSignupMode();
+                };
+                console.log('Signup button onclick added');
+            }
+        }, 100);
     }
 });
 
@@ -544,60 +577,82 @@ function showLoginSuccess(message) {
 
 // Login/Signup form event listeners
 function setupLoginEventListeners() {
+    console.log('Setting up login event listeners...');
+    
     // Login/Signup form handler
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('adminEmail').value;
-        const password = document.getElementById('adminPassword').value;
-        
-        try {
-            if (isSignupMode) {
-                // Handle account creation
-                const name = document.getElementById('adminName').value;
-                const confirmPassword = document.getElementById('adminPasswordConfirm').value;
-                
-                // Validate inputs
-                if (!name.trim()) {
-                    throw new Error('Full name is required');
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            try {
+                if (isSignupMode) {
+                    // Handle account creation
+                    const name = document.getElementById('adminName').value;
+                    const confirmPassword = document.getElementById('adminPasswordConfirm').value;
+                    
+                    // Validate inputs
+                    if (!name.trim()) {
+                        throw new Error('Full name is required');
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        throw new Error('Passwords do not match');
+                    }
+                    
+                    if (password.length < 8) {
+                        throw new Error('Password must be at least 8 characters long');
+                    }
+                    
+                    // Create account
+                    await createAccount(email, password, name.trim());
+                    showLoginSuccess('Account created successfully! You can now sign in.');
+                    
+                    // Switch back to login mode
+                    switchToLoginMode();
+                    
+                } else {
+                    // Handle login
+                    await login(email, password);
                 }
-                
-                if (password !== confirmPassword) {
-                    throw new Error('Passwords do not match');
-                }
-                
-                if (password.length < 8) {
-                    throw new Error('Password must be at least 8 characters long');
-                }
-                
-                // Create account
-                await createAccount(email, password, name.trim());
-                showLoginSuccess('Account created successfully! You can now sign in.');
-                
-                // Switch back to login mode
-                switchToLoginMode();
-                
-            } else {
-                // Handle login
-                await login(email, password);
+            } catch (error) {
+                showError(error.message);
             }
-        } catch (error) {
-            showError(error.message);
-        }
-    });
+        });
+        console.log('Login form listener added');
+    }
     
     // Mode switching button event listeners
     const loginModeBtn = document.getElementById('loginModeBtn');
     const signupModeBtn = document.getElementById('signupModeBtn');
     
+    console.log('Found toggle buttons:', { loginModeBtn: !!loginModeBtn, signupModeBtn: !!signupModeBtn });
+    
     if (loginModeBtn) {
-        loginModeBtn.addEventListener('click', switchToLoginMode);
+        // Remove any existing listeners first
+        loginModeBtn.replaceWith(loginModeBtn.cloneNode(true));
+        const newLoginBtn = document.getElementById('loginModeBtn');
+        newLoginBtn.addEventListener('click', function(e) {
+            console.log('Login mode button clicked via addEventListener');
+            e.preventDefault();
+            switchToLoginMode();
+        });
         console.log('Login mode button listener added');
     } else {
         console.error('Login mode button not found');
     }
     
     if (signupModeBtn) {
-        signupModeBtn.addEventListener('click', switchToSignupMode);
+        // Remove any existing listeners first
+        signupModeBtn.replaceWith(signupModeBtn.cloneNode(true));
+        const newSignupBtn = document.getElementById('signupModeBtn');
+        newSignupBtn.addEventListener('click', function(e) {
+            console.log('Signup mode button clicked via addEventListener');
+            e.preventDefault();
+            switchToSignupMode();
+        });
         console.log('Signup mode button listener added');
     } else {
         console.error('Signup mode button not found');
