@@ -200,20 +200,25 @@ async function loadUsers(page = 1, search = '') {
         const params = new URLSearchParams({
             page: page.toString(),
             limit: usersPerPage.toString(),
-            _t: Date.now().toString(), // Cache busting parameter
+            _t: Date.now().toString(),
             ...(search && { search })
         });
         
         const response = await apiCall(`/api/admin/users?${params}`);
         
-        // Handle the actual backend response structure
         allUsers = response.users || [];
         filteredUsers = allUsers;
         totalUsers = response.pagination?.total || 0;
         currentPage = page;
         
-        console.log('Loaded users:', allUsers); // Debug log
-        console.log('First user roles:', allUsers.map(u => ({ email: u.email, role: u.role })).slice(0, 3)); // Debug log
+        console.log('=== USER DATA DEBUG ===');
+        console.log('Raw response:', response);
+        console.log('Users array:', allUsers);
+        if (allUsers.length > 0) {
+            console.log('First user:', allUsers[0]);
+            console.log('First user role:', allUsers[0].role);
+        }
+        console.log('=== END DEBUG ===');
         
         renderUsersTable();
         renderPagination();
@@ -248,7 +253,7 @@ function renderUsersTable() {
             const badge = document.createElement('span');
             badge.className = 'px-2 py-1 text-xs font-semibold rounded-full ml-2';
             
-            console.log('Creating role badge for user:', { email: user.email, role: user.role, isAdmin: user.email === 'jamesingleton1971@gmail.com' }); // Debug log
+            console.log('Creating badge for:', user.email, 'Role:', user.role);
             
             if (user.role === 'superuser') {
                 badge.className += ' bg-purple-100 text-purple-800';
@@ -261,7 +266,7 @@ function renderUsersTable() {
                 badge.textContent = '👤 User';
             }
             
-            console.log('Created badge with text:', badge.textContent); // Debug log
+            console.log('Badge text:', badge.textContent);
             
             return badge;
         })();
