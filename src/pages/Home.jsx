@@ -33,9 +33,31 @@ export default function Home() {
                 Create Your <span className="text-[#E78F81]">Perfect CV</span>
                 <br className="hidden md:block" /> That Stands Out
               </h1>
-              <p className="text-lg md:text-xl mb-8 text-blue-100 max-w-lg leading-relaxed">
-                Professional CV builder with AI-powered optimization and ATS-friendly formatting to help you land your dream job.
+              <p className="text-lg md:text-xl mb-6 text-blue-100 max-w-lg leading-relaxed">
+                Professional CV builder with AI-powered optimization and ATS-friendly formatting. Get past hiring robots and land interviews 3x faster.
               </p>
+
+              {/* Value proposition badges */}
+              <div className="flex flex-wrap gap-2 mb-8">
+                <div className="bg-green-500 bg-opacity-20 border border-green-400 text-green-100 px-3 py-1 rounded-full text-sm flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Free to Start
+                </div>
+                <div className="bg-yellow-500 bg-opacity-20 border border-yellow-400 text-yellow-100 px-3 py-1 rounded-full text-sm flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  5-Minute Setup
+                </div>
+                <div className="bg-blue-500 bg-opacity-20 border border-blue-400 text-blue-100 px-3 py-1 rounded-full text-sm flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                  </svg>
+                  Download Instantly
+                </div>
+              </div>
 
               {/* Primary CTA Button */}
               <div className="mb-6 flex justify-center md:justify-start">
@@ -50,28 +72,12 @@ export default function Home() {
                 </Link>
               </div>
 
-              <p className="text-blue-200 text-sm mt-2 flex items-center">
+              <p className="text-blue-200 text-sm mt-4 flex items-center">
                 <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                Join 10,000+ professionals who've boosted their careers
+                Join 10,000+ professionals who've already boosted their careers
               </p>
-
-              {/* Feature tags */}
-              <div className="flex flex-wrap gap-2 mt-4">
-                <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm flex items-center">
-                  <span className="w-2 h-2 bg-green-400 rounded-full mr-1"></span>
-                  AI-Powered
-                </span>
-                <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm flex items-center">
-                  <span className="w-2 h-2 bg-yellow-400 rounded-full mr-1"></span>
-                  ATS-Optimized
-                </span>
-                <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm flex items-center">
-                  <span className="w-2 h-2 bg-blue-400 rounded-full mr-1"></span>
-                  Modern Templates
-                </span>
-              </div>
             </div>
             
             {/* Right column - Analysis options */}
@@ -193,169 +199,258 @@ export default function Home() {
               <p className="text-gray-600">Get personalized suggestions and optimizations</p>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Analyze CV Only Feature */}
-          <div className="mt-16 mb-16 bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-6 sm:p-8 shadow-sm">
-            <div className="flex flex-col md:flex-row items-start">
-              <div className="md:w-1/2 flex justify-center order-2 md:order-1">
-                <div className="relative">
-                  <svg className="w-64 h-64 text-teal-100" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
-                    <path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Z"></path>
-                    <path d="M171.31,156.69A8,8,0,0,1,168,168H88a8,8,0,0,1,0-16h80A8,8,0,0,1,171.31,156.69ZM168,184H88a8,8,0,0,0,0,16h80a8,8,0,0,0,0-16ZM88,104h16a8,8,0,0,0,0-16H88a8,8,0,0,0,0,16Z"></path>
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <svg className="w-24 h-24 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
+      {/* Template Showcase Section */}
+      <section className="py-16 bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#2c3e50] dark:text-white mb-4">
+              Choose from Industry-Specific Templates
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Each template is professionally designed for specific career paths and optimized to pass ATS systems
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {[
+              {
+                id: 1,
+                name: "Professional",
+                color: "#4A90E2",
+                image: "/images/templates/professional.svg",
+                description: "Corporate & Business",
+                features: ["Clean layout", "ATS-friendly", "Traditional sectors"]
+              },
+              {
+                id: 2,
+                name: "Creative",
+                color: "#E24A8B",
+                image: "/images/templates/creative.svg",
+                description: "Design & Marketing",
+                features: ["Visual sidebar", "Portfolio section", "Creative industries"]
+              },
+              {
+                id: 3,
+                name: "Executive",
+                color: "#4AE2C4",
+                image: "/images/templates/executive.svg",
+                description: "Leadership & Management",
+                features: ["Two-column layout", "Achievement focus", "Senior positions"]
+              },
+              {
+                id: 4,
+                name: "Academic",
+                color: "#E2A64A",
+                image: "/images/templates/academic.svg",
+                description: "Research & Academia",
+                features: ["Publications", "Research focus", "Academic roles"]
+              }
+            ].map((template) => (
+              <div key={template.id} className="group bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                <div className="relative aspect-[3/4] overflow-hidden">
+                  <img
+                    src={template.image}
+                    alt={`${template.name} Template`}
+                    className="w-full h-full object-cover object-top transform transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                    <div className="p-4 w-full">
+                      <Link
+                        to={`/create?template=${template.id}`}
+                        className="w-full inline-flex items-center justify-center px-4 py-2 text-white rounded-lg font-medium transition-all duration-200 text-sm"
+                        style={{ backgroundColor: template.color }}
+                      >
+                        Use Template
+                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="absolute top-3 left-3">
+                    <span 
+                      className="px-2 py-1 rounded-full text-white font-medium text-xs shadow-lg"
+                      style={{ backgroundColor: template.color }}
+                    >
+                      {template.name}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold text-[#2c3e50] dark:text-white mb-1 group-hover:text-opacity-80 transition-colors">
+                    {template.name}
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    {template.description}
+                  </p>
+                  <div className="space-y-1">
+                    {template.features.map((feature, index) => (
+                      <div key={index} className="flex items-center text-xs text-gray-500 dark:text-gray-500">
+                        <div 
+                          className="w-1.5 h-1.5 rounded-full mr-2 flex-shrink-0"
+                          style={{ backgroundColor: template.color }}
+                        ></div>
+                        {feature}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
-              <div className="md:w-1/2 mb-6 md:mb-0 md:pl-6 order-1 md:order-2">
-                <div className="mb-4">
-                  <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <h3 className="text-2xl font-bold text-[#2c3e50]">Analyze CV Only</h3>
-                    <span className="inline-block bg-yellow-400 text-[#2c3e50] px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
-                      PREMIUM FEATURE
-                    </span>
-                  </div>
-                  <p className="text-gray-700 mb-6">
-                    Get comprehensive feedback on your CV without targeting a specific job. Our advanced AI analyzes your CV's format, content, and keywords to ensure it meets professional standards and passes Applicant Tracking Systems (ATS). 
-                    This analysis helps identify missing sections, formatting issues, and content improvements needed for a professional CV.
-                  </p>
-                  <div className="flex flex-wrap gap-3 mb-4">
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      ATS Compatibility
-                    </div>
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      Format & Content Score
-                    </div>
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      Actionable Recommendations
-                    </div>
-                  </div>
-                  <Link
-                    to="/cv-analyze"
-                    className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800"
-                    aria-label="Try standalone CV analysis"
-                    state={{ fromHome: true }}
-                  >
-                    Try it now
-                    <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                  </Link>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link
+              to="/templates"
+              className="inline-flex items-center justify-center px-8 py-3 text-lg font-semibold text-white bg-[#E78F81] rounded-full hover:bg-[#d36e62] transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              View All Templates
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof and Success Metrics Section */}
+      <section className="py-16 bg-gray-100 dark:bg-gray-800">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#2c3e50] dark:text-white mb-4">
+              Join 10,000+ Professionals
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Our platform has helped thousands of professionals land their dream jobs
+            </p>
+          </div>
+
+          {/* Success Statistics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold text-[#E78F81] mb-2">10,000+</div>
+              <div className="text-gray-600 dark:text-gray-400 font-medium">CVs Created</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold text-[#3498db] mb-2">95%</div>
+              <div className="text-gray-600 dark:text-gray-400 font-medium">ATS Pass Rate</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold text-[#2ecc71] mb-2">85%</div>
+              <div className="text-gray-600 dark:text-gray-400 font-medium">Interview Rate</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold text-[#9b59b6] mb-2">4.8/5</div>
+              <div className="text-gray-600 dark:text-gray-400 font-medium">User Rating</div>
+            </div>
+          </div>
+
+          {/* Testimonials */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  M
                 </div>
+                <div className="ml-3">
+                  <div className="font-semibold text-[#2c3e50] dark:text-white">Mike Johnson</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Software Engineer</div>
+                </div>
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                "The AI analysis helped me identify gaps in my CV I never noticed. Got 3 interviews in 2 weeks!"
+              </p>
+              <div className="flex text-yellow-400 mt-3">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  S
+                </div>
+                <div className="ml-3">
+                  <div className="font-semibold text-[#2c3e50] dark:text-white">Sarah Chen</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Marketing Manager</div>
+                </div>
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                "The Creative template perfectly showcased my portfolio. Landed my dream job at a top agency!"
+              </p>
+              <div className="flex text-yellow-400 mt-3">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  D
+                </div>
+                <div className="ml-3">
+                  <div className="font-semibold text-[#2c3e50] dark:text-white">Dr. Alex Kumar</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Research Scientist</div>
+                </div>
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                "The Academic template highlighted my publications perfectly. Secured a position at Cambridge!"
+              </p>
+              <div className="flex text-yellow-400 mt-3">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* Industry-Focused Analysis Feature */}
-          <div className="mt-8 mb-16 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-6 sm:p-8 shadow-sm">
-            <div className="flex flex-col md:flex-row items-start">
-              <div className="md:w-1/2 mb-6 md:mb-0 md:pr-6">
-                <div className="mb-4">
-                  <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <h3 className="text-2xl font-bold text-[#2c3e50]">Industry-Focused Analysis</h3>
-                    <span className="inline-block bg-yellow-400 text-[#2c3e50] px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
-                      PREMIUM FEATURE
-                    </span>
-                  </div>
-                  <p className="text-gray-700 mb-6">
-                    Optimize your CV for specific industries and career fields. Our AI compares your CV against industry benchmarks and best practices to help you align with field-specific expectations. 
-                    Receive customized recommendations for your target industry, including relevant skills, certifications, and terminology that hiring managers look for.
-                  </p>
-                  <div className="flex flex-wrap gap-3 mb-4">
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      Industry-Specific Terms
-                    </div>
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      Career Field Alignment
-                    </div>
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      Competitive Benchmark
-                    </div>
-                  </div>
-                  <Link
-                    to="/cv-analyze-by-role" 
-                    className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800"
-                    aria-label="Try industry-focused analysis"
-                    state={{ fromHome: true }}
-                  >
-                    Try it now
-                    <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                  </Link>
-                </div>
+          {/* Trust Indicators */}
+          <div className="text-center">
+            <div className="flex flex-wrap justify-center items-center gap-8 mb-8 opacity-60">
+              <div className="flex items-center text-gray-600 dark:text-gray-400">
+                <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Secure & Private
               </div>
-              <div className="md:w-1/2 flex justify-center">
-                <div className="relative">
-                  <svg className="w-64 h-64 text-purple-100" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
-                    <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H216v96H40ZM40,200V168H216v32Z"></path>
-                    <path d="M184,180a8,8,0,0,1-8,8H80a8,8,0,0,1,0-16h96A8,8,0,0,1,184,180Zm32-84a12,12,0,1,1-12-12A12,12,0,0,1,216,96Zm-32,0a12,12,0,1,1-12-12A12,12,0,0,1,184,96Zm-32,0a12,12,0,1,1-12-12A12,12,0,0,1,152,96Z"></path>
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <svg className="w-24 h-24 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                </div>
+              <div className="flex items-center text-gray-600 dark:text-gray-400">
+                <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                ATS Tested
+              </div>
+              <div className="flex items-center text-gray-600 dark:text-gray-400">
+                <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                HR Approved
+              </div>
+              <div className="flex items-center text-gray-600 dark:text-gray-400">
+                <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                </svg>
+                Mobile Optimized
               </div>
             </div>
-          </div>
-
-          {/* Analyze with Job Feature */}
-          <div className="mt-8 mb-16 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 sm:p-8 shadow-sm">
-            <div className="flex flex-col md:flex-row items-start">
-              <div className="md:w-1/2 flex justify-center order-2 md:order-1">
-                <div className="relative">
-                  <svg className="w-64 h-64 text-blue-100" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
-                    <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H216v96H40ZM40,200V168H216v32Z"></path>
-                    <path d="M184,180a8,8,0,0,1-8,8H80a8,8,0,0,1,0-16h96A8,8,0,0,1,184,180Zm32-84a12,12,0,1,1-12-12A12,12,0,0,1,216,96Zm-32,0a12,12,0,1,1-12-12A12,12,0,0,1,184,96Zm-32,0a12,12,0,1,1-12-12A12,12,0,0,1,152,96Z"></path>
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <svg className="w-24 h-24 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              <div className="md:w-1/2 mb-6 md:mb-0 md:pl-6 order-1 md:order-2">
-                <div className="mb-4">
-                  <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <h3 className="text-2xl font-bold text-[#2c3e50]">Analyze with Job</h3>
-                    <span className="inline-block bg-yellow-400 text-[#2c3e50] px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
-                      PREMIUM FEATURE
-                    </span>
-                  </div>
-                  <p className="text-gray-700 mb-6">
-                    Match your CV precisely to specific job openings to maximize your chances of getting an interview. Our AI analyzes your CV against the job description to identify keyword matches, skills gaps, and optimization opportunities. 
-                    Receive tailored recommendations for each job application, including specific phrases to include and skills to highlight based on the exact requirements in the job posting.
-                  </p>
-                  <div className="flex flex-wrap gap-3 mb-4">
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      Job-Specific Keywords
-                    </div>
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      Skills Gap Analysis
-                    </div>
-                    <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-sm">
-                      ATS Match Score
-                    </div>
-                  </div>
-                  <Link
-                    to="/analyze"
-                    className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800"
-                    aria-label="Try job-specific analysis"
-                    state={{ fromHome: true }}
-                  >
-                    Try it now
-                    <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                  </Link>
-                </div>
-              </div>
+            
+            <div className="inline-flex items-center bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-6 py-3 rounded-full">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span className="font-medium">Start building your professional CV today - It's free to begin!</span>
             </div>
           </div>
         </div>
