@@ -236,14 +236,27 @@ function renderUsersTable() {
         statusBadge.className = `px-2 py-1 text-xs font-semibold rounded-full ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
         statusBadge.textContent = user.isActive ? 'Active' : 'Inactive';
         
-        // Create admin badge if applicable
-        const adminBadge = (user.email === 'jamesingleton1971@gmail.com' || user.isAdmin) ? 
-            (() => {
-                const badge = document.createElement('span');
-                badge.className = 'px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 ml-2';
-                badge.textContent = 'Admin';
-                return badge;
-            })() : null;
+        // Create role badge
+        const roleBadge = (() => {
+            const badge = document.createElement('span');
+            badge.className = 'px-2 py-1 text-xs font-semibold rounded-full ml-2';
+            
+            if (user.role === 'superuser') {
+                badge.className += ' bg-purple-100 text-purple-800';
+                badge.textContent = '👑 Superuser';
+            } else if (user.role === 'admin' || user.email === 'jamesingleton1971@gmail.com') {
+                badge.className += ' bg-blue-100 text-blue-800';
+                badge.textContent = '🛡️ Admin';
+            } else {
+                badge.className += ' bg-gray-100 text-gray-800';
+                badge.textContent = '👤 User';
+            }
+            
+            return badge;
+        })();
+        
+        // Check if user is protected (admin or superuser)
+        const isProtectedUser = user.role === 'admin' || user.role === 'superuser' || user.email === 'jamesingleton1971@gmail.com';
             
         // Create marketing consent icon
         const marketingIcon = document.createElement('i');
@@ -289,9 +302,7 @@ function renderUsersTable() {
         const statusCell = document.createElement('td');
         statusCell.className = 'px-6 py-4 whitespace-nowrap';
         statusCell.appendChild(statusBadge);
-        if (adminBadge) {
-            statusCell.appendChild(adminBadge);
-        }
+        statusCell.appendChild(roleBadge);
         
         // Created date cell
         const createdCell = document.createElement('td');
@@ -339,8 +350,8 @@ function renderUsersTable() {
         exportBtn.appendChild(exportIcon);
         actionsDiv.appendChild(exportBtn);
         
-        // Only add toggle/delete buttons for non-admin users
-        if (!adminBadge) {
+        // Only add toggle/delete buttons for non-protected users
+        if (!isProtectedUser) {
             // Toggle status button
             const toggleBtn = document.createElement('button');
             toggleBtn.className = 'text-yellow-600 hover:text-yellow-900 px-2 py-1 rounded';

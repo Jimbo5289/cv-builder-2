@@ -13,6 +13,7 @@ model User {
   email               String         @unique
   password            String
   name                String
+  role                String         @default("user") // user, admin, superuser
   customerId          String?        @unique
   twoFactorSecret     String?
   twoFactorEnabled    Boolean        @default(false)

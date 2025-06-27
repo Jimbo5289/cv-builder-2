@@ -54,9 +54,11 @@ const adminAuth = async (req, res, next) => {
       }
     });
     
-    // Enhanced admin privilege checking - based on email only for now
+    // Enhanced admin privilege checking - role-based system
     const isAuthorizedAdmin = user && (
-      user.email === 'jamesingleton1971@gmail.com' // Your permanent admin access
+      user.role === 'superuser' || 
+      user.role === 'admin' ||
+      user.email === 'jamesingleton1971@gmail.com' // Fallback for compatibility
     );
     
     if (!user) {
@@ -172,6 +174,7 @@ router.get('/users', authMiddleware, adminAuth, async (req, res) => {
         id: true,
         email: true,
         name: true,
+        role: true,
         createdAt: true,
         isActive: true,
         lastLogin: true,
@@ -404,11 +407,20 @@ router.delete('/users/:id', authMiddleware, adminAuth, async (req, res) => {
       });
     }
     
-    // Don't allow deletion of admin users
-    if (user.email === 'jamesingleton1971@gmail.com' || user.email === 'admin@example.com') {
+    // Don't allow regular admins to delete admin/superuser users
+    // Check if current user is superuser
+    const currentUser = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { role: true }
+    });
+    
+    const isSuperuser = currentUser?.role === 'superuser';
+    
+    // Protect admin and superuser accounts from regular admin deletion
+    if (!isSuperuser && (user.email === 'jamesingleton1971@gmail.com' || user.role === 'admin' || user.role === 'superuser')) {
       return res.status(403).json({ 
-        error: 'Cannot delete admin user',
-        message: 'Admin users cannot be deleted through this interface'
+        error: 'Cannot delete admin or superuser accounts',
+        message: 'Only superusers can delete admin or superuser accounts. Use the superuser interface.'
       });
     }
     
@@ -560,6 +572,337 @@ router.post('/users/:id/reactivate', authMiddleware, adminAuth, async (req, res)
   } catch (error) {
     console.error('Admin user reactivation error:', error);
     res.status(500).json({ error: 'Failed to reactivate user' });
+  }
+});
+
+/**
+ * Superuser-only middleware
+ * Only allows users with 'superuser' role
+ */
+const superuserAuth = async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, role: true, isActive: true }
+    });
+    
+    if (!user || !user.isActive) {
+      return res.status(403).json({ error: 'Account is inactive' });
+    }
+    
+    if (user.role !== 'superuser') {
+      logger.warn('Unauthorized superuser access attempt', {
+        userId,
+        userEmail: user.email,
+        userRole: user.role,
+        ip: req.ip,
+        path: req.path
+      });
+      return res.status(403).json({ error: 'Superuser privileges required' });
+    }
+    
+    logger.info('Superuser access granted', {
+      userId,
+      userEmail: user.email,
+      ip: req.ip,
+      path: req.path
+    });
+    
+    req.superuser = user;
+    next();
+  } catch (error) {
+    logger.error('Superuser authentication error', {
+      error: error.message,
+      ip: req.ip,
+      path: req.path
+    });
+    res.status(500).json({ error: 'Superuser authentication failed' });
+  }
+};
+
+/**
+ * @route PUT /api/admin/superuser/users/:id/role
+ * @desc Change user role (superuser only)
+ * @access Superuser only
+ */
+router.put('/superuser/users/:id/role', authMiddleware, superuserAuth, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { role } = req.body;
+    
+    // Validate role
+    const validRoles = ['user', 'admin', 'superuser'];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ 
+        error: 'Invalid role',
+        validRoles 
+      });
+    }
+    
+    // Prevent self-demotion from superuser
+    if (userId === req.user.id && role !== 'superuser') {
+      return res.status(400).json({ 
+        error: 'Cannot change your own superuser role',
+        message: 'Use another superuser account to change your role'
+      });
+    }
+    
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, name: true, role: true }
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    if (user.role === role) {
+      return res.status(200).json({ 
+        message: 'User already has this role',
+        user 
+      });
+    }
+    
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { role },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        updatedAt: true
+      }
+    });
+    
+    logger.info('User role changed by superuser', {
+      superuserId: req.user.id,
+      superuserEmail: req.superuser.email,
+      targetUserId: userId,
+      targetEmail: user.email,
+      previousRole: user.role,
+      newRole: role
+    });
+    
+    res.status(200).json({
+      success: true,
+      message: `User role changed from ${user.role} to ${role}`,
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Superuser role change error:', error);
+    res.status(500).json({ error: 'Failed to change user role' });
+  }
+});
+
+/**
+ * @route DELETE /api/admin/superuser/users/:id
+ * @desc Force delete any user including admins (superuser only)
+ * @access Superuser only
+ */
+router.delete('/superuser/users/:id', authMiddleware, superuserAuth, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { confirmEmail } = req.body;
+    
+    // Prevent self-deletion
+    if (userId === req.user.id) {
+      return res.status(400).json({ 
+        error: 'Cannot delete your own account',
+        message: 'Use another superuser account to delete your account'
+      });
+    }
+    
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        id: true, 
+        email: true, 
+        name: true, 
+        role: true,
+        _count: {
+          select: {
+            cvs: true,
+            subscriptions: true,
+            payments: true
+          }
+        }
+      }
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Require email confirmation for safety
+    if (confirmEmail !== user.email) {
+      return res.status(400).json({ 
+        error: 'Email confirmation required',
+        message: 'Please provide the user\'s email address to confirm deletion'
+      });
+    }
+    
+    logger.warn('Superuser force deletion initiated', {
+      superuserId: req.user.id,
+      superuserEmail: req.superuser.email,
+      targetUserId: userId,
+      targetEmail: user.email,
+      targetRole: user.role,
+      targetCVs: user._count.cvs,
+      targetSubscriptions: user._count.subscriptions,
+      targetPayments: user._count.payments
+    });
+    
+    try {
+      // Delete all related data first
+      await prisma.cVAnalysis.deleteMany({
+        where: { userId: userId }
+      });
+      
+      await prisma.cVSection.deleteMany({
+        where: {
+          cv: { userId: userId }
+        }
+      });
+      
+      await prisma.cV.deleteMany({
+        where: { userId: userId }
+      });
+      
+      await prisma.payment.deleteMany({
+        where: { userId: userId }
+      });
+      
+      await prisma.subscription.deleteMany({
+        where: { userId: userId }
+      });
+      
+      await prisma.temporaryAccess.deleteMany({
+        where: { userId: userId }
+      });
+      
+      // Finally delete the user
+      await prisma.user.delete({
+        where: { id: userId }
+      });
+      
+      logger.info('Superuser force deletion completed', {
+        superuserId: req.user.id,
+        superuserEmail: req.superuser.email,
+        deletedUserId: userId,
+        deletedUserEmail: user.email,
+        deletedUserRole: user.role
+      });
+      
+      res.status(200).json({
+        success: true,
+        message: `User ${user.email} (${user.role}) and all associated data has been permanently deleted`,
+        deletedUser: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role
+        },
+        deletionDate: new Date().toISOString()
+      });
+      
+    } catch (dbError) {
+      logger.error('Database error during superuser force deletion', {
+        superuserId: req.user.id,
+        targetUserId: userId,
+        error: dbError.message
+      });
+      
+      res.status(500).json({
+        error: 'Failed to delete user data',
+        message: 'A database error occurred during deletion. Please try again.'
+      });
+    }
+    
+  } catch (error) {
+    console.error('Superuser force deletion error:', error);
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
+});
+
+/**
+ * @route GET /api/admin/superuser/users
+ * @desc List all users with full role information (superuser only)
+ * @access Superuser only
+ */
+router.get('/superuser/users', authMiddleware, superuserAuth, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const roleFilter = req.query.role;
+    const skip = (page - 1) * limit;
+    
+    const where = {};
+    if (roleFilter && ['user', 'admin', 'superuser'].includes(roleFilter)) {
+      where.role = roleFilter;
+    }
+    
+    const users = await prisma.user.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: [
+        { role: 'desc' }, // superuser, admin, user
+        { createdAt: 'desc' }
+      ],
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+        lastLogin: true,
+        marketingConsent: true,
+        _count: {
+          select: {
+            cvs: true,
+            subscriptions: true,
+            payments: true
+          }
+        }
+      }
+    });
+    
+    const totalUsers = await prisma.user.count({ where });
+    
+    // Get role statistics
+    const roleStats = await prisma.user.groupBy({
+      by: ['role'],
+      _count: {
+        role: true
+      }
+    });
+    
+    const roleStatistics = roleStats.reduce((acc, stat) => {
+      acc[stat.role] = stat._count.role;
+      return acc;
+    }, {});
+    
+    res.status(200).json({
+      users,
+      pagination: {
+        total: totalUsers,
+        page,
+        limit,
+        pages: Math.ceil(totalUsers / limit)
+      },
+      roleStatistics,
+      filter: roleFilter || 'all'
+    });
+  } catch (error) {
+    console.error('Superuser users list error:', error);
+    res.status(500).json({ error: 'Failed to retrieve users list' });
   }
 });
 
