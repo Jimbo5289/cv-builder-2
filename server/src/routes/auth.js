@@ -31,7 +31,8 @@ const registerSchema = z.object({
       'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
     ),
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  phone: z.string().nullable().optional().transform(val => val === null ? undefined : val)
+  phone: z.string().nullable().optional().transform(val => val === null ? undefined : val),
+  marketingConsent: z.boolean().optional().default(false)
 });
 
 const loginSchema = z.object({
@@ -172,7 +173,7 @@ router.post('/register', async (req, res) => {
   addCorsHeaders(req, res);
   try {
     const validatedData = registerSchema.parse(req.body);
-    const { email, password, name, phone } = validatedData;
+    const { email, password, name, phone, marketingConsent = false } = validatedData;
 
     logger.info('Registration attempt:', { email, name });
 
@@ -204,6 +205,7 @@ router.post('/register', async (req, res) => {
           email,
           phone,
           password: hashedPassword,
+          marketingConsent: marketingConsent,
           isActive: true,
           createdAt: new Date(),
           updatedAt: new Date()

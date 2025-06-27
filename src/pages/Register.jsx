@@ -11,7 +11,8 @@ export default function Register() {
     email: '',
     phone: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    marketingConsent: true // Default to true, but user must actively confirm
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -57,10 +58,10 @@ export default function Register() {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
     // Clear error when user starts typing
     if (errors[name]) {
@@ -88,10 +89,11 @@ export default function Register() {
         email: formData.email.trim(),
         password: formData.password,
         phone: formData.phone?.trim() || null,
+        marketingConsent: formData.marketingConsent, // Include marketing consent
         turnstileToken: 'security-verification-disabled'
       };
 
-      console.log('Submitting registration data...');
+      console.log('Submitting registration data...', { ...registrationData, password: '[REDACTED]' });
       const result = await register(registrationData);
 
       if (result.success) {
@@ -274,6 +276,31 @@ export default function Register() {
                 <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
               )}
             </div>
+
+            {/* Marketing Consent Checkbox */}
+            <div className="border border-gray-200 rounded-md p-4 bg-gray-50">
+              <div className="flex items-start">
+                <div className="flex items-center h-5">
+                  <input
+                    id="marketingConsent"
+                    name="marketingConsent"
+                    type="checkbox"
+                    checked={formData.marketingConsent}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-[#E78F81] focus:ring-[#E78F81] border-gray-300 rounded"
+                  />
+                </div>
+                <div className="ml-3">
+                  <label htmlFor="marketingConsent" className="text-sm font-medium text-gray-700">
+                    Marketing Communications
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1">
+                    I agree to receive emails about CV tips, new features, special offers, and product updates from CV Builder. 
+                    You can unsubscribe at any time via your account preferences.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div>
@@ -301,6 +328,19 @@ export default function Register() {
               <li>Contains at least one number</li>
               <li>Contains at least one special character (@$!%*?&#-)</li>
             </ul>
+          </div>
+          
+          <div className="mt-4 text-xs text-gray-500 border-t pt-3">
+            <p>
+              By creating an account, you agree to our{' '}
+              <Link to="/terms" className="text-[#E78F81] hover:text-[#d36e62] underline">
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link to="/privacy" className="text-[#E78F81] hover:text-[#d36e62] underline">
+                Privacy Policy
+              </Link>.
+            </p>
           </div>
         </div>
       </div>
