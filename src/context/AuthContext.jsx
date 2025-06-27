@@ -165,6 +165,23 @@ function AuthProvider({ children }) {
         if (error.response?.status === 401 && !originalRequest._retry) {
           console.log('Received 401 error, attempting token refresh...');
           
+          // Check if it's an invalid signature error (JWT secret changed)
+          const errorMessage = error.response?.data?.error || error.response?.data?.message || '';
+          if (errorMessage.includes('invalid signature') || errorMessage.includes('jwt malformed')) {
+            console.warn('JWT signature invalid - clearing tokens and redirecting to login');
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            setState({
+              user: null,
+              loading: false,
+              isAuthenticated: false,
+              error: 'Your session has expired. Please log in again.'
+            });
+            toast.error('Session expired. Please log in again.');
+            return Promise.reject(error);
+          }
+          
           if (isRefreshing) {
             // If already refreshing, queue this request
             return new Promise((resolve, reject) => {
@@ -946,7 +963,29 @@ function AuthProvider({ children }) {
     }
   }
 
-  function logout() {
+  async function logout(showToast = true) {
+    try {
+      // Call backend logout endpoint to handle any server-side cleanup
+      const token = localStorage.getItem('token');
+      if (token && serverUrl) {
+        try {
+          await fetch(`${serverUrl}/api/auth/logout`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+        } catch (error) {
+          // Logout endpoint error is not critical - continue with client cleanup
+          console.warn('Backend logout failed, continuing with client cleanup:', error.message);
+        }
+      }
+    } catch (error) {
+      console.warn('Error during logout process:', error.message);
+    }
+    
+    // Always clear client-side data regardless of backend response
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
@@ -961,7 +1000,9 @@ function AuthProvider({ children }) {
       error: null
     });
     
-    toast.success('Logged out successfully');
+    if (showToast) {
+      toast.success('Logged out successfully');
+    }
   }
 
   // Get headers for authenticated requests

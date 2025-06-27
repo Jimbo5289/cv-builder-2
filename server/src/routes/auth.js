@@ -89,6 +89,7 @@ const validateRegistrationInput = (req, res, next) => {
 router.options('/register', handlePreflight);
 router.options('/login', handlePreflight);
 router.options('/refresh-token', handlePreflight);
+router.options('/logout', handlePreflight);
 
 // Special debug endpoint for CORS testing
 router.options('/test-cors', handlePreflight);
@@ -1098,6 +1099,52 @@ router.post('/temp-reset-password', async (req, res) => {
   } catch (error) {
     logger.error('Temporary password reset error:', { error: error.message });
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Logout endpoint to handle invalid tokens
+router.post('/logout', (req, res) => {
+  addCorsHeaders(req, res);
+  try {
+    // Clear any client-side tokens by sending instructions
+    res.json({
+      success: true,
+      message: 'Logged out successfully',
+      clearTokens: true
+    });
+  } catch (error) {
+    logger.error('Logout error:', { error: error.message });
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Token validation endpoint for troubleshooting
+router.post('/validate-token', (req, res) => {
+  addCorsHeaders(req, res);
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({ 
+        valid: false, 
+        error: 'No token provided' 
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    res.json({
+      valid: true,
+      userId: decoded.userId,
+      email: decoded.email,
+      expires: new Date(decoded.exp * 1000)
+    });
+  } catch (error) {
+    res.status(401).json({
+      valid: false,
+      error: error.message,
+      hint: error.message === 'invalid signature' ? 'JWT secret may have changed - please log in again' : 'Token expired or invalid'
+    });
   }
 });
 
