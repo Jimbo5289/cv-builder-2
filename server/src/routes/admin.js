@@ -9,41 +9,109 @@ const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const { auth: authMiddleware } = require('../middleware/auth');
+const { adminLimiter } = require('../middleware/security');
 const { logger } = require('../config/logger');
 
 // Initialize Prisma client
 const prisma = new PrismaClient();
 
+// Apply strict rate limiting to all admin routes
+router.use(adminLimiter);
+
 /**
- * Admin authentication middleware
- * Checks if the authenticated user has admin privileges
+ * Enhanced admin authentication middleware
+ * Checks if the authenticated user has admin privileges with additional security
  */
 const adminAuth = async (req, res, next) => {
   try {
     // Skip admin check in development mode if configured
     if (process.env.SKIP_AUTH_CHECK === 'true' && process.env.NODE_ENV === 'development') {
-      console.log('Warning: Skipping admin authentication check in development mode');
+      logger.warn('Admin authentication check skipped in development mode', {
+        ip: req.ip,
+        userAgent: req.headers['user-agent'],
+        path: req.path
+      });
       return next();
     }
     
     // Check if user exists and is an admin
     const userId = req.user?.id;
     if (!userId) {
+      logger.warn('Admin access attempt without authentication', {
+        ip: req.ip,
+        userAgent: req.headers['user-agent'],
+        path: req.path
+      });
       return res.status(401).json({ error: 'Authentication required' });
     }
     
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, isAdmin: true }
+      select: { 
+        id: true, 
+        email: true, 
+        isAdmin: true,
+        isActive: true 
+      }
     });
     
-    if (!user || !user.isAdmin) {
+    // Enhanced admin privilege checking
+    const isAuthorizedAdmin = user && (
+      user.isAdmin || 
+      user.email === 'jamesingleton1971@gmail.com' // Your permanent admin access
+    );
+    
+    if (!user) {
+      logger.warn('Admin access attempt with invalid user', {
+        userId,
+        ip: req.ip,
+        userAgent: req.headers['user-agent'],
+        path: req.path
+      });
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    if (!user.isActive) {
+      logger.warn('Admin access attempt with inactive user', {
+        userId,
+        userEmail: user.email,
+        ip: req.ip,
+        path: req.path
+      });
+      return res.status(403).json({ error: 'Account is inactive' });
+    }
+    
+    if (!isAuthorizedAdmin) {
+      logger.error('Unauthorized admin access attempt', {
+        userId,
+        userEmail: user.email,
+        ip: req.ip,
+        userAgent: req.headers['user-agent'],
+        path: req.path,
+        timestamp: new Date().toISOString()
+      });
       return res.status(403).json({ error: 'Admin privileges required' });
     }
     
+    // Log successful admin access for audit trail
+    logger.info('Admin access granted', {
+      userId,
+      userEmail: user.email,
+      ip: req.ip,
+      path: req.path,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Add user info to request for further use
+    req.adminUser = user;
     next();
   } catch (error) {
-    console.error('Admin authentication error:', error);
+    logger.error('Admin authentication error', {
+      error: error.message,
+      stack: error.stack,
+      ip: req.ip,
+      path: req.path
+    });
     res.status(500).json({ error: 'Admin authentication failed' });
   }
 };

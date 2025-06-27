@@ -203,102 +203,177 @@ async function loadUsers(page = 1, search = '') {
 
 function renderUsersTable() {
     const tbody = document.getElementById('usersTableBody');
-    tbody.innerHTML = '';
+    // Clear existing content safely
+    while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+    }
     
     filteredUsers.forEach(user => {
         const row = document.createElement('tr');
         row.className = 'hover:bg-gray-50';
         
-        const statusBadge = user.isActive 
-            ? '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>'
-            : '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>';
-            
-        const adminBadge = (user.email === 'jamesingleton1971@gmail.com' || user.isAdmin)
-            ? '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 ml-2">Admin</span>'
-            : '';
-            
-        const marketingConsent = user.marketingConsent 
-            ? '<i class="fas fa-check text-green-500"></i>'
-            : '<i class="fas fa-times text-red-500"></i>';
+        // Create status badge
+        const statusBadge = document.createElement('span');
+        statusBadge.className = `px-2 py-1 text-xs font-semibold rounded-full ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+        statusBadge.textContent = user.isActive ? 'Active' : 'Inactive';
         
-        // Handle name display (backend might return 'name' instead of firstName/lastName)
+        // Create admin badge if applicable
+        const adminBadge = (user.email === 'jamesingleton1971@gmail.com' || user.isAdmin) ? 
+            (() => {
+                const badge = document.createElement('span');
+                badge.className = 'px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 ml-2';
+                badge.textContent = 'Admin';
+                return badge;
+            })() : null;
+            
+        // Create marketing consent icon
+        const marketingIcon = document.createElement('i');
+        marketingIcon.className = user.marketingConsent ? 'fas fa-check text-green-500' : 'fas fa-times text-red-500';
+        
+        // Handle name display safely
         const displayName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'N/A';
         
-        row.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10">
-                        <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                            <i class="fas fa-user text-gray-600"></i>
-                        </div>
-                    </div>
-                    <div class="ml-4">
-                        <div class="text-sm font-medium text-gray-900">${displayName}</div>
-                        <div class="text-sm text-gray-500">${user.email}</div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                ${statusBadge}${adminBadge}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                ${formatDateShort(user.createdAt)}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                ${formatDateShort(user.lastLogin)}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                ${user._count?.cvs || 0}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
-                ${marketingConsent}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div class="flex space-x-2">
-                    <button onclick="viewUser('${user.id}')" 
-                            class="text-blue-600 hover:text-blue-900 px-2 py-1 rounded">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button onclick="exportUser('${user.id}')" 
-                            class="text-green-600 hover:text-green-900 px-2 py-1 rounded" 
-                            title="Export Data">
-                        <i class="fas fa-download"></i>
-                    </button>
-                    ${!adminBadge ? `
-                        <button onclick="toggleUserStatus('${user.id}', ${!user.isActive})" 
-                                class="text-yellow-600 hover:text-yellow-900 px-2 py-1 rounded"
-                                title="${user.isActive ? 'Deactivate' : 'Activate'} User">
-                            <i class="fas fa-${user.isActive ? 'pause' : 'play'}"></i>
-                        </button>
-                        <button onclick="deleteUser('${user.id}', '${user.email}')" 
-                                class="text-red-600 hover:text-red-900 px-2 py-1 rounded" 
-                                title="Delete User">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    ` : ''}
-                </div>
-            </td>
-        `;
+        // Create table cells
+        const nameCell = document.createElement('td');
+        nameCell.className = 'px-6 py-4 whitespace-nowrap';
+        
+        const nameContainer = document.createElement('div');
+        nameContainer.className = 'flex items-center';
+        
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'flex-shrink-0 h-10 w-10';
+        const avatarInner = document.createElement('div');
+        avatarInner.className = 'h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center';
+        const avatarIcon = document.createElement('i');
+        avatarIcon.className = 'fas fa-user text-gray-600';
+        avatarInner.appendChild(avatarIcon);
+        avatarDiv.appendChild(avatarInner);
+        
+        const textDiv = document.createElement('div');
+        textDiv.className = 'ml-4';
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'text-sm font-medium text-gray-900';
+        nameDiv.textContent = displayName;
+        const emailDiv = document.createElement('div');
+        emailDiv.className = 'text-sm text-gray-500';
+        emailDiv.textContent = user.email;
+        textDiv.appendChild(nameDiv);
+        textDiv.appendChild(emailDiv);
+        
+        nameContainer.appendChild(avatarDiv);
+        nameContainer.appendChild(textDiv);
+        nameCell.appendChild(nameContainer);
+        
+        // Status cell
+        const statusCell = document.createElement('td');
+        statusCell.className = 'px-6 py-4 whitespace-nowrap';
+        statusCell.appendChild(statusBadge);
+        if (adminBadge) {
+            statusCell.appendChild(adminBadge);
+        }
+        
+        // Created date cell
+        const createdCell = document.createElement('td');
+        createdCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-500';
+        createdCell.textContent = formatDateShort(user.createdAt);
+        
+        // Last login cell
+        const loginCell = document.createElement('td');
+        loginCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-500';
+        loginCell.textContent = formatDateShort(user.lastLogin);
+        
+        // CVs count cell
+        const cvsCell = document.createElement('td');
+        cvsCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-500';
+        cvsCell.textContent = user._count?.cvs || 0;
+        
+        // Marketing consent cell
+        const marketingCell = document.createElement('td');
+        marketingCell.className = 'px-6 py-4 whitespace-nowrap text-center text-sm';
+        marketingCell.appendChild(marketingIcon);
+        
+        // Actions cell
+        const actionsCell = document.createElement('td');
+        actionsCell.className = 'px-6 py-4 whitespace-nowrap text-right text-sm font-medium';
+        
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'flex space-x-2';
+        
+        // View button
+        const viewBtn = document.createElement('button');
+        viewBtn.className = 'text-blue-600 hover:text-blue-900 px-2 py-1 rounded';
+        viewBtn.onclick = () => viewUser(user.id);
+        const viewIcon = document.createElement('i');
+        viewIcon.className = 'fas fa-eye';
+        viewBtn.appendChild(viewIcon);
+        actionsDiv.appendChild(viewBtn);
+        
+        // Export button
+        const exportBtn = document.createElement('button');
+        exportBtn.className = 'text-green-600 hover:text-green-900 px-2 py-1 rounded';
+        exportBtn.title = 'Export Data';
+        exportBtn.onclick = () => exportUser(user.id);
+        const exportIcon = document.createElement('i');
+        exportIcon.className = 'fas fa-download';
+        exportBtn.appendChild(exportIcon);
+        actionsDiv.appendChild(exportBtn);
+        
+        // Only add toggle/delete buttons for non-admin users
+        if (!adminBadge) {
+            // Toggle status button
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'text-yellow-600 hover:text-yellow-900 px-2 py-1 rounded';
+            toggleBtn.title = user.isActive ? 'Deactivate User' : 'Activate User';
+            toggleBtn.onclick = () => toggleUserStatus(user.id, !user.isActive);
+            const toggleIcon = document.createElement('i');
+            toggleIcon.className = `fas fa-${user.isActive ? 'pause' : 'play'}`;
+            toggleBtn.appendChild(toggleIcon);
+            actionsDiv.appendChild(toggleBtn);
+            
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'text-red-600 hover:text-red-900 px-2 py-1 rounded';
+            deleteBtn.title = 'Delete User';
+            deleteBtn.onclick = () => deleteUser(user.id, user.email);
+            const deleteIcon = document.createElement('i');
+            deleteIcon.className = 'fas fa-trash';
+            deleteBtn.appendChild(deleteIcon);
+            actionsDiv.appendChild(deleteBtn);
+        }
+        
+        actionsCell.appendChild(actionsDiv);
+        
+        // Append all cells to row
+        row.appendChild(nameCell);
+        row.appendChild(statusCell);
+        row.appendChild(createdCell);
+        row.appendChild(loginCell);
+        row.appendChild(cvsCell);
+        row.appendChild(marketingCell);
+        row.appendChild(actionsCell);
         
         tbody.appendChild(row);
     });
 }
 
 function renderPagination() {
-    const totalPages = Math.ceil(totalUsers / usersPerPage);
     const pagination = document.getElementById('pagination');
-    pagination.innerHTML = '';
+    // Clear existing pagination safely
+    while (pagination.firstChild) {
+        pagination.removeChild(pagination.firstChild);
+    }
+    
+    const totalPages = Math.ceil(totalUsers / usersPerPage);
     
     // Previous button
     const prevButton = document.createElement('button');
-    prevButton.className = `relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 ${currentPage === 1 ? 'cursor-not-allowed' : 'hover:text-gray-700'}`;
-    prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    prevButton.className = `px-3 py-2 rounded-md text-sm font-medium ${currentPage === 1 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`;
     prevButton.disabled = currentPage === 1;
-    prevButton.onclick = () => {
-        if (currentPage > 1) {
-            loadUsers(currentPage - 1, document.getElementById('userSearch').value);
-        }
-    };
+    prevButton.onclick = () => !prevButton.disabled && loadUsers(currentPage - 1, document.getElementById('userSearch').value);
+    
+    const prevIcon = document.createElement('i');
+    prevIcon.className = 'fas fa-chevron-left';
+    prevButton.appendChild(prevIcon);
     pagination.appendChild(prevButton);
     
     // Page numbers
@@ -307,30 +382,21 @@ function renderPagination() {
     
     for (let i = startPage; i <= endPage; i++) {
         const pageButton = document.createElement('button');
-        pageButton.className = `relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-            i === currentPage 
-                ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' 
-                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-        }`;
+        pageButton.className = `px-3 py-2 rounded-md text-sm font-medium ${i === currentPage ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`;
         pageButton.textContent = i;
-        pageButton.onclick = () => {
-            if (i !== currentPage) {
-                loadUsers(i, document.getElementById('userSearch').value);
-            }
-        };
+        pageButton.onclick = () => loadUsers(i, document.getElementById('userSearch').value);
         pagination.appendChild(pageButton);
     }
     
     // Next button
     const nextButton = document.createElement('button');
-    nextButton.className = `relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 ${currentPage === totalPages ? 'cursor-not-allowed' : 'hover:text-gray-700'}`;
-    nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    nextButton.className = `px-3 py-2 rounded-md text-sm font-medium ${currentPage === totalPages ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`;
     nextButton.disabled = currentPage === totalPages;
-    nextButton.onclick = () => {
-        if (currentPage < totalPages) {
-            loadUsers(currentPage + 1, document.getElementById('userSearch').value);
-        }
-    };
+    nextButton.onclick = () => !nextButton.disabled && loadUsers(currentPage + 1, document.getElementById('userSearch').value);
+    
+    const nextIcon = document.createElement('i');
+    nextIcon.className = 'fas fa-chevron-right';
+    nextButton.appendChild(nextIcon);
     pagination.appendChild(nextButton);
 }
 
