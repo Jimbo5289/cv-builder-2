@@ -329,98 +329,7 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Platform Features - COMMENTED OUT until we have verified data */}
-          {/*
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#E78F81] mb-2">4</div>
-              <div className="text-gray-600 dark:text-gray-400 font-medium">Template Types</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#3498db] mb-2">AI</div>
-              <div className="text-gray-600 dark:text-gray-400 font-medium">Powered Analysis</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#2ecc71] mb-2">ATS</div>
-              <div className="text-gray-600 dark:text-gray-400 font-medium">Optimized</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#9b59b6] mb-2">Free</div>
-              <div className="text-gray-600 dark:text-gray-400 font-medium">To Start</div>
-            </div>
-          </div>
-          */
-
-          {/* Testimonials - COMMENTED OUT until we have real customer feedback */}
-          {/* 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <div className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  M
-                </div>
-                <div className="ml-3">
-                  <div className="font-semibold text-[#2c3e50] dark:text-white">Mike Johnson</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Software Engineer</div>
-                </div>
-              </div>
-              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                "The AI analysis helped me identify gaps in my CV I never noticed. Got 3 interviews in 2 weeks!"
-              </p>
-              <div className="flex text-yellow-400 mt-3">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  S
-                </div>
-                <div className="ml-3">
-                  <div className="font-semibold text-[#2c3e50] dark:text-white">Sarah Chen</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Marketing Manager</div>
-                </div>
-              </div>
-              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                "The Creative template perfectly showcased my portfolio. Landed my dream job at a top agency!"
-              </p>
-              <div className="flex text-yellow-400 mt-3">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  D
-                </div>
-                <div className="ml-3">
-                  <div className="font-semibold text-[#2c3e50] dark:text-white">Dr. Alex Kumar</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Research Scientist</div>
-                </div>
-              </div>
-              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                "The Academic template highlighted my publications perfectly. Secured a position at Cambridge!"
-              </p>
-              <div className="flex text-yellow-400 mt-3">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-            </div>
-          </div>
-          */}
+          {/* Platform Features and Testimonials removed for integrity - can be restored once we have real data */}
 
           {/* Trust Indicators - Only keeping factual, verifiable claims */}
           <div className="text-center">
@@ -431,21 +340,7 @@ export default function Home() {
                 </svg>
                 Secure & Private
               </div>
-              {/* Commented out unverified claims until we can substantiate them */}
-              {/*
-              <div className="flex items-center text-gray-600 dark:text-gray-400">
-                <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                ATS Tested
-              </div>
-              <div className="flex items-center text-gray-600 dark:text-gray-400">
-                <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                HR Approved
-              </div>
-              */}
+              {/* ATS Tested and HR Approved claims removed until verified */}
               <div className="flex items-center text-gray-600 dark:text-gray-400">
                 <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
