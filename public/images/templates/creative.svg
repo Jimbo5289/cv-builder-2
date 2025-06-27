@@ -1,1 +1,125 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="600" height="400" fill="#ffe4e6"/><text x="300" y="200" font-family="Arial" font-size="32" text-anchor="middle" fill="#be123c">Creative Template</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+  <!-- Creative Template Background with gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fef3c7;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#fed7aa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fecaca;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="sidebarGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#be185d;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="600" height="800" fill="url(#bgGradient)"/>
+  
+  <!-- Creative Left Sidebar -->
+  <rect x="0" y="0" width="200" height="800" fill="url(#sidebarGradient)"/>
+  
+  <!-- Decorative circles -->
+  <circle cx="50" cy="100" r="20" fill="#fbbf24" opacity="0.7"/>
+  <circle cx="150" cy="200" r="15" fill="#f59e0b" opacity="0.8"/>
+  <circle cx="80" cy="300" r="25" fill="#fcd34d" opacity="0.6"/>
+  
+  <!-- Profile Photo Area -->
+  <rect x="25" y="40" width="150" height="150" fill="#ffffff" rx="75" opacity="0.9"/>
+  <text x="100" y="125" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#be185d">PHOTO</text>
+  
+  <!-- Name in sidebar -->
+  <text x="100" y="230" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff">SARAH</text>
+  <text x="100" y="250" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff">CREATIVE</text>
+  <text x="100" y="275" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#fce7f3">Graphic Designer</text>
+  
+  <!-- Contact Info in sidebar -->
+  <text x="30" y="320" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">CONTACT</text>
+  <line x1="30" y1="325" x2="170" y2="325" stroke="#ffffff" stroke-width="2"/>
+  
+  <text x="30" y="345" font-family="Arial, sans-serif" font-size="10" fill="#fce7f3">📧 sarah@creative.com</text>
+  <text x="30" y="365" font-family="Arial, sans-serif" font-size="10" fill="#fce7f3">📱 +44 123 456 7890</text>
+  <text x="30" y="385" font-family="Arial, sans-serif" font-size="10" fill="#fce7f3">📍 London, UK</text>
+  <text x="30" y="405" font-family="Arial, sans-serif" font-size="10" fill="#fce7f3">🔗 behance.net/sarah</text>
+  
+  <!-- Skills in sidebar -->
+  <text x="30" y="450" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">SKILLS</text>
+  <line x1="30" y1="455" x2="170" y2="455" stroke="#ffffff" stroke-width="2"/>
+  
+  <!-- Skill bars -->
+  <text x="30" y="475" font-family="Arial, sans-serif" font-size="10" fill="#fce7f3">Adobe Creative Suite</text>
+  <rect x="30" y="480" width="140" height="8" fill="#ffffff" opacity="0.3" rx="4"/>
+  <rect x="30" y="480" width="126" height="8" fill="#ffffff" rx="4"/>
+  
+  <text x="30" y="505" font-family="Arial, sans-serif" font-size="10" fill="#fce7f3">UI/UX Design</text>
+  <rect x="30" y="510" width="140" height="8" fill="#ffffff" opacity="0.3" rx="4"/>
+  <rect x="30" y="510" width="112" height="8" fill="#ffffff" rx="4"/>
+  
+  <text x="30" y="535" font-family="Arial, sans-serif" font-size="10" fill="#fce7f3">Branding</text>
+  <rect x="30" y="540" width="140" height="8" fill="#ffffff" opacity="0.3" rx="4"/>
+  <rect x="30" y="540" width="98" height="8" fill="#ffffff" rx="4"/>
+  
+  <!-- Main Content Area -->
+  <!-- About Section -->
+  <text x="230" y="60" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#be185d">ABOUT ME</text>
+  <rect x="230" y="70" width="80" height="4" fill="#ec4899" rx="2"/>
+  
+  <text x="230" y="100" font-family="Arial, sans-serif" font-size="11" fill="#7c2d12">Creative designer with a passion for turning ideas into visually</text>
+  <text x="230" y="115" font-family="Arial, sans-serif" font-size="11" fill="#7c2d12">stunning realities. I specialize in branding, web design, and</text>
+  <text x="230" y="130" font-family="Arial, sans-serif" font-size="11" fill="#7c2d12">creating memorable user experiences that drive engagement.</text>
+  
+  <!-- Experience Section -->
+  <text x="230" y="170" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#be185d">EXPERIENCE</text>
+  <rect x="230" y="180" width="60" height="3" fill="#ec4899" rx="1.5"/>
+  
+  <!-- Creative timeline -->
+  <line x1="240" y1="200" x2="240" y2="350" stroke="#ec4899" stroke-width="3"/>
+  
+  <!-- Job 1 -->
+  <circle cx="240" cy="210" r="6" fill="#ec4899"/>
+  <rect x="260" y="195" width="320" height="50" fill="#ffffff" stroke="#ec4899" stroke-width="1" rx="8" opacity="0.9"/>
+  <text x="270" y="210" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#be185d">Senior Graphic Designer</text>
+  <text x="270" y="225" font-family="Arial, sans-serif" font-size="11" fill="#7c2d12">Creative Agency Ltd | 2021 - Present</text>
+  <text x="270" y="240" font-family="Arial, sans-serif" font-size="10" fill="#7c2d12">Lead designer for major brand campaigns</text>
+  
+  <!-- Job 2 -->
+  <circle cx="240" cy="270" r="6" fill="#ec4899"/>
+  <rect x="260" y="255" width="320" height="50" fill="#ffffff" stroke="#ec4899" stroke-width="1" rx="8" opacity="0.9"/>
+  <text x="270" y="270" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#be185d">Junior Designer</text>
+  <text x="270" y="285" font-family="Arial, sans-serif" font-size="11" fill="#7c2d12">Design Studio Inc | 2019 - 2021</text>
+  <text x="270" y="300" font-family="Arial, sans-serif" font-size="10" fill="#7c2d12">Created digital and print materials</text>
+  
+  <!-- Job 3 -->
+  <circle cx="240" cy="330" r="6" fill="#ec4899"/>
+  <rect x="260" y="315" width="320" height="50" fill="#ffffff" stroke="#ec4899" stroke-width="1" rx="8" opacity="0.9"/>
+  <text x="270" y="330" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#be185d">Freelance Designer</text>
+  <text x="270" y="345" font-family="Arial, sans-serif" font-size="11" fill="#7c2d12">Various Clients | 2018 - 2019</text>
+  <text x="270" y="360" font-family="Arial, sans-serif" font-size="10" fill="#7c2d12">Logo design and brand identity projects</text>
+  
+  <!-- Education Section -->
+  <text x="230" y="410" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#be185d">EDUCATION</text>
+  <rect x="230" y="420" width="50" height="3" fill="#ec4899" rx="1.5"/>
+  
+  <rect x="230" y="440" width="350" height="40" fill="#ffffff" stroke="#ec4899" stroke-width="1" rx="8" opacity="0.9"/>
+  <text x="240" y="455" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#be185d">BA (Hons) Graphic Design</text>
+  <text x="240" y="470" font-family="Arial, sans-serif" font-size="11" fill="#7c2d12">University of Arts London | First Class Honours | 2018</text>
+  
+  <!-- Portfolio Section -->
+  <text x="230" y="510" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#be185d">PORTFOLIO</text>
+  <rect x="230" y="520" width="55" height="3" fill="#ec4899" rx="1.5"/>
+  
+  <!-- Portfolio items -->
+  <rect x="230" y="540" width="100" height="80" fill="#ffffff" stroke="#ec4899" stroke-width="2" rx="8"/>
+  <text x="280" y="585" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#be185d">Brand Identity</text>
+  
+  <rect x="340" y="540" width="100" height="80" fill="#ffffff" stroke="#ec4899" stroke-width="2" rx="8"/>
+  <text x="390" y="585" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#be185d">Web Design</text>
+  
+  <rect x="450" y="540" width="100" height="80" fill="#ffffff" stroke="#ec4899" stroke-width="2" rx="8"/>
+  <text x="500" y="585" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#be185d">Print Design</text>
+  
+  <!-- Creative elements -->
+  <polygon points="550,150 570,130 570,170" fill="#fbbf24" opacity="0.7"/>
+  <polygon points="520,250 540,230 540,270" fill="#f59e0b" opacity="0.8"/>
+  
+  <!-- Creative styling footer -->
+  <text x="400" y="760" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#be185d">Creative Template - Bold & Visual</text>
+</svg>
