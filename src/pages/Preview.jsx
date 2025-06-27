@@ -33,6 +33,8 @@ function Preview() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [error, setError] = useState('');
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [premiumAccess, setPremiumAccess] = useState(null);
+  const [isPremiumLoading, setIsPremiumLoading] = useState(true);
   const [completionStatus, setCompletionStatus] = useState({
     personalInfo: false,
     personalStatement: false,
@@ -42,9 +44,68 @@ function Preview() {
     references: false
   });
   const { serverUrl } = useServer();
-  const { user } = useAuth();
+  const { user, getAuthHeader } = useAuth();
   const { bundleActive, bundleUsed, markBundleAsUsed } = usePremiumBundle();
   const cvContentRef = useRef(null);
+
+  // Check premium access on component mount
+  useEffect(() => {
+    const checkPremiumAccess = async () => {
+      if (!user) {
+        setIsPremiumLoading(false);
+        return;
+      }
+
+      try {
+        const headers = getAuthHeader();
+        const response = await fetch(`${serverUrl}/api/subscriptions/premium-status`, {
+          method: 'GET',
+          headers: headers
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setPremiumAccess(data);
+          console.log('Premium access data:', data);
+        } else {
+          console.error('Failed to fetch premium status:', response.status);
+          setPremiumAccess(null);
+        }
+      } catch (error) {
+        console.error('Error checking premium access:', error);
+        setPremiumAccess(null);
+      } finally {
+        setIsPremiumLoading(false);
+      }
+    };
+
+    checkPremiumAccess();
+  }, [user, serverUrl, getAuthHeader]);
+
+  // Helper function to check if user has premium access
+  const hasPremiumAccess = () => {
+    // If premium access is still loading, allow access to prevent blocking
+    if (isPremiumLoading) {
+      return true;
+    }
+    
+    // Check premium access from the API response
+    if (premiumAccess?.hasPremiumAccess || premiumAccess?.hasAccess) {
+      return true;
+    }
+    
+    // Fallback to checking user.subscription for backward compatibility
+    if (user?.subscription?.status === 'active') {
+      return true;
+    }
+    
+    // Check for temporary access
+    if (user?.temporaryAccess && new Date(user.temporaryAccess.endTime) > new Date()) {
+      return true;
+    }
+    
+    return false;
+  };
 
   useEffect(() => {
     const fetchCV = async () => {
@@ -395,11 +456,11 @@ function Preview() {
         if (!window.confirm('This will use your one-time Premium CV Bundle. After downloading, you will need to purchase another bundle or subscribe to make further changes. Continue?')) {
           return;
         }
-      } else if (!bundleActive && !user?.subscription) {
+      } else if (!bundleActive && !hasPremiumAccess()) {
         // Show subscription modal for users without premium bundle or subscription
         setShowSubscriptionModal(true);
         return;
-      } else if (bundleUsed && !user?.subscription) {
+      } else if (bundleUsed && !hasPremiumAccess()) {
         // If bundle is already used and no subscription
         toast.error('Your Premium CV Bundle has already been used. Please purchase another bundle or subscribe for unlimited access.');
         setShowSubscriptionModal(true);
@@ -489,10 +550,10 @@ function Preview() {
       markBundleAsUsed().then(() => {
         window.print();
       });
-    } else if (!bundleActive && !user?.subscription) {
+    } else if (!bundleActive && !hasPremiumAccess()) {
       // Show subscription modal for users without premium bundle or subscription
       setShowSubscriptionModal(true);
-    } else if (bundleUsed && !user?.subscription) {
+    } else if (bundleUsed && !hasPremiumAccess()) {
       // If bundle is already used and no subscription
       toast.error('Your Premium CV Bundle has already been used. Please purchase another bundle or subscribe for unlimited access.');
       setShowSubscriptionModal(true);

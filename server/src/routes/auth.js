@@ -570,7 +570,44 @@ router.get('/me', auth, async (req, res) => {
         email: true,
         name: true,
         phone: true, // Include phone in selection
-        createdAt: true
+        createdAt: true,
+        subscriptions: {
+          where: {
+            status: { in: ['active', 'trialing'] },
+            currentPeriodEnd: {
+              gt: new Date() // Subscription period has not ended
+            }
+          },
+          select: {
+            id: true,
+            status: true,
+            currentPeriodStart: true,
+            currentPeriodEnd: true,
+            cancelAtPeriodEnd: true,
+            stripeSubscriptionId: true
+          },
+          orderBy: {
+            currentPeriodEnd: 'desc'
+          },
+          take: 1
+        },
+        temporaryAccess: {
+          where: {
+            endTime: {
+              gt: new Date() // Access has not expired
+            }
+          },
+          select: {
+            id: true,
+            type: true,
+            startTime: true,
+            endTime: true
+          },
+          orderBy: {
+            endTime: 'desc'
+          },
+          take: 1
+        }
       }
     });
 
@@ -579,7 +616,17 @@ router.get('/me', auth, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json(user);
+    // Format the response to include subscription info
+    const responseUser = {
+      ...user,
+      subscription: user.subscriptions && user.subscriptions.length > 0 ? user.subscriptions[0] : null,
+      temporaryAccess: user.temporaryAccess && user.temporaryAccess.length > 0 ? user.temporaryAccess[0] : null
+    };
+
+    // Remove the subscriptions array from the response since we've flattened it
+    delete responseUser.subscriptions;
+
+    res.json(responseUser);
   } catch (error) {
     logger.error('Get current user error:', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Server error' });
