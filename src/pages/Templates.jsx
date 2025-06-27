@@ -12,7 +12,7 @@ function Templates() {
     {
       id: 1,
       name: "Professional",
-      image: "/images/templates/professional.svg",
+      image: "https://images.unsplash.com/photo-1602642379049-4d72dd65b09e?w=600&h=800&fit=crop&crop=top",
       description: "Clean, corporate-friendly layout with structured sections and professional blue accents. Perfect for business, finance, consulting, and traditional corporate roles.",
       features: ["ATS-friendly format", "Clear section headers", "Skills showcase", "Professional color scheme"],
       bestFor: "Corporate roles, business positions, traditional industries",
@@ -21,7 +21,7 @@ function Templates() {
     {
       id: 2,
       name: "Creative",
-      image: "/images/templates/creative.svg",
+      image: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=600&h=800&fit=crop&crop=center",
       description: "Modern design with visual sidebar, colorful gradients, and portfolio showcase. Features creative timeline and visual skill bars for design-focused careers.",
       features: ["Visual sidebar layout", "Portfolio section", "Creative timeline", "Colorful design elements"],
       bestFor: "Graphic design, marketing, advertising, creative agencies",
@@ -30,7 +30,7 @@ function Templates() {
     {
       id: 3,
       name: "Executive",
-      image: "/images/templates/executive.svg",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop&crop=top",
       description: "Sophisticated two-column layout with elegant typography and premium styling. Emphasizes leadership experience, achievements, and executive presence.",
       features: ["Two-column premium layout", "Achievement highlights", "Executive summary", "Elegant typography"],
       bestFor: "C-level positions, senior management, leadership roles",
@@ -39,7 +39,7 @@ function Templates() {
     {
       id: 4,
       name: "Academic",
-      image: "/images/templates/academic.svg",
+      image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=800&fit=crop&crop=center",
       description: "Research-focused format with dedicated sections for publications, grants, and academic positions. Designed for scholarly and research careers.",
       features: ["Publications section", "Research interests", "Grant funding", "Academic formatting"],
       bestFor: "University positions, research roles, academic careers",
@@ -100,8 +100,9 @@ function Templates() {
             <div className="relative overflow-hidden" style={{ height: '400px' }}>
               <img
                 src={template.image}
-                alt={`${template.name} Template Preview`}
-                className="w-full h-full object-cover object-top transform transition-transform duration-500 group-hover:scale-105"
+                alt={`${template.name} CV Template Preview - Professional ${template.description} resume design`}
+                className="w-full h-full object-cover object-center transform transition-transform duration-500 group-hover:scale-105"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center">
                 <div className="p-6 w-full">

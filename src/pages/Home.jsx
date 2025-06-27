@@ -220,15 +220,15 @@ export default function Home() {
                 id: 1,
                 name: "Professional",
                 color: "#4A90E2",
-                image: "/images/templates/professional.svg",
+                image: "https://images.unsplash.com/photo-1602642379049-4d72dd65b09e?w=400&h=600&fit=crop&crop=top",
                 description: "Corporate & Business",
                 features: ["Clean layout", "ATS-friendly", "Traditional sectors"]
               },
               {
                 id: 2,
                 name: "Creative",
-                color: "#E24A8B",
-                image: "/images/templates/creative.svg",
+                color: "#E24A8B", 
+                image: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=600&fit=crop&crop=center",
                 description: "Design & Marketing",
                 features: ["Visual sidebar", "Portfolio section", "Creative industries"]
               },
@@ -236,7 +236,7 @@ export default function Home() {
                 id: 3,
                 name: "Executive",
                 color: "#4AE2C4",
-                image: "/images/templates/executive.svg",
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&crop=top",
                 description: "Leadership & Management",
                 features: ["Two-column layout", "Achievement focus", "Senior positions"]
               },
@@ -244,7 +244,7 @@ export default function Home() {
                 id: 4,
                 name: "Academic",
                 color: "#E2A64A",
-                image: "/images/templates/academic.svg",
+                image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=600&fit=crop&crop=center",
                 description: "Research & Academia",
                 features: ["Publications", "Research focus", "Academic roles"]
               }
@@ -253,8 +253,9 @@ export default function Home() {
                 <div className="relative aspect-[3/4] overflow-hidden">
                   <img
                     src={template.image}
-                    alt={`${template.name} Template`}
-                    className="w-full h-full object-cover object-top transform transition-transform duration-500 group-hover:scale-105"
+                    alt={`${template.name} CV Template - ${template.description} resume design`}
+                    className="w-full h-full object-cover object-center transform transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                     <div className="p-4 w-full">
