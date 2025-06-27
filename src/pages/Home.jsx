@@ -329,7 +329,8 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Platform Features - Replaced statistics with feature highlights */}
+          {/* Platform Features - COMMENTED OUT until we have verified data */}
+          {/*
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-[#E78F81] mb-2">4</div>
@@ -348,6 +349,7 @@ export default function Home() {
               <div className="text-gray-600 dark:text-gray-400 font-medium">To Start</div>
             </div>
           </div>
+          */
 
           {/* Testimonials - COMMENTED OUT until we have real customer feedback */}
           {/* 
@@ -420,7 +422,7 @@ export default function Home() {
           </div>
           */}
 
-          {/* Trust Indicators */}
+          {/* Trust Indicators - Only keeping factual, verifiable claims */}
           <div className="text-center">
             <div className="flex flex-wrap justify-center items-center gap-8 mb-8 opacity-60">
               <div className="flex items-center text-gray-600 dark:text-gray-400">
@@ -429,6 +431,8 @@ export default function Home() {
                 </svg>
                 Secure & Private
               </div>
+              {/* Commented out unverified claims until we can substantiate them */}
+              {/*
               <div className="flex items-center text-gray-600 dark:text-gray-400">
                 <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -441,6 +445,7 @@ export default function Home() {
                 </svg>
                 HR Approved
               </div>
+              */}
               <div className="flex items-center text-gray-600 dark:text-gray-400">
                 <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
