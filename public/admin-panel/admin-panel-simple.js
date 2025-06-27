@@ -4,6 +4,8 @@ const API_BASE_URL = 'https://cv-builder-backend-zjax.onrender.com';
 let authToken = null;
 let currentUser = null;
 let allUsers = [];
+let filteredUsers = [];
+let isSignupMode = false;
 
 // Utility Functions
 function showElement(id) {
@@ -182,14 +184,42 @@ document.addEventListener('DOMContentLoaded', async function() {
         showAdminDashboard();
     }
     
-    // Login form
+    // Login/Signup form
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('adminEmail').value;
         const password = document.getElementById('adminPassword').value;
         
         try {
-            await login(email, password);
+            if (isSignupMode) {
+                // Handle account creation
+                const name = document.getElementById('adminName').value;
+                const confirmPassword = document.getElementById('adminPasswordConfirm').value;
+                
+                // Validate inputs
+                if (!name.trim()) {
+                    throw new Error('Full name is required');
+                }
+                
+                if (password !== confirmPassword) {
+                    throw new Error('Passwords do not match');
+                }
+                
+                if (password.length < 8) {
+                    throw new Error('Password must be at least 8 characters long');
+                }
+                
+                // Create account
+                await createAccount(email, password, name.trim());
+                showLoginSuccess('Account created successfully! You can now sign in.');
+                
+                // Switch back to login mode
+                switchToLoginMode();
+                
+            } else {
+                // Handle login
+                await login(email, password);
+            }
         } catch (error) {
             showError(error.message);
         }
@@ -198,6 +228,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Set up event listeners
     document.getElementById('logoutBtn').addEventListener('click', logout);
     document.getElementById('userSearch').addEventListener('input', filterUsers);
+    
+    // Mode switching button event listeners
+    document.getElementById('loginModeBtn').addEventListener('click', switchToLoginMode);
+    document.getElementById('signupModeBtn').addEventListener('click', switchToSignupMode);
     
     // Navigation button event listeners
     const dashboardBtn = document.getElementById('dashboardNavBtn');
@@ -443,4 +477,93 @@ console.log('Tab switching functions defined:', {
     showAccountTab: typeof showAccountTab,
     showUsersTab: typeof showUsersTab,
     showDashboardTab: typeof showDashboardTab
-}); 
+});
+
+// Mode switching functions
+function switchToLoginMode() {
+    isSignupMode = false;
+    
+    // Update button styles
+    document.getElementById('loginModeBtn').className = 'flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors bg-white text-blue-600 shadow-sm';
+    document.getElementById('signupModeBtn').className = 'flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors text-gray-600 hover:text-gray-900';
+    
+    // Hide signup fields
+    document.getElementById('nameField').style.display = 'none';
+    document.getElementById('confirmPasswordField').style.display = 'none';
+    
+    // Update form
+    document.getElementById('loginBtnText').textContent = 'Sign In';
+    document.getElementById('adminName').required = false;
+    document.getElementById('adminPasswordConfirm').required = false;
+    
+    // Clear form
+    clearLoginForm();
+}
+
+function switchToSignupMode() {
+    isSignupMode = true;
+    
+    // Update button styles
+    document.getElementById('loginModeBtn').className = 'flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors text-gray-600 hover:text-gray-900';
+    document.getElementById('signupModeBtn').className = 'flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors bg-white text-blue-600 shadow-sm';
+    
+    // Show signup fields
+    document.getElementById('nameField').style.display = 'block';
+    document.getElementById('confirmPasswordField').style.display = 'block';
+    
+    // Update form
+    document.getElementById('loginBtnText').textContent = 'Create Account';
+    document.getElementById('adminName').required = true;
+    document.getElementById('adminPasswordConfirm').required = true;
+    
+    // Clear form
+    clearLoginForm();
+}
+
+function clearLoginForm() {
+    document.getElementById('adminEmail').value = '';
+    document.getElementById('adminPassword').value = '';
+    document.getElementById('adminName').value = '';
+    document.getElementById('adminPasswordConfirm').value = '';
+    hideElement('loginError');
+    hideElement('loginSuccess');
+}
+
+// Account creation function
+async function createAccount(email, password, name) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password,
+                name: name,
+                marketingConsent: false
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to create account');
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Account creation error:', error);
+        throw error;
+    }
+}
+
+// Show login success message
+function showLoginSuccess(message) {
+    const successElement = document.getElementById('loginSuccess');
+    successElement.textContent = message;
+    successElement.style.display = 'block';
+    setTimeout(() => {
+        successElement.style.display = 'none';
+    }, 5000);
+} 
