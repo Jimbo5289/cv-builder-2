@@ -160,79 +160,12 @@ async function deleteUser(userId, userEmail) {
 function showAdminDashboard() {
     hideElement('loginScreen');
     showElement('adminDashboard');
+    setupAdminEventListeners();
     loadUsers();
 }
 
-// Load user profile function
-async function loadUserProfile() {
-    try {
-        const response = await apiCall('/api/auth/profile');
-        currentUser = response.user;
-        updateHeaderUserInfo();
-    } catch (error) {
-        console.error('Failed to load user profile:', error);
-        // Continue initialization even if profile load fails
-    }
-}
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', async function() {
-    // Check for stored token
-    const storedToken = localStorage.getItem('adminToken');
-    if (storedToken) {
-        authToken = storedToken;
-        showAdminDashboard();
-    }
-    
-    // Login/Signup form
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('adminEmail').value;
-        const password = document.getElementById('adminPassword').value;
-        
-        try {
-            if (isSignupMode) {
-                // Handle account creation
-                const name = document.getElementById('adminName').value;
-                const confirmPassword = document.getElementById('adminPasswordConfirm').value;
-                
-                // Validate inputs
-                if (!name.trim()) {
-                    throw new Error('Full name is required');
-                }
-                
-                if (password !== confirmPassword) {
-                    throw new Error('Passwords do not match');
-                }
-                
-                if (password.length < 8) {
-                    throw new Error('Password must be at least 8 characters long');
-                }
-                
-                // Create account
-                await createAccount(email, password, name.trim());
-                showLoginSuccess('Account created successfully! You can now sign in.');
-                
-                // Switch back to login mode
-                switchToLoginMode();
-                
-            } else {
-                // Handle login
-                await login(email, password);
-            }
-        } catch (error) {
-            showError(error.message);
-        }
-    });
-    
-    // Set up event listeners
-    document.getElementById('logoutBtn').addEventListener('click', logout);
-    document.getElementById('userSearch').addEventListener('input', filterUsers);
-    
-    // Mode switching button event listeners
-    document.getElementById('loginModeBtn').addEventListener('click', switchToLoginMode);
-    document.getElementById('signupModeBtn').addEventListener('click', switchToSignupMode);
-    
+// Setup admin dashboard event listeners
+async function setupAdminEventListeners() {
     // Navigation button event listeners
     const dashboardBtn = document.getElementById('dashboardNavBtn');
     const usersBtn = document.getElementById('usersNavBtn');
@@ -260,15 +193,54 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     
     // Account form handler
-    document.getElementById('accountForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await updateAccountDetails();
-    });
+    const accountForm = document.getElementById('accountForm');
+    if (accountForm) {
+        accountForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await updateAccountDetails();
+        });
+    }
+    
+    // Logout button
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+    }
+    
+    // User search
+    const userSearch = document.getElementById('userSearch');
+    if (userSearch) {
+        userSearch.addEventListener('input', filterUsers);
+    }
     
     // Load initial data
     await loadUserProfile();
-    loadUsers();
-    console.log('Admin panel initialized successfully');
+}
+
+// Load user profile function
+async function loadUserProfile() {
+    try {
+        const response = await apiCall('/api/auth/profile');
+        currentUser = response.user;
+        updateHeaderUserInfo();
+    } catch (error) {
+        console.error('Failed to load user profile:', error);
+        // Continue initialization even if profile load fails
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', async function() {
+    // Check for stored token
+    const storedToken = localStorage.getItem('adminToken');
+    if (storedToken) {
+        authToken = storedToken;
+        showAdminDashboard();
+    } else {
+        // Show login screen and set up login-specific event listeners
+        showElement('loginScreen');
+        setupLoginEventListeners();
+    }
 });
 
 // Logout function
@@ -481,6 +453,7 @@ console.log('Tab switching functions defined:', {
 
 // Mode switching functions
 function switchToLoginMode() {
+    console.log('switchToLoginMode called');
     isSignupMode = false;
     
     // Update button styles
@@ -501,6 +474,7 @@ function switchToLoginMode() {
 }
 
 function switchToSignupMode() {
+    console.log('switchToSignupMode called');
     isSignupMode = true;
     
     // Update button styles
@@ -566,4 +540,66 @@ function showLoginSuccess(message) {
     setTimeout(() => {
         successElement.style.display = 'none';
     }, 5000);
+}
+
+// Login/Signup form event listeners
+function setupLoginEventListeners() {
+    // Login/Signup form handler
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('adminEmail').value;
+        const password = document.getElementById('adminPassword').value;
+        
+        try {
+            if (isSignupMode) {
+                // Handle account creation
+                const name = document.getElementById('adminName').value;
+                const confirmPassword = document.getElementById('adminPasswordConfirm').value;
+                
+                // Validate inputs
+                if (!name.trim()) {
+                    throw new Error('Full name is required');
+                }
+                
+                if (password !== confirmPassword) {
+                    throw new Error('Passwords do not match');
+                }
+                
+                if (password.length < 8) {
+                    throw new Error('Password must be at least 8 characters long');
+                }
+                
+                // Create account
+                await createAccount(email, password, name.trim());
+                showLoginSuccess('Account created successfully! You can now sign in.');
+                
+                // Switch back to login mode
+                switchToLoginMode();
+                
+            } else {
+                // Handle login
+                await login(email, password);
+            }
+        } catch (error) {
+            showError(error.message);
+        }
+    });
+    
+    // Mode switching button event listeners
+    const loginModeBtn = document.getElementById('loginModeBtn');
+    const signupModeBtn = document.getElementById('signupModeBtn');
+    
+    if (loginModeBtn) {
+        loginModeBtn.addEventListener('click', switchToLoginMode);
+        console.log('Login mode button listener added');
+    } else {
+        console.error('Login mode button not found');
+    }
+    
+    if (signupModeBtn) {
+        signupModeBtn.addEventListener('click', switchToSignupMode);
+        console.log('Signup mode button listener added');
+    } else {
+        console.error('Signup mode button not found');
+    }
 } 
