@@ -1197,5 +1197,145 @@ router.post('/validate-token', (req, res) => {
   }
 });
 
+// Get user profile (for admin panel)
+router.get('/profile', auth, async (req, res) => {
+  addCorsHeaders(req, res);
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      user: user
+    });
+  } catch (error) {
+    logger.error('Get profile error:', { error: error.message, userId: req.user?.id });
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
+});
+
+// Update user profile (for admin panel)
+router.put('/profile', auth, async (req, res) => {
+  addCorsHeaders(req, res);
+  try {
+    const { email, name, currentPassword, newPassword } = req.body;
+
+    // Validate required fields
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Validate email format
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    // If changing password, validate current password
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ error: 'Current password is required to set new password' });
+      }
+
+      // Verify current password
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: { password: true }
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+      if (!isValidPassword) {
+        return res.status(400).json({ error: 'Current password is incorrect' });
+      }
+
+      // Validate new password strength
+      if (!newPassword.match(PASSWORD_REGEX)) {
+        return res.status(400).json({
+          error: 'New password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+        });
+      }
+    }
+
+    // Check if email is already taken by another user
+    if (email !== req.user.email) {
+      const existingUser = await prisma.user.findUnique({
+        where: { email }
+      });
+
+      if (existingUser && existingUser.id !== req.user.id) {
+        return res.status(400).json({ error: 'Email is already taken' });
+      }
+    }
+
+    // Prepare update data
+    const updateData = {
+      email,
+      name: name || null,
+      updatedAt: new Date()
+    };
+
+    // Hash new password if provided
+    if (newPassword) {
+      const salt = await bcrypt.genSalt(12);
+      updateData.password = await bcrypt.hash(newPassword, salt);
+    }
+
+    // Update user in database
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.id },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    logger.info('User profile updated via admin panel', {
+      userId: req.user.id,
+      updatedFields: Object.keys(updateData),
+      passwordChanged: !!newPassword
+    });
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    logger.error('Update profile error (admin panel):', { 
+      error: error.message, 
+      stack: error.stack,
+      userId: req.user?.id
+    });
+    
+    res.status(500).json({ 
+      error: 'Failed to update profile',
+      message: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
+    });
+  }
+});
+
 // Request password reset
 module.exports = router;

@@ -161,8 +161,20 @@ function showAdminDashboard() {
     loadUsers();
 }
 
-// Event listeners
-document.addEventListener('DOMContentLoaded', () => {
+// Load user profile function
+async function loadUserProfile() {
+    try {
+        const response = await apiCall('/api/auth/profile');
+        currentUser = response.user;
+        updateHeaderUserInfo();
+    } catch (error) {
+        console.error('Failed to load user profile:', error);
+        // Continue initialization even if profile load fails
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', async function() {
     // Check for stored token
     const storedToken = localStorage.getItem('adminToken');
     if (storedToken) {
@@ -184,13 +196,193 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Logout button
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        authToken = null;
-        localStorage.removeItem('adminToken');
-        hideElement('adminDashboard');
-        showElement('loginScreen');
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    document.getElementById('userSearch').addEventListener('input', filterUsers);
+    
+    // Account form handler
+    document.getElementById('accountForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await updateAccountDetails();
     });
+    
+    // Load initial data
+    await loadUserProfile();
+    loadUsers();
+    console.log('Admin panel initialized successfully');
 });
 
 // Make deleteUser globally available
-window.deleteUser = deleteUser; 
+window.deleteUser = deleteUser;
+
+// Logout function
+function logout() {
+    authToken = null;
+    localStorage.removeItem('adminToken');
+    hideElement('adminDashboard');
+    showElement('loginScreen');
+}
+
+// Filter users function
+function filterUsers() {
+    const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+    const rows = document.querySelectorAll('#usersTableBody tr');
+    
+    rows.forEach(row => {
+        const email = row.querySelector('td:first-child')?.textContent.toLowerCase() || '';
+        const name = row.querySelector('td:first-child')?.textContent.toLowerCase() || '';
+        
+        if (email.includes(searchTerm) || name.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// Account Management Functions
+async function loadAccountDetails() {
+    try {
+        const response = await apiCall('/api/auth/profile');
+        currentUser = response.user;
+        
+        // Update account form with current details
+        document.getElementById('accountEmail').value = currentUser.email || '';
+        document.getElementById('accountName').value = currentUser.name || '';
+        
+    } catch (error) {
+        console.error('Failed to load account details:', error);
+        showError('Failed to load account details');
+    }
+}
+
+async function updateAccountDetails() {
+    try {
+        const email = document.getElementById('accountEmail').value;
+        const name = document.getElementById('accountName').value;
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        // Validate inputs
+        if (!email) {
+            throw new Error('Email is required');
+        }
+        
+        if (newPassword && newPassword !== confirmPassword) {
+            throw new Error('New passwords do not match');
+        }
+        
+        if (newPassword && !currentPassword) {
+            throw new Error('Current password is required to set new password');
+        }
+        
+        const updateData = {
+            email: email,
+            name: name
+        };
+        
+        if (newPassword) {
+            updateData.currentPassword = currentPassword;
+            updateData.newPassword = newPassword;
+        }
+        
+        const response = await apiCall('/api/auth/profile', {
+            method: 'PUT',
+            body: JSON.stringify(updateData)
+        });
+        
+        // Update current user
+        currentUser = response.user;
+        
+        // Clear password fields
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+        
+        // Show success message
+        showAccountSuccess('Account updated successfully!');
+        
+        // Update display name in header
+        updateHeaderUserInfo();
+        
+    } catch (error) {
+        console.error('Failed to update account:', error);
+        showAccountError(error.message);
+    }
+}
+
+function showAccountError(message) {
+    const errorElement = document.getElementById('accountError');
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+    setTimeout(() => {
+        errorElement.style.display = 'none';
+    }, 5000);
+}
+
+function showAccountSuccess(message) {
+    const successElement = document.getElementById('accountSuccess');
+    successElement.textContent = message;
+    successElement.style.display = 'block';
+    setTimeout(() => {
+        successElement.style.display = 'none';
+    }, 3000);
+}
+
+function updateHeaderUserInfo() {
+    const userInfoElement = document.getElementById('userInfo');
+    if (userInfoElement && currentUser) {
+        const displayName = currentUser.name || currentUser.email;
+        userInfoElement.textContent = `Logged in as ${displayName}`;
+    }
+}
+
+function showAccountTab() {
+    // Hide other tabs
+    hideElement('usersTab');
+    hideElement('dashboardTab');
+    
+    // Show account tab
+    showElement('accountTab');
+    
+    // Update navigation
+    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+    document.getElementById('accountNavTab').classList.add('active');
+    
+    // Load account details
+    loadAccountDetails();
+}
+
+function showUsersTab() {
+    // Hide other tabs
+    hideElement('accountTab');
+    hideElement('dashboardTab');
+    
+    // Show users tab
+    showElement('usersTab');
+    
+    // Update navigation
+    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+    document.getElementById('usersNavTab').classList.add('active');
+    
+    // Load users
+    loadUsers();
+}
+
+function showDashboardTab() {
+    // Hide other tabs
+    hideElement('accountTab');
+    hideElement('usersTab');
+    
+    // Show dashboard tab
+    showElement('dashboardTab');
+    
+    // Update navigation
+    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+    document.getElementById('dashboardNavTab').classList.add('active');
+    
+    // Load dashboard stats if function exists
+    if (typeof loadDashboardStats === 'function') {
+        loadDashboardStats();
+    }
+} 
