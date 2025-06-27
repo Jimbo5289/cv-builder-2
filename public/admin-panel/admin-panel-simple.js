@@ -214,6 +214,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 // Make deleteUser globally available
 window.deleteUser = deleteUser;
 
+// Make tab switching functions globally available
+window.showAccountTab = showAccountTab;
+window.showUsersTab = showUsersTab;
+window.showDashboardTab = showDashboardTab;
+
 // Logout function
 function logout() {
     authToken = null;
@@ -345,9 +350,9 @@ function showAccountTab() {
     // Show account tab
     showElement('accountTab');
     
-    // Update navigation
-    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-    document.getElementById('accountNavTab').classList.add('active');
+    // Update navigation buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('accountNavBtn').classList.add('active');
     
     // Load account details
     loadAccountDetails();
@@ -361,9 +366,9 @@ function showUsersTab() {
     // Show users tab
     showElement('usersTab');
     
-    // Update navigation
-    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-    document.getElementById('usersNavTab').classList.add('active');
+    // Update navigation buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('usersNavBtn').classList.add('active');
     
     // Load users
     loadUsers();
@@ -377,12 +382,31 @@ function showDashboardTab() {
     // Show dashboard tab
     showElement('dashboardTab');
     
-    // Update navigation
-    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-    document.getElementById('dashboardNavTab').classList.add('active');
+    // Update navigation buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('dashboardNavBtn').classList.add('active');
     
-    // Load dashboard stats if function exists
-    if (typeof loadDashboardStats === 'function') {
-        loadDashboardStats();
+    // Load dashboard stats
+    loadDashboardStats();
+}
+
+// Load dashboard statistics
+async function loadDashboardStats() {
+    try {
+        const response = await apiCall('/api/admin/users');
+        const users = response.users || [];
+        
+        // Update total users count
+        const totalUsersElement = document.getElementById('totalUsers');
+        if (totalUsersElement) {
+            totalUsersElement.textContent = users.length;
+        }
+        
+    } catch (error) {
+        console.error('Failed to load dashboard stats:', error);
+        const totalUsersElement = document.getElementById('totalUsers');
+        if (totalUsersElement) {
+            totalUsersElement.textContent = 'Error';
+        }
     }
 } 

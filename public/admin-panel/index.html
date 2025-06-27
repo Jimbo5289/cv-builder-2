@@ -7,14 +7,22 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .admin-card { transition: shadow 0.3s ease; }
-        .admin-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .nav-tab { transition: all 0.2s ease-in-out; }
-        .nav-tab.active { color: #2563eb !important; border-color: #2563eb !important; }
-        .nav-tab:hover { color: #374151 !important; border-color: #d1d5db !important; }
-        #accountError { display: none; }
-        #accountSuccess { display: none; }
+                 body { font-family: 'Inter', sans-serif; }
+         .admin-card { transition: shadow 0.3s ease; }
+         .admin-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+         .nav-btn { 
+             transition: all 0.2s ease-in-out; 
+             border: 1px solid transparent;
+             cursor: pointer;
+         }
+         .nav-btn.active { 
+             background-color: #2563eb !important; 
+             color: white !important; 
+             border-color: #2563eb !important;
+         }
+         .nav-btn:focus { outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+         #accountError { display: none; }
+         #accountSuccess { display: none; }
         .status-active {
             background-color: #10B981;
         }
@@ -109,19 +117,19 @@
                     </div>
                 </div>
                 
-                <!-- Navigation Tabs -->
-                <div class="border-b border-gray-200">
-                    <nav class="-mb-px flex space-x-8">
-                        <button id="dashboardNavTab" onclick="showDashboardTab()" class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
-                            Dashboard
+                <!-- Navigation Buttons -->
+                <div class="border-b border-gray-200 px-4 py-3">
+                    <div class="flex space-x-4">
+                        <button id="dashboardNavBtn" onclick="showDashboardTab()" class="nav-btn bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 px-4 py-2 rounded-md font-medium text-sm transition-colors duration-200">
+                            📊 Dashboard
                         </button>
-                        <button id="usersNavTab" onclick="showUsersTab()" class="nav-tab active border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
-                            User Management
+                        <button id="usersNavBtn" onclick="showUsersTab()" class="nav-btn bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md font-medium text-sm transition-colors duration-200">
+                            👥 User Management
                         </button>
-                        <button id="accountNavTab" onclick="showAccountTab()" class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
-                            My Account
+                        <button id="accountNavBtn" onclick="showAccountTab()" class="nav-btn bg-gray-100 text-gray-700 hover:bg-green-100 hover:text-green-700 px-4 py-2 rounded-md font-medium text-sm transition-colors duration-200">
+                            ⚙️ My Account
                         </button>
-                    </nav>
+                    </div>
                 </div>
             </div>
         </div>
