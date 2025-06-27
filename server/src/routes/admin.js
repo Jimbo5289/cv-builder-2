@@ -50,14 +50,12 @@ const adminAuth = async (req, res, next) => {
       select: { 
         id: true, 
         email: true, 
-        isAdmin: true,
         isActive: true 
       }
     });
     
-    // Enhanced admin privilege checking
+    // Enhanced admin privilege checking - based on email only for now
     const isAuthorizedAdmin = user && (
-      user.isAdmin || 
       user.email === 'jamesingleton1971@gmail.com' // Your permanent admin access
     );
     
