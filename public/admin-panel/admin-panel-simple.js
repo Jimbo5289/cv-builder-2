@@ -195,9 +195,35 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
     
-    // Logout button
+    // Set up event listeners
     document.getElementById('logoutBtn').addEventListener('click', logout);
     document.getElementById('userSearch').addEventListener('input', filterUsers);
+    
+    // Navigation button event listeners
+    const dashboardBtn = document.getElementById('dashboardNavBtn');
+    const usersBtn = document.getElementById('usersNavBtn');
+    const accountBtn = document.getElementById('accountNavBtn');
+    
+    if (dashboardBtn) {
+        dashboardBtn.addEventListener('click', showDashboardTab);
+        console.log('Dashboard button listener added');
+    } else {
+        console.error('Dashboard button not found');
+    }
+    
+    if (usersBtn) {
+        usersBtn.addEventListener('click', showUsersTab);
+        console.log('Users button listener added');
+    } else {
+        console.error('Users button not found');
+    }
+    
+    if (accountBtn) {
+        accountBtn.addEventListener('click', showAccountTab);
+        console.log('Account button listener added');
+    } else {
+        console.error('Account button not found');
+    }
     
     // Account form handler
     document.getElementById('accountForm').addEventListener('submit', async (e) => {
@@ -210,14 +236,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     loadUsers();
     console.log('Admin panel initialized successfully');
 });
-
-// Make deleteUser globally available
-window.deleteUser = deleteUser;
-
-// Make tab switching functions globally available
-window.showAccountTab = showAccountTab;
-window.showUsersTab = showUsersTab;
-window.showDashboardTab = showDashboardTab;
 
 // Logout function
 function logout() {
@@ -343,6 +361,7 @@ function updateHeaderUserInfo() {
 }
 
 function showAccountTab() {
+    console.log('showAccountTab called');
     // Hide other tabs
     hideElement('usersTab');
     hideElement('dashboardTab');
@@ -359,6 +378,7 @@ function showAccountTab() {
 }
 
 function showUsersTab() {
+    console.log('showUsersTab called');
     // Hide other tabs
     hideElement('accountTab');
     hideElement('dashboardTab');
@@ -375,6 +395,7 @@ function showUsersTab() {
 }
 
 function showDashboardTab() {
+    console.log('showDashboardTab called');
     // Hide other tabs
     hideElement('accountTab');
     hideElement('usersTab');
@@ -409,4 +430,17 @@ async function loadDashboardStats() {
             totalUsersElement.textContent = 'Error';
         }
     }
-} 
+}
+
+// Make functions globally available (moved to after definitions)
+window.deleteUser = deleteUser;
+window.showAccountTab = showAccountTab;
+window.showUsersTab = showUsersTab;
+window.showDashboardTab = showDashboardTab;
+
+// Add debug logging for button clicks
+console.log('Tab switching functions defined:', {
+    showAccountTab: typeof showAccountTab,
+    showUsersTab: typeof showUsersTab,
+    showDashboardTab: typeof showDashboardTab
+}); 
