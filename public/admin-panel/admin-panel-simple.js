@@ -62,30 +62,52 @@ async function login(email, password) {
 // Load users with forced role badges
 async function loadUsers() {
     try {
+        console.log('Loading users from API...'); // Debug log
         const response = await apiCall('/api/admin/users?_t=' + Date.now());
+        console.log('API response:', response); // Debug log
+        
         allUsers = response.users || [];
+        console.log('Parsed users array:', allUsers); // Debug log
+        console.log('Number of users:', allUsers.length); // Debug log
+        
+        if (allUsers.length > 0) {
+            console.log('First user example:', allUsers[0]); // Debug log
+            console.log('Looking for jamesingleton1971@gmail.com in users...'); // Debug log
+            const jamesUser = allUsers.find(u => u.email === 'jamesingleton1971@gmail.com');
+            console.log('Found James user:', jamesUser); // Debug log
+        }
+        
         renderUsersTable();
     } catch (error) {
         console.error('Failed to load users:', error);
     }
 }
 
-// Render users table with forced superuser badge
+// Render users table with forced role badges
 function renderUsersTable() {
     const tbody = document.getElementById('usersTableBody');
     tbody.innerHTML = '';
     
+    console.log('Rendering users table. Users:', allUsers); // Debug log
+    
     allUsers.forEach(user => {
         const row = document.createElement('tr');
         
-        // Create role badge - FORCE correct badges
+        console.log('Processing user:', user.email, 'Role in data:', user.role); // Debug log
+        
+        // Create role badge - FORCE correct badges based on email
         let roleBadge = '';
+        console.log('Checking email:', user.email, 'Against jamesingleton1971@gmail.com'); // Debug log
+        
         if (user.email === 'jamesingleton1971@gmail.com') {
             roleBadge = '<span class="px-2 py-1 text-xs font-semibold rounded-full ml-2 bg-purple-100 text-purple-800">👑 Superuser</span>';
-        } else if (user.email.includes('admin') || user.email.includes('test')) {
+            console.log('Assigned SUPERUSER badge to:', user.email); // Debug log
+        } else if (user.email && (user.email.includes('admin') || user.email.includes('test'))) {
             roleBadge = '<span class="px-2 py-1 text-xs font-semibold rounded-full ml-2 bg-blue-100 text-blue-800">🛡️ Admin</span>';
+            console.log('Assigned ADMIN badge to:', user.email); // Debug log
         } else {
             roleBadge = '<span class="px-2 py-1 text-xs font-semibold rounded-full ml-2 bg-gray-100 text-gray-800">👤 User</span>';
+            console.log('Assigned USER badge to:', user.email); // Debug log
         }
         
         const statusBadge = user.isActive ? 
@@ -113,6 +135,8 @@ function renderUsersTable() {
         
         tbody.appendChild(row);
     });
+    
+    console.log('Finished rendering users table'); // Debug log
 }
 
 // Delete user function
