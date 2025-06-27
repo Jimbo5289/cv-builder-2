@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react';
 
 // Google Analytics 4 Configuration
-const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || 'GA_MEASUREMENT_ID_PLACEHOLDER';
+const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-G64RBEW6YP';
 
 // Initialize gtag if not already available
 if (typeof window !== 'undefined' && !window.gtag) {
@@ -20,7 +20,7 @@ const trackEvent = (eventName, properties = {}) => {
   console.log('Analytics Event:', eventName, properties);
   
   // Send to Google Analytics if available
-  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID !== 'GA_MEASUREMENT_ID_PLACEHOLDER') {
+  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID) {
     window.gtag('event', eventName, {
       custom_parameter_1: properties.category || 'general',
       custom_parameter_2: properties.label || '',
@@ -47,7 +47,7 @@ const trackPageView = (path, title = document.title) => {
   console.log('Page View:', path, title);
   
   // Send to Google Analytics if available
-  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID !== 'GA_MEASUREMENT_ID_PLACEHOLDER') {
+  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID) {
     window.gtag('config', GA_MEASUREMENT_ID, {
       page_path: path,
       page_title: title,
@@ -83,7 +83,7 @@ const trackUserAction = (action, properties = {}) => {
   console.log('User Action:', action, properties);
   
   // Send to Google Analytics
-  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID !== 'GA_MEASUREMENT_ID_PLACEHOLDER') {
+  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID) {
     window.gtag('event', action, {
       event_category: 'user_interaction',
       event_label: properties.label || '',
@@ -108,7 +108,7 @@ const trackUserAction = (action, properties = {}) => {
  */
 const trackError = (error, properties = {}) => {
   // Send to Google Analytics
-  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID !== 'GA_MEASUREMENT_ID_PLACEHOLDER') {
+  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID) {
     window.gtag('event', 'exception', {
       description: error.message,
       fatal: properties.fatal || false,
@@ -131,7 +131,7 @@ const trackPerformance = (metric) => {
   console.log('Performance Metric:', metric);
   
   // Send to Google Analytics
-  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID !== 'GA_MEASUREMENT_ID_PLACEHOLDER') {
+  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID) {
     window.gtag('event', 'timing_complete', {
       name: metric.type,
       value: Math.round(metric.duration),
@@ -171,7 +171,7 @@ export const trackFormInteraction = (formName, action, properties = {}) => {
  * @param {Object} properties - Conversion properties
  */
 export const trackConversion = (conversionType, properties = {}) => {
-  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID !== 'GA_MEASUREMENT_ID_PLACEHOLDER') {
+  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID) {
     window.gtag('event', 'conversion', {
       send_to: GA_MEASUREMENT_ID,
       event_category: 'conversions',

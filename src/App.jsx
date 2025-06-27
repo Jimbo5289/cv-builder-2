@@ -43,6 +43,7 @@ import ServerStatusIndicator from './components/ServerStatusIndicator';
 import ScrollToTop from './components/ScrollToTop';
 import { setupErrorHandler } from './utils/errorHandler';
 import storageUtils from './utils/storageCleanup';
+import { AnalyticsProvider } from './context/AnalyticsContext';
 
 // Set up global error handling
 setupErrorHandler();
@@ -163,6 +164,7 @@ function App() {
           <WebSocketProvider path="/ws" autoConnect={false} reconnectOnFailure={false} useMockInDev={true}>
             <AuthProvider>
               <PremiumBundleProvider>
+                <AnalyticsProvider>
                 {/* Main application layout */}
                 <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col ${showCookieConsent ? 'pb-24 md:pb-16' : ''}`}>
                   {/* Toast notification container */}
@@ -192,6 +194,7 @@ function App() {
                   {/* Server status indicator (conditionally shown) */}
                   {showServerStatus && <ServerStatusIndicator />}
                 </div>
+                </AnalyticsProvider>
               </PremiumBundleProvider>
             </AuthProvider>
           </WebSocketProvider>
