@@ -167,7 +167,13 @@ function AuthProvider({ children }) {
           
           // Check if it's an invalid signature error (JWT secret changed)
           const errorMessage = error.response?.data?.error || error.response?.data?.message || '';
-          if (errorMessage.includes('invalid signature') || errorMessage.includes('jwt malformed')) {
+          const errorCode = error.response?.data?.code || '';
+          
+          if (errorMessage.includes('invalid signature') || 
+              errorMessage.includes('jwt malformed') || 
+              errorCode === 'INVALID_SIGNATURE' || 
+              errorCode === 'MALFORMED_TOKEN' ||
+              errorCode === 'INVALID_TOKEN') {
             console.warn('JWT signature invalid - clearing tokens and redirecting to login');
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
@@ -176,9 +182,9 @@ function AuthProvider({ children }) {
               user: null,
               loading: false,
               isAuthenticated: false,
-              error: 'Your session has expired. Please log in again.'
+              error: error.response?.data?.message || 'Your session has expired. Please log in again.'
             });
-            toast.error('Session expired. Please log in again.');
+            toast.error(error.response?.data?.message || 'Session expired. Please log in again.');
             return Promise.reject(error);
           }
           
@@ -843,7 +849,8 @@ function AuthProvider({ children }) {
           name,
           email,
           password,
-          phone
+          phone,
+          marketingConsent: false // Default for old format
         };
       } else {
         // Handle standard object format
@@ -853,7 +860,8 @@ function AuthProvider({ children }) {
             : userData.name,
           email: userData.email,
           password: userData.password,
-          phone: userData.phone
+          phone: userData.phone,
+          marketingConsent: userData.marketingConsent || false // Include marketing consent
         };
       }
       

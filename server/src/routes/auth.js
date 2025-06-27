@@ -175,7 +175,7 @@ router.post('/register', async (req, res) => {
     const validatedData = registerSchema.parse(req.body);
     const { email, password, name, phone, marketingConsent = false } = validatedData;
 
-    logger.info('Registration attempt:', { email, name });
+    logger.info('Registration attempt:', { email, name, marketingConsent });
 
     try {
       const existingUser = await prisma.user.findUnique({

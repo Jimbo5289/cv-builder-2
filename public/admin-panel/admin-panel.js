@@ -71,17 +71,36 @@ async function apiCall(endpoint, options = {}) {
         ...options
     };
 
+    console.log('Making API call:', {
+        url: url,
+        method: config.method || 'GET',
+        hasAuth: !!authToken,
+        authTokenLength: authToken ? authToken.length : 0
+    });
+
     try {
         const response = await fetch(url, config);
         
+        console.log('API response status:', response.status);
+        console.log('API response headers:', Object.fromEntries(response.headers.entries()));
+        
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+            console.error('API error response:', errorData);
             throw new Error(errorData.error || errorData.message || `HTTP ${response.status}`);
         }
 
-        return await response.json();
+        const responseData = await response.json();
+        console.log('API success response:', responseData);
+        return responseData;
     } catch (error) {
         console.error('API call failed:', error);
+        console.error('API call details:', {
+            url: url,
+            method: config.method || 'GET',
+            error: error.message,
+            stack: error.stack
+        });
         throw error;
     }
 }
@@ -252,8 +271,10 @@ function renderUsersTable() {
         const textDiv = document.createElement('div');
         textDiv.className = 'ml-4';
         const nameDiv = document.createElement('div');
-        nameDiv.className = 'text-sm font-medium text-gray-900';
+        nameDiv.className = 'text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600';
         nameDiv.textContent = displayName;
+        nameDiv.onclick = () => viewUser(user.id);
+        nameDiv.title = 'Click to view user details';
         const emailDiv = document.createElement('div');
         emailDiv.className = 'text-sm text-gray-500';
         emailDiv.textContent = user.email;
@@ -412,13 +433,27 @@ function updatePaginationInfo() {
 // User Management Functions
 async function viewUser(userId) {
     try {
+        console.log('ViewUser called with userId:', userId);
+        console.log('Current authToken:', authToken ? 'Present' : 'Missing');
+        console.log('API_BASE_URL:', API_BASE_URL);
+        
         showElement('loadingOverlay');
         const response = await apiCall(`/api/admin/users/${userId}`);
+        console.log('User detail response:', response);
+        
         const user = response.user || response; // Handle different response formats
+        console.log('Processed user data:', user);
+        
         showUserModal(user);
     } catch (error) {
         console.error('Failed to load user details:', error);
-        showError('Failed to load user details');
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            userId: userId,
+            authToken: authToken ? 'Present' : 'Missing'
+        });
+        showError(`Failed to load user details: ${error.message}`);
     } finally {
         hideElement('loadingOverlay');
     }

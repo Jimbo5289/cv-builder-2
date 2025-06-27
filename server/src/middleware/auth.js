@@ -152,11 +152,61 @@ const auth = async (req, res, next) => {
     logger.error('Token verification error:', error);
     logger.error('Auth middleware error:', error);
     
+    // Handle specific JWT errors
     if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ error: 'Token expired' });
+      return res.status(401).json({ 
+        error: 'Token expired',
+        message: 'Your session has expired. Please log in again.',
+        code: 'TOKEN_EXPIRED'
+      });
     }
     
-    res.status(500).json({ error: 'Authentication error' });
+    if (error.name === 'JsonWebTokenError') {
+      if (error.message.includes('invalid signature')) {
+        return res.status(401).json({ 
+          error: 'Invalid token signature',
+          message: 'Your session is invalid. Please log in again.',
+          code: 'INVALID_SIGNATURE'
+        });
+      }
+      
+      if (error.message.includes('jwt malformed')) {
+        return res.status(401).json({ 
+          error: 'Malformed token',
+          message: 'Invalid authentication token. Please log in again.',
+          code: 'MALFORMED_TOKEN'
+        });
+      }
+      
+      return res.status(401).json({ 
+        error: 'Invalid token',
+        message: 'Authentication failed. Please log in again.',
+        code: 'INVALID_TOKEN'
+      });
+    }
+    
+    if (error.name === 'NotBeforeError') {
+      return res.status(401).json({ 
+        error: 'Token not active',
+        message: 'Token is not active yet. Please try again later.',
+        code: 'TOKEN_NOT_ACTIVE'
+      });
+    }
+    
+    // Database or other errors
+    logger.error('Authentication middleware error:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      path: req.path,
+      method: req.method
+    });
+    
+    res.status(500).json({ 
+      error: 'Authentication error',
+      message: 'Internal server error during authentication',
+      code: 'AUTH_ERROR'
+    });
   }
 };
 
