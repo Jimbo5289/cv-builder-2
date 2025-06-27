@@ -12,7 +12,7 @@ function Templates() {
     {
       id: 1,
       name: "Professional",
-      image: "https://images.unsplash.com/photo-1602642379049-4d72dd65b09e?w=600&h=800&fit=crop&crop=top",
+      image: "https://images.unsplash.com/photo-1568992688065-536aad8a12f6?w=600&h=800&fit=crop&crop=center",
       description: "Clean, corporate-friendly layout with structured sections and professional blue accents. Perfect for business, finance, consulting, and traditional corporate roles.",
       features: ["ATS-friendly format", "Clear section headers", "Skills showcase", "Professional color scheme"],
       bestFor: "Corporate roles, business positions, traditional industries",
@@ -21,7 +21,7 @@ function Templates() {
     {
       id: 2,
       name: "Creative",
-      image: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=600&h=800&fit=crop&crop=center",
+      image: "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=600&h=800&fit=crop&crop=center",
       description: "Modern design with visual sidebar, colorful gradients, and portfolio showcase. Features creative timeline and visual skill bars for design-focused careers.",
       features: ["Visual sidebar layout", "Portfolio section", "Creative timeline", "Colorful design elements"],
       bestFor: "Graphic design, marketing, advertising, creative agencies",
@@ -30,7 +30,7 @@ function Templates() {
     {
       id: 3,
       name: "Executive",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop&crop=top",
+      image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=600&h=800&fit=crop&crop=center",
       description: "Sophisticated two-column layout with elegant typography and premium styling. Emphasizes leadership experience, achievements, and executive presence.",
       features: ["Two-column premium layout", "Achievement highlights", "Executive summary", "Elegant typography"],
       bestFor: "C-level positions, senior management, leadership roles",

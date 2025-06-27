@@ -220,7 +220,7 @@ export default function Home() {
                 id: 1,
                 name: "Professional",
                 color: "#4A90E2",
-                image: "https://images.unsplash.com/photo-1602642379049-4d72dd65b09e?w=400&h=600&fit=crop&crop=top",
+                image: "https://images.unsplash.com/photo-1568992688065-536aad8a12f6?w=400&h=600&fit=crop&crop=center",
                 description: "Corporate & Business",
                 features: ["Clean layout", "ATS-friendly", "Traditional sectors"]
               },
@@ -228,7 +228,7 @@ export default function Home() {
                 id: 2,
                 name: "Creative",
                 color: "#E24A8B", 
-                image: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=600&fit=crop&crop=center",
+                image: "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=400&h=600&fit=crop&crop=center",
                 description: "Design & Marketing",
                 features: ["Visual sidebar", "Portfolio section", "Creative industries"]
               },
@@ -236,7 +236,7 @@ export default function Home() {
                 id: 3,
                 name: "Executive",
                 color: "#4AE2C4",
-                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&crop=top",
+                image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&h=600&fit=crop&crop=center",
                 description: "Leadership & Management",
                 features: ["Two-column layout", "Achievement focus", "Senior positions"]
               },
