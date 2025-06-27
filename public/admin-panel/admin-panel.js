@@ -211,15 +211,6 @@ async function loadUsers(page = 1, search = '') {
         totalUsers = response.pagination?.total || 0;
         currentPage = page;
         
-        console.log('=== USER DATA DEBUG ===');
-        console.log('Raw response:', response);
-        console.log('Users array:', allUsers);
-        if (allUsers.length > 0) {
-            console.log('First user:', allUsers[0]);
-            console.log('First user role:', allUsers[0].role);
-        }
-        console.log('=== END DEBUG ===');
-        
         renderUsersTable();
         renderPagination();
         updatePaginationInfo();
@@ -253,8 +244,6 @@ function renderUsersTable() {
             const badge = document.createElement('span');
             badge.className = 'px-2 py-1 text-xs font-semibold rounded-full ml-2';
             
-            console.log('Creating badge for:', user.email, 'Role:', user.role);
-            
             if (user.role === 'superuser') {
                 badge.className += ' bg-purple-100 text-purple-800';
                 badge.textContent = '👑 Superuser';
@@ -265,8 +254,6 @@ function renderUsersTable() {
                 badge.className += ' bg-gray-100 text-gray-800';
                 badge.textContent = '👤 User';
             }
-            
-            console.log('Badge text:', badge.textContent);
             
             return badge;
         })();
