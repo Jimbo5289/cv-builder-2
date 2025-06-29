@@ -149,15 +149,39 @@ const auth = async (req, res, next) => {
     // Continue to next middleware
     next();
   } catch (error) {
-    logger.error('Token verification error:', error);
-    logger.error('Auth middleware error:', error);
-    
-    // Handle specific JWT errors
+    // Handle specific JWT errors with appropriate logging levels
     if (error.name === 'TokenExpiredError') {
+      // Token expiration is expected behavior, log as info instead of error
+      logger.info('Token expired for user session:', {
+        expiredAt: error.expiredAt,
+        path: req.path,
+        method: req.method,
+        ip: req.ip
+      });
       return res.status(401).json({ 
         error: 'Token expired',
         message: 'Your session has expired. Please log in again.',
         code: 'TOKEN_EXPIRED'
+      });
+    }
+    
+    // Log other JWT errors as warnings (not errors) since they're client-side issues
+    if (error.name === 'JsonWebTokenError' || error.name === 'NotBeforeError') {
+      logger.warn('JWT authentication failed:', {
+        name: error.name,
+        message: error.message,
+        path: req.path,
+        method: req.method,
+        ip: req.ip
+      });
+    } else {
+      // Only log unexpected errors as actual errors
+      logger.error('Unexpected auth middleware error:', {
+        name: error.name,
+        message: error.message,
+        path: req.path,
+        method: req.method,
+        ip: req.ip
       });
     }
     
@@ -193,15 +217,7 @@ const auth = async (req, res, next) => {
       });
     }
     
-    // Database or other errors
-    logger.error('Authentication middleware error:', {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-      path: req.path,
-      method: req.method
-    });
-    
+    // Database or other unexpected errors
     res.status(500).json({ 
       error: 'Authentication error',
       message: 'Internal server error during authentication',

@@ -91,6 +91,7 @@ router.options('/register', handlePreflight);
 router.options('/login', handlePreflight);
 router.options('/refresh-token', handlePreflight);
 router.options('/logout', handlePreflight);
+router.options('/profile', handlePreflight);
 
 // Special debug endpoint for CORS testing
 router.options('/test-cors', handlePreflight);
@@ -219,12 +220,9 @@ router.post('/register', async (req, res) => {
         }
       });
 
-      // Generate token
-      const token = jwt.sign(
-        { id: user.id },
-        process.env.JWT_SECRET || 'fallback-secret',
-        { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-      );
+      // Generate tokens using utility functions
+      const token = generateToken({ id: user.id });
+      const refreshToken = generateRefreshToken({ id: user.id });
 
       // Add user to mailing list (non-blocking)
       addUserToMailingList(user).then(result => {
@@ -247,7 +245,8 @@ router.post('/register', async (req, res) => {
 
       logger.info('User registered successfully', { userId: user.id, email });
       return res.status(201).json({
-        token,
+        accessToken: token,
+        refreshToken,
         user
       });
     } catch (createError) {
@@ -372,6 +371,91 @@ router.post('/login', authLimiter, async (req, res) => {
   } catch (error) {
     logger.error('Login error:', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Refresh token endpoint
+router.post('/refresh-token', async (req, res) => {
+  addCorsHeaders(req, res);
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(401).json({ 
+        error: 'Refresh token required',
+        code: 'REFRESH_TOKEN_REQUIRED'
+      });
+    }
+
+    // Verify refresh token
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    } catch (error) {
+      logger.info('Refresh token verification failed:', {
+        error: error.name,
+        message: error.message
+      });
+      
+      if (error.name === 'TokenExpiredError') {
+        return res.status(401).json({ 
+          error: 'Refresh token expired',
+          message: 'Please log in again.',
+          code: 'REFRESH_TOKEN_EXPIRED'
+        });
+      }
+      
+      return res.status(401).json({ 
+        error: 'Invalid refresh token',
+        message: 'Please log in again.',
+        code: 'INVALID_REFRESH_TOKEN'
+      });
+    }
+
+    // Check if user still exists and is active
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        isActive: true
+      }
+    });
+
+    if (!user || !user.isActive) {
+      logger.warn('Refresh token failed: User not found or inactive', { userId: decoded.id });
+      return res.status(401).json({ 
+        error: 'User not found or inactive',
+        message: 'Please log in again.',
+        code: 'USER_INACTIVE'
+      });
+    }
+
+    // Generate new tokens
+    const newAccessToken = generateToken({ id: user.id });
+    const newRefreshToken = generateRefreshToken({ id: user.id });
+
+    logger.info('Token refreshed successfully', { userId: user.id });
+    
+    res.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone
+      },
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken
+    });
+  } catch (error) {
+    logger.error('Token refresh error:', { error: error.message, stack: error.stack });
+    res.status(500).json({ 
+      error: 'Server error',
+      message: 'Unable to refresh token',
+      code: 'REFRESH_ERROR'
+    });
   }
 });
 
