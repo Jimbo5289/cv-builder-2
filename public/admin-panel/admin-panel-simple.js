@@ -9,11 +9,19 @@ let isSignupMode = false;
 
 // Utility Functions
 function showElement(id) {
-    document.getElementById(id).style.display = 'block';
+    const element = document.getElementById(id);
+    if (element) {
+        element.style.display = 'block';
+        element.classList.remove('hidden');
+    }
 }
 
 function hideElement(id) {
-    document.getElementById(id).style.display = 'none';
+    const element = document.getElementById(id);
+    if (element) {
+        element.style.display = 'none';
+        element.classList.add('hidden');
+    }
 }
 
 function showError(message) {
@@ -248,7 +256,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         showAdminDashboard();
     } else {
         // Show login screen and set up login-specific event listeners
-        showElement('loginScreen');
+        const loginScreen = document.getElementById('loginScreen');
+        if (loginScreen) {
+            loginScreen.style.display = 'flex';
+            loginScreen.classList.remove('hidden');
+        }
         setupLoginEventListeners();
         
         // Backup: Add event listeners directly with more debugging
@@ -279,9 +291,20 @@ document.addEventListener('DOMContentLoaded', async function() {
 // Logout function
 function logout() {
     authToken = null;
+    currentUser = null;
     localStorage.removeItem('adminToken');
     hideElement('adminDashboard');
-    showElement('loginScreen');
+    
+    // Properly show login screen
+    const loginScreen = document.getElementById('loginScreen');
+    if (loginScreen) {
+        loginScreen.style.display = 'flex';
+        loginScreen.classList.remove('hidden');
+    }
+    
+    // Clear any forms
+    clearLoginForm();
+    setupLoginEventListeners();
 }
 
 // Filter users function
