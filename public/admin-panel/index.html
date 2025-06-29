@@ -7,9 +7,41 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-                 body { font-family: 'Inter', sans-serif; }
-         .admin-card { transition: shadow 0.3s ease; }
-         .admin-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        /* Ensure perfect centering */
+        #loginScreen {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-height: 100vh !important;
+            min-width: 100vw !important;
+            padding: 1rem !important;
+            box-sizing: border-box !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+        }
+        
+        /* Login card styling */
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .admin-card { transition: shadow 0.3s ease; }
+        .admin-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
          .nav-btn { 
              transition: all 0.2s ease-in-out; 
              border: 1px solid transparent;
@@ -56,12 +88,49 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .login-card {
+                max-width: 380px;
+            }
+            
+            #loginScreen {
+                padding: 0.75rem !important;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .login-card {
+                max-width: 350px;
+            }
+            
+            #loginScreen {
+                padding: 0.5rem !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .login-card {
+                max-width: 320px;
+            }
+            
+            #loginScreen {
+                padding: 0.25rem !important;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .login-card {
+                max-width: 300px;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100">
     <!-- Login Screen -->
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center">
-        <div class="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
+    <div id="loginScreen">
+        <div class="login-card bg-white p-8">
             <div class="text-center mb-8">
                 <i class="fas fa-shield-alt text-4xl text-blue-600 mb-4"></i>
                 <h1 class="text-2xl font-bold text-gray-900">Admin Panel</h1>
