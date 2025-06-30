@@ -1,8 +1,9 @@
 /* eslint-disable */
 import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+import { useState } from 'react';
 
-const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry }) => {
+const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, originalCvText }) => {
   // Use actual analysis results if available, with fallbacks
   const score = analysisResults?.score || 0;
   const improvements = analysisResults?.improvements || [];
@@ -11,10 +12,42 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry }) 
   const improvementSuggestions = analysisResults?.improvementSuggestions || {};
   const careerTransitionAdvice = analysisResults?.careerTransitionAdvice || null;
   const timeToCompetitive = analysisResults?.timeToCompetitive || null;
+  
+  // New detailed improvement data
+  const detailedImprovements = analysisResults?.detailedImprovements || [];
+  
+  // State for managing expanded improvement details
+  const [expandedImprovements, setExpandedImprovements] = useState(new Set());
+  const [appliedImprovements, setAppliedImprovements] = useState(new Set());
 
   // Get current location to determine which analysis page we're on
   const location = useLocation();
   const isOnRoleSpecificPage = location.pathname === '/cv-analyze-by-role';
+
+  // Toggle detailed improvement view
+  const toggleImprovement = (improvementId) => {
+    const newExpanded = new Set(expandedImprovements);
+    if (newExpanded.has(improvementId)) {
+      newExpanded.delete(improvementId);
+    } else {
+      newExpanded.add(improvementId);
+    }
+    setExpandedImprovements(newExpanded);
+  };
+
+  // Apply suggested improvement
+  const applyImprovement = (improvementId, newText) => {
+    const newApplied = new Set(appliedImprovements);
+    newApplied.add(improvementId);
+    setAppliedImprovements(newApplied);
+    
+    // Here you would typically update the CV content
+    // For now, we'll just mark it as applied
+    console.log('Applied improvement:', improvementId, newText);
+    
+    // You could emit an event or call a callback to update the parent component
+    // onApplyImprovement?.(improvementId, newText);
+  };
 
   // Generate personalized next steps based on actual analysis results
   const getPersonalizedNextSteps = () => {
@@ -111,24 +144,26 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry }) 
   // Get priority color based on priority level
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-300 dark:border-red-800/50';
-      case 'medium': return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-800/50';
-      case 'low': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-300 dark:border-green-800/50';
-      default: return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-800/50';
+      case 'high':
+        return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700';
+      case 'low':
+        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
     }
   };
 
-  // Get priority label
   const getPriorityLabel = (priority) => {
     switch (priority) {
       case 'high': return 'High Priority';
       case 'medium': return 'Medium Priority';
       case 'low': return 'Low Priority';
-      default: return 'Recommended';
+      default: return 'Priority';
     }
   };
 
-  // Get step icon based on type
   const getStepIcon = (type) => {
     switch (type) {
       case 'improvement':
@@ -161,6 +196,7 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry }) 
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
           </svg>
         );
+      
       default:
         return (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,7 +250,110 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry }) 
         </div>
       )}
       
+      {/* Detailed Improvements Section */}
+      {detailedImprovements && detailedImprovements.length > 0 && (
+        <div className="mb-8">
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+            <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Specific Content Improvements
+          </h4>
+          
+          <div className="space-y-4">
+            {detailedImprovements.map((improvement) => (
+              <div key={improvement.id} className="border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div 
+                  className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                  onClick={() => toggleImprovement(improvement.id)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <span className={`inline-block text-xs font-medium px-2 py-1 rounded-full ${getPriorityColor(improvement.priority)}`}>
+                          {getPriorityLabel(improvement.priority)}
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                          {improvement.section}
+                        </span>
+                      </div>
+                      <p className="text-gray-700 dark:text-gray-300 font-medium">{improvement.title}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{improvement.reason}</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {appliedImprovements.has(improvement.id) && (
+                        <span className="text-green-600 dark:text-green-400 text-sm font-medium bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                          Applied
+                        </span>
+                      )}
+                      <svg 
+                        className={`w-5 h-5 text-gray-400 transition-transform ${expandedImprovements.has(improvement.id) ? 'rotate-180' : ''}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                {expandedImprovements.has(improvement.id) && (
+                  <div className="px-4 pb-4 border-t border-gray-100 dark:border-gray-700">
+                    <div className="mt-4 space-y-4">
+                      
+                      {/* Original Text */}
+                      {improvement.originalText && (
+                        <div>
+                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Original Text:</h5>
+                          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                            <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{improvement.originalText}</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Analysis */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">AI Analysis:</h5>
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                          <p className="text-sm text-blue-800 dark:text-blue-300">{improvement.analysis}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Suggested Improvement */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Recommended Rewrite:</h5>
+                        <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                          <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{improvement.suggestedText}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Apply Button */}
+                      <div className="flex justify-end pt-2">
+                        <button
+                          onClick={() => applyImprovement(improvement.id, improvement.suggestedText)}
+                          disabled={appliedImprovements.has(improvement.id)}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            appliedImprovements.has(improvement.id)
+                              ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                              : 'bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600'
+                          }`}
+                        >
+                          {appliedImprovements.has(improvement.id) ? 'Applied' : 'Apply Changes'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* General Next Steps */}
       <div className="space-y-4">
+        <h4 className="text-lg font-semibold text-gray-800 dark:text-white">General Recommendations:</h4>
         {nextSteps.map((step) => (
           <div key={step.id} className="flex items-start group hover:bg-gray-50 dark:hover:bg-gray-700/50 p-3 rounded-lg transition-colors">
             <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-3 ${getPriorityColor(step.priority)}`}>
@@ -249,53 +388,30 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry }) 
         </div>
       )}
       
-      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Link 
-            to="/create" 
-            className="inline-flex items-center justify-center px-4 py-2 bg-[#3498db] dark:bg-blue-700 text-white rounded-lg hover:bg-[#2980b9] dark:hover:bg-blue-800 transition-colors"
+      {/* Action buttons */}
+      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-center space-x-4">
+        <Link
+          to="/create"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors dark:bg-blue-500 dark:hover:bg-blue-600"
+        >
+          + Create New CV
+        </Link>
+        
+        <Link
+          to="/templates"
+          className="text-blue-600 hover:text-blue-700 border border-blue-600 hover:border-blue-700 px-6 py-2 rounded-lg text-sm font-medium transition-colors dark:text-blue-400 dark:border-blue-400 dark:hover:text-blue-300 dark:hover:border-blue-300"
+        >
+          📄 Browse Templates
+        </Link>
+        
+        {!isOnRoleSpecificPage && (
+          <Link
+            to="/cv-analyze-by-role"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors dark:bg-purple-500 dark:hover:bg-purple-600"
           >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Create New CV
+            🎯 Role-Specific Analysis
           </Link>
-          
-          <Link 
-            to="/templates" 
-            className="inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-gray-700 text-[#3498db] dark:text-blue-400 border border-[#3498db] dark:border-blue-500 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            Browse Templates
-          </Link>
-          
-          {/* Conditional button based on current page */}
-          {missingKeywords && missingKeywords.length > 0 && (
-            isOnRoleSpecificPage ? (
-              <Link 
-                to="/analyze" 
-                className="inline-flex items-center justify-center px-4 py-2 bg-[#3498db] dark:bg-blue-700 text-white rounded-lg hover:bg-[#2980b9] dark:hover:bg-blue-800 transition-colors"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Job Description Analysis
-              </Link>
-            ) : (
-              <Link 
-                to="/cv-analyze-by-role" 
-                className="inline-flex items-center justify-center px-4 py-2 bg-[#9b59b6] dark:bg-purple-700 text-white rounded-lg hover:bg-[#8e44ad] dark:hover:bg-purple-800 transition-colors"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                Role-Specific Analysis
-              </Link>
-            )
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

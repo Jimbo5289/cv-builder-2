@@ -801,10 +801,10 @@ const CvAnalyzeByRole = () => {
               />
             )}
             
-            {/* Next Steps Guidance */}
+            {/* Next Steps Guidance and Detailed Improvements */}
             <CvAnalysisNextSteps 
               analysisResults={analysisResults}
-              analysisType={useGenericScope ? "general" : "role-specific"}
+              analysisType={useGenericScope ? 'general' : 'role'}
               role={selectedRole}
               industry={selectedIndustry}
             />

@@ -3370,7 +3370,8 @@ router.post('/analyze', (req, res, next) => {
       cvText, 
       industry === 'general' ? null : industry, 
       role === 'general' ? null : role, 
-      isGenericAnalysis
+      isGenericAnalysis,
+      jobDescriptionText
     );
     
     // Format results for backward compatibility with job analysis expectations
@@ -3399,7 +3400,8 @@ router.post('/analyze', (req, res, next) => {
       relevanceAnalysis: analysisResults.relevanceAnalysis,
       careerTransitionAdvice: analysisResults.careerTransitionAdvice,
       modelsUsed: analysisResults.modelsUsed,
-      jobDescriptionSource: _jobDescriptionSource
+      jobDescriptionSource: _jobDescriptionSource,
+      detailedImprovements: analysisResults.detailedImprovements || []
     };
 
     // Add extracted CV content to results for enhancement
@@ -3551,7 +3553,9 @@ async function processRoleAnalysis(req, res) {
       timeToCompetitive: analysisResults.timeToCompetitive,
       relevanceAnalysis: analysisResults.relevanceAnalysis,
       careerTransitionAdvice: analysisResults.careerTransitionAdvice,
-      modelsUsed: analysisResults.modelsUsed
+      modelsUsed: analysisResults.modelsUsed,
+      detailedImprovements: analysisResults.detailedImprovements || [],
+      originalCvText: cvText
     };
     
     // Log for debugging

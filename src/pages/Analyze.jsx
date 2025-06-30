@@ -863,6 +863,12 @@ const Analyze = () => {
             onNewAnalysis={resetAnalysis}
           />
         )}
+
+        {/* Next Steps Guidance and Detailed Improvements */}
+        <CvAnalysisNextSteps 
+          analysisResults={analysisResults}
+          analysisType="job"
+        />
       </div>
     </div>
   );

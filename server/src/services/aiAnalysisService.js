@@ -560,12 +560,14 @@ class AIAnalysisService {
       
       // Step 2: Parse job requirements
       let jobData;
+      let analysisType = 'generic';
       if (jobDescription) {
-        // Parse actual job description
         jobData = this.parseJobDescription(jobDescription);
         industry = jobData.industry || industry || 'general';
         role = jobData.role || role || 'general';
-      } else {
+        analysisType = 'job';
+      } else if (!isGeneric && role && industry) {
+        analysisType = 'role';
         // Create job data from industry/role parameters
         if (!industry) {
           industry = cvData.currentField || this.detectCurrentField(cvText) || 'general';
@@ -584,6 +586,28 @@ class AIAnalysisService {
           qualifications: industryReqs.qualifications.slice(0, 5),
           keywords: industryReqs.keywords.slice(0, 12),
           experience: [3], // Default 3 years requirement
+          seniority: 'mid',
+          responsibilities: []
+        };
+      } else {
+        analysisType = 'generic';
+        if (!industry) {
+          industry = cvData.currentField || this.detectCurrentField(cvText) || 'general';
+        }
+        if (!role) {
+          role = 'general';
+        }
+        
+        const industryReqs = this.getIndustryRequirements(industry);
+        const roleReqs = await this.getRoleRequirements(role, industry);
+        
+        jobData = {
+          industry,
+          role,
+          requiredSkills: roleReqs.specificSkills || industryReqs.keywords.slice(0, 8),
+          qualifications: industryReqs.qualifications.slice(0, 5),
+          keywords: industryReqs.keywords.slice(0, 12),
+          experience: [3],
           seniority: 'mid',
           responsibilities: []
         };
@@ -621,6 +645,15 @@ class AIAnalysisService {
       finalResult.personalizedFeedback = this.generatePersonalizedFeedback(cvData, jobData, universalMatch);
       finalResult.dynamicCourseRecommendations = this.generateDynamicCourseRecommendations(cvData, jobData, universalMatch.gapAreas);
       
+      // Always generate detailed improvements, tailored to analysis type
+      try {
+        finalResult.detailedImprovements = await this.generateDetailedImprovements(cvText, industry, role, analysisType, jobDescription);
+        logger.info('Generated detailed improvements', { count: finalResult.detailedImprovements.length, analysisType });
+      } catch (error) {
+        logger.warn('Failed to generate detailed improvements:', error);
+        finalResult.detailedImprovements = [];
+      }
+      
       // Enhanced metadata with deep insights
       finalResult.analysisMetadata = {
         analysisVersion: '4.0-Revolutionary',
@@ -631,7 +664,8 @@ class AIAnalysisService {
         atsCompliance: this.calculateATSCompliance(cvData),
         processingTime: Date.now() - startTime,
         aiEnhanced: !!aiResults,
-        fromCache: false
+        fromCache: false,
+        hasDetailedImprovements: finalResult.detailedImprovements?.length > 0 || false
       };
 
       // Cache the result for future identical requests
@@ -4041,7 +4075,7 @@ Remember: Score realistically based on actual job requirements. A career changer
     const leadershipPatterns = [
       /(manager|supervisor|director|lead|head|chief|coordinator|team lead)[^.\n]*([^.\n]*)/gi,
       /(managed|supervised|led|coordinated|directed|headed)\s+([^.\n]*team[^.\n]*)/gi,
-      /(responsible\s+for\s+managing|oversaw|guided|mentored)\s+([^.\n]*)/gi
+              /(responsible\s+for\s+managing|oversaw|guided|mentored)\s+([^.\n]*)/gi
     ];
     
     const leadership = [];
@@ -4355,6 +4389,108 @@ Remember: Score realistically based on actual job requirements. A career changer
     if (lowerTitle.includes('manager') || lowerTitle.includes('supervisor')) return 3;
     if (lowerTitle.includes('junior') || lowerTitle.includes('assistant') || lowerTitle.includes('intern')) return 1;
     return 2; // Mid-level
+  }
+
+  // Enhanced analysis prompt for detailed paragraph improvements
+  createDetailedImprovementPrompt(cvText, industry, role, analysisType = 'generic', jobDescription = null) {
+    let focus = '';
+    let target = '';
+    let extra = '';
+    if (analysisType === 'generic') {
+      focus = 'content, format, and structure';
+      target = 'any professional role';
+      extra = 'Focus on general best practices, clarity, and ATS optimization.';
+    } else if (analysisType === 'role') {
+      focus = `content, format, structure, and role-specific keywords for ${role} in ${industry}`;
+      target = `${role} in ${industry}`;
+      extra = `Focus on adding field/role-specific keywords, skills, and advice for ${role} roles in ${industry}.`;
+    } else if (analysisType === 'job') {
+      focus = 'matching the CV to the provided job description, including keywords and requirements';
+      target = `the provided job description for ${role} in ${industry}`;
+      extra = 'Focus on tailoring the CV to match the job description, using its keywords and requirements.';
+    }
+    return `ADVANCED CV CONTENT IMPROVEMENT ANALYSIS\n\nYou are an expert CV writer and ATS optimization specialist. Analyze this CV and provide specific paragraph-level improvements.\n\nCV CONTENT:\n${cvText}\n\n${jobDescription ? `JOB DESCRIPTION:\n${jobDescription}\n` : ''}\nTARGET: ${target}\n\nINSTRUCTIONS:\n1. Extract and analyze specific sections/paragraphs from the CV\n2. Identify exactly what's wrong with each section\n3. Provide specific rewritten versions that are better optimized for ATS systems and ${target}\n4. Focus on ${focus}\n${extra}\n\nFor each improvement, provide:\n- The exact original text from the CV\n- Detailed analysis of why it needs improvement\n- A completely rewritten version that's better optimized\n\nReturn a JSON response with this structure:\n{\n  "detailedImprovements": [\n    {\n      "id": "improvement_1",\n      "section": "Personal Statement|Experience|Skills|Education",\n      "title": "Brief description of the improvement",\n      "priority": "high|medium|low",\n      "reason": "Why this needs improvement",\n      "originalText": "Exact text from the CV that needs improvement",\n      "analysis": "Detailed analysis of the problems with the original text",\n      "suggestedText": "Complete rewrite with ATS optimization and relevant keywords",\n      "keywords": ["list", "of", "keywords", "added"],\n      "improvements": ["specific", "changes", "made"]\n    }\n  ]\n}\n\nFocus on:\n- Personal statements that are too generic\n- Work experience without quantified achievements\n- Skills sections that lack specific technologies or keywords\n- Missing industry/job-specific keywords\n- Weak action verbs\n- Lack of measurable results\n\nProvide 3-5 specific improvements that would have the biggest impact on ATS scores and recruiter appeal.`;
+  }
+
+  // Generate detailed paragraph improvements
+  async generateDetailedImprovements(cvText, industry, role, analysisType = 'generic', jobDescription = null) {
+    if (!this.isAnthropicEnabled && !this.isOpenAIEnabled) {
+      return [];
+    }
+
+    try {
+      const prompt = this.createDetailedImprovementPrompt(cvText, industry, role, analysisType, jobDescription);
+      let response;
+      if (this.isAnthropicEnabled) {
+        const message = await this.anthropic.messages.create({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 3000,
+          temperature: 0.1, // Slightly higher for creative rewriting
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ]
+        });
+        response = message.content[0].text;
+      } else if (this.isOpenAIEnabled) {
+        const completion = await this.openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert CV writer and ATS optimization specialist. Provide detailed, actionable improvements with specific text rewrites.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          max_tokens: 3000,
+          temperature: 0.1
+        });
+        response = completion.choices[0].message.content;
+      }
+
+      // Parse the response
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        logger.warn('No JSON found in detailed improvements response');
+        return [];
+      }
+
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (!parsed.detailedImprovements || !Array.isArray(parsed.detailedImprovements)) {
+        logger.warn('Invalid detailed improvements structure');
+        return [];
+      }
+      // Validate and clean up the improvements
+      const validImprovements = parsed.detailedImprovements
+        .filter(imp => imp.originalText && imp.suggestedText && imp.analysis)
+        .map((imp, index) => ({
+          id: imp.id || `improvement_${index + 1}`,
+          section: imp.section || 'General',
+          title: imp.title || 'Content Improvement',
+          priority: imp.priority || 'medium',
+          reason: imp.reason || 'Needs optimization for better ATS compatibility',
+          originalText: imp.originalText,
+          analysis: imp.analysis,
+          suggestedText: imp.suggestedText,
+          keywords: Array.isArray(imp.keywords) ? imp.keywords : [],
+          improvements: Array.isArray(imp.improvements) ? imp.improvements : []
+        }));
+      logger.info('Generated detailed improvements:', { 
+        count: validImprovements.length,
+        role,
+        industry,
+        analysisType
+      });
+      return validImprovements;
+    } catch (error) {
+      logger.error('Failed to generate detailed improvements:', error);
+      return [];
+    }
   }
 }
 
