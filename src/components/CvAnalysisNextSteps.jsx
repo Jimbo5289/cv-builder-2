@@ -66,6 +66,35 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
     console.log('Modal should now be visible');
   };
 
+  // Helper: Parse raw CV text into a basic structure
+  function parseCVTextToStructure(cvText) {
+    // Very basic parser: split by common section headers
+    const sections = cvText.split(/\n(?=\w+\s*:?)/g);
+    const structure = {
+      personalInfo: {},
+      personalStatement: '',
+      skills: [],
+      experiences: [],
+      education: []
+    };
+    sections.forEach(section => {
+      const lower = section.toLowerCase();
+      if (lower.includes('personal statement')) {
+        structure.personalStatement = section.replace(/personal statement:?/i, '').trim();
+      } else if (lower.includes('skills')) {
+        structure.skills = section.replace(/skills:?/i, '').split(/,|\n/).map(s => ({ skill: s.trim() })).filter(s => s.skill);
+      } else if (lower.includes('experience')) {
+        structure.experiences.push({ description: section.replace(/work experience:?/i, '').trim() });
+      } else if (lower.includes('education')) {
+        structure.education.push({ description: section.replace(/education:?/i, '').trim() });
+      } else if (section.match(/@|\d{4}/)) {
+        // crude guess: personal info
+        structure.personalInfo = { ...structure.personalInfo, raw: section.trim() };
+      }
+    });
+    return structure;
+  }
+
   // Helper: Merge all applied improvements into the structured CV content
   const getUpdatedCVContent = () => {
     console.log('getUpdatedCVContent called');
@@ -73,13 +102,15 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
     console.log('appliedImprovements:', appliedImprovements);
     console.log('detailedImprovements:', detailedImprovements);
     
-    // Start from the original extracted content
-    const base = analysisResults?.extractedContent || analysisResults?.extractedInfo || {};
-    console.log('Base content:', base);
-    
+    // Start from the original extracted content, or parse from text if missing
+    let base = analysisResults?.extractedContent || analysisResults?.extractedInfo;
+    if (!base || Object.keys(base).length === 0) {
+      const text = analysisResults?.cvText || originalCvText || '';
+      base = parseCVTextToStructure(text);
+      console.log('Parsed structure from text:', base);
+    }
     // Deep clone to avoid mutating original
     const updated = JSON.parse(JSON.stringify(base));
-    
     // Apply each applied improvement
     detailedImprovements.forEach((imp) => {
       if (appliedImprovements.has(imp.id)) {
@@ -89,17 +120,14 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
         if (section.includes('personal statement')) {
           updated.personalStatement = imp.suggestedText;
         } else if (section.includes('skills')) {
-          // Replace skills section with suggested text (split by comma or newlines)
           updated.skills = imp.suggestedText.split(/,|\n/).map(s => ({ skill: s.trim() })).filter(s => s.skill);
         } else if (section.includes('experience')) {
-          // Replace the first experience's description (or append if none)
           if (updated.experiences && updated.experiences.length > 0) {
             updated.experiences[0].description = imp.suggestedText;
           } else {
             updated.experiences = [{ description: imp.suggestedText }];
           }
         } else if (section.includes('education')) {
-          // Replace the first education's description (or append if none)
           if (updated.education && updated.education.length > 0) {
             updated.education[0].description = imp.suggestedText;
           } else {
@@ -108,7 +136,6 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
         }
       }
     });
-    
     console.log('Final updated content:', updated);
     return updated;
   };
