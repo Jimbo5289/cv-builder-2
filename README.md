@@ -29,7 +29,7 @@ The easiest way to start the application is using our reliable startup script:
 
 ```bash
 # Clone the repository
-git clone https://github.com/Jimbo5289/cv-builder-2.git
+git clone git@github.com:Jimbo5289/cv-builder-2.git
 cd cv-builder-2
 
 # Install dependencies
