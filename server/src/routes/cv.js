@@ -3017,56 +3017,33 @@ router.post('/analyze-only', (req, res, next) => {
     });
 
     // Get CV text from file or directly from input
+    let cvText = '';
     let _sourceType = 'unknown';
     let _fileName = 'cv-text';
     
     if (req.file) {
       _sourceType = 'file';
       _fileName = req.file.originalname;
+      // Extract text from file
+      try {
+        cvText = await extractTextFromFile(req.file);
+      } catch (extractError) {
+        logger.warn('File extraction failed, using fallback:', extractError.message);
+        cvText = req.file.buffer.toString('utf8').replace(/[^\u0000-\uFFFF]/g, ' ').trim();
+      }
     } else {
       _sourceType = 'text';
+      cvText = req.body.cvText;
     }
 
-    // Use seed based on filename or a default
-    const _seed = Math.random();
+    // Use aiAnalysisService for generic analysis
+    const analysisResults = await aiAnalysisService.analyzeCV(cvText, null, null, true);
     
-    // Generate mock results - always use mock to prevent memory issues
-    const mockResults = {
-      score: Math.floor(70 + (_seed * 20)),
-      formatScore: Math.floor(65 + (_seed * 25)),
-      contentScore: Math.floor(75 + (_seed * 15)),
-      strengths: [
-        "Clear professional summary",
-        "Good experience section structure",
-        "Appropriate CV length",
-        "Relevant skills highlighted"
-      ].slice(0, 3 + Math.floor(_seed * 2)),
-      recommendations: [
-        "Add more quantifiable achievements",
-        "Improve skill presentation with proficiency levels",
-        "Include more industry-specific keywords",
-        "Strengthen your professional summary"
-      ].slice(0, 3 + Math.floor(_seed * 2)),
-      missingKeywords: [
-        "quantifiable results",
-        "leadership",
-        "communication skills",
-        "project management",
-        "teamwork",
-        "problem-solving"
-      ].slice(0, 4 + Math.floor(_seed * 3)),
-      improvements: [
-        "Focus on adding specific, measurable achievements to your experience section. Quantify your impact where possible.",
-        "Ensure consistent formatting throughout your CV. Use bullet points consistently and maintain uniform spacing.",
-        "Consider reordering sections to place the most relevant information first. Your most impressive qualifications should be immediately visible.",
-        "Research job descriptions in your target field and incorporate relevant keywords to pass ATS systems."
-      ]
-    };
-    
-    // Simulate processing time - short delay to appear realistic
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    res.json(mockResults);
+    // Return all fields, including detailedImprovements
+    return res.json({
+      ...analysisResults,
+      detailedImprovements: analysisResults.detailedImprovements || []
+    });
   } catch (error) {
     logger.error('Error analyzing CV:', error);
     res.status(500).json({ error: 'Failed to analyze CV', message: error.message });

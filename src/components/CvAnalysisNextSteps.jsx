@@ -16,6 +16,11 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
   // New detailed improvement data
   const detailedImprovements = analysisResults?.detailedImprovements || [];
   
+  // Debug logging
+  console.log('CvAnalysisNextSteps - analysisResults:', analysisResults);
+  console.log('CvAnalysisNextSteps - detailedImprovements:', detailedImprovements);
+  console.log('CvAnalysisNextSteps - analysisType:', analysisType);
+  
   // State for managing expanded improvement details
   const [expandedImprovements, setExpandedImprovements] = useState(new Set());
   const [appliedImprovements, setAppliedImprovements] = useState(new Set());
