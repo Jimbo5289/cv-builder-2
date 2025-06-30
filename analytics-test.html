@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Analytics Test - MyCVBuilder</title>
+    
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G64RBEW6YP"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      
+      gtag('config', 'G-G64RBEW6YP', {
+        page_title: document.title,
+        page_location: window.location.href,
+        anonymize_ip: true
+      });
+      
+      // Test event
+      gtag('event', 'test_page_view', {
+        event_category: 'testing',
+        event_label: 'analytics_test_page'
+      });
+    </script>
+    
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: #f5f5f5;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button { 
+            background: #3498db; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 10px 5px; 
+            font-size: 14px;
+        }
+        .test-button:hover { 
+            background: #2980b9; 
+        }
+        .status { 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-radius: 5px; 
+            border-left: 5px solid #3498db;
+            background: #e8f4fd;
+        }
+        .success { border-left-color: #27ae60; background: #e8f5e8; }
+        .warning { border-left-color: #f39c12; background: #fdf4e8; }
+        .error { border-left-color: #e74c3c; background: #fdeaea; }
+        code { 
+            background: #f8f8f8; 
+            padding: 2px 6px; 
+            border-radius: 3px; 
+            font-family: monospace;
+        }
+        .checklist {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .checklist h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Google Analytics Test Page</h1>
+        
+        <div id="ga-status" class="status">
+            <strong>Checking Google Analytics...</strong>
+        </div>
+        
+        <h2>📊 Analytics Tests</h2>
+        <p>Click these buttons to send test events to Google Analytics:</p>
+        
+        <button class="test-button" onclick="testPageView()">Test Page View</button>
+        <button class="test-button" onclick="testEvent()">Test Custom Event</button>
+        <button class="test-button" onclick="testConversion()">Test Conversion</button>
+        <button class="test-button" onclick="testError()">Test Error Event</button>
+        
+        <div id="test-results"></div>
+        
+        <div class="checklist">
+            <h3>✅ Troubleshooting Checklist</h3>
+            
+            <div class="step">
+                <strong>1. Check Browser Network Tab:</strong><br>
+                Open DevTools → Network tab → Look for requests to <code>google-analytics.com</code> or <code>googletagmanager.com</code>
+            </div>
+            
+            <div class="step">
+                <strong>2. Check Google Analytics Real-time:</strong><br>
+                Go to your GA4 dashboard → Reports → Real-time → Should show current users
+            </div>
+            
+            <div class="step">
+                <strong>3. Check Console for Errors:</strong><br>
+                Open DevTools → Console → Look for any JavaScript errors
+            </div>
+            
+            <div class="step">
+                <strong>4. Verify Measurement ID:</strong><br>
+                Current ID: <code>G-G64RBEW6YP</code> (should match your GA4 property)
+            </div>
+            
+            <div class="step">
+                <strong>5. Test with GA Debugger:</strong><br>
+                Install "Google Analytics Debugger" Chrome extension for detailed logs
+            </div>
+        </div>
+        
+        <h3>🌐 Test Your Main Site</h3>
+        <p>After testing here, visit your main site and check:</p>
+        <ul>
+            <li><a href="https://mycvbuilder.co.uk" target="_blank">MyCVBuilder.co.uk Homepage</a></li>
+            <li>Navigate between pages to trigger page view events</li>
+            <li>Use features (CV builder, analysis) to trigger interaction events</li>
+        </ul>
+        
+        <div class="status warning">
+            <strong>📝 Note:</strong> Google Analytics data can take 24-48 hours to appear in standard reports. 
+            Use the Real-time reports for immediate verification.
+        </div>
+    </div>
+
+    <script>
+        // Check if gtag is available
+        window.addEventListener('load', function() {
+            const statusDiv = document.getElementById('ga-status');
+            
+            if (typeof gtag !== 'undefined') {
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '<strong>✅ Google Analytics Loaded Successfully!</strong><br>gtag function is available and ready to track events.';
+                
+                // Send initial test event
+                gtag('event', 'test_page_loaded', {
+                    event_category: 'testing',
+                    event_label: 'analytics_test_page_loaded'
+                });
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '<strong>❌ Google Analytics Failed to Load</strong><br>gtag function is not available. Check your internet connection and ad blockers.';
+            }
+        });
+        
+        function testPageView() {
+            if (typeof gtag !== 'undefined') {
+                gtag('config', 'G-G64RBEW6YP', {
+                    page_path: '/test-page-view',
+                    page_title: 'Test Page View'
+                });
+                showResult('Page View', 'success', 'Sent page view event to GA4');
+            } else {
+                showResult('Page View', 'error', 'gtag not available');
+            }
+        }
+        
+        function testEvent() {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'test_button_click', {
+                    event_category: 'testing',
+                    event_label: 'manual_test_event',
+                    value: 1
+                });
+                showResult('Custom Event', 'success', 'Sent custom event to GA4');
+            } else {
+                showResult('Custom Event', 'error', 'gtag not available');
+            }
+        }
+        
+        function testConversion() {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'conversion', {
+                    send_to: 'G-G64RBEW6YP',
+                    event_category: 'testing',
+                    event_label: 'test_conversion',
+                    value: 9.99,
+                    currency: 'GBP'
+                });
+                showResult('Conversion', 'success', 'Sent conversion event to GA4');
+            } else {
+                showResult('Conversion', 'error', 'gtag not available');
+            }
+        }
+        
+        function testError() {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'exception', {
+                    description: 'Test error event',
+                    fatal: false
+                });
+                showResult('Error Event', 'success', 'Sent error event to GA4');
+            } else {
+                showResult('Error Event', 'error', 'gtag not available');
+            }
+        }
+        
+        function showResult(testName, type, message) {
+            const resultsDiv = document.getElementById('test-results');
+            const timestamp = new Date().toLocaleTimeString();
+            const resultClass = type === 'success' ? 'success' : 'error';
+            const icon = type === 'success' ? '✅' : '❌';
+            
+            resultsDiv.innerHTML += `
+                <div class="status ${resultClass}">
+                    <strong>${icon} ${testName} Test (${timestamp}):</strong><br>
+                    ${message}
+                </div>
+            `;
+        }
+        
+        // Monitor network requests (if available)
+        if (typeof performance !== 'undefined' && performance.getEntriesByType) {
+            setTimeout(() => {
+                const entries = performance.getEntriesByType('resource');
+                const gaRequests = entries.filter(entry => 
+                    entry.name.includes('google-analytics.com') || 
+                    entry.name.includes('googletagmanager.com')
+                );
+                
+                if (gaRequests.length > 0) {
+                    showResult('Network Check', 'success', `Found ${gaRequests.length} GA network requests`);
+                } else {
+                    showResult('Network Check', 'warning', 'No GA network requests detected yet');
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html> 
