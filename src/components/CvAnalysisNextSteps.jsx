@@ -2,6 +2,9 @@
 import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { useState } from 'react';
+import CVPreviewWindow from './CVPreviewWindow';
+import { useAuth } from '../context/AuthContext';
+import { useServer } from '../context/ServerContext';
 
 const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, originalCvText }) => {
   // Use actual analysis results if available, with fallbacks
@@ -24,10 +27,16 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
   // State for managing expanded improvement details
   const [expandedImprovements, setExpandedImprovements] = useState(new Set());
   const [appliedImprovements, setAppliedImprovements] = useState(new Set());
+  // New: State for preview modal and updated CV
+  const [showPreview, setShowPreview] = useState(false);
+  const [updatedCV, setUpdatedCV] = useState(null);
 
   // Get current location to determine which analysis page we're on
   const location = useLocation();
   const isOnRoleSpecificPage = location.pathname === '/cv-analyze-by-role';
+
+  const { getAuthHeader } = useAuth();
+  const { apiUrl } = useServer();
 
   // Toggle detailed improvement view
   const toggleImprovement = (improvementId) => {
@@ -42,17 +51,128 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
 
   // Apply suggested improvement
   const applyImprovement = (improvementId, newText) => {
+    console.log('applyImprovement called:', { improvementId, newText });
     const newApplied = new Set(appliedImprovements);
     newApplied.add(improvementId);
     setAppliedImprovements(newApplied);
     
-    // Here you would typically update the CV content
-    // For now, we'll just mark it as applied
-    console.log('Applied improvement:', improvementId, newText);
+    // Get updated CV content
+    const updatedContent = getUpdatedCVContent();
+    console.log('Updated CV content:', updatedContent);
     
-    // You could emit an event or call a callback to update the parent component
-    // onApplyImprovement?.(improvementId, newText);
+    // Set the updated CV and show preview
+    setUpdatedCV(updatedContent);
+    setShowPreview(true);
+    console.log('Modal should now be visible');
   };
+
+  // Helper: Merge all applied improvements into the structured CV content
+  const getUpdatedCVContent = () => {
+    console.log('getUpdatedCVContent called');
+    console.log('analysisResults:', analysisResults);
+    console.log('appliedImprovements:', appliedImprovements);
+    console.log('detailedImprovements:', detailedImprovements);
+    
+    // Start from the original extracted content
+    const base = analysisResults?.extractedContent || analysisResults?.extractedInfo || {};
+    console.log('Base content:', base);
+    
+    // Deep clone to avoid mutating original
+    const updated = JSON.parse(JSON.stringify(base));
+    
+    // Apply each applied improvement
+    detailedImprovements.forEach((imp) => {
+      if (appliedImprovements.has(imp.id)) {
+        console.log('Applying improvement:', imp);
+        // Map section to field
+        const section = (imp.section || '').toLowerCase();
+        if (section.includes('personal statement')) {
+          updated.personalStatement = imp.suggestedText;
+        } else if (section.includes('skills')) {
+          // Replace skills section with suggested text (split by comma or newlines)
+          updated.skills = imp.suggestedText.split(/,|\n/).map(s => ({ skill: s.trim() })).filter(s => s.skill);
+        } else if (section.includes('experience')) {
+          // Replace the first experience's description (or append if none)
+          if (updated.experiences && updated.experiences.length > 0) {
+            updated.experiences[0].description = imp.suggestedText;
+          } else {
+            updated.experiences = [{ description: imp.suggestedText }];
+          }
+        } else if (section.includes('education')) {
+          // Replace the first education's description (or append if none)
+          if (updated.education && updated.education.length > 0) {
+            updated.education[0].description = imp.suggestedText;
+          } else {
+            updated.education = [{ description: imp.suggestedText }];
+          }
+        }
+      }
+    });
+    
+    console.log('Final updated content:', updated);
+    return updated;
+  };
+
+  // Analyse Again logic
+  const [isReanalyzing, setIsReanalyzing] = useState(false);
+  const [reanalyzeResults, setReanalyzeResults] = useState(null);
+  const handleAnalyseAgain = async () => {
+    setIsReanalyzing(true);
+    setReanalyzeResults(null);
+    try {
+      const updatedCV = getUpdatedCVContent();
+      // Prepare payload for backend (as text or structured)
+      const headers = getAuthHeader();
+      delete headers['Content-Type'];
+      const formData = new FormData();
+      formData.append('cvText', formatCVAsText(updatedCV));
+      const response = await fetch(`${apiUrl}/api/cv/analyze-only`, {
+        method: 'POST',
+        headers,
+        body: formData
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setReanalyzeResults(data);
+      } else {
+        setReanalyzeResults({ error: 'Analysis failed. Please try again.' });
+      }
+    } catch (err) {
+      setReanalyzeResults({ error: err.message || 'Analysis failed.' });
+    } finally {
+      setIsReanalyzing(false);
+    }
+  };
+
+  // Helper: Format structured CV as plain text for backend
+  function formatCVAsText(cv) {
+    let text = '';
+    if (cv.personalInfo) {
+      text += `${cv.personalInfo.fullName || cv.personalInfo.name || ''}\n`;
+      if (cv.personalInfo.email) text += `${cv.personalInfo.email}\n`;
+      if (cv.personalInfo.phone) text += `${cv.personalInfo.phone}\n`;
+      if (cv.personalInfo.location) text += `${cv.personalInfo.location}\n`;
+    }
+    if (cv.personalStatement) {
+      text += `\nPersonal Statement:\n${cv.personalStatement}\n`;
+    }
+    if (cv.skills && cv.skills.length > 0) {
+      text += `\nSkills:\n${cv.skills.map(s => s.skill || s).join(', ')}\n`;
+    }
+    if (cv.experiences && cv.experiences.length > 0) {
+      text += `\nWork Experience:\n`;
+      cv.experiences.forEach(exp => {
+        text += `${exp.position || ''} at ${exp.company || ''} (${exp.startDate || ''} - ${exp.endDate || 'Present'})\n${exp.description || ''}\n`;
+      });
+    }
+    if (cv.education && cv.education.length > 0) {
+      text += `\nEducation:\n`;
+      cv.education.forEach(edu => {
+        text += `${edu.degree || edu.title || ''} at ${edu.institution || ''} (${edu.startDate || ''} - ${edu.endDate || 'Present'})\n${edu.description || ''}\n`;
+      });
+    }
+    return text;
+  }
 
   // Generate personalized next steps based on actual analysis results
   const getPersonalizedNextSteps = () => {
@@ -222,188 +342,210 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mt-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-gray-800 dark:text-white">
-          {getTitle()}
-        </h3>
-        {score > 0 && (
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Current Score: <span className="font-semibold">{score}/100</span>
-          </div>
-        )}
-      </div>
+    <>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mt-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+            {getTitle()}
+          </h3>
+          {score > 0 && (
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Current Score: <span className="font-semibold">{score}/100</span>
+            </div>
+          )}
+        </div>
 
-      {/* Analysis-based insights */}
-      {analysisResults && (
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <div className="flex items-start">
-            <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <div className="text-sm text-blue-800 dark:text-blue-300">
-              <p className="font-medium mb-1">AI Analysis Insight:</p>
-              <p>
-                {analysisResults.relevanceAnalysis || 
-                 `Based on your CV analysis, we've identified ${nextSteps.length} key areas for improvement that will help you stand out to employers.`}
-              </p>
+        {/* Analysis-based insights */}
+        {analysisResults && (
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <div className="flex items-start">
+              <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="text-sm text-blue-800 dark:text-blue-300">
+                <p className="font-medium mb-1">AI Analysis Insight:</p>
+                <p>
+                  {analysisResults.relevanceAnalysis || 
+                   `Based on your CV analysis, we've identified ${nextSteps.length} key areas for improvement that will help you stand out to employers.`}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-      
-      {/* Detailed Improvements Section */}
-      {detailedImprovements && detailedImprovements.length > 0 && (
-        <div className="mb-8">
-          <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
-            <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Specific Content Improvements
-          </h4>
-          
-          <div className="space-y-4">
-            {detailedImprovements.map((improvement) => (
-              <div key={improvement.id} className="border border-gray-200 dark:border-gray-700 rounded-lg">
-                <div 
-                  className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                  onClick={() => toggleImprovement(improvement.id)}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <span className={`inline-block text-xs font-medium px-2 py-1 rounded-full ${getPriorityColor(improvement.priority)}`}>
-                          {getPriorityLabel(improvement.priority)}
-                        </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
-                          {improvement.section}
-                        </span>
+        )}
+        
+        {/* Detailed Improvements Section */}
+        {detailedImprovements && detailedImprovements.length > 0 && (
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+              <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Specific Content Improvements
+            </h4>
+            
+            <div className="space-y-4">
+              {detailedImprovements.map((improvement) => (
+                <div key={improvement.id} className="border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <div 
+                    className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                    onClick={() => toggleImprovement(improvement.id)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <span className={`inline-block text-xs font-medium px-2 py-1 rounded-full ${getPriorityColor(improvement.priority)}`}>
+                            {getPriorityLabel(improvement.priority)}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                            {improvement.section}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 dark:text-gray-300 font-medium">{improvement.title}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{improvement.reason}</p>
                       </div>
-                      <p className="text-gray-700 dark:text-gray-300 font-medium">{improvement.title}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{improvement.reason}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {appliedImprovements.has(improvement.id) && (
-                        <span className="text-green-600 dark:text-green-400 text-sm font-medium bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
-                          Applied
-                        </span>
-                      )}
-                      <svg 
-                        className={`w-5 h-5 text-gray-400 transition-transform ${expandedImprovements.has(improvement.id) ? 'rotate-180' : ''}`} 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
+                      <div className="flex items-center space-x-2">
+                        {appliedImprovements.has(improvement.id) && (
+                          <span className="text-green-600 dark:text-green-400 text-sm font-medium bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                            Applied
+                          </span>
+                        )}
+                        <svg 
+                          className={`w-5 h-5 text-gray-400 transition-transform ${expandedImprovements.has(improvement.id) ? 'rotate-180' : ''}`} 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
-                </div>
-                
-                {expandedImprovements.has(improvement.id) && (
-                  <div className="px-4 pb-4 border-t border-gray-100 dark:border-gray-700">
-                    <div className="mt-4 space-y-4">
-                      
-                      {/* Original Text */}
-                      {improvement.originalText && (
+                  
+                  {expandedImprovements.has(improvement.id) && (
+                    <div className="px-4 pb-4 border-t border-gray-100 dark:border-gray-700">
+                      <div className="mt-4 space-y-4">
+                        
+                        {/* Original Text */}
+                        {improvement.originalText && (
+                          <div>
+                            <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Original Text:</h5>
+                            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                              <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{improvement.originalText}</p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Analysis */}
                         <div>
-                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Original Text:</h5>
-                          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                            <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{improvement.originalText}</p>
+                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">AI Analysis:</h5>
+                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                            <p className="text-sm text-blue-800 dark:text-blue-300">{improvement.analysis}</p>
                           </div>
                         </div>
-                      )}
-                      
-                      {/* Analysis */}
-                      <div>
-                        <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">AI Analysis:</h5>
-                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                          <p className="text-sm text-blue-800 dark:text-blue-300">{improvement.analysis}</p>
+                        
+                        {/* Suggested Improvement */}
+                        <div>
+                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Recommended Rewrite:</h5>
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                            <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{improvement.suggestedText}</p>
+                          </div>
                         </div>
-                      </div>
-                      
-                      {/* Suggested Improvement */}
-                      <div>
-                        <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Recommended Rewrite:</h5>
-                        <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                          <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{improvement.suggestedText}</p>
+                        
+                        {/* Apply Button */}
+                        <div className="flex justify-end pt-2">
+                          <button
+                            onClick={() => applyImprovement(improvement.id, improvement.suggestedText)}
+                            disabled={appliedImprovements.has(improvement.id)}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              appliedImprovements.has(improvement.id)
+                                ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                : 'bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600'
+                            }`}
+                          >
+                            {appliedImprovements.has(improvement.id) ? 'Applied' : 'Apply Changes'}
+                          </button>
                         </div>
-                      </div>
-                      
-                      {/* Apply Button */}
-                      <div className="flex justify-end pt-2">
-                        <button
-                          onClick={() => applyImprovement(improvement.id, improvement.suggestedText)}
-                          disabled={appliedImprovements.has(improvement.id)}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            appliedImprovements.has(improvement.id)
-                              ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                              : 'bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600'
-                          }`}
-                        >
-                          {appliedImprovements.has(improvement.id) ? 'Applied' : 'Apply Changes'}
-                        </button>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      {/* General Next Steps */}
-      <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-gray-800 dark:text-white">General Recommendations:</h4>
-        {nextSteps.map((step) => (
-          <div key={step.id} className="flex items-start group hover:bg-gray-50 dark:hover:bg-gray-700/50 p-3 rounded-lg transition-colors">
-            <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-3 ${getPriorityColor(step.priority)}`}>
-              {step.source === 'ai_analysis' ? getStepIcon(step.type) : step.id}
-            </div>
-            <div className="flex-1">
-              <p className="text-gray-700 dark:text-gray-300">{step.text}</p>
-              <div className="flex items-center mt-1 space-x-2">
-                <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full border ${getPriorityColor(step.priority)}`}>
-                  {getPriorityLabel(step.priority)}
-                </span>
-                {step.source === 'ai_analysis' && (
-                  <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
-                    AI Recommendation
-                  </span>
-                )}
-              </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-      
-      {/* Action buttons */}
-      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-center space-x-4">
-        <Link
-          to="/create"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors dark:bg-blue-500 dark:hover:bg-blue-600"
-        >
-          + Create New CV
-        </Link>
-        
-        <Link
-          to="/templates"
-          className="text-blue-600 hover:text-blue-700 border border-blue-600 hover:border-blue-700 px-6 py-2 rounded-lg text-sm font-medium transition-colors dark:text-blue-400 dark:border-blue-400 dark:hover:text-blue-300 dark:hover:border-blue-300"
-        >
-          📄 Browse Templates
-        </Link>
-        
-        {!isOnRoleSpecificPage && (
-          <Link
-            to="/cv-analyze-by-role"
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors dark:bg-purple-500 dark:hover:bg-purple-600"
-          >
-            🎯 Role-Specific Analysis
-          </Link>
         )}
+        
+        {/* General Next Steps */}
+        <div className="space-y-4">
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-white">General Recommendations:</h4>
+          {nextSteps.map((step) => (
+            <div key={step.id} className="flex items-start group hover:bg-gray-50 dark:hover:bg-gray-700/50 p-3 rounded-lg transition-colors">
+              <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-3 ${getPriorityColor(step.priority)}`}>
+                {step.source === 'ai_analysis' ? getStepIcon(step.type) : step.id}
+              </div>
+              <div className="flex-1">
+                <p className="text-gray-700 dark:text-gray-300">{step.text}</p>
+                <div className="flex items-center mt-1 space-x-2">
+                  <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full border ${getPriorityColor(step.priority)}`}>
+                    {getPriorityLabel(step.priority)}
+                  </span>
+                  {step.source === 'ai_analysis' && (
+                    <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
+                      AI Recommendation
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Action buttons */}
+        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-center space-x-4">
+          <Link
+            to="/create"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors dark:bg-blue-500 dark:hover:bg-blue-600"
+          >
+            + Create New CV
+          </Link>
+          
+          <Link
+            to="/templates"
+            className="text-blue-600 hover:text-blue-700 border border-blue-600 hover:border-blue-700 px-6 py-2 rounded-lg text-sm font-medium transition-colors dark:text-blue-400 dark:border-blue-400 dark:hover:text-blue-300 dark:hover:border-blue-300"
+          >
+            📄 Browse Templates
+          </Link>
+          
+          {!isOnRoleSpecificPage && (
+            <Link
+              to="/cv-analyze-by-role"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors dark:bg-purple-500 dark:hover:bg-purple-600"
+            >
+              🎯 Role-Specific Analysis
+            </Link>
+          )}
+        </div>
       </div>
-    </div>
+      {/* Preview Modal */}
+      {showPreview && (
+        <CVPreviewWindow
+          cvContent={updatedCV || {
+            personalInfo: { fullName: 'Your Name', email: 'your.email@example.com' },
+            personalStatement: 'Your updated personal statement will appear here.',
+            skills: [{ skill: 'Updated skills will appear here' }],
+            experiences: [{ position: 'Your Role', company: 'Company Name', description: 'Updated experience will appear here.' }],
+            education: [{ degree: 'Your Degree', institution: 'Institution Name', description: 'Updated education will appear here.' }]
+          }}
+          title="Preview Updated CV"
+          onClose={() => {
+            console.log('Closing modal');
+            setShowPreview(false);
+          }}
+          onAnalyseAgain={handleAnalyseAgain}
+          isReanalyzing={isReanalyzing}
+          reanalyzeResults={reanalyzeResults}
+        />
+      )}
+    </>
   );
 };
 
