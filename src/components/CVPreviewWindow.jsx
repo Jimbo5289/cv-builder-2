@@ -4,11 +4,12 @@ import { FiDownload, FiPrinter, FiSave, FiX, FiCheck } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useServer } from '../context/ServerContext';
 
-const CVPreviewWindow = ({ cvContent, title, onClose }) => {
-  const [isSaving, _setIsSaving] = useState(false);
+const CVPreviewWindow = ({ cvContent, title, onClose, onAnalyseAgain, isReanalyzing, reanalyzeResults }) => {
+  const [isSaving, setIsSaving] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
 
   const { isAuthenticated, getAuthHeader } = useAuth();
   const { apiUrl } = useServer();
@@ -193,6 +194,42 @@ const CVPreviewWindow = ({ cvContent, title, onClose }) => {
     };
   };
 
+  // Save to Account logic
+  const handleSaveToAccount = async () => {
+    if (!isAuthenticated) {
+      setSaveMessage('Please log in to save your CV to your account.');
+      return;
+    }
+    setIsSaving(true);
+    setSaveMessage('');
+    try {
+      const cvData = {
+        title: title || 'My CV',
+        content: cvContent
+      };
+      const response = await fetch(`${apiUrl}/api/cv/save`, {
+        method: 'POST',
+        headers: {
+          ...getAuthHeader(),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(cvData)
+      });
+      if (response.ok) {
+        setSaveMessage('CV saved to your account!');
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 2000);
+      } else {
+        const errorData = await response.json();
+        setSaveMessage(errorData.error || 'Failed to save CV.');
+      }
+    } catch (err) {
+      setSaveMessage(err.message || 'Failed to save CV.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -209,7 +246,30 @@ const CVPreviewWindow = ({ cvContent, title, onClose }) => {
             <FiX size={24} />
           </button>
         </div>
-        
+        {/* New Analysis Results */}
+        {reanalyzeResults && (
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20">
+            {reanalyzeResults.error ? (
+              <div className="text-red-600 dark:text-red-400 font-semibold">{reanalyzeResults.error}</div>
+            ) : (
+              <>
+                <div className="text-lg font-bold text-blue-800 dark:text-blue-200 mb-2">
+                  New Score: {reanalyzeResults.score}/100
+                </div>
+                {reanalyzeResults.recommendations && (
+                  <div className="mb-2">
+                    <div className="font-semibold text-blue-700 dark:text-blue-300">Advice:</div>
+                    <ul className="list-disc ml-6 text-blue-800 dark:text-blue-200">
+                      {reanalyzeResults.recommendations.map((rec, i) => (
+                        <li key={i}>{rec}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
         {/* CV Content */}
         <div className="flex-1 overflow-auto p-6">
           {/* Personal Info */}
@@ -308,7 +368,21 @@ const CVPreviewWindow = ({ cvContent, title, onClose }) => {
         </div>
         
         {/* Footer with buttons */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex flex-wrap justify-end gap-3">
+          <button
+            onClick={onAnalyseAgain}
+            disabled={isReanalyzing}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            {isReanalyzing ? (
+              <>
+                <span className="animate-spin">⟳</span>
+                Analysing...
+              </>
+            ) : (
+              'Analyse Again'
+            )}
+          </button>
           <button
             onClick={handlePrint}
             disabled={isPrinting}
@@ -317,7 +391,6 @@ const CVPreviewWindow = ({ cvContent, title, onClose }) => {
             <FiPrinter />
             {isPrinting ? 'Printing...' : 'Print'}
           </button>
-          
           <button
             onClick={handleDownload}
             disabled={isDownloading}
@@ -340,6 +413,17 @@ const CVPreviewWindow = ({ cvContent, title, onClose }) => {
               </>
             )}
           </button>
+          <button
+            onClick={handleSaveToAccount}
+            disabled={isSaving}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            <FiSave />
+            {isSaving ? 'Saving...' : 'Save to Account'}
+          </button>
+          {saveMessage && (
+            <div className="w-full text-center text-sm mt-2 text-purple-700 dark:text-purple-300">{saveMessage}</div>
+          )}
         </div>
       </div>
     </div>
