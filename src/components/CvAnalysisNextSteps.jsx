@@ -218,9 +218,6 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
     if (analysisType === 'role-specific' && role && industry) {
       return `Next Steps to Excel as a ${role} in ${industry}`;
     }
-    if (timeToCompetitive) {
-      return `Your Path to Improvement (Est. ${timeToCompetitive})`;
-    }
     return 'Personalized Next Steps for Your CV';
   };
 
@@ -380,18 +377,6 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
           </div>
         ))}
       </div>
-      
-      {/* Additional context if available */}
-      {timeToCompetitive && (
-        <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-          <div className="flex items-center text-sm text-green-800 dark:text-green-300">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="font-medium">Estimated time to become competitive: {timeToCompetitive}</span>
-          </div>
-        </div>
-      )}
       
       {/* Action buttons */}
       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-center space-x-4">

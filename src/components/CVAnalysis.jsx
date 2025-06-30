@@ -144,11 +144,6 @@ const CVAnalysis = ({ cv, analysisResults }) => {
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCompatibilityBadge(fieldCompatibility)}`}>
                 {fieldCompatibility.charAt(0).toUpperCase() + fieldCompatibility.slice(1)} Compatibility
               </span>
-              {timeToCompetitive && (
-                <span className="text-xs text-gray-500">
-                  Time to competitive: {timeToCompetitive}
-                </span>
-              )}
             </div>
           </div>
         </div>
