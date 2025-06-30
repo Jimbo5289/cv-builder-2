@@ -3038,7 +3038,13 @@ router.post('/analyze-only', (req, res, next) => {
 
     // Use aiAnalysisService for generic analysis
     const analysisResults = await aiAnalysisService.analyzeCV(cvText, null, null, true);
-    
+    // Log the outgoing response for debugging
+    logger.info('[DEBUG] /analyze-only outgoing response', {
+      score: analysisResults.score,
+      detailedImprovements: Array.isArray(analysisResults.detailedImprovements) ? analysisResults.detailedImprovements.length : 'none',
+      improvements: Array.isArray(analysisResults.improvements) ? analysisResults.improvements.length : 'none',
+      analysisMetadata: analysisResults.analysisMetadata || null
+    });
     // Return all fields, including detailedImprovements
     return res.json({
       ...analysisResults,
