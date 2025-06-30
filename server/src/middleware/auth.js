@@ -165,42 +165,45 @@ const auth = async (req, res, next) => {
       });
     }
     
-    // Log other JWT errors as warnings (not errors) since they're client-side issues
-    if (error.name === 'JsonWebTokenError' || error.name === 'NotBeforeError') {
-      logger.warn('JWT authentication failed:', {
-        name: error.name,
-        message: error.message,
-        path: req.path,
-        method: req.method,
-        ip: req.ip
-      });
-    } else {
-      // Only log unexpected errors as actual errors
-      logger.error('Unexpected auth middleware error:', {
-        name: error.name,
-        message: error.message,
-        path: req.path,
-        method: req.method,
-        ip: req.ip
-      });
-    }
-    
+    // Handle JWT signature errors (common when JWT secret changes)
     if (error.name === 'JsonWebTokenError') {
       if (error.message.includes('invalid signature')) {
+        // This is common when JWT secret changes - log as info, not warning
+        logger.info('JWT signature invalid - likely due to server restart or secret rotation:', {
+          path: req.path,
+          method: req.method,
+          ip: req.ip,
+          userAgent: req.headers['user-agent']?.substring(0, 50) + '...'
+        });
         return res.status(401).json({ 
           error: 'Invalid token signature',
           message: 'Your session is invalid. Please log in again.',
-          code: 'INVALID_SIGNATURE'
+          code: 'INVALID_SIGNATURE',
+          hint: 'Server was restarted - please refresh and log in again'
         });
       }
       
       if (error.message.includes('jwt malformed')) {
+        logger.info('Malformed JWT token received:', {
+          path: req.path,
+          method: req.method,
+          ip: req.ip
+        });
         return res.status(401).json({ 
           error: 'Malformed token',
           message: 'Invalid authentication token. Please log in again.',
           code: 'MALFORMED_TOKEN'
         });
       }
+      
+      // Other JWT errors
+      logger.info('JWT authentication failed:', {
+        name: error.name,
+        message: error.message,
+        path: req.path,
+        method: req.method,
+        ip: req.ip
+      });
       
       return res.status(401).json({ 
         error: 'Invalid token',
@@ -210,12 +213,27 @@ const auth = async (req, res, next) => {
     }
     
     if (error.name === 'NotBeforeError') {
+      logger.info('JWT not yet active:', {
+        path: req.path,
+        method: req.method,
+        ip: req.ip
+      });
       return res.status(401).json({ 
         error: 'Token not active',
         message: 'Token is not active yet. Please try again later.',
         code: 'TOKEN_NOT_ACTIVE'
       });
     }
+    
+    // Only log unexpected errors as actual errors
+    logger.error('Unexpected auth middleware error:', {
+      name: error.name,
+      message: error.message,
+      path: req.path,
+      method: req.method,
+      ip: req.ip,
+      stack: error.stack
+    });
     
     // Database or other unexpected errors
     res.status(500).json({ 

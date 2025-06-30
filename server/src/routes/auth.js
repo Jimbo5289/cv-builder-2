@@ -1260,7 +1260,8 @@ router.post('/validate-token', (req, res) => {
     if (!token) {
       return res.status(401).json({ 
         valid: false, 
-        error: 'No token provided' 
+        error: 'No token provided',
+        code: 'NO_TOKEN'
       });
     }
 
@@ -1268,15 +1269,39 @@ router.post('/validate-token', (req, res) => {
     
     res.json({
       valid: true,
-      userId: decoded.userId,
-      email: decoded.email,
-      expires: new Date(decoded.exp * 1000)
+      userId: decoded.id || decoded.userId, // Handle both token formats
+      expires: new Date(decoded.exp * 1000),
+      issuedAt: new Date(decoded.iat * 1000),
+      timeUntilExpiry: Math.max(0, decoded.exp - Math.floor(Date.now() / 1000))
     });
   } catch (error) {
+    let errorCode = 'INVALID_TOKEN';
+    let hint = 'Token expired or invalid';
+    
+    if (error.name === 'TokenExpiredError') {
+      errorCode = 'TOKEN_EXPIRED';
+      hint = 'Token has expired - please log in again';
+    } else if (error.message.includes('invalid signature')) {
+      errorCode = 'INVALID_SIGNATURE';
+      hint = 'Server was restarted - please refresh and log in again';
+    } else if (error.message.includes('jwt malformed')) {
+      errorCode = 'MALFORMED_TOKEN';
+      hint = 'Token format is invalid - please log in again';
+    }
+    
+    // Log token validation failures as info (not warnings) to reduce noise
+    logger.info('Token validation failed:', {
+      error: error.name,
+      message: error.message,
+      code: errorCode,
+      ip: req.ip
+    });
+    
     res.status(401).json({
       valid: false,
       error: error.message,
-      hint: error.message === 'invalid signature' ? 'JWT secret may have changed - please log in again' : 'Token expired or invalid'
+      code: errorCode,
+      hint: hint
     });
   }
 });

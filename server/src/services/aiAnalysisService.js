@@ -1,6 +1,7 @@
 const OpenAI = require('openai');
 const Anthropic = require('@anthropic-ai/sdk');
 const logger = require('../utils/logger');
+const crypto = require('crypto');
 
 class AIAnalysisService {
   constructor() {
@@ -8,6 +9,10 @@ class AIAnalysisService {
     this.anthropic = null;
     this.isOpenAIEnabled = false;
     this.isAnthropicEnabled = false;
+    
+    // Analysis result caching for identical CV content
+    this.analysisCache = new Map();
+    this.cacheTimeout = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
     
     // Initialize OpenAI
     if (process.env.OPENAI_API_KEY && process.env.USE_AI_ANALYSIS === 'true') {
@@ -504,10 +509,50 @@ class AIAnalysisService {
     };
   }
 
+  // Generate hash for caching identical CV analyses
+  generateCVHash(cvText, industry, role, jobDescription) {
+    const content = cvText + (industry || '') + (role || '') + (jobDescription || '');
+    return crypto.createHash('sha256').update(content).digest('hex');
+  }
+
+  // Check and clean expired cache entries
+  cleanExpiredCache() {
+    const now = Date.now();
+    for (const [hash, entry] of this.analysisCache.entries()) {
+      if (now - entry.timestamp > this.cacheTimeout) {
+        this.analysisCache.delete(hash);
+      }
+    }
+  }
+
   // Main analysis method - Universal approach
   async analyzeCV(cvText, industry = null, role = null, isGeneric = false, jobDescription = null) {
     const startTime = Date.now(); // Track processing time
+    
     try {
+      // Generate hash for this analysis request
+      const cvHash = this.generateCVHash(cvText, industry, role, jobDescription);
+      
+      // Check cache first
+      this.cleanExpiredCache();
+      if (this.analysisCache.has(cvHash)) {
+        const cachedResult = this.analysisCache.get(cvHash);
+        const ageMinutes = Math.round((Date.now() - cachedResult.timestamp) / 1000 / 60);
+        logger.info('Returning cached analysis result', { 
+          hash: cvHash.substring(0, 8),
+          age: ageMinutes + ' minutes'
+        });
+        
+        // Mark result as from cache
+        const result = { ...cachedResult.result };
+        if (result.analysisMetadata) {
+          result.analysisMetadata.fromCache = true;
+          result.analysisMetadata.cacheAge = ageMinutes;
+        }
+        
+        return result;
+      }
+      
       logger.info('Starting universal CV analysis', { industry, role, isGeneric });
       
       // Step 1: Parse CV content universally
@@ -585,8 +630,21 @@ class AIAnalysisService {
         cvQualityScore: this.calculateContentScore(cvData),
         atsCompliance: this.calculateATSCompliance(cvData),
         processingTime: Date.now() - startTime,
-        aiEnhanced: !!aiResults
+        aiEnhanced: !!aiResults,
+        fromCache: false
       };
+
+      // Cache the result for future identical requests
+      this.analysisCache.set(cvHash, {
+        result: finalResult,
+        timestamp: Date.now()
+      });
+
+      logger.info('Analysis completed and cached', { 
+        hash: cvHash.substring(0, 8),
+        score: finalResult.score,
+        processingTime: finalResult.analysisMetadata.processingTime + 'ms'
+      });
 
       return finalResult;
 
@@ -730,7 +788,7 @@ class AIAnalysisService {
     const message = await this.anthropic.messages.create({
       model: model,
       max_tokens: 2000,
-      temperature: 0.3,
+      temperature: 0.0,  // Changed from 0.3 to 0.0 for deterministic results
       messages: [
         {
           role: 'user',
@@ -758,7 +816,7 @@ class AIAnalysisService {
         }
       ],
       max_tokens: 2000,
-      temperature: 0.3
+      temperature: 0.0  // Changed from 0.3 to 0.0 for deterministic results
     });
 
     const response = completion.choices[0].message.content;

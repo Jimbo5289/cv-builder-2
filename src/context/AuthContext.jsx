@@ -168,23 +168,34 @@ function AuthProvider({ children }) {
           // Check if it's an invalid signature error (JWT secret changed)
           const errorMessage = error.response?.data?.error || error.response?.data?.message || '';
           const errorCode = error.response?.data?.code || '';
+          const errorHint = error.response?.data?.hint || '';
           
           if (errorMessage.includes('invalid signature') || 
               errorMessage.includes('jwt malformed') || 
               errorCode === 'INVALID_SIGNATURE' || 
               errorCode === 'MALFORMED_TOKEN' ||
               errorCode === 'INVALID_TOKEN') {
-            console.warn('JWT signature invalid - clearing tokens and redirecting to login');
+            console.info('JWT signature invalid - server was likely restarted, clearing local tokens');
+            
+            // Clear all authentication data
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
+            
             setState({
               user: null,
               loading: false,
               isAuthenticated: false,
-              error: error.response?.data?.message || 'Your session has expired. Please log in again.'
+              error: null // Don't persist error state for signature issues
             });
-            toast.error(error.response?.data?.message || 'Session expired. Please log in again.');
+            
+            // Show appropriate message based on hint
+            const message = errorHint || 'Server was restarted. Please log in again.';
+            toast.info(message, {
+              autoClose: 5000,
+              toastId: 'jwt-signature-invalid' // Prevent duplicate toasts
+            });
+            
             return Promise.reject(error);
           }
           
