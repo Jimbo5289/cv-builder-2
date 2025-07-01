@@ -30,6 +30,7 @@ const CvAnalyze = () => {
   const [cvText, setCvText] = useState(''); // Text of CV for analysis
   const [analysisProgress, setAnalysisProgress] = useState(0); // Progress percentage
   const [analysisStage, setAnalysisStage] = useState(''); // Current stage description
+  const [originalCvContent, setOriginalCvContent] = useState(''); // Store original CV content
 
   // Context hooks for authentication and server connection
   const { isAuthenticated, user, getAuthHeader } = useAuth();
@@ -201,54 +202,53 @@ const CvAnalyze = () => {
     setIsAnalyzing(true);
     setError('');
     setAnalysisResults(null);
-    setProgressStep(2); // Update progress to Analysis step
+    setProgressStep(1);
     setAnalysisProgress(0);
     setAnalysisStage('Initializing analysis...');
     
-    // Simulate progress updates with delays for better UX
+    // Update progress every 500ms during the analysis
     const updateProgress = (progress, stage) => {
       setAnalysisProgress(progress);
       setAnalysisStage(stage);
     };
-
-    // Add realistic delays between progress updates
+    
     const delayedProgress = async (progress, stage, delay = 500) => {
       updateProgress(progress, stage);
       await new Promise(resolve => setTimeout(resolve, delay));
     };
-    
+
           try {
-        // Start progress animation
-        await delayedProgress(10, 'Checking access permissions...', 300);
-        
-        // Check subscription status but allow through if in testing mode
-        const hasSubscription = await checkSubscription();
-        
-        await delayedProgress(20, 'Access verified - preparing analysis...', 400);
+       let extractedCvText = '';
+       
+       if (activeTab === 'upload' && file) {
+         // Read file content
+         if (file.type === 'text/plain') {
+           extractedCvText = await file.text();
+         } else {
+           // For PDF/DOCX, we'll send the file and let the backend extract
+           extractedCvText = ''; // Will be extracted by backend
+         }
+       } else {
+         extractedCvText = cvText;
+       }
+       
+       // Store original content for the component
+       setOriginalCvContent(activeTab === 'upload' ? '' : cvText); // For files, backend will provide this
+
+      // Progress stages with delays
+      await delayedProgress(20, 'Extracting content from your CV...');
+      await delayedProgress(40, 'Analyzing structure and formatting...');
+      await delayedProgress(60, 'Evaluating content quality...');
+      await delayedProgress(80, 'Generating personalized recommendations...');
       
-      // If testing mode is enabled, bypass the subscription check
-      if (!hasSubscription && !mockSubscription && !premiumEnabled && !bypassPayment && !devMode) {
-        console.log('User does not have an active subscription');
-        setIsAnalyzing(false);
-        navigate('/subscription', { state: { redirectFrom: '/cv-analyze', upgrade: true } });
-        return;
-      }
+      const formData = new FormData();
       
-              console.log('Proceeding with analysis');
-        
-        await delayedProgress(30, 'Extracting CV content...', 600);
-        
-        // Create form data to send the file or text
-        const formData = new FormData();
-      
-      if (activeTab === 'upload' && file) {
-        // Explicitly log file information for debugging
-        console.log(`Appending file to form: ${file.name}, size: ${file.size}, type: ${file.type}`);
-        formData.append('cv', file);
-      } else if (activeTab === 'paste' && cvText) {
-        formData.append('cvText', cvText);
-      }
-      
+             if (activeTab === 'upload' && file) {
+         formData.append('cv', file);
+       } else {
+         formData.append('cvText', extractedCvText);
+       }
+
       // Log all form data contents for debugging
       for (let [key, value] of formData.entries()) {
         console.log(`Form contains: ${key} => ${value instanceof File ? value.name : value}`);
@@ -258,35 +258,23 @@ const CvAnalyze = () => {
       const headers = getAuthHeader();
       delete headers['Content-Type']; // This is crucial for multipart/form-data to work properly
       
-              await delayedProgress(50, 'Processing with AI analysis...', 800);
-        
-        console.log(`Submitting CV analysis request to ${apiUrl}/api/cv/analyze-only`);
-        
-        await delayedProgress(70, 'Analyzing CV structure and content...', 1000);
-        
-        const response = await fetch(`${apiUrl}/api/cv/analyze-only`, {
+      console.log(`Submitting CV analysis request to ${apiUrl}/api/cv/analyze-only`);
+      
+      const response = await fetch(`${apiUrl}/api/cv/analyze-only`, {
         method: 'POST',
         headers: headers,
         body: formData
       });
       
-              if (response.ok) {
-          await delayedProgress(85, 'Generating recommendations...', 600);
-          
-          const data = await response.json();
-          console.log('Analysis results:', data);
-          
-          await delayedProgress(95, 'Finalizing analysis...', 400);
-          
-          setProgressStep(3); // Update progress to Results step
-          
-          // Complete the progress
-          updateProgress(100, 'Analysis complete!');
-          
-          // Small delay before showing results
-          await new Promise(resolve => setTimeout(resolve, 300));
-          
-          setAnalysisResults(data);
+      if (response.ok) {
+        const data = await response.json();
+        setAnalysisResults(data);
+        // Store the CV text from backend if it was extracted from file
+        if (activeTab === 'upload' && data.cvText) {
+          setOriginalCvContent(data.cvText);
+        }
+        setProgressStep(3);
+        updateProgress(100, 'Analysis complete!');
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
         setError(`Analysis failed: ${errorData.message || response.statusText}`);
@@ -633,6 +621,7 @@ const CvAnalyze = () => {
             <CvAnalysisNextSteps 
               analysisResults={analysisResults}
               analysisType="general"
+              originalCvText={originalCvContent}
             />
           </div>
         )}

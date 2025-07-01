@@ -28,6 +28,7 @@ const CvAnalyzeByRole = () => {
   const [useGenericScope, setUseGenericScope] = useState(true); // Whether to use generic analysis scope
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false); // State for subscription modal visibility
   const [careerPathwayData, setCareerPathwayData] = useState(null); // Career pathway analysis
+  const [originalCvContent, setOriginalCvContent] = useState(''); // Store original CV content
 
   // Add progress step state
   const [progressStep, setProgressStep] = useState(1); // Current step in analysis progress
@@ -266,6 +267,11 @@ const CvAnalyzeByRole = () => {
           // Small delay before showing results
           await new Promise(resolve => setTimeout(resolve, 300));
           
+          // Store original CV content from response
+          if (data.cvText) {
+            setOriginalCvContent(data.cvText);
+          }
+          
           setAnalysisResults(data);
           
           // Generate career pathway if we have role and education data
@@ -304,6 +310,11 @@ const CvAnalyzeByRole = () => {
           
           // Small delay before showing results
           await new Promise(resolve => setTimeout(resolve, 300));
+          
+          // Store original CV content from response
+          if (data.cvText) {
+            setOriginalCvContent(data.cvText);
+          }
           
           setAnalysisResults(data);
           
@@ -807,6 +818,7 @@ const CvAnalyzeByRole = () => {
               analysisType={useGenericScope ? 'general' : 'role'}
               role={selectedRole}
               industry={selectedIndustry}
+              originalCvText={originalCvContent}
             />
           </div>
         )}

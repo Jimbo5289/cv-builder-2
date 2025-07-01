@@ -68,8 +68,28 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
 
   // Helper: Parse raw CV text into a basic structure
   function parseCVTextToStructure(cvText) {
-    // Very basic parser: split by common section headers
-    const sections = cvText.split(/\n(?=\w+\s*:?)/g);
+    if (!cvText || cvText.length < 20) {
+      return {
+        personalInfo: { fullName: "Professional", email: "email@example.com", phone: "Phone number", location: "Location" },
+        personalStatement: "Professional summary will appear here.",
+        skills: [{ skill: "Professional Skills", level: "Advanced" }],
+        experiences: [{
+          position: "Professional Role",
+          company: "Company Name", 
+          startDate: "Start Date",
+          endDate: "End Date",
+          description: "Professional experience will appear here."
+        }],
+        education: [{
+          institution: "Educational Institution",
+          degree: "Degree",
+          startDate: "Start Date", 
+          endDate: "End Date",
+          description: "Educational background will appear here."
+        }]
+      };
+    }
+    
     const structure = {
       personalInfo: {},
       personalStatement: '',
@@ -77,21 +97,108 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
       experiences: [],
       education: []
     };
-    sections.forEach(section => {
-      const lower = section.toLowerCase();
-      if (lower.includes('personal statement')) {
-        structure.personalStatement = section.replace(/personal statement:?/i, '').trim();
-      } else if (lower.includes('skills')) {
-        structure.skills = section.replace(/skills:?/i, '').split(/,|\n/).map(s => ({ skill: s.trim() })).filter(s => s.skill);
-      } else if (lower.includes('experience')) {
-        structure.experiences.push({ description: section.replace(/work experience:?/i, '').trim() });
-      } else if (lower.includes('education')) {
-        structure.education.push({ description: section.replace(/education:?/i, '').trim() });
-      } else if (section.match(/@|\d{4}/)) {
-        // crude guess: personal info
-        structure.personalInfo = { ...structure.personalInfo, raw: section.trim() };
+    
+    // Extract personal information (look for common patterns)
+    const emailMatch = cvText.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
+    const phoneMatch = cvText.match(/(\+?[0-9\s\-\(\)]{10,})/);
+    const nameMatch = cvText.match(/^([A-Z][a-z]+ [A-Z][a-z]+(?:\s[A-Z][a-z]+)?)/m);
+    
+    structure.personalInfo = {
+      fullName: nameMatch ? nameMatch[1] : "Professional",
+      email: emailMatch ? emailMatch[1] : "email@example.com",
+      phone: phoneMatch ? phoneMatch[1] : "Phone number",
+      location: "Location"
+    };
+    
+    // Extract personal statement/summary
+    const summaryPatterns = [
+      /(?:PERSONAL STATEMENT|SUMMARY|OBJECTIVE|PROFILE)(?:\s*:?\s*)([\s\S]*?)(?:\n(?:EXPERIENCE|EDUCATION|SKILLS|WORK HISTORY)|$)/i,
+      /(?:^|\n)((?:Experienced|Dedicated|Results-driven|Professional)[\s\S]*?)(?:\n(?:EXPERIENCE|EDUCATION|SKILLS|WORK HISTORY)|$)/i
+    ];
+    
+    for (const pattern of summaryPatterns) {
+      const match = cvText.match(pattern);
+      if (match && match[1] && match[1].trim().length > 20) {
+        structure.personalStatement = match[1].trim().substring(0, 300);
+        break;
       }
-    });
+    }
+    
+    if (!structure.personalStatement) {
+      structure.personalStatement = "Professional summary will appear here.";
+    }
+    
+    // Extract skills
+    const skillsMatch = cvText.match(/(?:SKILLS|EXPERTISE|COMPETENCIES|KEY SKILLS)(?:\s*:?\s*)([\s\S]*?)(?:\n(?:EXPERIENCE|EDUCATION|WORK HISTORY)|$)/i);
+    if (skillsMatch && skillsMatch[1]) {
+      const skillsText = skillsMatch[1];
+      const skills = skillsText.split(/[,\n•\-]/).map(s => s.trim()).filter(s => s && s.length > 2 && s.length < 50);
+      structure.skills = skills.slice(0, 8).map(skill => ({ skill, level: 'Advanced' }));
+    }
+    
+    if (structure.skills.length === 0) {
+      structure.skills = [{ skill: "Professional Skills", level: "Advanced" }];
+    }
+    
+    // Extract experience
+    const experienceMatch = cvText.match(/(?:EXPERIENCE|WORK HISTORY|EMPLOYMENT|PROFESSIONAL EXPERIENCE)(?:\s*:?\s*)([\s\S]*?)(?:\n(?:EDUCATION|SKILLS|QUALIFICATIONS)|$)/i);
+    if (experienceMatch && experienceMatch[1]) {
+      const expText = experienceMatch[1];
+      // Try to find position titles (often in caps or bold formatting)
+      const positions = expText.match(/([A-Z][A-Za-z\s&,]+(?:Manager|Director|Analyst|Specialist|Engineer|Developer|Coordinator|Assistant|Lead|Head|Officer))/g);
+      const companies = expText.match(/([A-Z][A-Za-z\s&,]+(?:Ltd|Inc|Corp|Company|Group|Solutions|Services))/g);
+      
+      if (positions && positions.length > 0) {
+        structure.experiences.push({
+          position: positions[0],
+          company: companies ? companies[0] : "Company Name",
+          startDate: "Start Date",
+          endDate: "End Date", 
+          description: expText.substring(0, 200).trim()
+        });
+      } else {
+        structure.experiences.push({
+          position: "Professional Role",
+          company: "Company Name",
+          startDate: "Start Date",
+          endDate: "End Date",
+          description: expText.substring(0, 200).trim()
+        });
+      }
+    } else {
+      structure.experiences.push({
+        position: "Professional Role",
+        company: "Company Name",
+        startDate: "Start Date",
+        endDate: "End Date",
+        description: "Professional experience will appear here."
+      });
+    }
+    
+    // Extract education
+    const educationMatch = cvText.match(/(?:EDUCATION|QUALIFICATIONS|ACADEMIC BACKGROUND)(?:\s*:?\s*)([\s\S]*?)(?:\n(?:SKILLS|EXPERIENCE|REFERENCES)|$)/i);
+    if (educationMatch && educationMatch[1]) {
+      const eduText = educationMatch[1];
+      const degrees = eduText.match(/(Bachelor|Master|PhD|Degree|Diploma|Certificate|BSc|MSc|BA|MA|MBA)/gi);
+      const institutions = eduText.match(/([A-Z][A-Za-z\s]+(?:University|College|Institute|School))/g);
+      
+      structure.education.push({
+        institution: institutions ? institutions[0] : "Educational Institution",
+        degree: degrees ? degrees[0] : "Degree",
+        startDate: "Start Date",
+        endDate: "End Date",
+        description: eduText.substring(0, 100).trim()
+      });
+    } else {
+      structure.education.push({
+        institution: "Educational Institution",
+        degree: "Degree", 
+        startDate: "Start Date",
+        endDate: "End Date",
+        description: "Educational background will appear here."
+      });
+    }
+    
     return structure;
   }
 
@@ -104,38 +211,90 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
     
     // Start from the original extracted content, or parse from text if missing
     let base = analysisResults?.extractedContent || analysisResults?.extractedInfo;
-    if (!base || Object.keys(base).length === 0) {
+    
+    console.log('Base content from backend:', base);
+    
+    if (!base || Object.keys(base).length === 0 || !base.personalInfo) {
       const text = analysisResults?.cvText || originalCvText || '';
+      console.log('Parsing CV text:', text.substring(0, 200) + '...');
       base = parseCVTextToStructure(text);
       console.log('Parsed structure from text:', base);
     }
+    
+    // Ensure base has all required fields with defaults
+    const validatedBase = {
+      personalInfo: {
+        fullName: base?.personalInfo?.fullName || base?.personalInfo?.name || 'Professional',
+        email: base?.personalInfo?.email || 'email@example.com',
+        phone: base?.personalInfo?.phone || 'Phone Number',
+        location: base?.personalInfo?.location || 'Location'
+      },
+      personalStatement: base?.personalStatement || 'Professional summary will appear here.',
+      skills: Array.isArray(base?.skills) && base.skills.length > 0 
+        ? base.skills 
+        : [{ skill: 'Professional Skills', level: 'Advanced' }],
+      experiences: Array.isArray(base?.experiences) && base.experiences.length > 0 
+        ? base.experiences 
+        : [{
+            position: 'Professional Role',
+            company: 'Company Name',
+            startDate: 'Start Date',
+            endDate: 'End Date',
+            description: 'Professional experience and achievements will appear here.'
+          }],
+      education: Array.isArray(base?.education) && base.education.length > 0 
+        ? base.education 
+        : [{
+            institution: 'Educational Institution',
+            degree: 'Degree',
+            startDate: 'Start Date',
+            endDate: 'End Date',
+            description: 'Educational background will appear here.'
+          }]
+    };
+    
     // Deep clone to avoid mutating original
-    const updated = JSON.parse(JSON.stringify(base));
+    const updated = JSON.parse(JSON.stringify(validatedBase));
+    
     // Apply each applied improvement
     detailedImprovements.forEach((imp) => {
       if (appliedImprovements.has(imp.id)) {
         console.log('Applying improvement:', imp);
         // Map section to field
         const section = (imp.section || '').toLowerCase();
-        if (section.includes('personal statement')) {
+        if (section.includes('personal statement') || section.includes('summary') || section.includes('objective')) {
           updated.personalStatement = imp.suggestedText;
-        } else if (section.includes('skills')) {
-          updated.skills = imp.suggestedText.split(/,|\n/).map(s => ({ skill: s.trim() })).filter(s => s.skill);
-        } else if (section.includes('experience')) {
+        } else if (section.includes('skills') || section.includes('competencies')) {
+          const skillsArray = imp.suggestedText.split(/[,\n]/).map(s => s.trim()).filter(s => s);
+          updated.skills = skillsArray.map(skill => ({ skill, level: 'Advanced' }));
+        } else if (section.includes('experience') || section.includes('work') || section.includes('employment')) {
           if (updated.experiences && updated.experiences.length > 0) {
             updated.experiences[0].description = imp.suggestedText;
           } else {
-            updated.experiences = [{ description: imp.suggestedText }];
+            updated.experiences = [{
+              position: 'Professional Role',
+              company: 'Company Name',
+              startDate: 'Start Date',
+              endDate: 'End Date',
+              description: imp.suggestedText
+            }];
           }
-        } else if (section.includes('education')) {
+        } else if (section.includes('education') || section.includes('qualification')) {
           if (updated.education && updated.education.length > 0) {
             updated.education[0].description = imp.suggestedText;
           } else {
-            updated.education = [{ description: imp.suggestedText }];
+            updated.education = [{
+              institution: 'Educational Institution',
+              degree: 'Degree',
+              startDate: 'Start Date',
+              endDate: 'End Date',
+              description: imp.suggestedText
+            }];
           }
         }
       }
     });
+    
     console.log('Final updated content:', updated);
     return updated;
   };

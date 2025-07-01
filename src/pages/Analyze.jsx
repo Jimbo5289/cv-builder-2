@@ -40,6 +40,7 @@ const Analyze = () => {
   const [enhancedCV, setEnhancedCV] = useState(null);
   const [extractedCVContent, setExtractedCVContent] = useState(null);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [originalCvContent, setOriginalCvContent] = useState(''); // Store original CV content
 
   // Context hooks for authentication and server connection
   const { isAuthenticated, user, getAuthHeader } = useAuth();
@@ -297,6 +298,12 @@ const Analyze = () => {
           updateProgress(80, 'Processing analysis results...');
           const data = await response.json();
           console.log('Analysis results:', data);
+          
+          // Store original CV content from response
+          if (data.cvText) {
+            setOriginalCvContent(data.cvText);
+          }
+          
           updateProgress(100, 'Analysis complete!');
           setAnalysisResults(data);
         } else {
@@ -315,6 +322,12 @@ const Analyze = () => {
           updateProgress(80, 'Processing analysis results...');
           const data = await response.json();
           console.log('Analysis results:', data);
+          
+          // Store original CV content from response
+          if (data.cvText) {
+            setOriginalCvContent(data.cvText);
+          }
+          
           updateProgress(100, 'Analysis complete!');
           setAnalysisResults(data);
         } else {
@@ -868,6 +881,7 @@ const Analyze = () => {
         <CvAnalysisNextSteps 
           analysisResults={analysisResults}
           analysisType="job"
+          originalCvText={originalCvContent}
         />
       </div>
     </div>
