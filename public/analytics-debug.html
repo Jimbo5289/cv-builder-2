@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Analytics Debug - MyCVBuilder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+        .success { border-color: #27ae60; background: #d5f5d5; }
+        .warning { border-color: #f39c12; background: #fef9e7; }
+        .error { border-color: #e74c3c; background: #fadbd8; }
+        .info { border-color: #3498db; background: #ebf3fd; }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #2980b9; }
+        #logs {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Google Analytics Debug Tool</h1>
+        <p>This tool helps diagnose Google Analytics tracking issues on MyCVBuilder.co.uk</p>
+        
+        <div id="status-container">
+            <div class="status info">
+                <strong>🔄 Initializing...</strong> Checking Google Analytics configuration...
+            </div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <button onclick="testPageView()">📄 Test Page View</button>
+            <button onclick="testEvent()">⚡ Test Custom Event</button>
+            <button onclick="checkGAStatus()">✅ Check GA Status</button>
+            <button onclick="clearLogs()">🗑️ Clear Logs</button>
+        </div>
+        
+        <h3>📊 Real-time Debug Logs</h3>
+        <div id="logs"></div>
+        
+        <div style="margin-top: 30px;">
+            <h3>🔧 How to Check if Analytics is Working:</h3>
+            <ol>
+                <li><strong>Google Analytics Real-Time:</strong> Go to your GA4 property → Reports → Real-time</li>
+                <li><strong>Visit This Page:</strong> You should see 1 active user (yourself)</li>
+                <li><strong>Test Events:</strong> Click buttons above and watch for events in GA4</li>
+                <li><strong>Check Network Tab:</strong> Look for requests to google-analytics.com</li>
+            </ol>
+            
+            <h3>🚨 Troubleshooting Checklist:</h3>
+            <ul>
+                <li>✅ GA Measurement ID: <code>G-G64RBEW6YP</code></li>
+                <li>✅ Environment Variable: <code>VITE_GA_MEASUREMENT_ID</code> set in Vercel</li>
+                <li>❌ No duplicate GA implementations</li>
+                <li>✅ gtag.js script loading properly</li>
+                <li>✅ Console shows "GA configured with ID"</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Log function
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#3498db',
+                success: '#27ae60', 
+                warning: '#f39c12',
+                error: '#e74c3c'
+            };
+            
+            logs.innerHTML += `<div style="color: ${colors[type]}; margin: 2px 0;">
+                [${timestamp}] ${message}
+            </div>`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        // Initialize Google Analytics
+        const GA_ID = 'G-G64RBEW6YP';
+        
+        function initializeGA() {
+            log('🚀 Initializing Google Analytics...', 'info');
+            
+            // Check if gtag script exists
+            const existingScript = document.querySelector('script[src*="googletagmanager.com/gtag/js"]');
+            if (existingScript) {
+                log('⚠️ gtag script already exists', 'warning');
+            } else {
+                log('📥 Loading gtag script...', 'info');
+                const script = document.createElement('script');
+                script.async = true;
+                script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+                document.head.appendChild(script);
+            }
+
+            // Initialize dataLayer and gtag
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = window.gtag || function() {
+                dataLayer.push(arguments);
+            };
+
+            // Configure GA
+            gtag('js', new Date());
+            gtag('config', GA_ID, {
+                anonymize_ip: true,
+                debug_mode: true
+            });
+            
+            log(`✅ GA configured with ID: ${GA_ID}`, 'success');
+            updateStatus();
+        }
+
+        function updateStatus() {
+            const container = document.getElementById('status-container');
+            const hasGtag = typeof window.gtag !== 'undefined';
+            const hasDataLayer = Array.isArray(window.dataLayer);
+            
+            let statusHTML = '';
+            
+            if (hasGtag && hasDataLayer) {
+                statusHTML = `<div class="status success">
+                    <strong>✅ Google Analytics Active</strong><br>
+                    gtag function: Available<br>
+                    dataLayer: ${window.dataLayer.length} items<br>
+                    Measurement ID: ${GA_ID}
+                </div>`;
+            } else {
+                statusHTML = `<div class="status error">
+                    <strong>❌ Google Analytics Issues Detected</strong><br>
+                    gtag function: ${hasGtag ? 'Available' : 'Missing'}<br>
+                    dataLayer: ${hasDataLayer ? 'Available' : 'Missing'}
+                </div>`;
+            }
+            
+            container.innerHTML = statusHTML;
+        }
+
+        function testPageView() {
+            log('📄 Testing page view event...', 'info');
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'page_view', {
+                    page_title: 'Analytics Debug Test',
+                    page_location: window.location.href,
+                    custom_parameter: 'debug_test'
+                });
+                log('✅ Page view event sent', 'success');
+            } else {
+                log('❌ gtag not available', 'error');
+            }
+        }
+
+        function testEvent() {
+            log('⚡ Testing custom event...', 'info');
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'debug_test', {
+                    event_category: 'testing',
+                    event_label: 'manual_test',
+                    value: 1
+                });
+                log('✅ Custom event sent', 'success');
+            } else {
+                log('❌ gtag not available', 'error');
+            }
+        }
+
+        function checkGAStatus() {
+            log('🔍 Checking Google Analytics status...', 'info');
+            
+            // Check gtag
+            if (typeof window.gtag !== 'undefined') {
+                log('✅ gtag function is available', 'success');
+            } else {
+                log('❌ gtag function is missing', 'error');
+            }
+            
+            // Check dataLayer
+            if (Array.isArray(window.dataLayer)) {
+                log(`✅ dataLayer available with ${window.dataLayer.length} items`, 'success');
+            } else {
+                log('❌ dataLayer is missing or invalid', 'error');
+            }
+            
+            // Check for gtag script
+            const gtagScript = document.querySelector('script[src*="googletagmanager.com/gtag/js"]');
+            if (gtagScript) {
+                log('✅ gtag.js script found in DOM', 'success');
+            } else {
+                log('❌ gtag.js script not found', 'error');
+            }
+            
+            updateStatus();
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+            log('🗑️ Logs cleared', 'info');
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeGA();
+            
+            // Auto-check status every 5 seconds
+            setInterval(updateStatus, 5000);
+        });
+
+        // Log any errors
+        window.addEventListener('error', (e) => {
+            log(`❌ Error: ${e.message}`, 'error');
+        });
+    </script>
+</body>
+</html> 
