@@ -2,7 +2,6 @@
 import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import CVPreviewWindow from './CVPreviewWindow';
 import { useAuth } from '../context/AuthContext';
 import { useServer } from '../context/ServerContext';
 
@@ -26,10 +25,6 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
   
   // State for managing expanded improvement details
   const [expandedImprovements, setExpandedImprovements] = useState(new Set());
-  const [appliedImprovements, setAppliedImprovements] = useState(new Set());
-  // New: State for preview modal and updated CV
-  const [showPreview, setShowPreview] = useState(false);
-  const [updatedCV, setUpdatedCV] = useState(null);
 
   // Get current location to determine which analysis page we're on
   const location = useLocation();
@@ -49,318 +44,44 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
     setExpandedImprovements(newExpanded);
   };
 
-  // Apply suggested improvement
-  const applyImprovement = (improvementId, newText) => {
-    console.log('applyImprovement called:', { improvementId, newText });
-    const newApplied = new Set(appliedImprovements);
-    newApplied.add(improvementId);
-    setAppliedImprovements(newApplied);
-    
-    // Get updated CV content
-    const updatedContent = getUpdatedCVContent();
-    console.log('Updated CV content:', updatedContent);
-    
-    // Set the updated CV and show preview
-    setUpdatedCV(updatedContent);
-    setShowPreview(true);
-    console.log('Modal should now be visible');
-  };
-
-  // Helper: Parse raw CV text into a basic structure
-  function parseCVTextToStructure(cvText) {
-    if (!cvText || cvText.length < 20) {
-      return {
-        personalInfo: { fullName: "Professional", email: "email@example.com", phone: "Phone number", location: "Location" },
-        personalStatement: "Professional summary will appear here.",
-        skills: [{ skill: "Professional Skills", level: "Advanced" }],
-        experiences: [{
-          position: "Professional Role",
-          company: "Company Name", 
-          startDate: "Start Date",
-          endDate: "End Date",
-          description: "Professional experience will appear here."
-        }],
-        education: [{
-          institution: "Educational Institution",
-          degree: "Degree",
-          startDate: "Start Date", 
-          endDate: "End Date",
-          description: "Educational background will appear here."
-        }]
-      };
-    }
-    
-    const structure = {
-      personalInfo: {},
-      personalStatement: '',
-      skills: [],
-      experiences: [],
-      education: []
-    };
-    
-    // Extract personal information (look for common patterns)
-    const emailMatch = cvText.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
-    const phoneMatch = cvText.match(/(\+?[0-9\s\-\(\)]{10,})/);
-    const nameMatch = cvText.match(/^([A-Z][a-z]+ [A-Z][a-z]+(?:\s[A-Z][a-z]+)?)/m);
-    
-    structure.personalInfo = {
-      fullName: nameMatch ? nameMatch[1] : "Professional",
-      email: emailMatch ? emailMatch[1] : "email@example.com",
-      phone: phoneMatch ? phoneMatch[1] : "Phone number",
-      location: "Location"
-    };
-    
-    // Extract personal statement/summary
-    const summaryPatterns = [
-      /(?:PERSONAL STATEMENT|SUMMARY|OBJECTIVE|PROFILE)(?:\s*:?\s*)([\s\S]*?)(?:\n(?:EXPERIENCE|EDUCATION|SKILLS|WORK HISTORY)|$)/i,
-      /(?:^|\n)((?:Experienced|Dedicated|Results-driven|Professional)[\s\S]*?)(?:\n(?:EXPERIENCE|EDUCATION|SKILLS|WORK HISTORY)|$)/i
-    ];
-    
-    for (const pattern of summaryPatterns) {
-      const match = cvText.match(pattern);
-      if (match && match[1] && match[1].trim().length > 20) {
-        structure.personalStatement = match[1].trim().substring(0, 300);
-        break;
-      }
-    }
-    
-    if (!structure.personalStatement) {
-      structure.personalStatement = "Professional summary will appear here.";
-    }
-    
-    // Extract skills
-    const skillsMatch = cvText.match(/(?:SKILLS|EXPERTISE|COMPETENCIES|KEY SKILLS)(?:\s*:?\s*)([\s\S]*?)(?:\n(?:EXPERIENCE|EDUCATION|WORK HISTORY)|$)/i);
-    if (skillsMatch && skillsMatch[1]) {
-      const skillsText = skillsMatch[1];
-      const skills = skillsText.split(/[,\n•\-]/).map(s => s.trim()).filter(s => s && s.length > 2 && s.length < 50);
-      structure.skills = skills.slice(0, 8).map(skill => ({ skill, level: 'Advanced' }));
-    }
-    
-    if (structure.skills.length === 0) {
-      structure.skills = [{ skill: "Professional Skills", level: "Advanced" }];
-    }
-    
-    // Extract experience
-    const experienceMatch = cvText.match(/(?:EXPERIENCE|WORK HISTORY|EMPLOYMENT|PROFESSIONAL EXPERIENCE)(?:\s*:?\s*)([\s\S]*?)(?:\n(?:EDUCATION|SKILLS|QUALIFICATIONS)|$)/i);
-    if (experienceMatch && experienceMatch[1]) {
-      const expText = experienceMatch[1];
-      // Try to find position titles (often in caps or bold formatting)
-      const positions = expText.match(/([A-Z][A-Za-z\s&,]+(?:Manager|Director|Analyst|Specialist|Engineer|Developer|Coordinator|Assistant|Lead|Head|Officer))/g);
-      const companies = expText.match(/([A-Z][A-Za-z\s&,]+(?:Ltd|Inc|Corp|Company|Group|Solutions|Services))/g);
-      
-      if (positions && positions.length > 0) {
-        structure.experiences.push({
-          position: positions[0],
-          company: companies ? companies[0] : "Company Name",
-          startDate: "Start Date",
-          endDate: "End Date", 
-          description: expText.substring(0, 200).trim()
-        });
-      } else {
-        structure.experiences.push({
-          position: "Professional Role",
-          company: "Company Name",
-          startDate: "Start Date",
-          endDate: "End Date",
-          description: expText.substring(0, 200).trim()
-        });
-      }
-    } else {
-      structure.experiences.push({
-        position: "Professional Role",
-        company: "Company Name",
-        startDate: "Start Date",
-        endDate: "End Date",
-        description: "Professional experience will appear here."
-      });
-    }
-    
-    // Extract education
-    const educationMatch = cvText.match(/(?:EDUCATION|QUALIFICATIONS|ACADEMIC BACKGROUND)(?:\s*:?\s*)([\s\S]*?)(?:\n(?:SKILLS|EXPERIENCE|REFERENCES)|$)/i);
-    if (educationMatch && educationMatch[1]) {
-      const eduText = educationMatch[1];
-      const degrees = eduText.match(/(Bachelor|Master|PhD|Degree|Diploma|Certificate|BSc|MSc|BA|MA|MBA)/gi);
-      const institutions = eduText.match(/([A-Z][A-Za-z\s]+(?:University|College|Institute|School))/g);
-      
-      structure.education.push({
-        institution: institutions ? institutions[0] : "Educational Institution",
-        degree: degrees ? degrees[0] : "Degree",
-        startDate: "Start Date",
-        endDate: "End Date",
-        description: eduText.substring(0, 100).trim()
-      });
-    } else {
-      structure.education.push({
-        institution: "Educational Institution",
-        degree: "Degree", 
-        startDate: "Start Date",
-        endDate: "End Date",
-        description: "Educational background will appear here."
-      });
-    }
-    
-    return structure;
-  }
-
-  // Helper: Merge all applied improvements into the structured CV content
-  const getUpdatedCVContent = () => {
-    console.log('getUpdatedCVContent called');
-    console.log('analysisResults:', analysisResults);
-    console.log('appliedImprovements:', appliedImprovements);
-    console.log('detailedImprovements:', detailedImprovements);
-    
-    // Start from the original extracted content, or parse from text if missing
-    let base = analysisResults?.extractedContent || analysisResults?.extractedInfo;
-    
-    console.log('Base content from backend:', base);
-    
-    if (!base || Object.keys(base).length === 0 || !base.personalInfo) {
-      const text = analysisResults?.cvText || originalCvText || '';
-      console.log('Parsing CV text:', text.substring(0, 200) + '...');
-      base = parseCVTextToStructure(text);
-      console.log('Parsed structure from text:', base);
-    }
-    
-    // Ensure base has all required fields with defaults
-    const validatedBase = {
-      personalInfo: {
-        fullName: base?.personalInfo?.fullName || base?.personalInfo?.name || 'Professional',
-        email: base?.personalInfo?.email || 'email@example.com',
-        phone: base?.personalInfo?.phone || 'Phone Number',
-        location: base?.personalInfo?.location || 'Location'
-      },
-      personalStatement: base?.personalStatement || 'Professional summary will appear here.',
-      skills: Array.isArray(base?.skills) && base.skills.length > 0 
-        ? base.skills 
-        : [{ skill: 'Professional Skills', level: 'Advanced' }],
-      experiences: Array.isArray(base?.experiences) && base.experiences.length > 0 
-        ? base.experiences 
-        : [{
-            position: 'Professional Role',
-            company: 'Company Name',
-            startDate: 'Start Date',
-            endDate: 'End Date',
-            description: 'Professional experience and achievements will appear here.'
-          }],
-      education: Array.isArray(base?.education) && base.education.length > 0 
-        ? base.education 
-        : [{
-            institution: 'Educational Institution',
-            degree: 'Degree',
-            startDate: 'Start Date',
-            endDate: 'End Date',
-            description: 'Educational background will appear here.'
-          }]
-    };
-    
-    // Deep clone to avoid mutating original
-    const updated = JSON.parse(JSON.stringify(validatedBase));
-    
-    // Apply each applied improvement
-    detailedImprovements.forEach((imp) => {
-      if (appliedImprovements.has(imp.id)) {
-        console.log('Applying improvement:', imp);
-        // Map section to field
-        const section = (imp.section || '').toLowerCase();
-        if (section.includes('personal statement') || section.includes('summary') || section.includes('objective')) {
-          updated.personalStatement = imp.suggestedText;
-        } else if (section.includes('skills') || section.includes('competencies')) {
-          const skillsArray = imp.suggestedText.split(/[,\n]/).map(s => s.trim()).filter(s => s);
-          updated.skills = skillsArray.map(skill => ({ skill, level: 'Advanced' }));
-        } else if (section.includes('experience') || section.includes('work') || section.includes('employment')) {
-          if (updated.experiences && updated.experiences.length > 0) {
-            updated.experiences[0].description = imp.suggestedText;
-          } else {
-            updated.experiences = [{
-              position: 'Professional Role',
-              company: 'Company Name',
-              startDate: 'Start Date',
-              endDate: 'End Date',
-              description: imp.suggestedText
-            }];
-          }
-        } else if (section.includes('education') || section.includes('qualification')) {
-          if (updated.education && updated.education.length > 0) {
-            updated.education[0].description = imp.suggestedText;
-          } else {
-            updated.education = [{
-              institution: 'Educational Institution',
-              degree: 'Degree',
-              startDate: 'Start Date',
-              endDate: 'End Date',
-              description: imp.suggestedText
-            }];
-          }
-        }
-      }
-    });
-    
-    console.log('Final updated content:', updated);
-    return updated;
-  };
-
   // Analyse Again logic
   const [isReanalyzing, setIsReanalyzing] = useState(false);
   const [reanalyzeResults, setReanalyzeResults] = useState(null);
-  const handleAnalyseAgain = async () => {
-    setIsReanalyzing(true);
-    setReanalyzeResults(null);
+
+  const handleReanalyze = async () => {
+    if (!originalCvText) return;
+    
     try {
-      const updatedCV = getUpdatedCVContent();
-      // Prepare payload for backend (as text or structured)
+      setIsReanalyzing(true);
+      
       const headers = getAuthHeader();
-      delete headers['Content-Type'];
-      const formData = new FormData();
-      formData.append('cvText', formatCVAsText(updatedCV));
       const response = await fetch(`${apiUrl}/api/cv/analyze-only`, {
         method: 'POST',
-        headers,
-        body: formData
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          cvText: originalCvText,
+          role: role || 'general',
+          industry: industry || 'general'
+        })
       });
+
       if (response.ok) {
         const data = await response.json();
         setReanalyzeResults(data);
+        console.log('Re-analysis complete:', data);
       } else {
-        setReanalyzeResults({ error: 'Analysis failed. Please try again.' });
+        console.error('Re-analysis failed:', response.status);
       }
-    } catch (err) {
-      setReanalyzeResults({ error: err.message || 'Analysis failed.' });
+    } catch (error) {
+      console.error('Error during re-analysis:', error);
     } finally {
       setIsReanalyzing(false);
     }
   };
 
-  // Helper: Format structured CV as plain text for backend
-  function formatCVAsText(cv) {
-    let text = '';
-    if (cv.personalInfo) {
-      text += `${cv.personalInfo.fullName || cv.personalInfo.name || ''}\n`;
-      if (cv.personalInfo.email) text += `${cv.personalInfo.email}\n`;
-      if (cv.personalInfo.phone) text += `${cv.personalInfo.phone}\n`;
-      if (cv.personalInfo.location) text += `${cv.personalInfo.location}\n`;
-    }
-    if (cv.personalStatement) {
-      text += `\nPersonal Statement:\n${cv.personalStatement}\n`;
-    }
-    if (cv.skills && cv.skills.length > 0) {
-      text += `\nSkills:\n${cv.skills.map(s => s.skill || s).join(', ')}\n`;
-    }
-    if (cv.experiences && cv.experiences.length > 0) {
-      text += `\nWork Experience:\n`;
-      cv.experiences.forEach(exp => {
-        text += `${exp.position || ''} at ${exp.company || ''} (${exp.startDate || ''} - ${exp.endDate || 'Present'})\n${exp.description || ''}\n`;
-      });
-    }
-    if (cv.education && cv.education.length > 0) {
-      text += `\nEducation:\n`;
-      cv.education.forEach(edu => {
-        text += `${edu.degree || edu.title || ''} at ${edu.institution || ''} (${edu.startDate || ''} - ${edu.endDate || 'Present'})\n${edu.description || ''}\n`;
-      });
-    }
-    return text;
-  }
-
-  // Generate personalized next steps based on actual analysis results
   const getPersonalizedNextSteps = () => {
     const steps = [];
     let stepId = 1;
@@ -416,53 +137,62 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
     }
 
     // Priority 4: Career transition advice if available
-    if (careerTransitionAdvice && steps.length < 5) {
+    if (careerTransitionAdvice && steps.length < 4) {
       steps.push({
         id: stepId++,
         text: careerTransitionAdvice,
         priority: 'medium',
-        type: 'career_advice',
+        type: 'career_transition',
         source: 'career_analysis'
       });
     }
 
-    // Fallback: If no AI data, provide score-based generic advice
-    if (steps.length === 0) {
-      if (score < 60) {
-        steps.push(
-          { id: 1, text: 'Focus on improving your CV content with specific achievements and metrics', priority: 'high', type: 'fallback' },
-          { id: 2, text: 'Ensure your CV format is ATS-compatible and professionally structured', priority: 'high', type: 'fallback' },
-          { id: 3, text: 'Add more relevant keywords for your target industry and role', priority: 'medium', type: 'fallback' }
-        );
-      } else if (score < 80) {
-        steps.push(
-          { id: 1, text: 'Enhance your skills section with more specific technical competencies', priority: 'medium', type: 'fallback' },
-          { id: 2, text: 'Add more quantifiable results and achievements to stand out', priority: 'medium', type: 'fallback' },
-          { id: 3, text: 'Consider tailoring your CV more specifically for your target roles', priority: 'low', type: 'fallback' }
-        );
-      } else {
-        steps.push(
-          { id: 1, text: 'Your CV is strong - focus on customizing it for specific job applications', priority: 'low', type: 'fallback' },
-          { id: 2, text: 'Consider adding any recent certifications or projects to stay current', priority: 'low', type: 'fallback' },
-          { id: 3, text: 'Polish your professional summary to make an even stronger first impression', priority: 'low', type: 'fallback' }
-        );
-      }
+    // Priority 5: Use recommendations as fallback
+    if (recommendations && recommendations.length > 0 && steps.length < 4) {
+      const remainingSlots = 4 - steps.length;
+      recommendations.slice(0, remainingSlots).forEach((recommendation) => {
+        steps.push({
+          id: stepId++,
+          text: recommendation,
+          priority: 'low',
+          type: 'recommendation',
+          source: 'general_recommendations'
+        });
+      });
     }
 
-    return steps.slice(0, 4); // Limit to top 4 recommendations
+    // Fallback: Generic steps if we have very few specific recommendations
+    if (steps.length < 2) {
+      const genericSteps = [
+        'Review and update your personal statement to better highlight your key achievements',
+        'Ensure all work experience entries include specific, quantifiable achievements',
+        'Add relevant keywords that align with your target job descriptions',
+        'Check formatting consistency throughout your CV (fonts, spacing, bullet points)',
+        'Include relevant certifications or training that demonstrate your expertise'
+      ];
+
+      genericSteps.slice(0, 4 - steps.length).forEach((step) => {
+        steps.push({
+          id: stepId++,
+          text: step,
+          priority: 'medium',
+          type: 'generic',
+          source: 'fallback'
+        });
+      });
+    }
+
+    return steps.slice(0, 4); // Limit to 4 steps max
   };
 
-  // Get priority color based on priority level
+  const nextSteps = getPersonalizedNextSteps();
+
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high':
-        return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700';
-      case 'low':
-        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
+      case 'high': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+      case 'low': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
   };
 
@@ -475,73 +205,23 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
     }
   };
 
-  const getStepIcon = (type) => {
-    switch (type) {
-      case 'improvement':
-        return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        );
-      case 'keywords':
-        return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-          </svg>
-        );
-      case 'content':
-        return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        );
-      case 'format':
-        return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-          </svg>
-        );
-      case 'career_advice':
-        return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
-        );
-      
-      default:
-        return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-          </svg>
-        );
-    }
-  };
-
-  const nextSteps = getPersonalizedNextSteps();
-
-  // Create dynamic title based on context
-  const getTitle = () => {
-    if (analysisType === 'role-specific' && role && industry) {
-      return `Next Steps to Excel as a ${role} in ${industry}`;
-    }
-    return 'Personalized Next Steps for Your CV';
-  };
+  // Don't render if no analysis results
+  if (!analysisResults) {
+    return null;
+  }
 
   return (
-    <>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mt-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-gray-800 dark:text-white">
-            {getTitle()}
-          </h3>
-          {score > 0 && (
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Current Score: <span className="font-semibold">{score}/100</span>
-            </div>
-          )}
-        </div>
+    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow rounded-lg p-6 border border-blue-100 dark:border-blue-900/30">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+          <svg className="w-6 h-6 text-blue-600 dark:text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Next Steps & Recommendations
+        </h2>
+      </div>
 
-        {/* Analysis-based insights */}
+      <div className="space-y-6">
         {analysisResults && (
           <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
             <div className="flex items-start">
@@ -590,11 +270,6 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{improvement.reason}</p>
                       </div>
                       <div className="flex items-center space-x-2">
-                        {appliedImprovements.has(improvement.id) && (
-                          <span className="text-green-600 dark:text-green-400 text-sm font-medium bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
-                            Applied
-                          </span>
-                        )}
                         <svg 
                           className={`w-5 h-5 text-gray-400 transition-transform ${expandedImprovements.has(improvement.id) ? 'rotate-180' : ''}`} 
                           fill="none" 
@@ -636,21 +311,6 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
                             <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{improvement.suggestedText}</p>
                           </div>
                         </div>
-                        
-                        {/* Apply Button */}
-                        <div className="flex justify-end pt-2">
-                          <button
-                            onClick={() => applyImprovement(improvement.id, improvement.suggestedText)}
-                            disabled={appliedImprovements.has(improvement.id)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                              appliedImprovements.has(improvement.id)
-                                ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                                : 'bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600'
-                            }`}
-                          >
-                            {appliedImprovements.has(improvement.id) ? 'Applied' : 'Apply Changes'}
-                          </button>
-                        </div>
                       </div>
                     </div>
                   )}
@@ -661,77 +321,113 @@ const CvAnalysisNextSteps = ({ analysisResults, analysisType, role, industry, or
         )}
         
         {/* General Next Steps */}
-        <div className="space-y-4">
-          <h4 className="text-lg font-semibold text-gray-800 dark:text-white">General Recommendations:</h4>
-          {nextSteps.map((step) => (
-            <div key={step.id} className="flex items-start group hover:bg-gray-50 dark:hover:bg-gray-700/50 p-3 rounded-lg transition-colors">
-              <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-3 ${getPriorityColor(step.priority)}`}>
-                {step.source === 'ai_analysis' ? getStepIcon(step.type) : step.id}
-              </div>
-              <div className="flex-1">
-                <p className="text-gray-700 dark:text-gray-300">{step.text}</p>
-                <div className="flex items-center mt-1 space-x-2">
-                  <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full border ${getPriorityColor(step.priority)}`}>
-                    {getPriorityLabel(step.priority)}
-                  </span>
-                  {step.source === 'ai_analysis' && (
-                    <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
-                      AI Recommendation
-                    </span>
-                  )}
+        <div>
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+            <svg className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Recommended Action Steps
+          </h4>
+          <div className="grid gap-4 md:grid-cols-2">
+            {nextSteps.map((step) => (
+              <div key={step.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <div className="flex items-start space-x-3">
+                  <div className={`w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold ${
+                    step.priority === 'high' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
+                    step.priority === 'medium' ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                    'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
+                  }`}>
+                    {step.id}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${getPriorityColor(step.priority)}`}>
+                        {getPriorityLabel(step.priority)}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{step.text}</p>
+                  </div>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Career Transition Advice - Only show if available and relevant */}
+        {careerTransitionAdvice && timeToCompetitive && (
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-6 rounded-lg border border-purple-200 dark:border-purple-800">
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-3 flex items-center">
+              <svg className="w-5 h-5 text-purple-600 dark:text-purple-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Career Transition Insight
+            </h4>
+            <div className="space-y-3">
+              <p className="text-gray-700 dark:text-gray-300">{careerTransitionAdvice}</p>
+              <div className="flex items-center space-x-2 text-sm">
+                <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  <strong>Estimated time to become competitive:</strong> {timeToCompetitive}
+                </span>
+              </div>
             </div>
-          ))}
-        </div>
-        
-        {/* Action buttons */}
-        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-center space-x-4">
-          <Link
-            to="/create"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors dark:bg-blue-500 dark:hover:bg-blue-600"
-          >
-            + Create New CV
-          </Link>
-          
-          <Link
-            to="/templates"
-            className="text-blue-600 hover:text-blue-700 border border-blue-600 hover:border-blue-700 px-6 py-2 rounded-lg text-sm font-medium transition-colors dark:text-blue-400 dark:border-blue-400 dark:hover:text-blue-300 dark:hover:border-blue-300"
-          >
-            📄 Browse Templates
-          </Link>
-          
-          {!isOnRoleSpecificPage && (
+          </div>
+        )}
+
+        {/* Quick Actions */}
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Take Action</h4>
+          <div className="grid gap-4 md:grid-cols-3">
             <Link
-              to="/cv-analyze-by-role"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors dark:bg-purple-500 dark:hover:bg-purple-600"
+              to="/create"
+              className="flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
-              🎯 Role-Specific Analysis
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit Your CV
             </Link>
-          )}
+            
+            {!isOnRoleSpecificPage && (
+              <Link
+                to="/cv-analyze-by-role"
+                className="flex items-center justify-center px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2v0" />
+                </svg>
+                Role-Specific Analysis
+              </Link>
+            )}
+            
+            <button
+              onClick={handleReanalyze}
+              disabled={isReanalyzing || !originalCvText}
+              className="flex items-center justify-center px-4 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              {isReanalyzing ? 'Analyzing...' : 'Analyze Again'}
+            </button>
+          </div>
         </div>
+
+        {/* Re-analysis Results */}
+        {reanalyzeResults && (
+          <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+            <h5 className="font-medium text-green-800 dark:text-green-300 mb-2">Updated Analysis Results:</h5>
+            <p className="text-sm text-green-700 dark:text-green-400">
+              New Score: {reanalyzeResults.score}/100 
+              {reanalyzeResults.score > score && <span className="ml-2 text-green-600">📈 Improved!</span>}
+              {reanalyzeResults.score < score && <span className="ml-2 text-red-600">📉 Needs work</span>}
+            </p>
+          </div>
+        )}
       </div>
-      {/* Preview Modal */}
-      {showPreview && (
-        <CVPreviewWindow
-          cvContent={updatedCV || {
-            personalInfo: { fullName: 'Your Name', email: 'your.email@example.com' },
-            personalStatement: 'Your updated personal statement will appear here.',
-            skills: [{ skill: 'Updated skills will appear here' }],
-            experiences: [{ position: 'Your Role', company: 'Company Name', description: 'Updated experience will appear here.' }],
-            education: [{ degree: 'Your Degree', institution: 'Institution Name', description: 'Updated education will appear here.' }]
-          }}
-          title="Preview Updated CV"
-          onClose={() => {
-            console.log('Closing modal');
-            setShowPreview(false);
-          }}
-          onAnalyseAgain={handleAnalyseAgain}
-          isReanalyzing={isReanalyzing}
-          reanalyzeResults={reanalyzeResults}
-        />
-      )}
-    </>
+    </div>
   );
 };
 
