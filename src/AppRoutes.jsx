@@ -24,6 +24,7 @@ import routes from './routes';
 import RouterOptimizer from './components/RouterOptimizer';
 import AuthGuard from './components/AuthGuard';
 import { validateCurrentRoute } from './utils/redirectToHome';
+import { trackPageView } from './utils/analytics';
 
 /**
  * @component LoadingComponent
@@ -96,8 +97,23 @@ const ProtectedRoute = ({ element, requiresAuth }) => {
   return isAuthenticated ? element : <Navigate to="/login" state={{ from: location }} replace />;
 };
 
+function usePageTracking() {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Track page view on route changes
+    if (typeof window !== 'undefined' && window.gtag) {
+      console.log('Tracking page view:', location.pathname);
+      trackPageView(location.pathname, document.title);
+    }
+  }, [location]);
+}
+
 const AppRoutes = () => {
   const location = useLocation();
+  
+  // Add page tracking for analytics
+  usePageTracking();
   
   // Safely check if routes is valid
   if (!Array.isArray(routes) || routes.length === 0) {

@@ -3,39 +3,103 @@ import * as Sentry from '@sentry/react';
 // Google Analytics 4 Configuration
 const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-G64RBEW6YP';
 
-// Initialize gtag if not already available
-if (typeof window !== 'undefined' && !window.gtag) {
+// Enhanced gtag initialization with fallback
+const initializeGtag = () => {
+  if (typeof window === 'undefined') return false;
+  
+  // Check if gtag is already available
+  if (window.gtag) {
+    console.log('gtag already available');
+    return true;
+  }
+  
+  // Initialize dataLayer and gtag if not available
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function(){
+  window.gtag = function() {
     window.dataLayer.push(arguments);
   };
-}
+  
+  console.log('gtag initialized manually');
+  return true;
+};
+
+// Initialize gtag immediately
+initializeGtag();
+
+/**
+ * Wait for gtag to be available (with timeout)
+ */
+const waitForGtag = (timeout = 5000) => {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') {
+      resolve(false);
+      return;
+    }
+    
+    if (window.gtag) {
+      resolve(true);
+      return;
+    }
+    
+    let attempts = 0;
+    const maxAttempts = timeout / 100;
+    
+    const checkGtag = () => {
+      attempts++;
+      if (window.gtag) {
+        console.log('gtag became available after', attempts * 100, 'ms');
+        resolve(true);
+      } else if (attempts >= maxAttempts) {
+        console.warn('gtag not available after', timeout, 'ms');
+        resolve(false);
+      } else {
+        setTimeout(checkGtag, 100);
+      }
+    };
+    
+    checkGtag();
+  });
+};
 
 /**
  * Track custom events in Google Analytics
  * @param {string} eventName - Event name
  * @param {Object} properties - Event properties
  */
-const trackEvent = (eventName, properties = {}) => {
+const trackEvent = async (eventName, properties = {}) => {
   console.log('Analytics Event:', eventName, properties);
   
+  // Wait for gtag to be available
+  const gtagAvailable = await waitForGtag(2000);
+  
   // Send to Google Analytics if available
-  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID) {
-    window.gtag('event', eventName, {
-      custom_parameter_1: properties.category || 'general',
-      custom_parameter_2: properties.label || '',
-      value: properties.value || 0,
-      ...properties
-    });
+  if (gtagAvailable && GA_MEASUREMENT_ID) {
+    try {
+      window.gtag('event', eventName, {
+        custom_parameter_1: properties.category || 'general',
+        custom_parameter_2: properties.label || '',
+        value: properties.value || 0,
+        ...properties
+      });
+      console.log('Event sent to GA:', eventName);
+    } catch (error) {
+      console.error('Error sending event to GA:', error);
+    }
+  } else {
+    console.warn('gtag not available, event not sent:', eventName);
   }
   
   // Send to Sentry for debugging
-  Sentry.addBreadcrumb({
-    category: 'analytics',
-    message: `Event: ${eventName}`,
-    level: 'info',
-    data: properties
-  });
+  try {
+    Sentry.addBreadcrumb({
+      category: 'analytics',
+      message: `Event: ${eventName}`,
+      level: 'info',
+      data: properties
+    });
+  } catch (error) {
+    console.error('Error sending to Sentry:', error);
+  }
 };
 
 /**
@@ -43,35 +107,50 @@ const trackEvent = (eventName, properties = {}) => {
  * @param {string} path - Page path
  * @param {string} title - Page title
  */
-const trackPageView = (path, title = document.title) => {
+const trackPageView = async (path, title = document.title) => {
   console.log('Page View:', path, title);
   
+  // Wait for gtag to be available
+  const gtagAvailable = await waitForGtag(2000);
+  
   // Send to Google Analytics if available
-  if (typeof window !== 'undefined' && window.gtag && GA_MEASUREMENT_ID) {
-    window.gtag('config', GA_MEASUREMENT_ID, {
-      page_path: path,
-      page_title: title,
-      page_location: window.location.href
-    });
-    
-    window.gtag('event', 'page_view', {
-      page_title: title,
-      page_location: window.location.href,
-      page_path: path
-    });
+  if (gtagAvailable && GA_MEASUREMENT_ID) {
+    try {
+      window.gtag('config', GA_MEASUREMENT_ID, {
+        page_path: path,
+        page_title: title,
+        page_location: window.location.href
+      });
+      
+      window.gtag('event', 'page_view', {
+        page_title: title,
+        page_location: window.location.href,
+        page_path: path
+      });
+      
+      console.log('Page view sent to GA:', path);
+    } catch (error) {
+      console.error('Error sending page view to GA:', error);
+    }
+  } else {
+    console.warn('gtag not available, page view not sent:', path);
   }
   
   // Add breadcrumb to Sentry
-  Sentry.addBreadcrumb({
-    category: 'navigation',
-    message: `Page view: ${path}`,
-    level: 'info',
-    data: {
-      path,
-      title,
-      url: window.location.href
-    }
-  });
+  try {
+    Sentry.addBreadcrumb({
+      category: 'navigation',
+      message: `Page view: ${path}`,
+      level: 'info',
+      data: {
+        path,
+        title,
+        url: window.location.href
+      }
+    });
+  } catch (error) {
+    console.error('Error sending to Sentry:', error);
+  }
 };
 
 /**

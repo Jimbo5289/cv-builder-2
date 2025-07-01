@@ -17,8 +17,20 @@ import './utils/initializeApp.js'; // Import the initialization code
 import './fix-react-config';
 import './utils/reactEslintFix';
 
+// Initialize Google Analytics as early as possible
+import { trackPageView } from './utils/analytics';
+
 // Debug - log the loading process
 console.log('Main.jsx loading - Initializing app');
+
+// Initialize Google Analytics
+if (typeof window !== 'undefined' && window.gtag) {
+  console.log('Google Analytics initialized in main.jsx');
+  // Track the initial page load
+  trackPageView(window.location.pathname, document.title);
+} else {
+  console.warn('Google Analytics not available in main.jsx');
+}
 
 // Suppress known CSS warnings that can't be fixed
 suppressCssWarnings();
