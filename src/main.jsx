@@ -12,6 +12,7 @@ import ReactBootstrap from './components/ReactBootstrap';
 import routes from './routes';
 import { validateCurrentRoute } from './utils/redirectToHome';
 import './utils/initializeApp.js'; // Import the initialization code
+import { initializeCVBuilderTracking } from './utils/cvBuilderAnalytics';
 
 // Import our fixes for React global definitions and ESLint errors
 import './fix-react-config';
@@ -231,6 +232,9 @@ const renderApp = async () => {
         window.location.href = '/';
       }
     };
+    
+    // Initialize CV Builder analytics tracking
+    initializeCVBuilderTracking();
     
     // Directly render the app with minimal wrapping
     console.log('Rendering application');

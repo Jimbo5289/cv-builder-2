@@ -13,6 +13,7 @@ import AnalysisProgressTracker from '../components/AnalysisProgressTracker';
 import CourseRecommendations from '../components/CourseRecommendations';
 import CVPreviewResult from '../components/CVPreviewResult';
 import { findCourseRecommendations } from '../data/courseRecommendations';
+import { trackCVUpload, trackCVAnalysis, trackCVAnalysisComplete, trackUserJourney, trackFeatureUsage } from '../utils/cvBuilderAnalytics';
 import './Analyze.css'; // Import the animation styles
 
 // Global objects that exist in browser environment
@@ -174,6 +175,18 @@ const CvAnalyze = () => {
     
     console.log('File validation passed, setting file');
     setFile(uploadedFile);
+    
+    // Track CV upload analytics
+    trackCVUpload({
+      fileType: uploadedFile.type,
+      fileSizeKB: Math.round(uploadedFile.size / 1024),
+      uploadMethod: activeTab
+    });
+    
+    trackUserJourney('cv_upload_started', {
+      userType: isAuthenticated ? 'registered' : 'anonymous',
+      fileType: uploadedFile.type
+    });
   };
 
   const analyzeCV = async () => {
@@ -236,6 +249,14 @@ const CvAnalyze = () => {
        setOriginalCvContent(activeTab === 'upload' ? '' : cvText); // For files, backend will provide this
 
       // Progress stages with delays
+      // Track analysis start
+      const analysisStartTime = Date.now();
+      trackCVAnalysis({
+        type: 'comprehensive',
+        uploadMethod: activeTab,
+        userType: isAuthenticated ? 'registered' : 'anonymous'
+      });
+      
       await delayedProgress(20, 'Extracting content from your CV...');
       await delayedProgress(40, 'Analyzing structure and formatting...');
       await delayedProgress(60, 'Evaluating content quality...');
@@ -269,14 +290,49 @@ const CvAnalyze = () => {
       if (response.ok) {
         const data = await response.json();
         setAnalysisResults(data);
+        
         // Store the CV text from backend if it was extracted from file
         if (activeTab === 'upload' && data.cvText) {
           setOriginalCvContent(data.cvText);
         }
+        
+        // Track successful analysis completion
+        const analysisDuration = (Date.now() - analysisStartTime) / 1000;
+        trackCVAnalysisComplete({
+          score: data.score || 0,
+          durationSeconds: analysisDuration,
+          improvementsCount: data.improvements?.length || 0,
+          missingKeywordsCount: data.missingKeywords?.length || 0
+        });
+        
+        trackUserJourney('first_analysis_complete', {
+          userType: isAuthenticated ? 'registered' : 'anonymous',
+          cvScore: data.score || 0,
+          sessionDuration: Math.round(analysisDuration / 60)
+        });
+        
+        trackFeatureUsage('cv_analysis', {
+          type: 'core',
+          context: 'standalone_analysis',
+          success: true,
+          completionTime: analysisDuration,
+          userType: isAuthenticated ? 'registered' : 'anonymous'
+        });
+        
         setProgressStep(3);
         updateProgress(100, 'Analysis complete!');
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        
+        // Track analysis failure
+        trackFeatureUsage('cv_analysis', {
+          type: 'core',
+          context: 'standalone_analysis',
+          success: false,
+          errorType: errorData.message || 'unknown_error',
+          userType: isAuthenticated ? 'registered' : 'anonymous'
+        });
+        
         setError(`Analysis failed: ${errorData.message || response.statusText}`);
       }
     } catch (error) {
