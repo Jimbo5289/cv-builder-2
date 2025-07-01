@@ -1,7 +1,7 @@
 {
   "name": "cv-builder",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.1",
   "type": "module",
   "buildTimestamp": "2025-01-19T21:59:00Z",
   "scripts": {
