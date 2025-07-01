@@ -7,23 +7,40 @@ const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-G64RBEW6Y
 const initializeGtag = () => {
   if (typeof window === 'undefined') return false;
   
-  // Check if gtag is already available
-  if (window.gtag) {
-    console.log('gtag already available');
-    return true;
+  // Check if gtag script is already loaded
+  const existingScript = document.querySelector(`script[src*="googletagmanager.com/gtag/js"]`);
+  
+  if (!existingScript && GA_MEASUREMENT_ID) {
+    // Load the gtag script dynamically
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+    document.head.appendChild(script);
+    console.log('gtag script loaded dynamically');
   }
   
-  // Initialize dataLayer and gtag if not available
+  // Initialize dataLayer and gtag function
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function() {
+  window.gtag = window.gtag || function() {
     window.dataLayer.push(arguments);
   };
   
-  console.log('gtag initialized manually');
+  // Configure Google Analytics
+  if (GA_MEASUREMENT_ID) {
+    window.gtag('js', new Date());
+    window.gtag('config', GA_MEASUREMENT_ID, {
+      anonymize_ip: true,
+      allow_google_signals: false,
+      allow_ad_personalization_signals: false,
+      cookie_flags: 'SameSite=None;Secure'
+    });
+    console.log('GA configured with ID:', GA_MEASUREMENT_ID);
+  }
+  
   return true;
 };
 
-// Initialize gtag immediately
+// Initialize gtag immediately when this module loads
 initializeGtag();
 
 /**
