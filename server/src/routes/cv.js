@@ -3020,6 +3020,7 @@ router.post('/analyze-only', (req, res, next) => {
     let cvText = '';
     let _sourceType = 'unknown';
     let _fileName = 'cv-text';
+    let extractedContent = null;
     
     if (req.file) {
       _sourceType = 'file';
@@ -3027,28 +3028,40 @@ router.post('/analyze-only', (req, res, next) => {
       // Extract text from file
       try {
         cvText = await extractTextFromFile(req.file);
+        // Also extract structured CV content for enhancement purposes
+        extractedContent = extractStructuredCVContent(cvText);
       } catch (extractError) {
         logger.warn('File extraction failed, using fallback:', extractError.message);
         cvText = req.file.buffer.toString('utf8').replace(/[^\u0000-\uFFFF]/g, ' ').trim();
+        // Try to extract content from fallback text
+        extractedContent = extractStructuredCVContent(cvText);
       }
     } else {
       _sourceType = 'text';
       cvText = req.body.cvText;
+      // Extract structured content from provided text
+      extractedContent = extractStructuredCVContent(cvText);
     }
 
     // Use aiAnalysisService for generic analysis
     const analysisResults = await aiAnalysisService.analyzeCV(cvText, null, null, true);
+    
     // Log the outgoing response for debugging
     logger.info('[DEBUG] /analyze-only outgoing response', {
       score: analysisResults.score,
       detailedImprovements: Array.isArray(analysisResults.detailedImprovements) ? analysisResults.detailedImprovements.length : 'none',
       improvements: Array.isArray(analysisResults.improvements) ? analysisResults.improvements.length : 'none',
-      analysisMetadata: analysisResults.analysisMetadata || null
+      analysisMetadata: analysisResults.analysisMetadata || null,
+      hasExtractedContent: !!extractedContent,
+      hasCvText: !!cvText
     });
-    // Return all fields, including detailedImprovements
+    
+    // Return all fields, including detailedImprovements, extractedContent, and cvText
     return res.json({
       ...analysisResults,
-      detailedImprovements: analysisResults.detailedImprovements || []
+      detailedImprovements: analysisResults.detailedImprovements || [],
+      extractedContent: extractedContent,
+      cvText: cvText
     });
   } catch (error) {
     logger.error('Error analyzing CV:', error);
