@@ -6,13 +6,18 @@ import { Link } from 'react-router-dom';
 import { safeFetch } from '../utils/apiUtils';
 
 export default function NotificationBell() {
-  const { user, getAuthHeader } = useAuth();
+  const { user, getAuthHeader, isAuthenticated } = useAuth();
   const { apiUrl, status: serverStatus } = useServer();
   const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {
+    let retryCount = 0;
+    const maxRetries = 3;
+    let intervalId = null;
+
     const fetchNotificationCount = async () => {
-      if (!user || serverStatus !== 'connected' || !apiUrl) {
+      // Only fetch if user is authenticated and server is connected
+      if (!user || !isAuthenticated || serverStatus !== 'connected' || !apiUrl) {
         return;
       }
 
@@ -25,19 +30,36 @@ export default function NotificationBell() {
 
         if (data && data.notifications) {
           setNotificationCount(data.notifications.length);
+          retryCount = 0; // Reset retry count on success
         }
       } catch (error) {
+        // If authentication fails, stop polling temporarily
+        if (error.status === 401) {
+          retryCount++;
+          if (retryCount >= maxRetries) {
+            console.log('Authentication failed multiple times, stopping notification polling');
+            if (intervalId) {
+              clearInterval(intervalId);
+            }
+            return;
+          }
+        }
         console.error('Error fetching notification count:', error);
       }
     };
 
+    // Initial fetch
     fetchNotificationCount();
     
-    // Refresh notification count every 5 minutes
-    const interval = setInterval(fetchNotificationCount, 5 * 60 * 1000);
+    // Set up interval with longer delay (10 minutes instead of 5)
+    intervalId = setInterval(fetchNotificationCount, 10 * 60 * 1000);
     
-    return () => clearInterval(interval);
-  }, [user, apiUrl, serverStatus, getAuthHeader]);
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [user, apiUrl, serverStatus, getAuthHeader, isAuthenticated]);
 
   if (!user || notificationCount === 0) {
     return null;

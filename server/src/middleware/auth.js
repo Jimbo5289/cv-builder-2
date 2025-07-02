@@ -13,6 +13,10 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 const useMockDb = process.env.MOCK_DATABASE === 'true';
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
 
+// Rate limiting for token expiration warnings to reduce log noise
+const expiredTokenWarnings = new Map();
+const WARNING_COOLDOWN = 60000; // 1 minute cooldown per client
+
 // Read the development.env file to get the DEV_USER_ID value
 let devUserId = null;
 let devUserName = null;
@@ -151,13 +155,21 @@ const auth = async (req, res, next) => {
   } catch (error) {
     // Handle specific JWT errors with appropriate logging levels
     if (error.name === 'TokenExpiredError') {
-      // Token expiration is expected behavior, log as info instead of error
-      logger.info('Token expired for user session:', {
-        expiredAt: error.expiredAt,
-        path: req.path,
-        method: req.method,
-        ip: req.ip
-      });
+      // Rate limit token expiration warnings to reduce log noise
+      const clientKey = `${req.ip}-${req.path}`;
+      const now = Date.now();
+      const lastWarning = expiredTokenWarnings.get(clientKey);
+      
+      if (!lastWarning || (now - lastWarning) > WARNING_COOLDOWN) {
+        logger.info('Token expired for user session:', {
+          expiredAt: error.expiredAt,
+          path: req.path,
+          method: req.method,
+          ip: req.ip
+        });
+        expiredTokenWarnings.set(clientKey, now);
+      }
+      
       return res.status(401).json({ 
         error: 'Token expired',
         message: 'Your session has expired. Please log in again.',
