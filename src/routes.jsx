@@ -34,6 +34,7 @@ const Templates = React.lazy(() => import(/* webpackChunkName: "templates" */ '.
 const Examples = React.lazy(() => import(/* webpackChunkName: "examples" */ './pages/Examples'));
 const Pricing = React.lazy(() => import(/* webpackChunkName: "pricing" */ './pages/Pricing'));
 const Blog = React.lazy(() => import(/* webpackChunkName: "blog" */ './pages/Blog'));
+const BlogPost = React.lazy(() => import(/* webpackChunkName: "blog-post" */ './pages/BlogPost'));
 const Contact = React.lazy(() => import(/* webpackChunkName: "contact" */ './pages/Contact'));
 const CvTips = React.lazy(() => import(/* webpackChunkName: "cv-tips" */ './pages/CvTips'));
 const CookiePolicy = React.lazy(() => import(/* webpackChunkName: "cookie-policy" */ './pages/CookiePolicy'));
@@ -84,6 +85,7 @@ const routes = [
   { path: '/examples', Component: Examples },
   { path: '/pricing', Component: Pricing },
   { path: '/blog', Component: Blog },
+  { path: '/blog/:id', Component: BlogPost },
   { path: '/contact', Component: Contact },
   { path: '/cv-tips', Component: CvTips },
   { path: '/analyze', Component: Analyze },

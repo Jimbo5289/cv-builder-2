@@ -84,7 +84,7 @@ export default function Blog() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">CV Builder Blog</h1>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">MyCVBuilder Blog</h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Expert advice on CV writing, job hunting, and career development to help you succeed in your professional journey.
           </p>
