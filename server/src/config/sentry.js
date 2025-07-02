@@ -20,6 +20,13 @@ function initializeSentry() {
   }
 
   try {
+    // Validate DSN format
+    const dsn = process.env.SENTRY_DSN;
+    if (!dsn.includes('sentry.io')) {
+      console.error('Invalid Sentry DSN format provided');
+      return null;
+    }
+
     // Get default integrations using the new Sentry v9 API
     let defaultIntegrations = [];
     try {
@@ -39,7 +46,7 @@ function initializeSentry() {
     }
 
     const options = {
-      dsn: process.env.SENTRY_DSN,
+      dsn: dsn,
       environment: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || 'development',
       
       // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring
@@ -100,7 +107,7 @@ function initializeSentry() {
 
     Sentry.init(options);
     sentryInstance = Sentry;
-    console.log('Sentry initialized successfully');
+    console.log('Sentry initialized successfully with DSN:', dsn.substring(0, 20) + '...');
     return Sentry;
   } catch (error) {
     console.error('Error in Sentry configuration:', error);
