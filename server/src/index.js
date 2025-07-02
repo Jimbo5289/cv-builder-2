@@ -177,9 +177,10 @@ if (Sentry && Sentry.Handlers && Sentry.Handlers.requestHandler) {
     request: true,
   }));
   
-  logger.info('Sentry request handler initialized successfully');
+  // Remove the tracing handler since it requires additional setup
+  // app.use(Sentry.Handlers.tracingHandler());
 } else {
-  logger.warn('Sentry handlers not available - error tracking limited');
+  logger.info('Sentry handlers not available, skipping request handler setup');
 }
 
 // Enhance CORS middleware to handle preflight requests correctly
@@ -443,9 +444,8 @@ if (Sentry && Sentry.Handlers && Sentry.Handlers.errorHandler) {
       return error.status >= 400 || !error.status;
     }
   }));
-  logger.info('Sentry error handler initialized successfully');
 } else {
-  logger.warn('Sentry error handler not available - error tracking limited');
+  logger.info('Sentry error handler not available, skipping error handler setup');
 }
 
 // Global error handler
