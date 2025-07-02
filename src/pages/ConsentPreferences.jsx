@@ -162,7 +162,7 @@ const ConsentPreferences = () => {
                     Marketing Communications
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                    Receive emails about new features, CV tips, special offers, and product updates from CV Builder.
+                    Receive emails about new features, CV tips, special offers, and product updates from MyCVBuilder.
                   </p>
                   
                   <div className="mt-4 space-y-2">

@@ -27,7 +27,7 @@ export default function Subscription() {
     '/cv-analyze': 'Basic CV Analysis',
     '/cv-analyze-by-role': 'Industry-Specific CV Analysis',
     '/analyze': 'AI CV Analysis with Job Description Matching',
-    '/create': 'CV Builder Tool'
+            '/create': 'MyCVBuilder Tool'
   };
 
   const getPremiumFeatureName = (path) => {
@@ -82,7 +82,7 @@ export default function Subscription() {
   // Show success message when redirected from payment success
   useEffect(() => {
     if (showSuccessFromPayment) {
-      setSuccessMessage('🎉 Payment successful! Your premium subscription is now active. Welcome to CV Builder Premium!');
+              setSuccessMessage('🎉 Payment successful! Your premium subscription is now active. Welcome to MyCVBuilder Premium!');
       // Clear the state to prevent showing the message on refresh
       window.history.replaceState({}, document.title);
     }

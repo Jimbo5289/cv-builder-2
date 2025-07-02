@@ -27,14 +27,14 @@ export default function Home() {
             {/* Left column - Text content */}
             <div className="md:w-1/2 md:pr-8 mb-10 md:mb-0">
               <div className="inline-block px-3 py-1 bg-blue-900 bg-opacity-50 rounded-full text-blue-200 text-sm font-medium mb-4">
-                Professional CV Builder
+                Professional MyCVBuilder
               </div>
               <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight text-white">
                 Create Your <span className="text-[#E78F81]">Perfect CV</span>
                 <br className="hidden md:block" /> That Stands Out
               </h1>
               <p className="text-lg md:text-xl mb-6 text-blue-100 max-w-lg leading-relaxed">
-                Professional CV builder with AI-powered optimization and ATS-friendly formatting. Get past hiring robots and land interviews 3x faster.
+                Professional MyCVBuilder with AI-powered optimization and ATS-friendly formatting. Get past hiring robots and land interviews 3x faster.
               </p>
 
               {/* Value proposition badges */}
@@ -322,7 +322,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-[#2c3e50] dark:text-white mb-4">
-              Professional CV Builder Platform
+              Professional MyCVBuilder Platform
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Industry-standard tools and templates designed to help you create outstanding CVs

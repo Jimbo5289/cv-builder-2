@@ -59,7 +59,7 @@ export default function CvTips() {
         <div className="mt-12 bg-blue-50 dark:bg-blue-900/30 rounded-lg p-6 border border-blue-100 dark:border-blue-800">
           <h2 className="text-2xl font-bold text-blue-800 dark:text-blue-300 mb-4">Need more help with your CV?</h2>
           <p className="text-blue-700 dark:text-blue-400 mb-4">
-            Our CV builder offers professional templates and expert guidance to help you create
+            Our MyCVBuilder offers professional templates and expert guidance to help you create
             a CV that stands out to employers.
           </p>
           <a 

@@ -36,7 +36,7 @@ function Features() {
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-4xl font-bold text-[#2c3e50] dark:text-white mb-6">
-            Why Choose Our CV Builder?
+            Why Choose Our MyCVBuilder?
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300">
             Create a professional CV in minutes with our easy-to-use builder

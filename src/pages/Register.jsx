@@ -295,7 +295,7 @@ export default function Register() {
                     Marketing Communications
                   </label>
                   <p className="text-xs text-gray-500 mt-1">
-                    I agree to receive emails about CV tips, new features, special offers, and product updates from CV Builder. 
+                    I agree to receive emails about CV tips, new features, special offers, and product updates from MyCVBuilder. 
                     You can unsubscribe at any time via your account preferences.
                   </p>
                 </div>

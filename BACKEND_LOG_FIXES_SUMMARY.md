@@ -60,6 +60,65 @@ Update available 6.10.0 -> 6.10.1
 - ✅ Regenerated Prisma client with latest version
 - ✅ Verified compatibility with existing schema
 
+### 5. **JWT Signature Warnings (RESOLVED - Round 2)**
+**Problem**: JWT signature invalid warnings were still appearing as `[info]` level in production logs instead of `[debug]` level, cluttering the logs with noise.
+
+**Root Cause**: The `server-prod` directory had an outdated version of the auth middleware that was using the old error logging approach.
+
+**Solution**: Updated `server-prod/src/middleware/auth.js` to match the corrected version:
+- Changed JWT signature errors from `logger.error()` to `logger.debug()`
+- Changed malformed token errors from `logger.error()` to `logger.debug()`
+- Changed all JWT authentication failures from error/info level to debug level
+- Preserved error-level logging only for unexpected/system errors
+
+**Files Modified**:
+- ✅ `server/src/middleware/auth.js` (previously fixed)
+- ✅ `server-prod/src/middleware/auth.js` (newly fixed - production version)
+
+### 6. **Removed Debug Message Spam**
+**Problem**: Console.log DEBUG messages were cluttering production logs with unnecessary noise.
+
+**Solution**: Removed all `[DEBUG]` console.log statements:
+- Prisma client initialization debug messages
+- Subscription query debug messages  
+- Debug endpoint logging spam
+
+**Files Modified**:
+- `server/src/routes/user.js` - Removed all DEBUG console.log statements
+
+### 7. **DEBUG Console.log Spam (PREVIOUSLY RESOLVED)**
+**Problem**: `[DEBUG]` console.log statements were cluttering production logs with Prisma client initialization and subscription query debug information.
+
+**Files Cleaned**:
+- ✅ `server/src/routes/user.js` - Removed all DEBUG console.log statements
+- ✅ `server-prod/src/routes/user.js` - Already clean
+
+**Note**: If DEBUG messages persist in production, they may be from runtime/compiled code or an older deployed version that needs to be redeployed.
+
+## Production Deployment Required
+
+The updated auth middleware in `server-prod/src/middleware/auth.js` needs to be deployed to production to stop the JWT signature warnings from appearing as info-level logs.
+
+## Expected Log Level Improvements
+
+After deployment:
+- JWT signature invalid errors: `[info]` → `[debug]` ✅
+- JWT malformed token errors: `[error]` → `[debug]` ✅
+- JWT authentication failures: `[error]` → `[debug]` ✅
+- Console.log DEBUG spam: Removed ✅
+
+## Monitoring
+
+Monitor production logs after deployment to confirm:
+1. JWT signature warnings no longer appear as `[info]` level
+2. No remaining `[DEBUG]` console.log statements
+3. Legitimate security warnings still appear appropriately
+
+## Files Ready for Production
+
+- `server-prod/src/middleware/auth.js` - Updated with proper debug-level JWT logging
+- `server-prod/src/routes/user.js` - Clean, no DEBUG statements
+
 ---
 
 ## 🛠️ Technical Implementations
@@ -204,3 +263,34 @@ node server/fix-backend-logs.js
 ---
 
 **Summary**: All identified backend log issues have been comprehensively addressed with robust solutions that maintain functionality while improving log cleanliness and system reliability. The changes are production-ready and should significantly reduce noise in deployment logs while preserving critical error reporting. 
+
+## What Logs Were Preserved
+
+✅ **Legitimate Warnings Kept** (Important for monitoring):
+- User not found warnings
+- Invalid credentials warnings  
+- "No token provided" security warnings
+- Business logic validation warnings
+- Configuration missing warnings
+- Database connection warnings
+
+## Result
+
+- **Reduced Log Noise**: JWT signature warnings (common after server restarts) now only appear in debug logs
+- **Cleaner Production Logs**: Removed debug spam while keeping important business and security warnings
+- **Better Signal-to-Noise**: Administrators can now focus on actual issues rather than routine JWT token rotation noise
+
+## Log Level Hierarchy
+
+1. **ERROR** - Critical failures requiring immediate attention
+2. **WARN** - Important issues that need monitoring (kept most warnings)
+3. **INFO** - General operational information
+4. **DEBUG** - Detailed troubleshooting info (JWT signature issues moved here)
+
+## Testing
+
+To verify the changes:
+1. Deploy to production
+2. Monitor logs for reduced JWT signature warning spam
+3. Confirm legitimate warnings still appear for actual security issues
+4. Check that no DEBUG console.log messages appear in production logs 

@@ -12,12 +12,12 @@ export default function FAQ() {
   const faqs = [
     {
       id: 1,
-      question: "How does CV Builder work?",
-      answer: "CV Builder provides professional templates and an intuitive editor to help you create a standout CV. Simply choose a template, fill in your information, and our platform formats everything perfectly. You can then download your CV as a PDF or share it directly with employers."
+      question: "How does MyCVBuilder work?",
+      answer: "MyCVBuilder provides professional templates and an intuitive editor to help you create a standout CV. Simply choose a template, fill in your information, and our platform formats everything perfectly. You can then download your CV as a PDF or share it directly with employers."
     },
     {
       id: 2,
-      question: "Is CV Builder free to use?",
+      question: "Is MyCVBuilder free to use?",
       answer: "We offer both free and premium plans. The free plan allows you to create and download basic CVs. Our premium plans offer additional templates, advanced formatting options, AI content suggestions, and the ability to create multiple CVs. Visit our pricing page for more details."
     },
     {
@@ -53,7 +53,7 @@ export default function FAQ() {
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8 text-center">Frequently Asked Questions</h1>
         
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-          {faqs.map(faq => (
+          {faqs.map((faq) => (
             <div key={faq.id} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0">
               <button
                 onClick={() => toggleFaq(faq.id)}

@@ -374,17 +374,17 @@ export default function SubscriptionSuccess() {
 
   // Get purchase-specific welcome message
   const getWelcomeMessage = () => {
-    if (!purchaseType) return 'Welcome to CV Builder Premium! 🚀';
+    if (!purchaseType) return 'Welcome to MyCVBuilder Premium! 🚀';
     
     switch (purchaseType) {
       case 'subscription':
-        return 'Welcome to CV Builder Premium! 🚀';
+        return 'Welcome to MyCVBuilder Premium! 🚀';
       case '30day-access':
         return 'Welcome to Your 30-Day Premium Experience! ⭐';
       case 'pay-per-cv':
         return 'Let\'s Create Your Professional CV! 📝';
       default:
-        return 'Welcome to CV Builder! 🚀';
+        return 'Welcome to MyCVBuilder! 🚀';
     }
   };
 
@@ -394,7 +394,7 @@ export default function SubscriptionSuccess() {
     
     switch (purchaseType) {
       case 'subscription':
-        return 'You\'ve unlocked the complete CV Builder experience. Our powerful AI-driven tools will help you create professional, ATS-optimized CVs that get noticed by employers.';
+        return 'You\'ve unlocked the complete MyCVBuilder experience. Our powerful AI-driven tools will help you create professional, ATS-optimized CVs that get noticed by employers.';
       case '30day-access':
         return 'For the next 30 days, you have full access to all premium features including advanced AI analysis, premium templates, and comprehensive CV optimization tools.';
       case 'pay-per-cv':
@@ -621,7 +621,7 @@ export default function SubscriptionSuccess() {
                   </div>
                   <div className="space-y-3">
                     <p className="text-gray-700">
-                      Our support team is here to help you get the most out of your CV Builder experience.
+                      Our support team is here to help you get the most out of your MyCVBuilder experience.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-2">
                       <a 

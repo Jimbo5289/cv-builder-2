@@ -10,17 +10,6 @@ const { auth } = require('../middleware/auth');
 // Initialize Prisma client
 const prisma = new PrismaClient();
 
-// Debug logging for Prisma client
-console.log('[DEBUG] Prisma client initialized:', !!prisma);
-console.log('[DEBUG] Prisma client type:', typeof prisma);
-if (prisma && typeof prisma === 'object') {
-  console.log('[DEBUG] Prisma client methods:', Object.keys(prisma).slice(0, 10));
-  console.log('[DEBUG] Has subscription property:', 'subscription' in prisma);
-  console.log('[DEBUG] Has temporaryAccess property:', 'temporaryAccess' in prisma);
-} else {
-  console.log('[DEBUG] Prisma client is not an object:', prisma);
-}
-
 // Input validation schema for profile update
 const updateProfileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').optional(),
@@ -369,8 +358,6 @@ router.get('/notifications', auth, async (req, res) => {
     }
 
     // Check for expiring subscriptions
-    console.log('[DEBUG] About to call prisma.subscription.findMany, prisma is:', typeof prisma, !!prisma);
-    console.log('[DEBUG] prisma.subscription exists:', !!prisma?.subscription);
     const activeSubscriptions = await prisma.subscription.findMany({
       where: {
         userId: req.user.id,
@@ -439,10 +426,6 @@ router.get('/notifications', auth, async (req, res) => {
 
 // Test endpoint to debug Prisma client
 router.get('/debug-prisma', auth, (req, res) => {
-  console.log('[DEBUG] Debug endpoint called');
-  console.log('[DEBUG] Prisma client at runtime:', typeof prisma, !!prisma);
-  console.log('[DEBUG] Prisma client keys:', prisma ? Object.keys(prisma).slice(0, 5) : 'N/A');
-  
   res.json({
     prismaClientExists: !!prisma,
     prismaClientType: typeof prisma,
