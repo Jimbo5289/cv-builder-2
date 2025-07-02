@@ -88,6 +88,10 @@ const createMockUser = (existingUser = null) => {
   };
 };
 
+// Rate limiting for token expiration warnings (to reduce log noise)
+const expiredTokenWarnings = new Map();
+const WARNING_TIMEOUT = 60000; // 1 minute
+
 /**
  * Authentication middleware
  */
@@ -151,13 +155,21 @@ const auth = async (req, res, next) => {
   } catch (error) {
     // Handle specific JWT errors with appropriate logging levels
     if (error.name === 'TokenExpiredError') {
-      // Token expiration is expected behavior, log as info instead of error
-      logger.info('Token expired for user session:', {
-        expiredAt: error.expiredAt,
-        path: req.path,
-        method: req.method,
-        ip: req.ip
-      });
+      // Rate limit token expiration warnings to reduce log noise
+      const clientKey = `${req.ip}-${req.path}`;
+      const now = Date.now();
+      const lastWarning = expiredTokenWarnings.get(clientKey);
+      
+      if (!lastWarning || (now - lastWarning) > WARNING_TIMEOUT) {
+        expiredTokenWarnings.set(clientKey, now);
+        logger.info('Token expired for user session:', {
+          expiredAt: error.expiredAt,
+          path: req.path,
+          method: req.method,
+          ip: req.ip
+        });
+      }
+      
       return res.status(401).json({ 
         error: 'Token expired',
         message: 'Your session has expired. Please log in again.',
@@ -168,8 +180,8 @@ const auth = async (req, res, next) => {
     // Handle JWT signature errors (common when JWT secret changes)
     if (error.name === 'JsonWebTokenError') {
       if (error.message.includes('invalid signature')) {
-        // This is common when JWT secret changes - log as info, not warning
-        logger.info('JWT signature invalid - likely due to server restart or secret rotation:', {
+        // This is common when JWT secret changes - log as debug to reduce noise
+        logger.debug('JWT signature invalid - likely due to server restart or secret rotation:', {
           path: req.path,
           method: req.method,
           ip: req.ip,
@@ -184,7 +196,7 @@ const auth = async (req, res, next) => {
       }
       
       if (error.message.includes('jwt malformed')) {
-        logger.info('Malformed JWT token received:', {
+        logger.debug('Malformed JWT token received:', {
           path: req.path,
           method: req.method,
           ip: req.ip
@@ -197,7 +209,7 @@ const auth = async (req, res, next) => {
       }
       
       // Other JWT errors
-      logger.info('JWT authentication failed:', {
+      logger.debug('JWT authentication failed:', {
         name: error.name,
         message: error.message,
         path: req.path,
@@ -213,7 +225,7 @@ const auth = async (req, res, next) => {
     }
     
     if (error.name === 'NotBeforeError') {
-      logger.info('JWT not yet active:', {
+      logger.debug('JWT not yet active:', {
         path: req.path,
         method: req.method,
         ip: req.ip
