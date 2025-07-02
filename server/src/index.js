@@ -23,10 +23,23 @@ const isESModuleWarning = (message) => {
      message.includes('Warning: To load an ES module'));
 };
 
+// Function to check for debug messages that should be suppressed in production
+const isDebugMessage = (message) => {
+  return typeof message === 'string' && 
+    process.env.NODE_ENV === 'production' &&
+    (message.includes('[DEBUG]') ||
+     message.includes('About to call prisma') ||
+     message.includes('prisma is: object') ||
+     message.includes('prisma.subscription exists') ||
+     message.includes('Prisma client initialized') ||
+     message.includes('Prisma client type') ||
+     message.includes('Prisma client methods'));
+};
+
 // Override console methods to filter unwanted warnings
 console.warn = (...args) => {
   const message = args.join(' ');
-  if (isCanvasWarning(message) || isESModuleWarning(message)) {
+  if (isCanvasWarning(message) || isESModuleWarning(message) || isDebugMessage(message)) {
     return; // Suppress these warnings
   }
   originalConsoleWarn.apply(console, args);
@@ -34,16 +47,16 @@ console.warn = (...args) => {
 
 console.log = (...args) => {
   const message = args.join(' ');
-  if (isCanvasWarning(message)) {
-    return; // Suppress canvas warnings from log messages too
+  if (isCanvasWarning(message) || isDebugMessage(message)) {
+    return; // Suppress canvas warnings and debug messages from log messages too
   }
   originalConsoleLog.apply(console, args);
 };
 
 console.error = (...args) => {
   const message = args.join(' ');
-  if (isCanvasWarning(message)) {
-    return; // Suppress canvas warnings from error messages
+  if (isCanvasWarning(message) || isDebugMessage(message)) {
+    return; // Suppress canvas warnings and debug messages from error messages
   }
   originalConsoleError.apply(console, args);
 };
@@ -126,8 +139,31 @@ try {
   }
 }
 
-// Initialize Sentry
+// Initialize Sentry if available
 const Sentry = getSentry();
+if (Sentry && Sentry.Handlers && process.env.SENTRY_DSN) {
+  // Apply Sentry request handler with improved error filtering
+  app.use(Sentry.Handlers.requestHandler({
+    serverName: false,
+    user: ['id', 'email'],
+    // Extract request data
+    request: true,
+  }));
+  
+  logger.info('Sentry request handler initialized successfully');
+  // Remove the tracing handler since it requires additional setup
+  // app.use(Sentry.Handlers.tracingHandler());
+} else {
+  // Only log info about Sentry configuration in development, suppress warnings in production
+  if (process.env.NODE_ENV === 'development') {
+    if (!process.env.SENTRY_DSN) {
+      logger.info('Sentry DSN not configured - error tracking disabled');
+    } else {
+      logger.info('Sentry handlers not available - check Sentry configuration');
+    }
+  }
+  // In production, just quietly continue without Sentry
+}
 
 // Validate environment variables
 validateEnv();
@@ -166,26 +202,6 @@ try {
   }
 } catch (error) {
   logger.error('Failed to initialize expressWs:', error);
-}
-
-// Initialize Sentry request handler (must be the first middleware)
-if (Sentry && Sentry.Handlers && Sentry.Handlers.requestHandler) {
-  app.use(Sentry.Handlers.requestHandler({
-    // Include user information in errors
-    user: ['id', 'email'],
-    // Extract request data
-    request: true,
-  }));
-  
-  logger.info('Sentry request handler initialized successfully');
-  // Remove the tracing handler since it requires additional setup
-  // app.use(Sentry.Handlers.tracingHandler());
-} else {
-  if (!process.env.SENTRY_DSN) {
-    logger.info('Sentry DSN not configured - error tracking disabled');
-  } else {
-    logger.warn('Sentry handlers not available - check Sentry configuration');
-  }
 }
 
 // Enhance CORS middleware to handle preflight requests correctly
@@ -441,21 +457,28 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-// Sentry error handler (must come before any other error middleware and after all controllers)
-if (Sentry && Sentry.Handlers && Sentry.Handlers.errorHandler) {
+// Apply Sentry error handler
+if (Sentry && Sentry.Handlers && process.env.SENTRY_DSN) {
   app.use(Sentry.Handlers.errorHandler({
     shouldHandleError(error) {
-      // Only report errors with status code >= 400
-      return error.status >= 400 || !error.status;
+      // Skip common errors that don't need tracking
+      if (error.status === 404) return false;
+      if (error.message && error.message.includes('CORS')) return false;
+      if (error.message && error.message.includes('favicon')) return false;
+      return true;
     }
   }));
   logger.info('Sentry error handler initialized successfully');
 } else {
-  if (!process.env.SENTRY_DSN) {
-    logger.info('Sentry DSN not configured - error handler disabled');
-  } else {
-    logger.warn('Sentry error handler not available - check Sentry configuration');
+  // Only log info about Sentry in development, suppress warnings in production
+  if (process.env.NODE_ENV === 'development') {
+    if (!process.env.SENTRY_DSN) {
+      logger.info('Sentry DSN not configured - error handler disabled');
+    } else {
+      logger.info('Sentry error handler not available - check Sentry configuration');
+    }
   }
+  // In production, just quietly continue without Sentry
 }
 
 // Global error handler

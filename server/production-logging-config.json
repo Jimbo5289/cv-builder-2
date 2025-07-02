@@ -1,0 +1,14 @@
+{
+  "level": "info",
+  "suppressPatterns": [
+    "[DEBUG]",
+    "About to call prisma",
+    "prisma is: object",
+    "prisma.subscription exists",
+    "Prisma client initialized",
+    "Prisma client type",
+    "Prisma client methods"
+  ],
+  "enableSentry": false,
+  "timestamp": "2025-07-02T20:25:03.294Z"
+}

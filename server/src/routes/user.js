@@ -7,6 +7,22 @@ const { logger } = require('../config/logger');
 // Import auth middleware
 const { auth } = require('../middleware/auth');
 
+
+// Production log filtering - suppress debug output in production
+const originalConsoleLog = console.log;
+if (process.env.NODE_ENV === 'production') {
+  console.log = (...args) => {
+    const message = args.join(' ');
+    // Suppress DEBUG messages in production
+    if (message.includes('[DEBUG]') || 
+        message.includes('About to call prisma') ||
+        message.includes('prisma is: object') ||
+        message.includes('prisma.subscription exists')) {
+      return; // Suppress in production
+    }
+    originalConsoleLog.apply(console, args);
+  };
+}
 // Initialize Prisma client
 const prisma = new PrismaClient();
 
