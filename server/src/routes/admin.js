@@ -157,6 +157,82 @@ router.get('/dashboard', authMiddleware, adminAuth, async (req, res) => {
 });
 
 /**
+ * @route GET /api/admin/recent-activity
+ * @desc Get recent admin activity and user actions
+ * @access Admin only
+ */
+router.get('/recent-activity', authMiddleware, adminAuth, async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    
+    // Get recent user registrations
+    const recentUsers = await prisma.user.findMany({
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+        role: true
+      }
+    });
+    
+    // Get recent CV creations
+    const recentCVs = await prisma.cV.findMany({
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        createdAt: true,
+        user: {
+          select: {
+            email: true,
+            name: true
+          }
+        }
+      }
+    });
+    
+    // Get recent subscription activities
+    const recentSubscriptions = await prisma.subscription.findMany({
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        status: true,
+        createdAt: true,
+        user: {
+          select: {
+            email: true,
+            name: true
+          }
+        }
+      }
+    });
+    
+    res.status(200).json({
+      recentUsers: recentUsers.map(user => ({
+        ...user,
+        type: 'user_registration'
+      })),
+      recentCVs: recentCVs.map(cv => ({
+        ...cv,
+        type: 'cv_creation'
+      })),
+      recentSubscriptions: recentSubscriptions.map(sub => ({
+        ...sub,
+        type: 'subscription_activity'
+      }))
+    });
+  } catch (error) {
+    console.error('Admin recent activity error:', error);
+    res.status(500).json({ error: 'Failed to retrieve recent activity' });
+  }
+});
+
+/**
  * @route GET /api/admin/users
  * @desc Get all users (paginated)
  * @access Admin only
