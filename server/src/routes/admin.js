@@ -1161,4 +1161,68 @@ router.get('/superuser/users', authMiddleware, superuserAuth, async (req, res) =
   }
 });
 
+/**
+ * @route POST /api/admin/emergency-superuser-setup
+ * @desc Emergency endpoint to setup superuser (use once only)
+ * @access Authenticated users with specific email
+ */
+router.post('/emergency-superuser-setup', authMiddleware, async (req, res) => {
+  try {
+    // Only allow specific email to use this emergency endpoint
+    if (req.user.email !== 'jamesingleton1971@gmail.com') {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+    
+    // Get current user
+    const currentUser = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, email: true, role: true, name: true }
+    });
+    
+    if (!currentUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Check if already superuser
+    if (currentUser.role === 'superuser') {
+      return res.status(200).json({ 
+        message: 'Already a superuser',
+        user: currentUser 
+      });
+    }
+    
+    // Update to superuser
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { role: 'superuser' },
+      select: { id: true, email: true, role: true, name: true }
+    });
+    
+    logger.info('Emergency superuser setup completed', {
+      userId: req.user.id,
+      email: req.user.email,
+      previousRole: currentUser.role,
+      newRole: 'superuser',
+      ip: req.ip,
+      timestamp: new Date().toISOString()
+    });
+    
+    res.status(200).json({
+      success: true,
+      message: 'Successfully updated to superuser role',
+      user: updatedUser,
+      note: 'This endpoint will be removed after successful setup'
+    });
+    
+  } catch (error) {
+    logger.error('Emergency superuser setup error', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id,
+      email: req.user?.email
+    });
+    res.status(500).json({ error: 'Failed to setup superuser role' });
+  }
+});
+
 module.exports = router; 
