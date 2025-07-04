@@ -63,6 +63,14 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Edit = React.lazy(() => import(/* webpackChunkName: "edit" */ './pages/Edit'));
 const Unsubscribe = React.lazy(() => import(/* webpackChunkName: "unsubscribe" */ './pages/Unsubscribe'));
 
+// Admin Panel Components - Lazy loaded for performance
+const AdminLayout = React.lazy(() => import(/* webpackChunkName: "admin-layout" */ './components/admin/AdminLayout'));
+const AdminDashboard = React.lazy(() => import(/* webpackChunkName: "admin-dashboard" */ './components/admin/AdminDashboard'));
+const AdminUserManagement = React.lazy(() => import(/* webpackChunkName: "admin-users" */ './components/admin/AdminUserManagement'));
+const AdminAnalytics = React.lazy(() => import(/* webpackChunkName: "admin-analytics" */ './components/admin/AdminAnalytics'));
+const AdminSubscriptions = React.lazy(() => import(/* webpackChunkName: "admin-subscriptions" */ './components/admin/AdminSubscriptions'));
+const AdminSystemHealth = React.lazy(() => import(/* webpackChunkName: "admin-system" */ './components/admin/AdminSystemHealth'));
+
 /**
  * Route configuration array
  * 
@@ -133,6 +141,18 @@ const routes = [
   { path: '/subscription/cancel', Component: SubscriptionCancel, protected: true },
   { path: '/subscription', Component: Subscription, protected: true },
   { path: '/edit/:id', Component: Edit, protected: true },
+
+  /**
+   * Admin Panel Routes
+   * These routes require admin authentication and provide administrative functionality
+   * All admin routes are protected and require admin role verification
+   */
+  { path: '/admin', Component: () => <Navigate to="/admin/dashboard" replace />, protected: true },
+  { path: '/admin/dashboard', Component: () => <AdminLayout><AdminDashboard /></AdminLayout>, protected: true },
+  { path: '/admin/users', Component: () => <AdminLayout><AdminUserManagement /></AdminLayout>, protected: true },
+  { path: '/admin/analytics', Component: () => <AdminLayout><AdminAnalytics /></AdminLayout>, protected: true },
+  { path: '/admin/subscriptions', Component: () => <AdminLayout><AdminSubscriptions /></AdminLayout>, protected: true },
+  { path: '/admin/system', Component: () => <AdminLayout><AdminSystemHealth /></AdminLayout>, protected: true },
 ];
 
 export default routes;

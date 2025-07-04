@@ -32,7 +32,7 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -147,6 +147,18 @@ const Header = () => {
               </NavLink>
             )}
             
+            {/* Admin Panel Link - Only show for admin users */}
+            {isAuthenticated && user && (user.role === 'admin' || user.role === 'superuser' || user.email === 'jamesingleton1971@gmail.com') && (
+              <NavLink 
+                to="/admin/dashboard" 
+                className={({ isActive }) => 
+                  isActive || location.pathname.startsWith('/admin') ? "text-purple-600 dark:text-purple-400 font-medium" : "text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 font-medium"
+                }
+              >
+                Admin
+              </NavLink>
+            )}
+            
             {/* Auth Links */}
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
@@ -240,6 +252,17 @@ const Header = () => {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Dashboard
+                </Link>
+              )}
+              
+              {/* Admin Panel Link - Mobile */}
+              {isAuthenticated && user && (user.role === 'admin' || user.role === 'superuser' || user.email === 'jamesingleton1971@gmail.com') && (
+                <Link
+                  to="/admin/dashboard"
+                  className="block py-2 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Admin Panel
                 </Link>
               )}
               
