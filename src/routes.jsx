@@ -71,6 +71,7 @@ const AdminStaffManagement = React.lazy(() => import(/* webpackChunkName: "admin
 const AdminAnalytics = React.lazy(() => import(/* webpackChunkName: "admin-analytics" */ './components/admin/AdminAnalytics'));
 const AdminSubscriptions = React.lazy(() => import(/* webpackChunkName: "admin-subscriptions" */ './components/admin/AdminSubscriptions'));
 const AdminSystemHealth = React.lazy(() => import(/* webpackChunkName: "admin-system" */ './components/admin/AdminSystemHealth'));
+const AdminProfile = React.lazy(() => import(/* webpackChunkName: "admin-profile" */ './components/admin/AdminProfile'));
 
 /**
  * Route configuration array
@@ -155,6 +156,7 @@ const routes = [
   { path: '/admin/analytics', Component: () => <AdminLayout><AdminAnalytics /></AdminLayout>, protected: true },
   { path: '/admin/subscriptions', Component: () => <AdminLayout><AdminSubscriptions /></AdminLayout>, protected: true },
   { path: '/admin/system', Component: () => <AdminLayout><AdminSystemHealth /></AdminLayout>, protected: true },
+  { path: '/admin/profile', Component: () => <AdminLayout><AdminProfile /></AdminLayout>, protected: true },
 ];
 
 export default routes;

@@ -29,6 +29,7 @@ const AdminLayout = ({ children }) => {
     { name: 'Analytics', href: '/admin/analytics', icon: DocumentChartBarIcon },
     { name: 'Subscriptions', href: '/admin/subscriptions', icon: CreditCardIcon },
     { name: 'System Health', href: '/admin/system', icon: CogIcon },
+    { name: 'Profile', href: '/admin/profile', icon: UserIcon },
   ];
 
   // Check if user has admin privileges
@@ -42,7 +43,8 @@ const AdminLayout = ({ children }) => {
       // Check if user has admin role
       const hasAdminAccess = user.role === 'admin' || 
                            user.role === 'superuser' || 
-                           user.email === 'james@mycvbuilder.co.uk';
+                           user.email === 'james@mycvbuilder.co.uk' ||
+                           user.email === 'jamesingleton1971@gmail.com';
       
       setIsAdminUser(hasAdminAccess);
       setLoading(false);

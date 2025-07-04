@@ -832,6 +832,184 @@ router.delete('/superuser/users/:id', authMiddleware, superuserAuth, async (req,
 });
 
 /**
+ * @route POST /api/admin/superuser/create-staff
+ * @desc Create new staff member (superuser only)
+ * @access Superuser only
+ */
+router.post('/superuser/create-staff', authMiddleware, superuserAuth, async (req, res) => {
+  try {
+    const { name, email, phone, role, password } = req.body;
+    
+    // Validate required fields
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ 
+        error: 'Missing required fields',
+        required: ['name', 'email', 'password', 'role']
+      });
+    }
+    
+    // Validate role
+    if (!['admin', 'superuser'].includes(role)) {
+      return res.status(400).json({ 
+        error: 'Invalid role',
+        validRoles: ['admin', 'superuser']
+      });
+    }
+    
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true }
+    });
+    
+    if (existingUser) {
+      return res.status(400).json({ 
+        error: 'User already exists',
+        message: `A user with email ${email} already exists`
+      });
+    }
+    
+    // Hash password
+    const bcrypt = require('bcrypt');
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
+    // Create new staff member
+    const newStaff = await prisma.user.create({
+      data: {
+        name,
+        email,
+        phone: phone || null,
+        password: hashedPassword,
+        role,
+        isActive: true,
+        emailVerified: true, // Staff accounts are pre-verified
+        marketingConsent: false
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        isActive: true,
+        createdAt: true
+      }
+    });
+    
+    logger.info('New staff member created by superuser', {
+      superuserId: req.user.id,
+      superuserEmail: req.superuser.email,
+      newStaffId: newStaff.id,
+      newStaffEmail: newStaff.email,
+      newStaffRole: newStaff.role
+    });
+    
+    res.status(201).json({
+      success: true,
+      message: 'Staff member created successfully',
+      staff: newStaff
+    });
+  } catch (error) {
+    console.error('Create staff error:', error);
+    res.status(500).json({ error: 'Failed to create staff member' });
+  }
+});
+
+/**
+ * @route PUT /api/admin/superuser/users/:id
+ * @desc Update staff member information (superuser only)
+ * @access Superuser only
+ */
+router.put('/superuser/users/:id', authMiddleware, superuserAuth, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { name, email, phone, newPassword } = req.body;
+    
+    // Find the user to update
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        id: true, 
+        email: true, 
+        name: true, 
+        phone: true, 
+        role: true 
+      }
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Prepare update data
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (phone !== undefined) updateData.phone = phone || null;
+    
+    // Handle password update if provided
+    if (newPassword) {
+      if (newPassword.length < 8) {
+        return res.status(400).json({ 
+          error: 'Password too short',
+          message: 'Password must be at least 8 characters long'
+        });
+      }
+      
+      const bcrypt = require('bcrypt');
+      updateData.password = await bcrypt.hash(newPassword, 12);
+    }
+    
+    // Check if email is being changed and if it already exists
+    if (email && email !== user.email) {
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+        select: { id: true }
+      });
+      
+      if (existingUser && existingUser.id !== userId) {
+        return res.status(400).json({ 
+          error: 'Email already exists',
+          message: `A user with email ${email} already exists`
+        });
+      }
+    }
+    
+    // Update the user
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        isActive: true,
+        updatedAt: true
+      }
+    });
+    
+    logger.info('Staff member updated by superuser', {
+      superuserId: req.user.id,
+      superuserEmail: req.superuser.email,
+      updatedUserId: userId,
+      updatedFields: Object.keys(updateData),
+      passwordChanged: !!newPassword
+    });
+    
+    res.status(200).json({
+      success: true,
+      message: 'Staff member updated successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Update staff error:', error);
+    res.status(500).json({ error: 'Failed to update staff member' });
+  }
+});
+
+/**
  * @route GET /api/admin/superuser/users
  * @desc List all users with full role information (superuser only)
  * @access Superuser only
