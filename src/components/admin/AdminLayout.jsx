@@ -188,8 +188,10 @@ const AdminLayout = ({ children }) => {
         </div>
 
         {/* Page content */}
-        <main className="flex-1 p-6 bg-gray-50 dark:bg-gray-900">
-          {children}
+        <main className="flex-1 bg-gray-50 dark:bg-gray-900">
+          <div className="h-full">
+            {children}
+          </div>
         </main>
       </div>
     </div>
