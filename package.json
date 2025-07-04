@@ -36,6 +36,7 @@
     "docs": "cd server && npm run docs"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.9.0",
     "@sentry/react": "^9.22.0",
     "@stripe/stripe-js": "^7.3.1",
