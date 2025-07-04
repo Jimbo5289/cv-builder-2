@@ -148,10 +148,10 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="h-full bg-gray-50 dark:bg-gray-900">
+    <div className="h-full">
       {/* Header section aligned with sidebar */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="px-6 py-4">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 h-16 flex items-center">
+        <div className="px-6 w-full">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -172,7 +172,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Main content area */}
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-900 flex-1">
 
       {/* Emergency Setup Component */}
       <EmergencySetup />
