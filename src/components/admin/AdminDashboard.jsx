@@ -12,6 +12,7 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import EmergencySetup from './EmergencySetup';
 
 const AdminDashboard = () => {
   const { getAuthHeader } = useAuth();
@@ -165,6 +166,9 @@ const AdminDashboard = () => {
           Refresh Data
         </button>
       </div>
+
+      {/* Emergency Setup Component */}
+      <EmergencySetup />
 
       {/* Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
