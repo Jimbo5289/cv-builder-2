@@ -148,7 +148,7 @@ const Header = () => {
             )}
             
             {/* Admin Panel Link - Only show for admin users */}
-            {isAuthenticated && user && (user.role === 'admin' || user.role === 'superuser' || user.email === 'jamesingleton1971@gmail.com') && (
+            {isAuthenticated && user && (user.role === 'admin' || user.role === 'superuser' || user.email === 'james@mycvbuilder.co.uk') && (
               <NavLink 
                 to="/admin/dashboard" 
                 className={({ isActive }) => 
@@ -256,7 +256,7 @@ const Header = () => {
               )}
               
               {/* Admin Panel Link - Mobile */}
-              {isAuthenticated && user && (user.role === 'admin' || user.role === 'superuser' || user.email === 'jamesingleton1971@gmail.com') && (
+              {isAuthenticated && user && (user.role === 'admin' || user.role === 'superuser' || user.email === 'james@mycvbuilder.co.uk') && (
                 <Link
                   to="/admin/dashboard"
                   className="block py-2 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium"

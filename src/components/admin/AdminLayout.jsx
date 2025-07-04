@@ -41,7 +41,7 @@ const AdminLayout = ({ children }) => {
       // Check if user has admin role
       const hasAdminAccess = user.role === 'admin' || 
                            user.role === 'superuser' || 
-                           user.email === 'jamesingleton1971@gmail.com';
+                           user.email === 'james@mycvbuilder.co.uk';
       
       setIsAdminUser(hasAdminAccess);
       setLoading(false);

@@ -166,6 +166,14 @@ const AdminUserManagement = () => {
     }
   };
 
+  const getRoleIcon = (role) => {
+    switch (role) {
+      case 'superuser': return '👑';
+      case 'admin': return '🛡️';
+      default: return '👤';
+    }
+  };
+
   const getStatusColor = (isActive) => {
     return isActive 
       ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200'
@@ -311,7 +319,8 @@ const AdminUserManagement = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
+                    <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
+                      <span className="mr-1">{getRoleIcon(user.role)}</span>
                       {user.role || 'user'}
                     </span>
                   </td>
