@@ -148,7 +148,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="h-full">
+    <>
       {/* Header section aligned with sidebar */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 h-16 flex items-center">
         <div className="px-6 w-full">
@@ -332,7 +332,7 @@ const AdminDashboard = () => {
         </div>
       </div>
       </div>
-    </div>
+    </>
   );
 };
 
