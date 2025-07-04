@@ -16,7 +16,7 @@ const prisma = new PrismaClient();
       if (!user.role) {
         let newRole = 'user';
         
-        if (user.email === 'jamesingleton1971@gmail.com') {
+        if (user.email === 'james@mycvbuilder.co.uk') {
           newRole = 'superuser';
         } else if (user.email.includes('admin') || user.email.includes('test')) {
           newRole = 'admin';

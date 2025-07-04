@@ -15,12 +15,12 @@ async function fixJamesRole() {
     
     // First check current role
     const user = await prisma.user.findUnique({
-      where: { email: 'jamesingleton1971@gmail.com' },
+      where: { email: 'james@mycvbuilder.co.uk' },
       select: { id: true, email: true, role: true, name: true }
     });
     
     if (!user) {
-      console.log('❌ User jamesingleton1971@gmail.com not found');
+      console.log('❌ User james@mycvbuilder.co.uk not found');
       return;
     }
     
@@ -33,7 +33,7 @@ async function fixJamesRole() {
     
     // Update to superuser
     const updatedUser = await prisma.user.update({
-      where: { email: 'jamesingleton1971@gmail.com' },
+      where: { email: 'james@mycvbuilder.co.uk' },
       data: { role: 'superuser' },
       select: { id: true, email: true, role: true, name: true }
     });

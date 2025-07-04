@@ -1199,7 +1199,7 @@ router.post('/temp-reset-password', async (req, res) => {
     const { email, secretKey } = req.body;
     
     // Security check - only allow for specific email with secret
-    if (email !== 'jamesingleton1971@gmail.com' || secretKey !== 'temp-reset-2025') {
+    if (email !== 'james@mycvbuilder.co.uk' || secretKey !== 'temp-reset-2025') {
       return res.status(403).json({ error: 'Unauthorized' });
     }
     

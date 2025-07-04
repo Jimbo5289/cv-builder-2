@@ -456,7 +456,7 @@ router.get('/marketing-consent', auth, async (req, res) => {
   try {
     // Only allow admin users or specific authenticated access
     // You might want to add admin role checking here
-    const isAdmin = req.user.role === 'admin' || req.user.email === 'jamesingleton1971@gmail.com';
+    const isAdmin = req.user.role === 'admin' || req.user.email === 'james@mycvbuilder.co.uk';
     
     if (!isAdmin) {
       return res.status(403).json({ 

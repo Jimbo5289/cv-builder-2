@@ -59,7 +59,7 @@ const adminAuth = async (req, res, next) => {
     const isAuthorizedAdmin = user && (
       user.role === 'superuser' || 
       user.role === 'admin' ||
-      user.email === 'jamesingleton1971@gmail.com' // Fallback for compatibility
+      user.email === 'james@mycvbuilder.co.uk' // Fallback for compatibility
     );
     
     if (!user) {
@@ -494,7 +494,7 @@ router.delete('/users/:id', authMiddleware, adminAuth, async (req, res) => {
     const isSuperuser = currentUser?.role === 'superuser';
     
     // Protect admin and superuser accounts from regular admin deletion
-    if (!isSuperuser && (user.email === 'jamesingleton1971@gmail.com' || user.role === 'admin' || user.role === 'superuser')) {
+    if (!isSuperuser && (user.email === 'james@mycvbuilder.co.uk' || user.role === 'admin' || user.role === 'superuser')) {
       return res.status(403).json({ 
         error: 'Cannot delete admin or superuser accounts',
         message: 'Only superusers can delete admin or superuser accounts. Use the superuser interface.'
@@ -1169,7 +1169,7 @@ router.get('/superuser/users', authMiddleware, superuserAuth, async (req, res) =
 router.post('/emergency-superuser-setup', authMiddleware, async (req, res) => {
   try {
     // Only allow specific email to use this emergency endpoint
-    if (req.user.email !== 'jamesingleton1971@gmail.com') {
+    if (req.user.email !== 'james@mycvbuilder.co.uk') {
       return res.status(403).json({ error: 'Access denied' });
     }
     

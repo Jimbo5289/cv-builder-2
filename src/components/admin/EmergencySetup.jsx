@@ -71,7 +71,8 @@ const EmergencySetup = () => {
             Admin Access Setup Required
           </h3>
           <div className="mt-2 text-sm text-yellow-700">
-            <p>Your account needs superuser privileges to access admin features.</p>
+            <p>The <strong>james@mycvbuilder.co.uk</strong> account needs superuser privileges to access admin features.</p>
+            <p className="mt-1">Please log in with the james@mycvbuilder.co.uk account and click the setup button.</p>
           </div>
           <div className="mt-4">
             <button
