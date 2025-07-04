@@ -90,9 +90,17 @@ const AdminLayout = ({ children }) => {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col`}>
+      <div 
+        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col`}
+        style={{ 
+          top: '0px', 
+          marginTop: '0px', 
+          paddingTop: '0px',
+          height: '100vh'
+        }}
+      >
         
         {/* Sidebar header */}
         <div className="flex items-center justify-between h-16 px-6 bg-blue-600 dark:bg-blue-700 flex-shrink-0">
