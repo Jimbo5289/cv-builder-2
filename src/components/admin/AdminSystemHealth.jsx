@@ -5,7 +5,7 @@ import {
   ShieldCheckIcon,
   ServerIcon,
   CloudIcon,
-  DatabaseIcon,
+  CircleStackIcon,
   CpuChipIcon,
   ClockIcon,
   ExclamationTriangleIcon,
@@ -228,7 +228,7 @@ const AdminSystemHealth = () => {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <DatabaseIcon className="h-6 w-6 text-green-500" />
+                <CircleStackIcon className="h-6 w-6 text-green-500" />
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
