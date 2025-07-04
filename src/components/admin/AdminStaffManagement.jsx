@@ -79,9 +79,9 @@ const AdminStaffManagement = () => {
 
       const data = await response.json();
       
-      // Filter to show only admin and superuser roles (staff members)
+      // Filter to show admin, superuser, and user roles (all staff members)
       const staffOnly = (data.users || []).filter(user => 
-        user.role === 'admin' || user.role === 'superuser'
+        user.role === 'admin' || user.role === 'superuser' || user.role === 'user'
       );
       
       setStaffMembers(staffOnly);
@@ -294,7 +294,7 @@ const AdminStaffManagement = () => {
       name: '',
       email: '',
       phone: '',
-      role: 'admin',
+      role: 'user',
       password: '',
       confirmPassword: ''
     });
@@ -306,7 +306,7 @@ const AdminStaffManagement = () => {
       name: staff.name || '',
       email: staff.email || '',
       phone: staff.phone || '',
-      role: staff.role || 'admin',
+      role: staff.role || 'user',
       password: '',
       confirmPassword: ''
     });
@@ -317,6 +317,7 @@ const AdminStaffManagement = () => {
     switch (role) {
       case 'superuser': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200';
       case 'admin': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-200';
+      case 'user': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
     }
   };
@@ -388,8 +389,9 @@ const AdminStaffManagement = () => {
               className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
             >
               <option value="all">All Roles</option>
-              <option value="superuser">Super Administrators</option>
+              <option value="user">Users</option>
               <option value="admin">Administrators</option>
+              <option value="superuser">Super Administrators</option>
             </select>
             <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
               Total: {filteredStaff.length} staff members
@@ -448,7 +450,7 @@ const AdminStaffManagement = () => {
                     <div className="flex items-center">
                       <span className="text-lg mr-2">{getRoleIcon(staff.role)}</span>
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(staff.role)}`}>
-                        {staff.role === 'superuser' ? 'Super Admin' : 'Administrator'}
+                        {staff.role === 'superuser' ? 'Super Admin' : staff.role === 'admin' ? 'Administrator' : 'User'}
                       </span>
                     </div>
                   </td>
@@ -485,14 +487,32 @@ const AdminStaffManagement = () => {
                     </button>
                     
                     {/* Role Change Buttons */}
-                    {staff.role === 'admin' && staff.id !== currentUser?.id && (
+                    {staff.role === 'user' && staff.id !== currentUser?.id && (
                       <button
-                        onClick={() => handleChangeRole(staff.id, 'superuser')}
-                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                        title="Promote to Super Admin"
+                        onClick={() => handleChangeRole(staff.id, 'admin')}
+                        className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300"
+                        title="Promote to Admin"
                       >
-                        👑
+                        🛡️
                       </button>
+                    )}
+                    {staff.role === 'admin' && staff.id !== currentUser?.id && (
+                      <>
+                        <button
+                          onClick={() => handleChangeRole(staff.id, 'superuser')}
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                          title="Promote to Super Admin"
+                        >
+                          👑
+                        </button>
+                        <button
+                          onClick={() => handleChangeRole(staff.id, 'user')}
+                          className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+                          title="Demote to User"
+                        >
+                          👤
+                        </button>
+                      </>
                     )}
                     {staff.role === 'superuser' && staff.id !== currentUser?.id && (
                       <button
@@ -546,7 +566,7 @@ const AdminStaffManagement = () => {
                 Create New Staff Member
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Add a new administrator or staff member to your team
+                Add a new user, administrator, or staff member to your team
               </p>
             </div>
 
@@ -603,6 +623,7 @@ const AdminStaffManagement = () => {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                     required
                   >
+                    <option value="user">User</option>
                     <option value="admin">Administrator</option>
                     <option value="superuser">Super Administrator</option>
                   </select>
