@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useServer } from '../../context/ServerContext';
 import {
   ChartBarIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   UsersIcon,
   DocumentTextIcon,
   CreditCardIcon,
@@ -138,7 +138,7 @@ const AdminAnalytics = () => {
     {
       title: 'Active Subscriptions',
       value: analytics.overview.activeSubscriptions,
-      icon: TrendingUpIcon,
+      icon: ArrowTrendingUpIcon,
       color: 'yellow',
       growth: '+5%'
     }
