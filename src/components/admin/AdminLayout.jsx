@@ -81,7 +81,7 @@ const AdminLayout = ({ children }) => {
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-white dark:bg-gray-800" style={{ margin: 0, padding: 0 }}>
+    <div className="min-h-screen bg-white dark:bg-gray-800">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
@@ -91,15 +91,14 @@ const AdminLayout = ({ children }) => {
 
       {/* Sidebar */}
       <div 
-        className={`fixed left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col`}
         style={{ 
-          top: 0, 
-          bottom: 0,
-          height: '100vh',
-          margin: 0,
-          padding: 0
+          top: '0px', 
+          marginTop: '0px', 
+          paddingTop: '0px',
+          height: '100vh'
         }}
       >
         
@@ -171,7 +170,7 @@ const AdminLayout = ({ children }) => {
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64 h-screen flex flex-col" style={{ margin: 0, padding: 0 }}>
+      <div className="lg:pl-64 flex flex-col min-h-screen">
         {/* Top navigation - mobile only */}
         <div className="lg:hidden sticky top-0 z-40 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6">
@@ -197,8 +196,10 @@ const AdminLayout = ({ children }) => {
         </div>
 
         {/* Page content */}
-        <main className="flex-1 bg-gray-50 dark:bg-gray-900 overflow-y-auto" style={{ margin: 0, padding: 0 }}>
-          {children}
+        <main className="flex-1 bg-gray-50 dark:bg-gray-900">
+          <div className="h-full">
+            {children}
+          </div>
         </main>
       </div>
     </div>

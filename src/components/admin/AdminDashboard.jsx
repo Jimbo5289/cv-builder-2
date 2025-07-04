@@ -148,9 +148,9 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="h-full flex flex-col" style={{ margin: 0, padding: 0 }}>
+    <>
       {/* Header section aligned with sidebar */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 h-16 flex items-center flex-shrink-0" style={{ margin: 0, padding: 0 }}>
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 h-16 flex items-center">
         <div className="px-6 w-full">
           <div className="flex items-center justify-between">
             <div>
@@ -332,7 +332,7 @@ const AdminDashboard = () => {
         </div>
       </div>
       </div>
-    </div>
+    </>
   );
 };
 
