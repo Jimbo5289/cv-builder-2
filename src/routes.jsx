@@ -66,7 +66,8 @@ const Unsubscribe = React.lazy(() => import(/* webpackChunkName: "unsubscribe" *
 // Admin Panel Components - Lazy loaded for performance
 const AdminLayout = React.lazy(() => import(/* webpackChunkName: "admin-layout" */ './components/admin/AdminLayout'));
 const AdminDashboard = React.lazy(() => import(/* webpackChunkName: "admin-dashboard" */ './components/admin/AdminDashboard'));
-const AdminUserManagement = React.lazy(() => import(/* webpackChunkName: "admin-users" */ './components/admin/AdminUserManagement'));
+const AdminCustomerManagement = React.lazy(() => import(/* webpackChunkName: "admin-customers" */ './components/admin/AdminCustomerManagement'));
+const AdminStaffManagement = React.lazy(() => import(/* webpackChunkName: "admin-staff" */ './components/admin/AdminStaffManagement'));
 const AdminAnalytics = React.lazy(() => import(/* webpackChunkName: "admin-analytics" */ './components/admin/AdminAnalytics'));
 const AdminSubscriptions = React.lazy(() => import(/* webpackChunkName: "admin-subscriptions" */ './components/admin/AdminSubscriptions'));
 const AdminSystemHealth = React.lazy(() => import(/* webpackChunkName: "admin-system" */ './components/admin/AdminSystemHealth'));
@@ -149,7 +150,8 @@ const routes = [
    */
   { path: '/admin', Component: () => <Navigate to="/admin/dashboard" replace />, protected: true },
   { path: '/admin/dashboard', Component: () => <AdminLayout><AdminDashboard /></AdminLayout>, protected: true },
-  { path: '/admin/users', Component: () => <AdminLayout><AdminUserManagement /></AdminLayout>, protected: true },
+  { path: '/admin/customers', Component: () => <AdminLayout><AdminCustomerManagement /></AdminLayout>, protected: true },
+  { path: '/admin/staff', Component: () => <AdminLayout><AdminStaffManagement /></AdminLayout>, protected: true },
   { path: '/admin/analytics', Component: () => <AdminLayout><AdminAnalytics /></AdminLayout>, protected: true },
   { path: '/admin/subscriptions', Component: () => <AdminLayout><AdminSubscriptions /></AdminLayout>, protected: true },
   { path: '/admin/system', Component: () => <AdminLayout><AdminSystemHealth /></AdminLayout>, protected: true },

@@ -24,10 +24,11 @@ const AdminLayout = ({ children }) => {
   // Navigation items for the admin panel
   const navigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: ChartBarIcon },
-    { name: 'Users', href: '/admin/users', icon: UsersIcon },
+    { name: 'Customers', href: '/admin/customers', icon: UsersIcon },
+    { name: 'Staff', href: '/admin/staff', icon: ShieldCheckIcon },
     { name: 'Analytics', href: '/admin/analytics', icon: DocumentChartBarIcon },
     { name: 'Subscriptions', href: '/admin/subscriptions', icon: CreditCardIcon },
-    { name: 'System Health', href: '/admin/system', icon: ShieldCheckIcon },
+    { name: 'System Health', href: '/admin/system', icon: CogIcon },
   ];
 
   // Check if user has admin privileges
